@@ -2,20 +2,14 @@
 using System;
 using System.IO;
 using SLCommandScript.Interpreter;
-using SLCommandScript;
 
 namespace SLCommandScript.Commands
 {
     /// <summary>
     /// Command used to launch interpreted scripts
     /// </summary>
-    public class ScriptCommand : ICommand
+    public class FileScriptCommand : ICommand
     {
-        /// <summary>
-        /// Contains command context
-        /// </summary>
-        public CommandContextType ContextType { get; private set; }
-
         /// <summary>
         /// Contains command name
         /// </summary>
@@ -29,16 +23,21 @@ namespace SLCommandScript.Commands
         /// <summary>
         /// Contains command description
         /// </summary>
-        public string Description => $"Executes custom script named {Command}.scl";
+        public string Description => $"Executes custom script named {Command}";
+
+        /// <summary>
+        /// Contains path to script file
+        /// </summary>
+        private readonly string _filePath;
 
         /// <summary>
         /// Initializes the command
         /// </summary>
-        /// <param name="name">Name of associated script</param>
-        public ScriptCommand(string name, CommandContextType context)
+        /// <param name="file">Path to associated script</param>
+        public FileScriptCommand(string file)
         {
-            Command = name;
-            ContextType = context;
+            _filePath = file;
+            Command = file.Substring(file.LastIndexOf('/') + 1);
         }
 
         /// <summary>
@@ -56,13 +55,13 @@ namespace SLCommandScript.Commands
                 return false;
             }
 
-            if (!File.Exists($"{Plugin.ScriptsPath}{Command}"))
+            if (!File.Exists(_filePath))
             {
                 response = "Script file does not exist or cannot be accessed.";
                 return false;
             }
 
-            return new SCLInterpreterBase().ProcessLines(File.ReadAllLines($"{Plugin.ScriptsPath}{Command}"), sender, ContextType, out response);
+            return new SCLInterpreterBase().ProcessLines(File.ReadAllLines(_filePath), sender, out response);
         }
     }
 }

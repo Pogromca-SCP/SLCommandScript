@@ -7,9 +7,6 @@ namespace SLCommandScript.Commands
     /// <summary>
     /// Provides flow control commands
     /// </summary>
-    [CommandHandler(typeof(RemoteAdminCommandHandler))]
-    [CommandHandler(typeof(GameConsoleCommandHandler))]
-    [CommandHandler(typeof(ClientCommandHandler))]
     public class FlowCommand : ParentCommand, IUsageProvider
     {
         /// <summary>
@@ -20,7 +17,7 @@ namespace SLCommandScript.Commands
         /// <summary>
         /// Defines command aliases
         /// </summary>
-        public override string[] Aliases { get; } = null;
+        public override string[] Aliases => null;
 
         /// <summary>
         /// Contains command description
@@ -64,7 +61,7 @@ namespace SLCommandScript.Commands
 
             foreach (var command in AllCommands)
             {
-                sb.AppendLine($" - {command.Command} {command.Description}");
+                sb.AppendLine($" - {command.Command} - {command.Description}");
             }
 
             response = sb.ToString();

@@ -1,9 +1,9 @@
 ﻿namespace SLCommandScript.Commands
 {
     /// <summary>
-    /// Defines command context types
+    /// Defines command handler types
     /// </summary>
-    public enum CommandContextType
+    public enum CommandHandlerType
     {
         RemoteAdmin,
         ServerConsole,

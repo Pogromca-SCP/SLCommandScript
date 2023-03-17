@@ -1,9 +1,8 @@
-﻿using PluginAPI.Core.Attributes;
+﻿using PluginAPI.Core;
+using PluginAPI.Core.Attributes;
+using SLCommandScript.Loader;
 using PluginAPI.Enums;
-using PluginAPI.Core;
-using System.IO;
-using SLCommandScript.Commands;
-using System.Collections.Generic;
+using System;
 
 namespace SLCommandScript
 {
@@ -13,9 +12,38 @@ namespace SLCommandScript
     /// </summary>
     public class Plugin
     {
-        public static string ScriptsPath => $"{_singleton.PluginDirectoryPath}/scripts/";
-        private static PluginHandler _singleton;
-        private readonly List<ScriptCommand> _commands = new List<ScriptCommand>();
+        /// <summary>
+        /// Plugin prefix to use in logs
+        /// </summary>
+        private const string PluginPrefix = "SLCommandScript: ";
+
+        /// <summary>
+        /// Stores plugin's singleton reference
+        /// </summary>
+        public static Plugin Singleton { get; private set; }
+
+        /// <summary>
+        /// Prints an info message to server log
+        /// </summary>
+        /// <param name="message">Message to print</param>
+        public static void PrintLog(string message) => Log.Info(message, PluginPrefix);
+
+        /// <summary>
+        /// Prints an error message to server log
+        /// </summary>
+        /// <param name="message">Message to print</param>
+        public static void PrintError(string message) => Log.Error(message, PluginPrefix);
+
+        /// <summary>
+        /// Stores plugin configuration
+        /// </summary>
+        [PluginConfig]
+        public Config PluginConfig;
+
+        /// <summary>
+        /// Stores a reference to scripts loader
+        /// </summary>
+        private IScriptsLoader _scriptsLoader;
 
         /// <summary>
         /// Loads and initializes the plugin
@@ -24,32 +52,96 @@ namespace SLCommandScript
         [PluginEntryPoint("SLCommandScript", "1.0.0", "Simple commands based scripting language for SCP: Secret Laboratory", "Adam Szerszenowicz")]
         void LoadPlugin()
         {
-            Log.Info("Plugin is loaded.", "SLCommandScript: ");
-            _singleton = PluginHandler.Get(this);
-
-            foreach (var file in Directory.GetFiles(ScriptsPath))
-            {
-                var name = file.Substring(file.LastIndexOf('/') + 1);
-                var tmp = new ScriptCommand(name, CommandContextType.RemoteAdmin);
-                _commands.Add(tmp);
-                tmp = new ScriptCommand(name, CommandContextType.ServerConsole);
-                _commands.Add(tmp);
-                tmp = new ScriptCommand(name, CommandContextType.ClientConsole);
-                _commands.Add(tmp);
-            }
-
-            foreach (var cmd in _commands)
-            {
-                CommandsUtils.RegisterCommand(cmd.ContextType, cmd);
-            }
+            PrintLog("Plugin load started...");
+            Init();
+            PrintLog("Plugin is loaded.");
         }
 
+        /// <summary>
+        /// Reloads the plugin
+        /// </summary>
+        [PluginReload]
+        void ReloadPlugin()
+        {
+            PrintLog("Plugin reload started...");
+            Init();
+            PrintLog("Plugin reloaded.");
+        }
+
+        /// <summary>
+        /// Unloads the plugin
+        /// </summary>
         [PluginUnload]
         void UnloadPlugin()
         {
-            foreach (var cmd in _commands)
+            PrintLog("Plugin unload started...");
+            _scriptsLoader?.UnloadScripts();
+            _scriptsLoader = null;
+            PluginConfig = null;
+            Singleton = null;
+            PrintLog("Plugin is unloaded.");
+        }
+
+        /// <summary>
+        /// Plugin components initialization
+        /// </summary>
+        private void Init()
+        {
+            Singleton = this;
+            ReloadConfig();
+            _scriptsLoader?.UnloadScripts();
+            InitScriptsLoader();
+            _scriptsLoader.LoadScripts();
+        }
+
+        /// <summary>
+        /// Reloads plugin config values
+        /// </summary>
+        private void ReloadConfig()
+        {
+            if (PluginConfig is null)
             {
-                CommandsUtils.UnregisterCommand(cmd.ContextType, cmd);
+                PluginConfig = new Config();
+            }
+
+            var handler = PluginHandler.Get(this);
+            handler?.LoadConfig(this, nameof(PluginConfig));
+        }
+
+        /// <summary>
+        /// Initializes scripts loader
+        /// </summary>
+        private void InitScriptsLoader()
+        {
+            if (string.IsNullOrWhiteSpace(PluginConfig.CustomScriptsLoader))
+            {
+                _scriptsLoader = new FileScriptsLoader();
+                return;
+            }
+
+            Type loaderType = null;
+
+            try
+            {
+                loaderType = Type.GetType(PluginConfig.CustomScriptsLoader);
+            }
+            catch (Exception) {}
+
+            if (loaderType is null || !loaderType.IsSubclassOf(typeof(IScriptsLoader)))
+            {
+                PrintError("Custom scripts loader is invalid.");
+                _scriptsLoader = new FileScriptsLoader();
+                return;
+            }
+
+            try
+            {
+                _scriptsLoader = (IScriptsLoader) Activator.CreateInstance(loaderType);
+            }
+            catch (Exception)
+            {
+                PrintError("Custom scripts loader could not be loaded.");
+                _scriptsLoader = new FileScriptsLoader();
             }
         }
     }

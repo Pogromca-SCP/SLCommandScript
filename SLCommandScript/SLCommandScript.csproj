@@ -108,11 +108,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\CommandContextType.cs" />
+    <Compile Include="Commands\CommandHandlerType.cs" />
     <Compile Include="Commands\CommandsUtils.cs" />
     <Compile Include="Commands\FlowCommand.cs" />
-    <Compile Include="Commands\ScriptCommand.cs" />
+    <Compile Include="Commands\FileScriptCommand.cs" />
+    <Compile Include="Config.cs" />
     <Compile Include="Interpreter\SCLInterpreterBase.cs" />
+    <Compile Include="Loader\FileScriptsLoader.cs" />
+    <Compile Include="Loader\IScriptsLoader.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Interpreter\SLCInterpreter.cs" />

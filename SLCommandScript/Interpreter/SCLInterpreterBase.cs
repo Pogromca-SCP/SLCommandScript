@@ -9,15 +9,11 @@ namespace SLCommandScript.Interpreter
     {
         private ICommandSender _sender;
 
-        private CommandContextType _contextType;
-
         private string _result;
 
         private bool _missingPerms;
 
-        private bool _missingContext;
-
-        public bool ProcessLines(IEnumerable<string> lines, ICommandSender sender, CommandContextType context, out string response)
+        public bool ProcessLines(IEnumerable<string> lines, ICommandSender sender, out string response)
         {
             if (sender is null)
             {
@@ -26,9 +22,7 @@ namespace SLCommandScript.Interpreter
             }
 
             _sender = sender;
-            _contextType = context;
             _missingPerms = false;
-            _missingContext = false;
 
             foreach (var line in lines)
             {
@@ -50,7 +44,7 @@ namespace SLCommandScript.Interpreter
             return res;
         }
 
-        public bool ProcessSingleLine(string line, ICommandSender sender, CommandContextType context, out string response)
+        public bool ProcessSingleLine(string line, ICommandSender sender, out string response)
         {
             if (sender is null)
             {
@@ -59,9 +53,7 @@ namespace SLCommandScript.Interpreter
             }
 
             _sender = sender;
-            _contextType = context;
             _missingPerms = false;
-            _missingContext = false;
             ProcessLine(line);
             response = _result ?? "Script executed successfully.";
             var res = _result is null;
@@ -81,7 +73,12 @@ namespace SLCommandScript.Interpreter
             {
                 var index = line.IndexOf("#");
                 ProcessCommand(line.Substring(0, index));
-                ProcessComment(line.Substring(index + 1));
+
+                if (line[index + 1] == '!')
+                {
+                    ProcessPermissionsDef(line.Substring(index + 2));
+                }
+
                 return;
             }
 
@@ -90,13 +87,13 @@ namespace SLCommandScript.Interpreter
 
         private void ProcessCommand(string command)
         {
-            if (_missingPerms || _missingContext || string.IsNullOrWhiteSpace(command))
+            if (_missingPerms || string.IsNullOrWhiteSpace(command))
             {
                 return;
             }
 
             var query = command.Split(' ');
-            var cmd = CommandsUtils.FindCommand(_contextType, query[0]);
+            var cmd = CommandsUtils.FindCommand(query[0]);
 
             if (cmd is null)
             {
@@ -109,19 +106,6 @@ namespace SLCommandScript.Interpreter
             if (!tmp)
             {
                 _result = response;
-            }
-        }
-
-        private void ProcessComment(string comment)
-        {
-            if (comment.StartsWith("!"))
-            {
-                ProcessPermissionsDef(comment.Substring(1));
-            }
-
-            if (comment.StartsWith("?"))
-            {
-                ProcessHandlersDef(comment.Substring(1));
             }
         }
 
@@ -141,28 +125,6 @@ namespace SLCommandScript.Interpreter
                 if (tmp && !_sender.CheckPermission(result))
                 {
                     _missingPerms = true;
-                }
-            }
-        }
-
-        private void ProcessHandlersDef(string handlers)
-        {
-            if (string.IsNullOrWhiteSpace(handlers))
-            {
-                _missingContext = false;
-                return;
-            }
-
-            _missingContext = true;
-
-            foreach (var con in handlers.Split(' '))
-            {
-                var tmp = Enum.TryParse<CommandContextType>(con, true, out var result);
-
-                if (tmp && _contextType == result)
-                {
-                    _missingContext = false;
-                    return;
                 }
             }
         }
