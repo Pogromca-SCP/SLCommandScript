@@ -1,7 +1,7 @@
 ﻿using CommandSystem;
-using System;
-using System.IO;
 using SLCommandScript.Interpreter;
+using System.IO;
+using System;
 
 namespace SLCommandScript.Commands
 {
@@ -23,12 +23,12 @@ namespace SLCommandScript.Commands
         /// <summary>
         /// Contains command description
         /// </summary>
-        public string Description => $"Executes custom script named {Command}";
+        public string Description => $"Executes custom script from {Command}.scl.";
 
         /// <summary>
-        /// Contains path to script file
+        /// Contains script interpreter
         /// </summary>
-        private readonly string _filePath;
+        private readonly SLCFileInterpreter _interpreter;
 
         /// <summary>
         /// Initializes the command
@@ -36,8 +36,17 @@ namespace SLCommandScript.Commands
         /// <param name="file">Path to associated script</param>
         public FileScriptCommand(string file)
         {
-            _filePath = file;
-            Command = file.Substring(file.LastIndexOf('/') + 1);
+            if (!File.Exists(file))
+            {
+                _interpreter = null;
+                Command = null;
+                return;
+            }
+
+            _interpreter = new SLCFileInterpreter(file);
+            var startIndex = file.LastIndexOf('/') + 1;
+            var endIndex = file.LastIndexOf('.');
+            Command = endIndex < 0 ? file.Substring(startIndex) : file.Substring(startIndex, endIndex - startIndex);
         }
 
         /// <summary>
@@ -47,21 +56,6 @@ namespace SLCommandScript.Commands
         /// <param name="sender">Command sender</param>
         /// <param name="response">Response to display in sender's console</param>
         /// <returns>True if command executed successfully, false otherwise</returns>
-        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
-        {
-            if (sender is null)
-            {
-                response = "Command sender is null.";
-                return false;
-            }
-
-            if (!File.Exists(_filePath))
-            {
-                response = "Script file does not exist or cannot be accessed.";
-                return false;
-            }
-
-            return new SCLInterpreterBase().ProcessLines(File.ReadAllLines(_filePath), sender, out response);
-        }
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response) => _interpreter.Execute(arguments, sender, out response);
     }
 }

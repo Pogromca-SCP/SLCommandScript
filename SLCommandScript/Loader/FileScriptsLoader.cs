@@ -59,7 +59,7 @@ namespace SLCommandScript.Loader
         {
             if (!Directory.Exists(directory))
             {
-                return;
+                Directory.CreateDirectory(directory);
             }
 
             if (!_registeredCommands.ContainsKey(handlerType))
@@ -70,11 +70,15 @@ namespace SLCommandScript.Loader
             foreach (var file in Directory.GetFiles(directory))
             {
                 var cmd = new FileScriptCommand(file);
-                var tmp = CommandsUtils.RegisterCommand(handlerType, cmd);
+                var tmp = CommandsUtils.RegisterCommandIfMissing(handlerType, cmd);
 
                 if (tmp)
                 {
                     _registeredCommands[handlerType].Add(cmd);
+                }
+                else
+                {
+                    Plugin.PrintError($"Could not register command '{cmd.Command}'. It seems that such command already exists.");
                 }
             }
         }

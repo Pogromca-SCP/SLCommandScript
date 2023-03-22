@@ -48,7 +48,7 @@ namespace SLCommandScript
         /// <summary>
         /// Loads and initializes the plugin
         /// </summary>
-        [PluginPriority(LoadPriority.Highest)]
+        [PluginPriority(LoadPriority.Lowest)]
         [PluginEntryPoint("SLCommandScript", "1.0.0", "Simple commands based scripting language for SCP: Secret Laboratory", "Adam Szerszenowicz")]
         void LoadPlugin()
         {

@@ -113,12 +113,12 @@
     <Compile Include="Commands\FlowCommand.cs" />
     <Compile Include="Commands\FileScriptCommand.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="Interpreter\SCLInterpreterBase.cs" />
+    <Compile Include="Interpreter\SLCInterpreterBase.cs" />
     <Compile Include="Loader\FileScriptsLoader.cs" />
     <Compile Include="Loader\IScriptsLoader.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Interpreter\SLCInterpreter.cs" />
+    <Compile Include="Interpreter\SLCFileInterpreter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
