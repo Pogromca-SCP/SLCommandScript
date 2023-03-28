@@ -11,6 +11,29 @@ namespace SLCommandScript.Commands
     public class FileScriptCommand : ICommand
     {
         /// <summary>
+        /// Converts a file path into a usable command name
+        /// </summary>
+        /// <param name="path">File path to convert</param>
+        /// <returns>Usable command name or null if path is null</returns>
+        public static string FilePathToCommandName(string path)
+        {
+            if (path is null)
+            {
+                return null;
+            }
+
+            var startIndex = path.LastIndexOf('/') + 1;
+
+            if (startIndex < 1)
+            {
+                startIndex = path.LastIndexOf('\\') + 1;
+            }
+
+            var endIndex = path.LastIndexOf('.');
+            return endIndex <= startIndex ? path.Substring(startIndex) : path.Substring(startIndex, endIndex - startIndex);
+        }
+
+        /// <summary>
         /// Contains command name
         /// </summary>
         public string Command { get; private set; }
@@ -44,9 +67,7 @@ namespace SLCommandScript.Commands
             }
 
             _interpreter = new SLCFileInterpreter(file);
-            var startIndex = file.LastIndexOf('/') + 1;
-            var endIndex = file.LastIndexOf('.');
-            Command = endIndex < 0 ? file.Substring(startIndex) : file.Substring(startIndex, endIndex - startIndex);
+            Command = FilePathToCommandName(file);
         }
 
         /// <summary>

@@ -141,7 +141,7 @@ namespace SLCommandScript.Interpreter
 
             foreach (var line in lines)
             {
-                if (line.EndsWith(" _"))
+                if (line.EndsWith(" \\"))
                 {
                     sb.Append(line.Substring(0, line.Length - 1));
                 }
@@ -241,6 +241,11 @@ namespace SLCommandScript.Interpreter
 
             var regex = new Regex("\\$([0-9]+)");
             var matches = regex.Matches(command);
+
+            if (matches.Count < 1)
+            {
+                return command;
+            }
 
             for (var index = 0; index < matches.Count; ++index)
             {

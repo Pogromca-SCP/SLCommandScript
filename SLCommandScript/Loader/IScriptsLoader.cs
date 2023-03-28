@@ -1,18 +1,15 @@
-﻿namespace SLCommandScript.Loader
+﻿using System;
+
+namespace SLCommandScript.Loader
 {
     /// <summary>
     /// Interface to implement in order to create a custom scripts loader
     /// </summary>
-    public interface IScriptsLoader
+    public interface IScriptsLoader : IDisposable
     {
         /// <summary>
-        /// Loads scripts
+        /// Initializes the scripts loader
         /// </summary>
-        void LoadScripts();
-
-        /// <summary>
-        /// Unloads scripts
-        /// </summary>
-        void UnloadScripts();
+        void InitScriptsLoader();
     }
 }

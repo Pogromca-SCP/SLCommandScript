@@ -75,7 +75,7 @@ namespace SLCommandScript
         void UnloadPlugin()
         {
             PrintLog("Plugin unload started...");
-            _scriptsLoader?.UnloadScripts();
+            _scriptsLoader?.Dispose();
             _scriptsLoader = null;
             PluginConfig = null;
             Singleton = null;
@@ -89,9 +89,9 @@ namespace SLCommandScript
         {
             Singleton = this;
             ReloadConfig();
-            _scriptsLoader?.UnloadScripts();
+            _scriptsLoader?.Dispose();
             InitScriptsLoader();
-            _scriptsLoader.LoadScripts();
+            _scriptsLoader.InitScriptsLoader();
         }
 
         /// <summary>
