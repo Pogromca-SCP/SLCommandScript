@@ -1,6 +1,8 @@
-﻿using System;
+﻿using SLCommandScript.Core.Loader;
+using System;
 using System.Collections.Generic;
 using SLCommandScript.Commands;
+using SLCommandScript.Core.Commands;
 using System.IO;
 using PluginAPI.Core;
 

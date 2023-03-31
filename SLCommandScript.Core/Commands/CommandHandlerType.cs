@@ -1,4 +1,4 @@
-﻿namespace SLCommandScript.Commands
+﻿namespace SLCommandScript.Core.Commands
 {
     /// <summary>
     /// Defines command handler types

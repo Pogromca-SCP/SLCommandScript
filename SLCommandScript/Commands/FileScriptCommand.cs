@@ -14,21 +14,17 @@ namespace SLCommandScript.Commands
         /// Converts a file path into a usable command name
         /// </summary>
         /// <param name="path">File path to convert</param>
-        /// <returns>Usable command name or null if path is null</returns>
+        /// <returns>Usable command name or null if path is null or directory</returns>
         public static string FilePathToCommandName(string path)
         {
-            if (path is null)
+            if (path is null || path.EndsWith("/") || path.EndsWith("\\"))
             {
                 return null;
             }
 
-            var startIndex = path.LastIndexOf('/') + 1;
-
-            if (startIndex < 1)
-            {
-                startIndex = path.LastIndexOf('\\') + 1;
-            }
-
+            var slashStart = path.LastIndexOf('/') + 1;
+            var backSlashStart = path.LastIndexOf('\\') + 1;
+            var startIndex = slashStart > backSlashStart ? slashStart : backSlashStart;
             var endIndex = path.LastIndexOf('.');
             return endIndex <= startIndex ? path.Substring(startIndex) : path.Substring(startIndex, endIndex - startIndex);
         }
@@ -46,7 +42,7 @@ namespace SLCommandScript.Commands
         /// <summary>
         /// Contains command description
         /// </summary>
-        public string Description => $"Executes custom script from {Command}.scl.";
+        public string Description => $"Executes custom script from {Command}.slc.";
 
         /// <summary>
         /// Contains script interpreter

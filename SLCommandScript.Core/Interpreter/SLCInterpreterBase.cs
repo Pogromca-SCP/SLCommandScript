@@ -2,10 +2,10 @@
 using CommandSystem;
 using System.Collections.Generic;
 using System.Text;
-using SLCommandScript.Commands;
+using SLCommandScript.Core.Commands;
 using System.Text.RegularExpressions;
 
-namespace SLCommandScript.Interpreter
+namespace SLCommandScript.Core.Interpreter
 {
     /// <summary>
     /// Base class for SLCommands interpreters

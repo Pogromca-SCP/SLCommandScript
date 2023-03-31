@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SLCommandScript")]
+[assembly: AssemblyTitle("SLCommandScript.Core")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SLCommandScript")]
+[assembly: AssemblyProduct("SLCommandScript.Core")]
 [assembly: AssemblyCopyright("Copyright © 2023 Adam Szerszenowicz")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("184a8001-10e9-4cfa-b430-bc987bbfa43d")]
+[assembly: Guid("7ae28404-dd46-4cd3-8120-399f34ff8fbe")]
 
 // Version information for an assembly consists of the following four values:
 //

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SLCommandScript.Loader
+namespace SLCommandScript.Core.Loader
 {
     /// <summary>
     /// Interface to implement in order to create a custom scripts loader

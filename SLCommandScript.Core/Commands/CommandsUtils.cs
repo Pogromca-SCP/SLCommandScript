@@ -2,7 +2,7 @@
 using RemoteAdmin;
 using GameCore;
 
-namespace SLCommandScript.Commands
+namespace SLCommandScript.Core.Commands
 {
     /// <summary>
     /// Provides additional utilities for commands
