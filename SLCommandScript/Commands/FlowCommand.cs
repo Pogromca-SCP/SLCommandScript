@@ -51,12 +51,6 @@ namespace SLCommandScript.Commands
         /// <returns>True if command executed successfully, false otherwise</returns>
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (sender is null)
-            {
-                response = "Command sender is null.";
-                return false;
-            }
-
             var sb = new StringBuilder("Available flow control operations:\n");
 
             foreach (var command in AllCommands)

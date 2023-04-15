@@ -2,8 +2,10 @@
 using PluginAPI.Core.Attributes;
 using SLCommandScript.Core.Loader;
 using System;
-using PluginAPI.Enums;
 using SLCommandScript.Loader;
+using SLCommandScript.Commands;
+using PluginAPI.Enums;
+using SLCommandScript.Core.Commands;
 
 namespace SLCommandScript
 {
@@ -65,6 +67,16 @@ namespace SLCommandScript
         private IScriptsLoader _scriptsLoader;
 
         /// <summary>
+        /// Stores flow control commands
+        /// </summary>
+        private FlowCommand _flowCommand;
+
+        /// <summary>
+        /// Stores scope control commands
+        /// </summary>
+        private ScopeCommand _scopeCommand;
+
+        /// <summary>
         /// Loads and initializes the plugin
         /// </summary>
         [PluginPriority(LoadPriority.Lowest)]
@@ -96,6 +108,9 @@ namespace SLCommandScript
             PrintLog("Plugin unload started...");
             _scriptsLoader?.Dispose();
             _scriptsLoader = null;
+            ClearCommands();
+            _flowCommand = null;
+            _scopeCommand = null;
             PluginConfig = null;
             Singleton = null;
             PrintLog("Plugin is unloaded.");
@@ -109,6 +124,8 @@ namespace SLCommandScript
             Singleton = this;
             ReloadConfig();
             _scriptsLoader?.Dispose();
+            ClearCommands();
+            InitCommands();
             _scriptsLoader = InitScriptsLoader();
             _scriptsLoader.InitScriptsLoader();
         }
@@ -168,6 +185,38 @@ namespace SLCommandScript
                 PrintError($"An error has occured during custom scripts loader type search: {ex.Message}");
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Initializes built-in commands
+        /// </summary>
+        private void InitCommands()
+        {
+            if (_flowCommand is null)
+            {
+                _flowCommand = new FlowCommand();
+            }
+
+            if (_scopeCommand is null)
+            {
+                _scopeCommand = new ScopeCommand();
+            }
+
+            CommandsUtils.RegisterCommand(CommandHandlerType.RemoteAdmin, _flowCommand);
+            CommandsUtils.RegisterCommand(CommandHandlerType.ServerConsole, _flowCommand);
+            CommandsUtils.RegisterCommand(CommandHandlerType.ClientConsole, _flowCommand);
+            CommandsUtils.RegisterCommand(CommandHandlerType.RemoteAdmin, _scopeCommand);
+        }
+
+        /// <summary>
+        /// Clears built-in commands
+        /// </summary>
+        private void ClearCommands()
+        {
+            CommandsUtils.UnregisterCommand(CommandHandlerType.RemoteAdmin, _flowCommand);
+            CommandsUtils.UnregisterCommand(CommandHandlerType.ServerConsole, _flowCommand);
+            CommandsUtils.UnregisterCommand(CommandHandlerType.ClientConsole, _flowCommand);
+            CommandsUtils.UnregisterCommand(CommandHandlerType.RemoteAdmin, _scopeCommand);
         }
     }
 }

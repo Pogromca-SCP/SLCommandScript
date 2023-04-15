@@ -56,11 +56,6 @@ namespace SLCommandScript.Core.Commands
         /// <returns>True if command was registered, false otherwise</returns>
         public static bool RegisterCommandIfMissing(CommandHandlerType handlerType, ICommand command)
         {
-            if (command is null || string.IsNullOrEmpty(command.Command))
-            {
-                return false;
-            }
-
             if (IsCommandRegistered(handlerType, command))
             {
                 return false;
@@ -82,7 +77,7 @@ namespace SLCommandScript.Core.Commands
         /// </summary>
         /// <param name="handlerType">Type of required command handler</param>
         /// <returns>Command hanlder for provided context or null if no such hanlder exists</returns>
-        private static ICommandHandler GetCommandHandler(CommandHandlerType handlerType)
+        public static ICommandHandler GetCommandHandler(CommandHandlerType handlerType)
         {
             switch (handlerType)
             {
@@ -98,44 +93,18 @@ namespace SLCommandScript.Core.Commands
         }
 
         /// <summary>
-        /// Manages command registration for specific handler
-        /// </summary>
-        /// <param name="handlerType">Command handler to manage</param>
-        /// <param name="command">Command to register/unregister</param>
-        /// <param name="doRegister">Set to true to register a command, set to false to unregister</param>
-        /// <returns>True if command management succeded, false otherwise</returns>
-        private static bool ManageCommand(CommandHandlerType handlerType, ICommand command, bool doRegister)
-        {
-            if (command is null || string.IsNullOrWhiteSpace(command.Command))
-            {
-                return false;
-            }
-
-            var handler = GetCommandHandler(handlerType);
-
-            if (handler is null)
-            {
-                return false;
-            }
-            
-            if (doRegister)
-            {
-                handler.RegisterCommand(command);
-                return true;
-            }
-
-            handler.UnregisterCommand(command);
-            return true;
-        }
-
-        /// <summary>
         /// Attempts to get a command from specific handler
         /// </summary>
         /// <param name="handlerType">Command hanlder to search in</param>
         /// <param name="commandName">Name or alias of the command to get</param>
         /// <returns>Found command or null if nothing was found</returns>
-        private static ICommand GetCommand(CommandHandlerType handlerType, string commandName)
+        public static ICommand GetCommand(CommandHandlerType handlerType, string commandName)
         {
+            if (string.IsNullOrWhiteSpace(commandName))
+            {
+                return null;
+            }
+
             var handler = GetCommandHandler(handlerType);
 
             if (handler is null)
@@ -153,8 +122,13 @@ namespace SLCommandScript.Core.Commands
         /// <param name="handlerType">Handler type to check</param>
         /// <param name="command">Command to check</param>
         /// <returns>True if command is registered already, false otherwise</returns>
-        private static bool IsCommandRegistered(CommandHandlerType handlerType, ICommand command)
+        public static bool IsCommandRegistered(CommandHandlerType handlerType, ICommand command)
         {
+            if (command is null)
+            {
+                return false;
+            }
+
             var foundCommand = GetCommand(handlerType, command.Command);
 
             if (!(foundCommand is null))
@@ -178,6 +152,37 @@ namespace SLCommandScript.Core.Commands
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Manages command registration for specific handler
+        /// </summary>
+        /// <param name="handlerType">Command handler to manage</param>
+        /// <param name="command">Command to register/unregister</param>
+        /// <param name="doRegister">Set to true to register a command, set to false to unregister</param>
+        /// <returns>True if command management succeded, false otherwise</returns>
+        private static bool ManageCommand(CommandHandlerType handlerType, ICommand command, bool doRegister)
+        {
+            if (command is null || string.IsNullOrWhiteSpace(command.Command))
+            {
+                return false;
+            }
+
+            var handler = GetCommandHandler(handlerType);
+
+            if (handler is null)
+            {
+                return false;
+            }
+
+            if (doRegister)
+            {
+                handler.RegisterCommand(command);
+                return true;
+            }
+
+            handler.UnregisterCommand(command);
+            return true;
         }
     }
 }
