@@ -1,0 +1,31 @@
+NOTE: The entire scripting language is NOT case sensitive!
+
+<script> -> <line>*
+<line> -> <expression>? <comment>?    # Lines can be extended by ending them with " \".
+
+<expression> -> <command> | <directive>    # Each expression can be modified by parameters.
+<param> -> "$(" <identifier> ")"
+<identifier> -> <arg_index> | <property_name>
+<arg_index> -> [1-9][0-9]* | "0"    # Script arguments are evaluated before parsing.
+<property_name> -> [a-zA-Z]+    # Properties are checked before parsing and evaluated during execution.
+
+<command> -> <cmd_name> <arg>*
+<cmd_name> -> \S+
+<arg> -> \S+
+
+<directive> -> "[" <directive_body> "]"
+<directive_body> -> <foreach_loop> | <if_expr>
+<foreach_loop> -> <expression> "foreach" <iterable>    # Inner expression gets access to iterated object's properties.
+<if_expr> -> <expression> "if" <expression> ("else" <expression>)?
+<iterable> -> "Player" | "ClassD" | "Scientist" | "MTF" | "Chaos" | "SCP" | "Human"
+
+<comment> -> [^\\] "#" <comment_body>
+<comment_body> -> <permissions_guard> | <scope_guard> | .*
+<permissions_guard> -> "!" <perm_name>*
+<scope_guard> -> "?" <scope_name>*
+<scope_name> -> "RemoteAdmin" | "Console" | "GameConsole"
+
+<perm_name> -> "KickingAndShortTermBanning" | "BanningUpToDay" | "LongTermBanning" | "ForceclassSelf" | "ForceclassToSpectator" | "ForceclassWithoutRestrictions" |
+               "GivingItems" | "WarheadEvents" | "RespawnEvents" | "RoundEvents" | "SetGroup" | "GameplayData" | "Overwatch" | "FacilityManagement" | "PlayersManagement" |
+               "PermissionsManagement" | "ServerConsoleCommands" | "ViewHiddenBadges" | "ServerConfigs" | "Broadcasting" | "PlayerSensitiveDataAccess" | "Noclip" |
+               "AFKImmunity" | "AdminChat" | "ViewHiddenGlobalBadges" | "Announcer" | "Effects" | "FriendlyFireDetectorImmunity" | "FriendlyFireDetectorTempDisable"
