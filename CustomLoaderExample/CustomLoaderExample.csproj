@@ -6,10 +6,14 @@
 		<OutputType>Library</OutputType>
 		<AssemblyName>CustomLoaderExample</AssemblyName>
 		<RootNamespace>CustomLoaderExample</RootNamespace>
+		<LangVersion>10</LangVersion>
 		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
 		<Configurations>Release</Configurations>
 		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Northwood.PluginAPI" Version="12.0.0" />
+	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="../SLCommandScript.Core/SLCommandScript.Core.csproj" />
 	</ItemGroup>

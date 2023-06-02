@@ -6,18 +6,17 @@
 		<OutputType>Library</OutputType>
 		<AssemblyName>SLCommandScript.Core.UnitTests</AssemblyName>
 		<RootNamespace>SLCommandScript.Core.UnitTests</RootNamespace>
+		<LangVersion>10</LangVersion>
 		<Configurations>Release</Configurations>
 		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Castle.Core" Version="5.1.1" />
-		<PackageReference Include="FluentAssertions" Version="6.10.0" />
+		<PackageReference Include="FluentAssertions" Version="6.11.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
 		<PackageReference Include="Moq" Version="4.18.4" />
+		<PackageReference Include="Northwood.PluginAPI" Version="12.0.0" />
 		<PackageReference Include="NUnit" Version="3.13.3" />
 		<PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
-		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.3" />
-		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="../SLCommandScript.Core/SLCommandScript.Core.csproj" />

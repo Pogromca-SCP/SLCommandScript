@@ -1,188 +1,186 @@
-﻿using CommandSystem;
+﻿using PluginAPI.Enums;
+using System.Collections.Generic;
+using CommandSystem;
+using System.Linq;
 using RemoteAdmin;
 using GameCore;
 
-namespace SLCommandScript.Core.Commands
+namespace SLCommandScript.Core.Commands;
+
+/// <summary>
+/// Provides additional utilities for commands.
+/// </summary>
+public static class CommandsUtils
 {
     /// <summary>
-    /// Provides additional utilities for commands
+    /// Defines command handlers hierarchy for command searches.
     /// </summary>
-    public static class CommandsUtils
+    private static readonly CommandType[] _handlersHierarchy = { CommandType.RemoteAdmin, CommandType.Console, CommandType.GameConsole };
+
+    /// <summary>
+    /// Retrieves all appropriate command handlers for specific command type.
+    /// </summary>
+    /// <param name="commandType">Command type to handle.</param>
+    /// <returns>All valid command handlers for provided command type.</returns>
+    public static IEnumerable<ICommandHandler> GetCommandHandlers(CommandType commandType) =>
+        _handlersHierarchy.Where(t => (t & commandType) != 0).Select(GetCommandHandler).Where(h => h is not null);
+
+    /// <summary>
+    /// Checks if provided command is invalid.
+    /// </summary>
+    /// <param name="command">Command to check.</param>
+    /// <returns><see langword="true" /> if command is invalid, <see langword="false" /> otherwise.</returns>
+    public static bool IsCommandInvalid(ICommand command) => command is null || string.IsNullOrWhiteSpace(command.Command)
+        || (command.Aliases is not null && command.Aliases.Any(string.IsNullOrWhiteSpace));
+
+    /// <summary>
+    /// Registers a command of specific type.
+    /// </summary>
+    /// <param name="commandType">Type of registered command.</param>
+    /// <param name="command">Command to register.</param>
+    /// <returns>Types of command handlers the command was registered to.</returns>
+    public static CommandType RegisterCommand(CommandType commandType, ICommand command) => ManageCommand(commandType, command, true);
+
+    /// <summary>
+    /// Registers a command into specific handlers only if its not already registered.
+    /// </summary>
+    /// <param name="commandType">Type of registered command.</param>
+    /// <param name="command">Command to register.</param>
+    /// <returns>Types of command handlers the command was registered to.</returns>
+    public static CommandType RegisterCommandIfMissing(CommandType commandType, ICommand command) =>
+        RegisterCommand(commandType ^ IsCommandRegistered(commandType, command), command);
+
+    /// <summary>
+    /// Unregisters a command of specific type.
+    /// </summary>
+    /// <param name="commandType">Type of command to unregister.</param>
+    /// <param name="command">Command to unregister.</param>
+    /// <returns>Types of command handlers the command was unregistered from.</returns>
+    public static CommandType UnregisterCommand(CommandType commandType, ICommand command) => ManageCommand(commandType, command, false);
+
+    /// <summary>
+    /// Attempts to get a command from specific handlers.
+    /// </summary>
+    /// <param name="commandType">Command handlers to search in.</param>
+    /// <param name="commandName">Name or alias of the command to get.</param>
+    /// <returns>Found command or <see langword="null" /> if nothing was found.</returns>
+    public static ICommand GetCommand(CommandType commandType, string commandName)
     {
-        /// <summary>
-        /// Defines command handlers hierarchy for command searches
-        /// </summary>
-        private static readonly CommandHandlerType[] _hanldersHierarchy = { CommandHandlerType.RemoteAdmin, CommandHandlerType.ServerConsole,
-            CommandHandlerType.ClientConsole };
-
-        /// <summary>
-        /// Attempts to find a command
-        /// </summary>
-        /// <param name="commandName">Name or alias of the command to find</param>
-        /// <returns>Found command or null if nothing was found</returns>
-        public static ICommand FindCommand(string commandName)
+        if (string.IsNullOrWhiteSpace(commandName))
         {
-            if (string.IsNullOrWhiteSpace(commandName))
-            {
-                return null;
-            }
-
-            foreach (var handlerType in _hanldersHierarchy)
-            {
-                var command = GetCommand(handlerType, commandName);
-                
-                if (!(command is null))
-                {
-                    return command;
-                }
-            }
-
             return null;
         }
 
-        /// <summary>
-        /// Registers a command into specific handler
-        /// </summary>
-        /// <param name="handlerType">Command handler to register into</param>
-        /// <param name="command">Command to register</param>
-        /// <returns>True if command was registered, false otherwise</returns>
-        public static bool RegisterCommand(CommandHandlerType handlerType, ICommand command) => ManageCommand(handlerType, command, true);
-
-        /// <summary>
-        /// Registers a command into specific handler only if its not already registered
-        /// </summary>
-        /// <param name="handlerType">Command handler to register into</param>
-        /// <param name="command">Command to register</param>
-        /// <returns>True if command was registered, false otherwise</returns>
-        public static bool RegisterCommandIfMissing(CommandHandlerType handlerType, ICommand command)
+        foreach (var handler in GetCommandHandlers(commandType))
         {
-            if (IsCommandRegistered(handlerType, command))
-            {
-                return false;
-            }
-
-            return RegisterCommand(handlerType, command);
-        }
-
-        /// <summary>
-        /// Unregisters a command from specific handler
-        /// </summary>
-        /// <param name="handlerType">Command handler to unregister from</param>
-        /// <param name="command">Command to unregister</param>
-        /// <returns>True if command was unregistered, false otherwise</returns>
-        public static bool UnregisterCommand(CommandHandlerType handlerType, ICommand command) => ManageCommand(handlerType, command, false);
-
-        /// <summary>
-        /// Returns appropriate command handler
-        /// </summary>
-        /// <param name="handlerType">Type of required command handler</param>
-        /// <returns>Command hanlder for provided context or null if no such hanlder exists</returns>
-        public static ICommandHandler GetCommandHandler(CommandHandlerType handlerType)
-        {
-            switch (handlerType)
-            {
-                case CommandHandlerType.RemoteAdmin:
-                    return CommandProcessor.RemoteAdminCommandHandler;
-                case CommandHandlerType.ServerConsole:
-                    return Console.singleton?.ConsoleCommandHandler;
-                case CommandHandlerType.ClientConsole:
-                    return QueryProcessor.DotCommandHandler;
-                default:
-                    return null;
-            }
-        }
-
-        /// <summary>
-        /// Attempts to get a command from specific handler
-        /// </summary>
-        /// <param name="handlerType">Command hanlder to search in</param>
-        /// <param name="commandName">Name or alias of the command to get</param>
-        /// <returns>Found command or null if nothing was found</returns>
-        public static ICommand GetCommand(CommandHandlerType handlerType, string commandName)
-        {
-            if (string.IsNullOrWhiteSpace(commandName))
-            {
-                return null;
-            }
-
-            var handler = GetCommandHandler(handlerType);
-
-            if (handler is null)
-            {
-                return null;
-            }
-
             var commandFound = handler.TryGetCommand(commandName, out var command);
-            return commandFound ? command : null;
+
+            if (commandFound)
+            {
+                return command;
+            }
         }
 
-        /// <summary>
-        /// Checks if provided command is already registered in specific handler
-        /// </summary>
-        /// <param name="handlerType">Handler type to check</param>
-        /// <param name="command">Command to check</param>
-        /// <returns>True if command is registered already, false otherwise</returns>
-        public static bool IsCommandRegistered(CommandHandlerType handlerType, ICommand command)
+        return null;
+    }
+
+    /// <summary>
+    /// Checks if provided command is already registered in specific handlers.
+    /// </summary>
+    /// <param name="commandType">Handler types to check.</param>
+    /// <param name="command">Command to check.</param>
+    /// <returns>Types of command handlers where the command is already registered in.</returns>
+    public static CommandType IsCommandRegistered(CommandType commandType, ICommand command)
+    {
+        if (IsCommandInvalid(command))
         {
-            if (command is null)
+            return 0;
+        }
+
+        CommandType result = 0;
+
+        foreach (var handler in GetCommandHandlers(commandType))
+        {
+            var isFound = handler.TryGetCommand(command.Command, out var _);
+
+            if (!isFound && command.Aliases is not null)
             {
-                return false;
-            }
-
-            var foundCommand = GetCommand(handlerType, command.Command);
-
-            if (!(foundCommand is null))
-            {
-                return true;
-            }
-
-            if (command.Aliases is null || command.Aliases.Length < 1)
-            {
-                return false;
-            }
-
-            foreach (var alias in command.Aliases)
-            {
-                foundCommand = GetCommand(handlerType, alias);
-
-                if (!(foundCommand is null))
+                foreach (var alias in command.Aliases)
                 {
-                    return true;
+                    isFound = handler.TryGetCommand(alias, out var _);
+
+                    if (isFound)
+                    {
+                        break;
+                    }
                 }
             }
 
-            return false;
+            if (isFound)
+            {
+                result |= GetCommandType(handler);
+            }
         }
 
-        /// <summary>
-        /// Manages command registration for specific handler
-        /// </summary>
-        /// <param name="handlerType">Command handler to manage</param>
-        /// <param name="command">Command to register/unregister</param>
-        /// <param name="doRegister">Set to true to register a command, set to false to unregister</param>
-        /// <returns>True if command management succeded, false otherwise</returns>
-        private static bool ManageCommand(CommandHandlerType handlerType, ICommand command, bool doRegister)
+        return result;
+    }
+
+    /// <summary>
+    /// Returns appropriate command handler.
+    /// </summary>
+    /// <param name="commandType">Type of required command handler.</param>
+    /// <returns>Command handler of provided type or <see langword="null" /> if no such handler exists.</returns>
+    private static ICommandHandler GetCommandHandler(CommandType commandType) => commandType switch
+    {
+        CommandType.RemoteAdmin => CommandProcessor.RemoteAdminCommandHandler,
+        CommandType.Console => Console.singleton?.ConsoleCommandHandler,
+        CommandType.GameConsole => QueryProcessor.DotCommandHandler,
+        _ => null,
+    };
+
+    /// <summary>
+    /// Returns appropriate command handler type.
+    /// </summary>
+    /// <param name="commandHandler">Command handler to get type of.</param>
+    /// <returns>Type of provided command handler or 0 if provided handler is invalid.</returns>
+    private static CommandType GetCommandType(ICommandHandler commandHandler) => commandHandler switch
+    {
+        RemoteAdminCommandHandler => CommandType.RemoteAdmin,
+        GameConsoleCommandHandler => CommandType.Console,
+        ClientCommandHandler => CommandType.GameConsole,
+        _ => 0
+    };
+
+    /// <summary>
+    /// Manages command registration or unregistration process.
+    /// </summary>
+    /// <param name="commandType">Type of command to manage.</param>
+    /// <param name="command">Command to register/unregister.</param>
+    /// <param name="doRegister">Set to <see langword="true" /> to register a command, set to <see langword="false" /> to unregister.</param>
+    /// <returns>Types of affected command handlers.</returns>
+    private static CommandType ManageCommand(CommandType commandType, ICommand command, bool doRegister)
+    {
+        if (IsCommandInvalid(command))
         {
-            if (command is null || string.IsNullOrWhiteSpace(command.Command))
-            {
-                return false;
-            }
+            return 0;
+        }
 
-            var handler = GetCommandHandler(handlerType);
+        CommandType result = 0;
 
-            if (handler is null)
-            {
-                return false;
-            }
-
+        foreach (var handler in GetCommandHandlers(commandType))
+        {
             if (doRegister)
             {
                 handler.RegisterCommand(command);
-                return true;
+            }
+            else
+            {
+                handler.UnregisterCommand(command);
             }
 
-            handler.UnregisterCommand(command);
-            return true;
+            result |= GetCommandType(handler);
         }
+
+        return result;
     }
 }
