@@ -17,14 +17,14 @@ public abstract class Expr
         /// <summary>
         /// Visits a command expression.
         /// </summary>
-        /// <param name="direct">Expression to visit.</param>
+        /// <param name="expr">Expression to visit.</param>
         /// <returns>Result value of the visit.</returns>
         T VisitCommandExpr(Command expr);
 
         /// <summary>
         /// Visits a directive expression.
         /// </summary>
-        /// <param name="direct">Expression to visit.</param>
+        /// <param name="expr">Expression to visit.</param>
         /// <returns>Result value of the visit.</returns>
         T VisitDirectiveExpr(Directive expr);
     }

@@ -1,26 +1,66 @@
-﻿using CommandSystem;
+﻿using System.Text.RegularExpressions;
+using CommandSystem;
+using System.Collections.Generic;
 using SLCommandScript.Core.Language.Expressions;
 using System;
 
 namespace SLCommandScript.Core.Language;
 
+/// <summary>
+/// Evaluates and executes provided expressions.
+/// </summary>
 public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
 {
+    /// <summary>
+    /// Contains regular expression for variables.
+    /// </summary>
+    private static readonly Regex _variablePattern = new("\\$\\(([a-zA-Z]+)\\)");
+
+    #region Fields and Properties
+    /// <summary>
+    /// Contains used command sender.
+    /// </summary>
     public ICommandSender Sender { get; private set; }
 
+    /// <summary>
+    /// Contains current error message.
+    /// </summary>
     public string ErrorMessage { get; set; }
 
+    /// <summary>
+    /// Contains current variable values.
+    /// </summary>
+    private readonly Dictionary<string, string> _variables;
+    #endregion
+
+    #region State Management
+    /// <summary>
+    /// Creates new interpreter instance.
+    /// </summary>
+    /// <param name="sender">Command sender to use for commands.</param>
     public Interpreter(ICommandSender sender)
     {
         Reset(sender);
         ErrorMessage = null;
+        _variables = new();
     }
 
+    /// <summary>
+    /// Resets the interpretation process.
+    /// </summary>
+    /// <param name="sender">New command sender to use.</param>
     public void Reset(ICommandSender sender)
     {
         Sender = sender;
     }
+    #endregion
 
+    #region Expressions Processing
+    /// <summary>
+    /// Visits a command expression.
+    /// </summary>
+    /// <param name="expr">Expression to visit.</param>
+    /// <returns>Result value of the visit.</returns>
     public bool VisitCommandExpr(Expr.Command expr)
     {
         if (expr is null)
@@ -46,8 +86,9 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
             ErrorMessage = "[Interpreter] Provided command arguments array is empty";
             return false;
         }
-        
-        var result = expr.Cmd.Execute(new ArraySegment<string>(expr.Arguments, 1, expr.Arguments.Length), Sender, out var message);
+
+        var args = expr.HasVariables && expr.Arguments.Length > 1 ? InjectArguments(expr.Arguments) : expr.Arguments;
+        var result = expr.Cmd.Execute(new ArraySegment<string>(args, 1, args.Length), Sender, out var message);
 
         if (!result)
         {
@@ -57,6 +98,11 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
         return result;
     }
 
+    /// <summary>
+    /// Visits a directive expression.
+    /// </summary>
+    /// <param name="expr">Expression to visit.</param>
+    /// <returns>Result value of the visit.</returns>
     public bool VisitDirectiveExpr(Expr.Directive expr)
     {
         if (expr is null)
@@ -74,6 +120,11 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
         return expr.Body.Accept(this);
     }
 
+    /// <summary>
+    /// Visits a foreach directive.
+    /// </summary>
+    /// <param name="direct">Directive to visit.</param>
+    /// <returns>Result value of the visit.</returns>
     public bool VisitForeachDirect(Direct.Foreach direct)
     {
         if (direct is null)
@@ -96,18 +147,25 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
 
         while (!direct.Iterable.IsAtEnd)
         {
-            direct.Iterable.LoadNext(null);
+            direct.Iterable.LoadNext(_variables);
             var result = direct.Body.Accept(this);
 
             if (!result)
             {
+                _variables.Clear();
                 return false;
             }
         }
-        
+
+        _variables.Clear();
         return true;
     }
 
+    /// <summary>
+    /// Visits an if directive.
+    /// </summary>
+    /// <param name="direct">Directive to visit.</param>
+    /// <returns>Result value of the visit.</returns>
     public bool VisitIfDirect(Direct.If direct)
     {
         if (direct is null)
@@ -141,4 +199,23 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
             return true;
         }
     }
+
+    /// <summary>
+    /// Injects appropriate values in place of variables.
+    /// </summary>
+    /// <param name="args">Original arguments values.</param>
+    /// <returns>Arguments with injected variables values.</returns>
+    private string[] InjectArguments(string[] args)
+    {
+        var results = new string[args.Length];
+        results[0] = args[0];
+
+        for (var index = 1; index < args.Length; ++index)
+        {
+            results[index] = _variablePattern.Replace(args[index], m => _variables.ContainsKey(m.Groups[0].Value) ? _variables[m.Groups[0].Value] : m.Value);
+        }
+
+        return results;
+    }
+    #endregion
 }
