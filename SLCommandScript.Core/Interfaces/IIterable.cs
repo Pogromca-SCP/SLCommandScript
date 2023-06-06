@@ -16,7 +16,8 @@ public interface IIterable
     /// Performs next iteration step and loads new property values into provided dictionary.
     /// </summary>
     /// <param name="targetVars">Dictionary to insert properties into.</param>
-    void LoadNext(IDictionary<string, string> targetVars);
+    /// <returns><see langword="true" /> if the iteration can continue, <see langword="false" /> otherwise.</returns>
+    bool LoadNext(IDictionary<string, string?>? targetVars);
 
     /// <summary>
     /// Resets iteration process.

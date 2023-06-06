@@ -19,14 +19,14 @@ public abstract class Direct
         /// </summary>
         /// <param name="direct">Directive to visit.</param>
         /// <returns>Result value of the visit.</returns>
-        T VisitIfDirect(If direct);
+        T VisitIfDirect(If? direct);
 
         /// <summary>
         /// Visits a foreach directive.
         /// </summary>
         /// <param name="direct">Directive to visit.</param>
         /// <returns>Result value of the visit.</returns>
-        T VisitForeachDirect(Foreach direct);
+        T VisitForeachDirect(Foreach? direct);
     }
 
     /// <summary>
@@ -37,17 +37,17 @@ public abstract class Direct
         /// <summary>
         /// Expression to evaluate when condition is met.
         /// </summary>
-        public Expr Then { get; }
+        public Expr? Then { get; }
 
         /// <summary>
         /// Condition to check.
         /// </summary>
-        public Expr Condition { get; }
+        public Expr? Condition { get; }
 
         /// <summary>
         /// Expression to evaluate when condition is not met.
         /// </summary>
-        public Expr Else { get; }
+        public Expr? Else { get; }
 
         /// <summary>
         /// Creates new if directive representation.
@@ -55,7 +55,7 @@ public abstract class Direct
         /// <param name="then">Expression to evaluate when condition is met.</param>
         /// <param name="condition">Condition to check.</param>
         /// <param name="els">Expression to evaluate when condition is not met.</param>
-        public If(Expr then, Expr condition, Expr els)
+        public If(Expr? then, Expr? condition, Expr? els)
         {
             Then = then;
             Condition = condition;
@@ -69,7 +69,7 @@ public abstract class Direct
         /// <param name="visitor">Visitor to accept.</param>
         /// <exception cref="NullReferenceException">When provided visitor is <see langword="null" />.</exception>
         /// <returns>Result of accepted visit.</returns>
-        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitIfDirect(this);
+        public override T Accept<T>(IVisitor<T>? visitor) => visitor is null ? new() : visitor.VisitIfDirect(this);
     }
 
     /// <summary>
@@ -80,19 +80,19 @@ public abstract class Direct
         /// <summary>
         /// Expression to use as loop body.
         /// </summary>
-        public Expr Body { get; }
+        public Expr? Body { get; }
 
         /// <summary>
         /// Iterable object to loop over.
         /// </summary>
-        public IIterable Iterable { get; }
+        public IIterable? Iterable { get; }
 
         /// <summary>
         /// Creates new foreach directive representation.
         /// </summary>
         /// <param name="body">Expression to use as loop body.</param>
         /// <param name="iterable">Iterable object to loop over.</param>
-        public Foreach(Expr body, IIterable iterable)
+        public Foreach(Expr? body, IIterable? iterable)
         {
             Body = body;
             Iterable = iterable;
@@ -105,7 +105,7 @@ public abstract class Direct
         /// <param name="visitor">Visitor to accept.</param>
         /// <exception cref="NullReferenceException">When provided visitor is <see langword="null" />.</exception>
         /// <returns>Result of accepted visit.</returns>
-        public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitForeachDirect(this);
+        public override T Accept<T>(IVisitor<T>? visitor) => visitor is null ? new() : visitor.VisitForeachDirect(this);
     }
 
     /// <summary>
@@ -114,5 +114,5 @@ public abstract class Direct
     /// <typeparam name="T">Type used for visit result.</typeparam>
     /// <param name="visitor">Visitor to accept.</param>
     /// <returns>Result of accepted visit.</returns>
-    public abstract T Accept<T>(IVisitor<T> visitor);
+    public abstract T Accept<T>(IVisitor<T>? visitor) where T : new();
 }

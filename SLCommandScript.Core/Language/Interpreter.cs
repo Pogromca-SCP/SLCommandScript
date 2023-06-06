@@ -20,17 +20,17 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// <summary>
     /// Contains used command sender.
     /// </summary>
-    public ICommandSender Sender { get; private set; }
+    public ICommandSender? Sender { get; private set; }
 
     /// <summary>
     /// Contains current error message.
     /// </summary>
-    public string ErrorMessage { get; set; }
+    public string? ErrorMessage { get; set; }
 
     /// <summary>
     /// Contains current variable values.
     /// </summary>
-    private readonly Dictionary<string, string> _variables;
+    private readonly Dictionary<string, string?> _variables;
     #endregion
 
     #region State Management
@@ -38,7 +38,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// Creates new interpreter instance.
     /// </summary>
     /// <param name="sender">Command sender to use for commands.</param>
-    public Interpreter(ICommandSender sender)
+    public Interpreter(ICommandSender? sender)
     {
         Reset(sender);
         ErrorMessage = null;
@@ -49,7 +49,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// Resets the interpretation process.
     /// </summary>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(ICommandSender sender)
+    public void Reset(ICommandSender? sender)
     {
         Sender = sender;
     }
@@ -61,23 +61,23 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    public bool VisitCommandExpr(Expr.Command expr)
+    public bool VisitCommandExpr(Expr.Command? expr)
     {
         if (expr is null)
         {
-            ErrorMessage = "[Interpreter] Provided command expression is invalid";
+            ErrorMessage = "[Interpreter] Provided command expression is null";
             return false;
         }
 
         if (expr.Cmd is null)
         {
-            ErrorMessage = "[Interpreter] Cannot execute an invalid command";
+            ErrorMessage = "[Interpreter] Cannot execute a null command";
             return false;
         }
 
         if (expr.Arguments is null)
         {
-            ErrorMessage = "[Interpreter] Provided command arguments are invalid";
+            ErrorMessage = "[Interpreter] Provided command arguments array is null";
             return false;
         }
 
@@ -87,7 +87,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
             return false;
         }
 
-        var args = expr.HasVariables && expr.Arguments.Length > 1 ? InjectArguments(expr.Arguments) : expr.Arguments;
+        var args = expr.HasVariables && expr.Arguments.Length > 1 ? InjectArguments(expr.Arguments) : ClearArguments(expr.Arguments);
         var result = expr.Cmd.Execute(new ArraySegment<string>(args, 1, args.Length), Sender, out var message);
 
         if (!result)
@@ -103,17 +103,17 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    public bool VisitDirectiveExpr(Expr.Directive expr)
+    public bool VisitDirectiveExpr(Expr.Directive? expr)
     {
         if (expr is null)
         {
-            ErrorMessage = "[Interpreter] Provided directive expression is invalid";
+            ErrorMessage = "[Interpreter] Provided directive expression is null";
             return false;
         }
 
         if (expr.Body is null)
         {
-            ErrorMessage = "[Interpreter] Directive expression body is invalid";
+            ErrorMessage = "[Interpreter] Directive expression body is null";
             return false;
         }
 
@@ -125,29 +125,28 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// </summary>
     /// <param name="direct">Directive to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    public bool VisitForeachDirect(Direct.Foreach direct)
+    public bool VisitForeachDirect(Direct.Foreach? direct)
     {
         if (direct is null)
         {
-            ErrorMessage = "[Interpreter] Provided foreach directive is invalid";
+            ErrorMessage = "[Interpreter] Provided foreach directive is null";
             return false;
         }
 
         if (direct.Body is null)
         {
-            ErrorMessage = "[Interpreter] Foreach directive body is invalid";
+            ErrorMessage = "[Interpreter] Foreach directive body is null";
             return false;
         }
 
         if (direct.Iterable is null)
         {
-            ErrorMessage = "[Interpreter] Foreach directive iterable object is invalid";
+            ErrorMessage = "[Interpreter] Foreach directive iterable object is null";
             return false;
         }
 
-        while (!direct.Iterable.IsAtEnd)
+        while (direct.Iterable.LoadNext(_variables))
         {
-            direct.Iterable.LoadNext(_variables);
             var result = direct.Body.Accept(this);
 
             if (!result)
@@ -166,23 +165,23 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// </summary>
     /// <param name="direct">Directive to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    public bool VisitIfDirect(Direct.If direct)
+    public bool VisitIfDirect(Direct.If? direct)
     {
         if (direct is null)
         {
-            ErrorMessage = "[Interpreter] Provided if directive is invalid";
+            ErrorMessage = "[Interpreter] Provided if directive is null";
             return false;
         }
 
         if (direct.Then is null)
         {
-            ErrorMessage = "[Interpreter] If directive then branch is invalid";
+            ErrorMessage = "[Interpreter] If directive then branch is null";
             return false;
         }
 
         if (direct.Condition is null)
         {
-            ErrorMessage = "[Interpreter] If directive condition is invalid";
+            ErrorMessage = "[Interpreter] If directive condition is null";
             return false;
         }
 
@@ -201,18 +200,44 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     }
 
     /// <summary>
+    /// Sanitizes arguments values.
+    /// </summary>
+    /// <param name="args">Original arguments values.</param>
+    /// <returns>Arguments with sanitized values.</returns>
+    private string[] ClearArguments(string?[] args)
+    {
+        var results = new string[args.Length];
+
+        for (var index = 0; index < args.Length; ++index)
+        {
+            results[index] = args[index] ?? string.Empty;
+        }
+
+        return results;
+    }
+
+    /// <summary>
     /// Injects appropriate values in place of variables.
     /// </summary>
     /// <param name="args">Original arguments values.</param>
     /// <returns>Arguments with injected variables values.</returns>
-    private string[] InjectArguments(string[] args)
+    private string[] InjectArguments(string?[] args)
     {
         var results = new string[args.Length];
-        results[0] = args[0];
+        results[0] = args[0] ?? string.Empty;
 
         for (var index = 1; index < args.Length; ++index)
         {
-            results[index] = _variablePattern.Replace(args[index], m => _variables.ContainsKey(m.Groups[0].Value) ? _variables[m.Groups[0].Value] : m.Value);
+            var arg = args[index];
+
+            if (arg is null)
+            {
+                results[index] = string.Empty;
+            }
+            else
+            {
+                results[index] = _variablePattern.Replace(arg, m => _variables.ContainsKey(m.Groups[0].Value) ? _variables[m.Groups[0].Value] : m.Value);
+            }
         }
 
         return results;

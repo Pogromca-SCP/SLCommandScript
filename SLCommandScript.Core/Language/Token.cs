@@ -31,7 +31,7 @@ public readonly struct Token
     /// <param name="type">Token type to set.</param>
     /// <param name="lexeme">Value related to this token.</param>
     /// <param name="line">Line number where the token was found.</param>
-    public Token(TokenType type, string value, int line)
+    public Token(TokenType type, string? value, int line)
     {
         Type = type;
         Value = value ?? string.Empty;
