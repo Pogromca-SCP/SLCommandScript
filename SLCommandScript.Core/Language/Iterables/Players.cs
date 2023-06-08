@@ -25,13 +25,13 @@ public class PlayerIterable : IIterable
     /// Creates new iterable wrapper for players list.
     /// </summary>
     /// <param name="players">List of players to wrap.</param>
-    public PlayerIterable(IEnumerable<Player?>? players)
+    public PlayerIterable(IEnumerable<Player> players)
     {
         _players = new();
 
         if (players is not null)
         {
-            _players.AddRange((IEnumerable<Player>) players.Where(p => p is not null));
+            _players.AddRange(players.Where(p => p is not null));
         }
 
         Reset();
@@ -47,7 +47,7 @@ public class PlayerIterable : IIterable
     /// </summary>
     /// <param name="targetVars">Dictionary to insert properties into.</param>
     /// <returns><see langword="true" /> if the iteration can continue, <see langword="false" /> otherwise.</returns>
-    public bool LoadNext(IDictionary<string, string?>? targetVars)
+    public bool LoadNext(IDictionary<string, string> targetVars)
     {
         if (IsAtEnd)
         {

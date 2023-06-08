@@ -20,17 +20,17 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// <summary>
     /// Contains used command sender.
     /// </summary>
-    public ICommandSender? Sender { get; private set; }
+    public ICommandSender Sender { get; private set; }
 
     /// <summary>
     /// Contains current error message.
     /// </summary>
-    public string? ErrorMessage { get; set; }
+    public string ErrorMessage { get; set; }
 
     /// <summary>
     /// Contains current variable values.
     /// </summary>
-    private readonly Dictionary<string, string?> _variables;
+    private readonly Dictionary<string, string> _variables;
     #endregion
 
     #region State Management
@@ -38,7 +38,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// Creates new interpreter instance.
     /// </summary>
     /// <param name="sender">Command sender to use for commands.</param>
-    public Interpreter(ICommandSender? sender)
+    public Interpreter(ICommandSender sender)
     {
         Reset(sender);
         ErrorMessage = null;
@@ -49,7 +49,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// Resets the interpretation process.
     /// </summary>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(ICommandSender? sender)
+    public void Reset(ICommandSender sender)
     {
         Sender = sender;
     }
@@ -61,7 +61,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    public bool VisitCommandExpr(Expr.Command? expr)
+    public bool VisitCommandExpr(Expr.Command expr)
     {
         if (expr is null)
         {
@@ -103,7 +103,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    public bool VisitDirectiveExpr(Expr.Directive? expr)
+    public bool VisitDirectiveExpr(Expr.Directive expr)
     {
         if (expr is null)
         {
@@ -125,7 +125,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// </summary>
     /// <param name="direct">Directive to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    public bool VisitForeachDirect(Direct.Foreach? direct)
+    public bool VisitForeachDirect(Direct.Foreach direct)
     {
         if (direct is null)
         {
@@ -165,7 +165,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// </summary>
     /// <param name="direct">Directive to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    public bool VisitIfDirect(Direct.If? direct)
+    public bool VisitIfDirect(Direct.If direct)
     {
         if (direct is null)
         {
@@ -204,7 +204,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// </summary>
     /// <param name="args">Original arguments values.</param>
     /// <returns>Arguments with sanitized values.</returns>
-    private string[] ClearArguments(string?[] args)
+    private string[] ClearArguments(string[] args)
     {
         var results = new string[args.Length];
 
@@ -221,7 +221,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// </summary>
     /// <param name="args">Original arguments values.</param>
     /// <returns>Arguments with injected variables values.</returns>
-    private string[] InjectArguments(string?[] args)
+    private string[] InjectArguments(string[] args)
     {
         var results = new string[args.Length];
         results[0] = args[0] ?? string.Empty;

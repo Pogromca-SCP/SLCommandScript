@@ -19,14 +19,14 @@ public abstract class Expr
         /// </summary>
         /// <param name="expr">Expression to visit.</param>
         /// <returns>Result value of the visit.</returns>
-        T VisitCommandExpr(Command? expr);
+        T VisitCommandExpr(Command expr);
 
         /// <summary>
         /// Visits a directive expression.
         /// </summary>
         /// <param name="expr">Expression to visit.</param>
         /// <returns>Result value of the visit.</returns>
-        T VisitDirectiveExpr(Directive? expr);
+        T VisitDirectiveExpr(Directive expr);
     }
 
     /// <summary>
@@ -37,12 +37,12 @@ public abstract class Expr
         /// <summary>
         /// Command to execute.
         /// </summary>
-        public ICommand? Cmd { get; }
+        public ICommand Cmd { get; }
 
         /// <summary>
         /// Command arguments to use.
         /// </summary>
-        public string?[]? Arguments { get; }
+        public string[] Arguments { get; }
 
         /// <summary>
         /// Whether or not this expression contains variables.
@@ -55,7 +55,7 @@ public abstract class Expr
         /// <param name="cmd">Command to execute.</param>
         /// <param name="args">Command arguments to use.</param>
         /// <param name="hasVariables">Whether or not this expression contains variables.</param>
-        public Command(ICommand? cmd, string?[]? args, bool hasVariables)
+        public Command(ICommand cmd, string[] args, bool hasVariables)
         {
             Cmd = cmd;
             Arguments = args;
@@ -69,7 +69,7 @@ public abstract class Expr
         /// <param name="visitor">Visitor to accept.</param>
         /// <exception cref="NullReferenceException">When provided visitor is <see langword="null" />.</exception>
         /// <returns>Result of accepted visit.</returns>
-        public override T Accept<T>(IVisitor<T>? visitor) => visitor is null ? new() : visitor.VisitCommandExpr(this);
+        public override T Accept<T>(IVisitor<T> visitor) => visitor is null ? default : visitor.VisitCommandExpr(this);
     }
 
     /// <summary>
@@ -80,13 +80,13 @@ public abstract class Expr
         /// <summary>
         /// Directive body to use.
         /// </summary>
-        public Direct? Body { get; }
+        public Direct Body { get; }
 
         /// <summary>
         /// Creates new directive expression representation.
         /// </summary>
         /// <param name="body">Directive body to use.</param>
-        public Directive(Direct? body)
+        public Directive(Direct body)
         {
             Body = body;
         }
@@ -98,7 +98,7 @@ public abstract class Expr
         /// <param name="visitor">Visitor to accept.</param>
         /// <exception cref="NullReferenceException">When provided visitor is <see langword="null" />.</exception>
         /// <returns>Result of accepted visit.</returns>
-        public override T Accept<T>(IVisitor<T>? visitor) => visitor is null ? new() : visitor.VisitDirectiveExpr(this);
+        public override T Accept<T>(IVisitor<T> visitor) => visitor is null ? default : visitor.VisitDirectiveExpr(this);
     }
 
     /// <summary>
@@ -107,5 +107,5 @@ public abstract class Expr
     /// <typeparam name="T">Type used for visit result.</typeparam>
     /// <param name="visitor">Visitor to accept.</param>
     /// <returns>Result of accepted visit.</returns>
-    public abstract T Accept<T>(IVisitor<T>? visitor) where T : new();
+    public abstract T Accept<T>(IVisitor<T> visitor);
 }

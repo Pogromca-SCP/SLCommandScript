@@ -14,5 +14,5 @@ public interface IPermissionsResolver
     /// <param name="permission">Permission to check.</param>
     /// <param name="message">Error message to display if something went wrong.</param>
     /// <returns><see langword="true" /> if command sender has provided permission, <see langword="false" /> otherwise.</returns>
-    bool CheckPermission(ICommandSender? sender, string? permission, out string? message);
+    bool CheckPermission(ICommandSender sender, string permission, out string message);
 }

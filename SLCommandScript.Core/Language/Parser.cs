@@ -16,7 +16,7 @@ public class Parser
     /// <summary>
     /// Contains iterable objects providers used in foreach directives.
     /// </summary>
-    public static Dictionary<string, Func<IIterable?>?> Iterables { get; } = new(StringComparer.OrdinalIgnoreCase)
+    public static Dictionary<string, Func<IIterable>> Iterables { get; } = new(StringComparer.OrdinalIgnoreCase)
     {
         { "player", PlayerIterablesProvider.AllPlayers },
         { "classd", PlayerIterablesProvider.AllClassDs },
@@ -31,7 +31,7 @@ public class Parser
     /// <summary>
     /// Contains current error message.
     /// </summary>
-    public string? ErrorMessage { get; private set; }
+    public string ErrorMessage { get; private set; }
 
     /// <summary>
     /// <see langword="true" /> if tokens end was reached, <see langword="false" /> otherwise.
@@ -69,7 +69,7 @@ public class Parser
     /// Creates new parser instance.
     /// </summary>
     /// <param name="tokens">List with tokens to process.</param>
-    public Parser(IList<Token>? tokens)
+    public Parser(IList<Token> tokens)
     {
         _tokens = tokens ?? new List<Token>();
         _scope = CommandType.RemoteAdmin | CommandType.Console | CommandType.GameConsole;
@@ -80,7 +80,7 @@ public class Parser
     /// Parses an expression from provided tokens list.
     /// </summary>
     /// <returns>Parsed expression or <see langword="null" /> if something went wrong.</returns>
-    public Expr? Parse()
+    public Expr Parse()
     {
         var expr = ParseExpr(false);
 
@@ -168,7 +168,7 @@ public class Parser
     /// </summary>
     /// <param name="isInner">Whether or not this expression is inside another expression.</param>
     /// <returns>Parsed expression or <see langword="null" /> if nothing could be parsed.</returns>
-    private Expr? ParseExpr(bool isInner)
+    private Expr ParseExpr(bool isInner)
     {
         if (Match(TokenType.LeftSquare))
         {
@@ -198,9 +198,9 @@ public class Parser
     /// Parses a directive expression.
     /// </summary>
     /// <returns>Parsed directive expression or <see langword="null" /> if something went wrong.</returns>
-    private Expr.Directive? Directive()
+    private Expr.Directive Directive()
     {
-        Direct? body = null;
+        Direct body = null;
         var expr = ParseExpr(true);
 
         if (Match(TokenType.If))
@@ -233,7 +233,7 @@ public class Parser
     /// </summary>
     /// <param name="isInner">Whether or not this expression is inside another expression.</param>
     /// <returns>Parsed command expression or <see langword="null" /> if something went wrong.</returns>
-    private Expr.Command? Command(bool isInner)
+    private Expr.Command Command(bool isInner)
     {
         var cmd = CommandsUtils.GetCommand(_scope, Peek.Value);
 
@@ -291,7 +291,7 @@ public class Parser
     /// </summary>
     /// <param name="expr">Expression to use as then branch expression.</param>
     /// <returns>Parsed if directive or <see langword="null" /> if something went wrong.</returns>
-    private Direct.If? If(Expr? expr)
+    private Direct.If If(Expr expr)
     {
         if (expr is null)
         {
@@ -307,7 +307,7 @@ public class Parser
             return null;
         }
 
-        Expr? els = null;
+        Expr els = null;
 
         if (Match(TokenType.Else))
         {
@@ -328,7 +328,7 @@ public class Parser
     /// </summary>
     /// <param name="body">Expression to use as loop body.</param>
     /// <returns>Parsed foreach directive or <see langword="null" /> if something went wrong.</returns>
-    private Direct.Foreach? Foreach(Expr? body)
+    private Direct.Foreach Foreach(Expr body)
     {
         if (body is null)
         {

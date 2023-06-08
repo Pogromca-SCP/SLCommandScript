@@ -7,7 +7,6 @@
 		<AssemblyName>SLCommandScript.Core</AssemblyName>
 		<RootNamespace>SLCommandScript.Core</RootNamespace>
 		<LangVersion>10</LangVersion>
-		<Nullable>enable</Nullable>
 		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
 		<Configurations>Release</Configurations>
 		<Platforms>AnyCPU</Platforms>
