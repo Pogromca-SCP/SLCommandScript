@@ -206,17 +206,17 @@ public class CommandsUtilsTests
 
     #region IsCommandRegistered Tests
     [TestCaseSource(nameof(_allHandlerTypes))]
-    public void IsCommandRegistered_ShouldReturnZero_WhenCommandIsNull(CommandType handlerType)
+    public void IsCommandRegistered_ShouldReturnNull_WhenCommandIsNull(CommandType handlerType)
     {
         // Act
         var result = CommandsUtils.IsCommandRegistered(handlerType, null);
 
         // Assert
-        result.Should().Be(0);
+        result.Should().BeNull();
     }
 
     [TestCaseSource(nameof(_allHandlersXInvalidCommands))]
-    public void IsCommandRegistered_ShouldReturnZero_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
+    public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
@@ -226,13 +226,13 @@ public class CommandsUtilsTests
         var result = CommandsUtils.IsCommandRegistered(handlerType, commandMock.Object);
 
         // Assert
-        result.Should().Be(0);
+        result.Should().BeNull();
         commandMock.VerifyAll();
         commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_allHandlersXInvalidAliases))]
-    public void IsCommandRegistered_ShouldReturnZero_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
+    public void IsCommandRegistered_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
     {
         // Arrange
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
@@ -243,7 +243,7 @@ public class CommandsUtilsTests
         var result = CommandsUtils.IsCommandRegistered(handlerType, commandMock.Object);
 
         // Assert
-        result.Should().Be(0);
+        result.Should().BeNull();
         commandMock.VerifyAll();
         commandMock.VerifyNoOtherCalls();
     }
@@ -287,17 +287,17 @@ public class CommandsUtilsTests
 
     #region RegisterCommand Tests
     [TestCaseSource(nameof(_allHandlerTypes))]
-    public void RegisterCommand_ShouldReturnZero_WhenCommandIsNull(CommandType handlerType)
+    public void RegisterCommand_ShouldReturnNull_WhenCommandIsNull(CommandType handlerType)
     {
         // Act
         var result = CommandsUtils.RegisterCommand(handlerType, null);
 
         // Assert
-        result.Should().Be(0);
+        result.Should().BeNull();
     }
 
     [TestCaseSource(nameof(_allHandlersXInvalidCommands))]
-    public void RegisterCommand_ShouldReturnZero_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
+    public void RegisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
@@ -307,13 +307,13 @@ public class CommandsUtilsTests
         var result = CommandsUtils.RegisterCommand(handlerType, commandMock.Object);
 
         // Assert
-        result.Should().Be(0);
+        result.Should().BeNull();
         commandMock.VerifyAll();
         commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_allHandlersXInvalidAliases))]
-    public void RegisterCommand_ShouldReturnZero_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
+    public void RegisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
     {
         // Arrange
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
@@ -324,7 +324,7 @@ public class CommandsUtilsTests
         var result = CommandsUtils.RegisterCommand(handlerType, commandMock.Object);
 
         // Assert
-        result.Should().Be(0);
+        result.Should().BeNull();
         commandMock.VerifyAll();
         commandMock.VerifyNoOtherCalls();
     }
@@ -350,11 +350,11 @@ public class CommandsUtilsTests
     public void RegisterCommand_ShouldProperlyRegister_WhenGoldFlow(CommandType handlerType, string commandName)
     {
         // Arrange
-        var handlers = GetExpectedCommandHandlers(handlerType);
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Command).Returns(commandName);
         commandMock.Setup(x => x.Aliases).Returns((string[]) null);
-        var expectedResult = JoinCommandTypes(handlers.Select(GetCommandHandlerType));
+        var handlers = GetExpectedCommandHandlers(handlerType);
+        var expectedResult = JoinCommandTypes(handlers.Where(h => !h.TryGetCommand(commandName, out var _)).Select(GetCommandHandlerType));
 
         // Act
         var result = CommandsUtils.RegisterCommand(handlerType, commandMock.Object);
@@ -364,28 +364,22 @@ public class CommandsUtilsTests
         commandMock.VerifyAll();
         commandMock.VerifyNoOtherCalls();
         handlers.Select(h => h.TryGetCommand(commandName, out var _)).Should().NotContain(false);
-
-        // Cleanup
-        foreach (var handler in handlers)
-        {
-            handler.UnregisterCommand(commandMock.Object);
-        }
     }
     #endregion
 
     #region UnregisterCommand Tests
     [TestCaseSource(nameof(_allHandlerTypes))]
-    public void UnegisterCommand_ShouldReturnZero_WhenCommandIsNull(CommandType handlerType)
+    public void UnegisterCommand_ShouldReturnNull_WhenCommandIsNull(CommandType handlerType)
     {
         // Act
         var result = CommandsUtils.UnregisterCommand(handlerType, null);
 
         // Assert
-        result.Should().Be(0);
+        result.Should().BeNull();
     }
 
     [TestCaseSource(nameof(_allHandlersXInvalidCommands))]
-    public void UnregisterCommand_ShouldReturnZero_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
+    public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
@@ -395,13 +389,13 @@ public class CommandsUtilsTests
         var result = CommandsUtils.UnregisterCommand(handlerType, commandMock.Object);
 
         // Assert
-        result.Should().Be(0);
+        result.Should().BeNull();
         commandMock.VerifyAll();
         commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_allHandlersXInvalidAliases))]
-    public void UnregisterCommand_ShouldReturnZero_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
+    public void UnregisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
     {
         // Arrange
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
@@ -412,7 +406,7 @@ public class CommandsUtilsTests
         var result = CommandsUtils.UnregisterCommand(handlerType, commandMock.Object);
 
         // Assert
-        result.Should().Be(0);
+        result.Should().BeNull();
         commandMock.VerifyAll();
         commandMock.VerifyNoOtherCalls();
     }
@@ -438,17 +432,11 @@ public class CommandsUtilsTests
     public void UnregisterCommand_ShouldProperlyUnregister_WhenGoldFlow(CommandType handlerType, string commandName)
     {
         // Arrange
-        var handlers = GetExpectedCommandHandlers(handlerType);
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Command).Returns(commandName);
         commandMock.Setup(x => x.Aliases).Returns((string[]) null);
-
-        foreach (var handler in handlers)
-        {
-            handler.RegisterCommand(commandMock.Object);
-        }
-
-        var expectedResult = JoinCommandTypes(handlers.Select(GetCommandHandlerType));
+        var handlers = GetExpectedCommandHandlers(handlerType);
+        var expectedResult = JoinCommandTypes(handlers.Where(h => h.TryGetCommand(commandName, out var _)).Select(GetCommandHandlerType));
 
         // Act
         var result = CommandsUtils.UnregisterCommand(handlerType, commandMock.Object);
@@ -458,94 +446,6 @@ public class CommandsUtilsTests
         commandMock.VerifyAll();
         commandMock.VerifyNoOtherCalls();
         handlers.Select(h => h.TryGetCommand(commandName, out var _)).Should().NotContain(true);
-    }
-    #endregion
-
-    #region RegisterCommandIfMissing Tests
-    [TestCaseSource(nameof(_allHandlerTypes))]
-    public void RegisterCommandIfMissing_ShouldReturnZero_WhenCommandIsNull(CommandType handlerType)
-    {
-        // Act
-        var result = CommandsUtils.RegisterCommandIfMissing(handlerType, null);
-
-        // Assert
-        result.Should().Be(0);
-    }
-
-    [TestCaseSource(nameof(_allHandlersXInvalidCommands))]
-    public void RegisterCommandIfMissing_ShouldReturnZero_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
-    {
-        // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
-
-        // Act
-        var result = CommandsUtils.RegisterCommandIfMissing(handlerType, commandMock.Object);
-
-        // Assert
-        result.Should().Be(0);
-        commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
-    }
-
-    [TestCaseSource(nameof(_allHandlersXInvalidAliases))]
-    public void RegisterCommandIfMissing_ShouldReturnZero_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
-    {
-        // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(MockCommandName);
-        commandMock.Setup(x => x.Aliases).Returns(aliases);
-
-        // Act
-        var result = CommandsUtils.RegisterCommandIfMissing(handlerType, commandMock.Object);
-
-        // Assert
-        result.Should().Be(0);
-        commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
-    }
-
-    [TestCaseSource(nameof(_validCommandNames))]
-    public void RegisterCommandIfMissing_ShouldReturnZero_WhenCommandHandlerIsNotFound(string commandName)
-    {
-        // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
-        commandMock.Setup(x => x.Aliases).Returns((string[]) null);
-
-        // Act
-        var result = CommandsUtils.RegisterCommandIfMissing(InvalidCommandType, commandMock.Object);
-
-        // Assert
-        result.Should().Be(0);
-        commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
-    }
-
-    [TestCaseSource(nameof(_validHandlersXCommandsToRegister))]
-    public void RegisterCommandIfMissing_ShouldProperlyRegister_WhenGoldFlow(CommandType handlerType, string commandName)
-    {
-        // Arrange
-        var handlers = GetExpectedCommandHandlers(handlerType).Where(h => !h.TryGetCommand(commandName, out var _));
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
-        commandMock.Setup(x => x.Aliases).Returns((string[]) null);
-        var expectedResult = JoinCommandTypes(handlers.Select(GetCommandHandlerType));
-
-        // Act
-        var result = CommandsUtils.RegisterCommandIfMissing(handlerType, commandMock.Object);
-
-        // Assert
-        result.Should().Be(expectedResult);
-        commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
-        handlers.Select(h => h.TryGetCommand(commandName, out var _)).Should().NotContain(false);
-
-        // Cleanup
-        foreach (var handler in handlers)
-        {
-            handler.UnregisterCommand(commandMock.Object);
-        }
     }
     #endregion
 }
