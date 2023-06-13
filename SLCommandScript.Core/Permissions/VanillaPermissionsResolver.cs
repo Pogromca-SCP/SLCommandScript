@@ -20,7 +20,7 @@ public class VanillaPermissionsResolver : IPermissionsResolver
     {
         if (sender is null)
         {
-            message = "[PermissionsCheck] Command sender is invalid";
+            message = "[PermissionsCheck] Command sender is null";
             return false;
         }
 
