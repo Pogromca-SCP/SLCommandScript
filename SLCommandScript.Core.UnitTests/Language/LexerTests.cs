@@ -6,7 +6,6 @@ using Moq;
 using SLCommandScript.Core.Interfaces;
 using CommandSystem;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SLCommandScript.Core.UnitTests.Language;
 
@@ -17,7 +16,17 @@ public class LexerTests
 
     #region Gold Flow Tests Sources
     private static readonly object[][] _testsData = {
-        new object[] { "", new[] { "" }, PlayerPermissions.Overwatch, new[] { new Token() } }
+        new object[] { string.Empty, new[] { "TestEmpty" }, PlayerPermissions.KickingAndShortTermBanning, new Token[0], 1 },
+
+        new object[] { BlankLine, new[] { "TestBlank" }, PlayerPermissions.KickingAndShortTermBanning, new Token[0], 1 },
+
+        new object[] { @"
+    cassie why am I here #What is the point of life?
+    bc 5 I have no idea!
+", new[] { "TestBasicCommands" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "cassie", 2),
+            new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2),
+            new(TokenType.Text, "bc", 3), new(TokenType.Text, "5", 3), new(TokenType.Text, "I", 3), new(TokenType.Text, "have", 3),
+            new(TokenType.Text, "no", 3), new(TokenType.Text, "idea!", 3) }, 4 }
     };
     #endregion
 
@@ -376,7 +385,7 @@ public class LexerTests
     }
 
     [TestCaseSource(nameof(_testsData))]
-    public void ScanNextLine_ShouldReturnProperTokens_WhenGoldFlow(string src, string[] args, PlayerPermissions perms, Token[] expectedTokens)
+    public void ScanNextLine_ShouldReturnProperTokens_WhenGoldFlow(string src, string[] args, PlayerPermissions perms, Token[] expectedTokens, int expectedLine)
     {
         // Arrange
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
@@ -386,7 +395,7 @@ public class LexerTests
         var result = new List<Token>();
 
         // Act
-        while (!lexer.IsAtEnd && lexer.ErrorMessage is not null)
+        while (!lexer.IsAtEnd && lexer.ErrorMessage is null)
         {
             result.AddRange(lexer.ScanNextLine());
         }
@@ -396,12 +405,11 @@ public class LexerTests
         lexer.Arguments.Should().HaveCount(args.Length - 1);
         lexer.Sender.Should().Be(senderMock.Object);
         lexer.PermissionsResolver.Should().NotBeNull();
-        lexer.Line.Should().Be(src.Count(ch => ch == '\n') + 1);
+        lexer.Line.Should().Be(expectedLine);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeTrue();
-        senderMock.VerifyAll();
         senderMock.VerifyNoOtherCalls();
-        result.Should().BeEquivalentTo(expectedTokens);
+        result.Should().BeEquivalentTo(expectedTokens, opt => opt.ComparingByValue<Token>());
     }
     #endregion
 }

@@ -354,7 +354,7 @@ public class Lexer
     /// Adds new token to tokens list using current token as value.
     /// </summary>
     /// <param name="type">Type of token to add.</param>
-    private void AddToken(TokenType type) => AddToken(type, Source.Substring(_start, _current));
+    private void AddToken(TokenType type) => AddToken(type, Source.Substring(_start, _current - _start));
 
     /// <summary>
     /// Adds new token to tokens list using specific value.
@@ -374,12 +374,12 @@ public class Lexer
 
         if (_prefix.Length > 0)
         {
-            text = _prefix + Source.Substring(_start, current);
+            text = _prefix + Source.Substring(_start, current - _start);
             _prefix = string.Empty;
         }
         else
         {
-            text = Source.Substring(_start, current);
+            text = Source.Substring(_start, current - _start);
         }
 
         return text;
