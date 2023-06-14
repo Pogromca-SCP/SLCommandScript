@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
-using System;
 using SLCommandScript.Core.Language;
+using System;
 using FluentAssertions;
 using Moq;
 using SLCommandScript.Core.Interfaces;
