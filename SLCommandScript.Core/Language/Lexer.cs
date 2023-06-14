@@ -491,7 +491,7 @@ public class Lexer
                 }
                 while (IsAlpha(Current));
 
-                _hasMissingPerms = !PermissionsResolver.CheckPermission(Sender, Source.Substring(_start, _current), out var message);
+                _hasMissingPerms = !PermissionsResolver.CheckPermission(Sender, Source.Substring(_start, _current - _start), out var message);
 
                 if (message is not null)
                 {
