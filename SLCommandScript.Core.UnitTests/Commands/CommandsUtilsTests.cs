@@ -37,13 +37,13 @@ public class CommandsUtilsTests
 
     private static readonly string[] _commandsToRegister = { "wtf", "dotheflip", "weeee" };
 
-    private static IEnumerable<object[]> _allHandlersXInvalidCommands => JoinArrays(_allHandlerTypes, _invalidCommandNames);
+    private static IEnumerable<object[]> AllHandlersXInvalidCommands => JoinArrays(_allHandlerTypes, _invalidCommandNames);
 
-    private static IEnumerable<object[]> _allHandlersXInvalidAliases => JoinArrays(_allHandlerTypes, _invalidAliases);
+    private static IEnumerable<object[]> AllHandlersXInvalidAliases => JoinArrays(_allHandlerTypes, _invalidAliases);
 
-    private static IEnumerable<object[]> _validHandlersXExistingCommandNames => JoinArrays(_validHandlerTypes, _existingCommandNames);
+    private static IEnumerable<object[]> ValidHandlersXExistingCommandNames => JoinArrays(_validHandlerTypes, _existingCommandNames);
 
-    private static IEnumerable<object[]> _validHandlersXCommandsToRegister => JoinArrays(_validHandlerTypes, _commandsToRegister);
+    private static IEnumerable<object[]> ValidHandlersXCommandsToRegister => JoinArrays(_validHandlerTypes, _commandsToRegister);
 
     private static IEnumerable<object[]> JoinArrays<TFirst, TSecond>(TFirst[] first, TSecond[] second) =>
         first.SelectMany(f => second.Select(s => new object[] { f, s }));
@@ -161,7 +161,7 @@ public class CommandsUtilsTests
     #endregion
 
     #region GetCommand Tests
-    [TestCaseSource(nameof(_allHandlersXInvalidCommands))]
+    [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
     public void GetCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Act
@@ -181,7 +181,7 @@ public class CommandsUtilsTests
         result.Should().BeNull();
     }
 
-    [TestCaseSource(nameof(_validHandlersXExistingCommandNames))]
+    [TestCaseSource(nameof(ValidHandlersXExistingCommandNames))]
     public void GetCommand_ShouldReturnProperResult_WhenGoldFlow(CommandType handlerType, string commandName)
     {
         // Arrange
@@ -215,7 +215,7 @@ public class CommandsUtilsTests
         result.Should().BeNull();
     }
 
-    [TestCaseSource(nameof(_allHandlersXInvalidCommands))]
+    [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
     public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
@@ -231,7 +231,7 @@ public class CommandsUtilsTests
         commandMock.VerifyNoOtherCalls();
     }
 
-    [TestCaseSource(nameof(_allHandlersXInvalidAliases))]
+    [TestCaseSource(nameof(AllHandlersXInvalidAliases))]
     public void IsCommandRegistered_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
     {
         // Arrange
@@ -265,7 +265,7 @@ public class CommandsUtilsTests
         commandMock.VerifyNoOtherCalls();
     }
 
-    [TestCaseSource(nameof(_validHandlersXExistingCommandNames))]
+    [TestCaseSource(nameof(ValidHandlersXExistingCommandNames))]
     public void IsCommandRegistered_ShouldReturnProperResult_WhenGoldFlow(CommandType handlerType, string commandName)
     {
         // Arrange
@@ -296,7 +296,7 @@ public class CommandsUtilsTests
         result.Should().BeNull();
     }
 
-    [TestCaseSource(nameof(_allHandlersXInvalidCommands))]
+    [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
     public void RegisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
@@ -312,7 +312,7 @@ public class CommandsUtilsTests
         commandMock.VerifyNoOtherCalls();
     }
 
-    [TestCaseSource(nameof(_allHandlersXInvalidAliases))]
+    [TestCaseSource(nameof(AllHandlersXInvalidAliases))]
     public void RegisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
     {
         // Arrange
@@ -346,7 +346,7 @@ public class CommandsUtilsTests
         commandMock.VerifyNoOtherCalls();
     }
 
-    [TestCaseSource(nameof(_validHandlersXCommandsToRegister))]
+    [TestCaseSource(nameof(ValidHandlersXCommandsToRegister))]
     public void RegisterCommand_ShouldProperlyRegister_WhenGoldFlow(CommandType handlerType, string commandName)
     {
         // Arrange
@@ -378,7 +378,7 @@ public class CommandsUtilsTests
         result.Should().BeNull();
     }
 
-    [TestCaseSource(nameof(_allHandlersXInvalidCommands))]
+    [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
     public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
@@ -394,7 +394,7 @@ public class CommandsUtilsTests
         commandMock.VerifyNoOtherCalls();
     }
 
-    [TestCaseSource(nameof(_allHandlersXInvalidAliases))]
+    [TestCaseSource(nameof(AllHandlersXInvalidAliases))]
     public void UnregisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
     {
         // Arrange
@@ -428,7 +428,7 @@ public class CommandsUtilsTests
         commandMock.VerifyNoOtherCalls();
     }
 
-    [TestCaseSource(nameof(_validHandlersXCommandsToRegister))]
+    [TestCaseSource(nameof(ValidHandlersXCommandsToRegister))]
     public void UnregisterCommand_ShouldProperlyUnregister_WhenGoldFlow(CommandType handlerType, string commandName)
     {
         // Arrange
