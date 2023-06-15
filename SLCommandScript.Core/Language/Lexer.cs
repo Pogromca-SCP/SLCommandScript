@@ -28,7 +28,7 @@ public class Lexer
     /// </summary>
     /// <param name="ch">Character to check.</param>
     /// <returns><see langword="true" /> if character is a whitespace, <see langword="false" /> otherwise.</returns>
-    private static bool IsWhiteSpace(char ch) => char.IsWhiteSpace(ch);
+    private static bool IsWhiteSpace(char ch) => ch == '\0' || char.IsWhiteSpace(ch);
 
     /// <summary>
     /// Checks if provided character is an alpha char.
@@ -103,6 +103,11 @@ public class Lexer
     /// Previous character.
     /// </summary>
     private char Previous => Source[_current - 1];
+
+    /// <summary>
+    /// Tells whether or not the lexer can continue reading the same line.
+    /// </summary>
+    private bool CanRead => Current != '\n' || Previous == '\\' || (_current > 1 && Previous == '\r' && Source[_current - 2] == '\\');
 
     /// <summary>
     /// <see langword="true" /> if its top level tokenizer, <see langword="false" /> otherwise.
@@ -448,9 +453,9 @@ public class Lexer
             skip = false;
         }
 
-        while ((Current != '\n' || Previous == '\\') && !IsAtEnd)
+        while (!IsAtEnd && CanRead)
         {
-            if (Previous == '\n')
+            if (Current == '\n')
             {
                 ++Line;
             }
@@ -474,9 +479,9 @@ public class Lexer
     {
         _hasMissingPerms = false;
 
-        while ((Current != '\n' || Previous == '\\') && !IsAtEnd)
+        while (!IsAtEnd && CanRead)
         {
-            if (Previous == '\n')
+            if (Current == '\n')
             {
                 ++Line;
             }
@@ -509,14 +514,23 @@ public class Lexer
     /// </summary>
     private void LineExtend()
     {
-        if (IsTopLevel && Match('\n'))
+        if (IsTopLevel)
         {
-            ++Line;
+            var matched = Match('\r');
+
+            if (Match('\n'))
+            {
+                ++Line;
+                return;
+            }
+
+            if (matched)
+            {
+                --_current;
+            }
         }
-        else
-        {
-            Text();
-        }
+
+        Text();
     }
 
     /// <summary>
@@ -531,7 +545,7 @@ public class Lexer
         }
 
         var type = TokenType.Text;
-
+        
         while (!IsWhiteSpace(Current))
         {
             if (Previous == '$' && Match('(') && !Match(')'))
@@ -548,7 +562,7 @@ public class Lexer
                 return;
             }
         }
-
+        
         var text = GetTextWithPrefix(_current);
         AddToken(type == TokenType.Text && _keywords.ContainsKey(text) ? _keywords[text] : type, text);
     }

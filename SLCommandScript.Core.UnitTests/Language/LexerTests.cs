@@ -21,12 +21,33 @@ public class LexerTests
         new object[] { BlankLine, new[] { "TestBlank" }, PlayerPermissions.KickingAndShortTermBanning, new Token[0], 1 },
 
         new object[] { @"
+
+", new[] { "" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] {  }, 3 },
+
+        new object[] { @"
     cassie why am I here #What is the point of life?
     bc 5 I have no idea!
 ", new[] { "TestBasicCommands" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "cassie", 2),
             new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2),
             new(TokenType.Text, "bc", 3), new(TokenType.Text, "5", 3), new(TokenType.Text, "I", 3), new(TokenType.Text, "have", 3),
-            new(TokenType.Text, "no", 3), new(TokenType.Text, "idea!", 3) }, 4 }
+            new(TokenType.Text, "no", 3), new(TokenType.Text, "idea!", 3) }, 4 },
+
+        new object[] { @"
+    bc 10 This is a very \
+    long one boiiii
+", new[] { "TestLineBreak" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "bc", 2), new(TokenType.Text, "10", 2),
+            new(TokenType.Text, "This", 2), new(TokenType.Text, "is", 2), new(TokenType.Text, "a", 2), new(TokenType.Text, "very", 2),
+            new(TokenType.Text, "long", 3), new(TokenType.Text, "one", 3), new(TokenType.Text, "boiiii", 3) }, 4 },
+
+        new object[] { "\\\r\\", new[] { "TestLineBreakText" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "\\", 1),
+            new(TokenType.Text, "\\", 1) }, 1 },
+
+        new object[] { @"
+    bc 10 Long comment #I am a storm \
+    that is approaching \
+    Provoking black clouds...
+", new[] { "TestLineBrokeComment" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "bc", 2),
+            new(TokenType.Text, "10", 2), new(TokenType.Text, "Long", 2), new(TokenType.Text, "comment", 2) }, 5 }
     };
     #endregion
 
