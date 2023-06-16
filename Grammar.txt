@@ -3,29 +3,26 @@ NOTE: The entire scripting language is NOT case sensitive!
 <script> -> <line>*
 <line> -> <expression>? <comment>?    # Lines can be extended by ending them with " \".
 
-<expression> -> <command> | <directive>    # Each expression can be modified by parameters.
-<param> -> "$(" <identifier> ")"
-<identifier> -> <arg_index> | <property_name>
-<arg_index> -> [1-9][0-9]* | "0"    # Script arguments are evaluated before parsing.
-<property_name> -> [a-zA-Z]+    # Properties are checked before parsing and evaluated during execution.
+<expression> -> <command> | <directive>
+<inner_expression> -> <inner_command> | <directive>
+<argument> -> "$(" [0-9]+ ")"    # Script arguments are injected into expressions during tokenization
 
 <command> -> <cmd_name> <arg>*
+<inner_command> -> <cmd_name> <inner_arg>*
 <cmd_name> -> \S+
 <arg> -> \S+
+<inner_arg> -> <variable> | <arg>
+<variable> -> \S* ("$(" [a-z]+ ")" \S*)+
 
 <directive> -> "[" <directive_body> "]"
 <directive_body> -> <foreach_loop> | <if_expr>
-<foreach_loop> -> <expression> "foreach" <iterable>    # Inner expression gets access to iterated object's properties.
+<foreach_loop> -> <inner_expression> "foreach" <iterable>    # Inner expression gets access to iterated object's properties as variables
 <if_expr> -> <expression> "if" <expression> ("else" <expression>)?
-<iterable> -> "Player" | "ClassD" | "Scientist" | "MTF" | "Chaos" | "SCP" | "Human"
+<iterable> -> [a-z]+
 
-<comment> -> [^\\] "#" <comment_body>
+<comment> -> \s "#" <comment_body> | ^ "#" <comment_body>
 <comment_body> -> <permissions_guard> | <scope_guard> | .*
 <permissions_guard> -> "!" <perm_name>*
 <scope_guard> -> "?" <scope_name>*
 <scope_name> -> "RemoteAdmin" | "Console" | "GameConsole"
-
-<perm_name> -> "KickingAndShortTermBanning" | "BanningUpToDay" | "LongTermBanning" | "ForceclassSelf" | "ForceclassToSpectator" | "ForceclassWithoutRestrictions" |
-               "GivingItems" | "WarheadEvents" | "RespawnEvents" | "RoundEvents" | "SetGroup" | "GameplayData" | "Overwatch" | "FacilityManagement" | "PlayersManagement" |
-               "PermissionsManagement" | "ServerConsoleCommands" | "ViewHiddenBadges" | "ServerConfigs" | "Broadcasting" | "PlayerSensitiveDataAccess" | "Noclip" |
-               "AFKImmunity" | "AdminChat" | "ViewHiddenGlobalBadges" | "Announcer" | "Effects" | "FriendlyFireDetectorImmunity" | "FriendlyFireDetectorTempDisable"
+<perm_name> -> [a-z]+
