@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System;
 using SLCommandScript.Core.Interfaces;
-using SLCommandScript.Core.Language.Iterables;
 using PluginAPI.Enums;
 using SLCommandScript.Core.Language.Expressions;
 using SLCommandScript.Core.Commands;
+using SLCommandScript.Core.Iterables;
 
 namespace SLCommandScript.Core.Language;
 
@@ -14,7 +14,12 @@ namespace SLCommandScript.Core.Language;
 public class Parser
 {
     /// <summary>
-    /// Contains iterable objects providers used in foreach directives.
+    /// Defines an universal scope value.
+    /// </summary>
+    public const CommandType AllScopes = CommandType.RemoteAdmin | CommandType.Console | CommandType.GameConsole;
+
+    /// <summary>
+    /// Contains iterable objects providers used in foreach expressions.
     /// </summary>
     public static Dictionary<string, Func<IIterable>> Iterables { get; } = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -37,16 +42,6 @@ public class Parser
     /// <see langword="true" /> if tokens end was reached, <see langword="false" /> otherwise.
     /// </summary>
     public bool IsAtEnd => _current >= _tokens.Count;
-
-    /// <summary>
-    /// Current token.
-    /// </summary>
-    private Token Peek => _tokens[_current];
-
-    /// <summary>
-    /// Previous token.
-    /// </summary>
-    private Token Previous => _tokens[_current - 1];
 
     /// <summary>
     /// Contains a list with tokens to process.
@@ -72,7 +67,7 @@ public class Parser
     public Parser(IList<Token> tokens)
     {
         _tokens = tokens ?? new List<Token>();
-        _scope = CommandType.RemoteAdmin | CommandType.Console | CommandType.GameConsole;
+        _scope = AllScopes;
         Reset();
     }
 
@@ -138,14 +133,14 @@ public class Parser
     /// </summary>
     /// <param name="type">Expected token type.</param>
     /// <returns><see langword="true" /> if current token exists and has correct type, <see langword="false" /> otherwise.</returns>
-    private bool Check(TokenType type) => !IsAtEnd && Peek.Type == type;
+    private bool Check(TokenType type) => !IsAtEnd && _tokens[_current].Type == type;
 
     /// <summary>
     /// Checks if current token is not of specific type.
     /// </summary>
     /// <param name="type">Unwanted token type.</param>
     /// <returns><see langword="true" /> if current token exists and has correct type, <see langword="false" /> otherwise.</returns>
-    private bool CheckNot(TokenType type) => !IsAtEnd && Peek.Type != type;
+    private bool CheckNot(TokenType type) => !IsAtEnd && _tokens[_current].Type != type;
 
     /// <summary>
     /// Retrieves current token and moves index forward.
@@ -158,7 +153,7 @@ public class Parser
             ++_current;
         }
 
-        return Previous;
+        return _tokens[_current - 1];
     }
     #endregion
 
@@ -198,9 +193,9 @@ public class Parser
     /// Parses a directive expression.
     /// </summary>
     /// <returns>Parsed directive expression or <see langword="null" /> if something went wrong.</returns>
-    private Expr.Directive Directive()
+    private Expr Directive()
     {
-        Direct body = null;
+        Expr body = null;
         var expr = ParseExpr(true);
 
         if (Match(TokenType.If))
@@ -225,7 +220,7 @@ public class Parser
             return null;
         }
 
-        return new(body);
+        return body;
     }
 
     /// <summary>
@@ -233,29 +228,29 @@ public class Parser
     /// </summary>
     /// <param name="isInner">Whether or not this expression is inside another expression.</param>
     /// <returns>Parsed command expression or <see langword="null" /> if something went wrong.</returns>
-    private Expr.Command Command(bool isInner)
+    private CommandExpr Command(bool isInner)
     {
-        var cmd = CommandsUtils.GetCommand(_scope, Peek.Value);
+        var cmd = CommandsUtils.GetCommand(_scope, _tokens[_current].Value);
 
         if (cmd is null)
         {
-            ErrorMessage = $"[Parser] Command '{Peek.Value}' was not found";
+            ErrorMessage = $"[Parser] Command '{_tokens[_current].Value}' was not found";
             return null;
         }
 
         var args = new List<string>();
         var hasVars = false;
-        args.Add(Peek.Value);
+        args.Add(_tokens[_current].Value);
         Advance();
 
-        while (CheckNot(TokenType.ScopeGuard) && (!isInner || (Peek.Type != TokenType.RightSquare && Peek.Type < TokenType.If)))
+        while (CheckNot(TokenType.ScopeGuard) && (!isInner || (_tokens[_current].Type != TokenType.RightSquare && _tokens[_current].Type < TokenType.If)))
         {
-            if (Peek.Type == TokenType.Variable && isInner)
+            if (_tokens[_current].Type == TokenType.Variable && isInner)
             {
                 hasVars = true;
             }
 
-            args.Add(Peek.Value);
+            args.Add(_tokens[_current].Value);
             Advance();
         }
 
@@ -271,11 +266,11 @@ public class Parser
 
         while (Check(TokenType.Identifier))
         {
-            var parsed = Enum.TryParse<CommandType>(Peek.Value, true, out var result);
+            var parsed = Enum.TryParse<CommandType>(_tokens[_current].Value, true, out var result);
 
             if (!parsed)
             {
-                ErrorMessage = $"[Parser] '{Peek.Value}' is not a valid scope type";
+                ErrorMessage = $"[Parser] '{_tokens[_current].Value}' is not a valid scope type";
                 return;
             }
 
@@ -283,15 +278,15 @@ public class Parser
             Advance();
         }
 
-        _scope = scope == 0 ? CommandType.RemoteAdmin | CommandType.Console | CommandType.GameConsole : scope;
+        _scope = scope == 0 ? AllScopes : scope;
     }
 
     /// <summary>
-    /// Parses an if directive.
+    /// Parses an if expression.
     /// </summary>
     /// <param name="expr">Expression to use as then branch expression.</param>
-    /// <returns>Parsed if directive or <see langword="null" /> if something went wrong.</returns>
-    private Direct.If If(Expr expr)
+    /// <returns>Parsed if expression or <see langword="null" /> if something went wrong.</returns>
+    private IfExpr If(Expr expr)
     {
         if (expr is null)
         {
@@ -324,11 +319,11 @@ public class Parser
     }
 
     /// <summary>
-    /// Parses a foreach directive.
+    /// Parses a foreach expression.
     /// </summary>
     /// <param name="body">Expression to use as loop body.</param>
-    /// <returns>Parsed foreach directive or <see langword="null" /> if something went wrong.</returns>
-    private Direct.Foreach Foreach(Expr body)
+    /// <returns>Parsed foreach expression or <see langword="null" /> if something went wrong.</returns>
+    private ForeachExpr Foreach(Expr body)
     {
         if (body is null)
         {
@@ -336,17 +331,17 @@ public class Parser
             return null;
         }
 
-        if (CheckNot(TokenType.Text) || !Iterables.ContainsKey(Peek.Value))
+        if (CheckNot(TokenType.Text) || !Iterables.ContainsKey(_tokens[_current].Value))
         {
-            ErrorMessage = $"[Parser] '{Peek.Value}' is not a valid iterable object";
+            ErrorMessage = $"[Parser] '{_tokens[_current].Value}' is not a valid iterable object";
             return null;
         }
 
-        var provider = Iterables[Peek.Value];
+        var provider = Iterables[_tokens[_current].Value];
 
         if (provider is null)
         {
-            ErrorMessage = $"[Parser] Provider for '{Peek.Value}' iterable object is null";
+            ErrorMessage = $"[Parser] Provider for '{_tokens[_current].Value}' iterable object is null";
             return null;
         }
 
@@ -354,7 +349,7 @@ public class Parser
 
         if (iter is null)
         {
-            ErrorMessage = $"[Parser] Provider for '{Peek.Value}' iterable object returned null";
+            ErrorMessage = $"[Parser] Provider for '{_tokens[_current].Value}' iterable object returned null";
             return null;
         }
 

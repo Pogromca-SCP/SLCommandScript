@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using SLCommandScript.Core.Interfaces;
+using System.Text.RegularExpressions;
 using CommandSystem;
 using System.Collections.Generic;
 using SLCommandScript.Core.Language.Expressions;
@@ -9,7 +10,7 @@ namespace SLCommandScript.Core.Language;
 /// <summary>
 /// Evaluates and executes provided expressions.
 /// </summary>
-public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
+public class Interpreter : IExprVisitor<bool>
 {
     /// <summary>
     /// Contains regular expression for variables.
@@ -61,7 +62,7 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    public bool VisitCommandExpr(Expr.Command expr)
+    public bool VisitCommandExpr(CommandExpr expr)
     {
         if (expr is null)
         {
@@ -99,55 +100,33 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     }
 
     /// <summary>
-    /// Visits a directive expression.
+    /// Visits a foreach expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    public bool VisitDirectiveExpr(Expr.Directive expr)
+    public bool VisitForeachExpr(ForeachExpr expr)
     {
         if (expr is null)
-        {
-            ErrorMessage = "[Interpreter] Provided directive expression is null";
-            return false;
-        }
-
-        if (expr.Body is null)
-        {
-            ErrorMessage = "[Interpreter] Directive expression body is null";
-            return false;
-        }
-
-        return expr.Body.Accept(this);
-    }
-
-    /// <summary>
-    /// Visits a foreach directive.
-    /// </summary>
-    /// <param name="direct">Directive to visit.</param>
-    /// <returns>Result value of the visit.</returns>
-    public bool VisitForeachDirect(Direct.Foreach direct)
-    {
-        if (direct is null)
         {
             ErrorMessage = "[Interpreter] Provided foreach directive is null";
             return false;
         }
 
-        if (direct.Body is null)
+        if (expr.Body is null)
         {
             ErrorMessage = "[Interpreter] Foreach directive body is null";
             return false;
         }
 
-        if (direct.Iterable is null)
+        if (expr.Iterable is null)
         {
             ErrorMessage = "[Interpreter] Foreach directive iterable object is null";
             return false;
         }
 
-        while (direct.Iterable.LoadNext(_variables))
+        while (expr.Iterable.LoadNext(_variables))
         {
-            var result = direct.Body.Accept(this);
+            var result = expr.Body.Accept(this);
 
             if (!result)
             {
@@ -161,37 +140,37 @@ public class Interpreter : Expr.IVisitor<bool>, Direct.IVisitor<bool>
     }
 
     /// <summary>
-    /// Visits an if directive.
+    /// Visits an if expression.
     /// </summary>
-    /// <param name="direct">Directive to visit.</param>
+    /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    public bool VisitIfDirect(Direct.If direct)
+    public bool VisitIfExpr(IfExpr expr)
     {
-        if (direct is null)
+        if (expr is null)
         {
             ErrorMessage = "[Interpreter] Provided if directive is null";
             return false;
         }
 
-        if (direct.Then is null)
+        if (expr.Then is null)
         {
             ErrorMessage = "[Interpreter] If directive then branch is null";
             return false;
         }
 
-        if (direct.Condition is null)
+        if (expr.Condition is null)
         {
             ErrorMessage = "[Interpreter] If directive condition is null";
             return false;
         }
 
-        if (direct.Condition.Accept(this))
+        if (expr.Condition.Accept(this))
         {
-            return direct.Then.Accept(this);
+            return expr.Then.Accept(this);
         }
-        else if (direct.Else is not null)
+        else if (expr.Else is not null)
         {
-            return direct.Else.Accept(this);
+            return expr.Else.Accept(this);
         }
         else
         {

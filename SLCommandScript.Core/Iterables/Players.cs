@@ -4,7 +4,7 @@ using PluginAPI.Core;
 using System.Linq;
 using PlayerRoles;
 
-namespace SLCommandScript.Core.Language.Iterables;
+namespace SLCommandScript.Core.Iterables;
 
 /// <summary>
 /// Iterable wrapper for list of players.
