@@ -20,13 +20,13 @@ public class VanillaPermissionsResolver : IPermissionsResolver
     {
         if (sender is null)
         {
-            message = "[PermissionsCheck] Command sender is null";
+            message = "[PermissionsResolver] Command sender is null";
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(permission))
         {
-            message = "[PermissionsCheck] Permission name is invalid";
+            message = "[PermissionsResolver] Permission name is invalid";
             return false;
         }
 
@@ -34,7 +34,7 @@ public class VanillaPermissionsResolver : IPermissionsResolver
 
         if (!parsed)
         {
-            message = $"[PermissionsCheck] Permission '{permission}' does not exist";
+            message = $"[PermissionsResolver] Permission '{permission}' does not exist";
             return false;
         }
 
