@@ -14,6 +14,8 @@ public class LexerTests
 {
     private const string BlankLine = "      ";
 
+    private static readonly int[] _argSizes = { 2, 3, 4 };
+
     #region Gold Flow Tests Sources
     private static readonly object[][] _testsData = {
         new object[] { string.Empty, new[] { "TestEmpty" }, PlayerPermissions.KickingAndShortTermBanning, new Token[0], 1 },
@@ -42,12 +44,142 @@ public class LexerTests
         new object[] { "\\\r\\", new[] { "TestLineBreakText" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "\\", 1),
             new(TokenType.Text, "\\", 1) }, 1 },
 
+        new object[] { "#\nhello", new[] { "TestLineOnCommentStart" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] {
+            new(TokenType.Text, "hello", 2) }, 2 },
+
         new object[] { @"
     bc 10 Long comment #I am a storm \
     that is approaching \
     Provoking black clouds...
-", new[] { "TestLineBrokeComment" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "bc", 2),
-            new(TokenType.Text, "10", 2), new(TokenType.Text, "Long", 2), new(TokenType.Text, "comment", 2) }, 5 }
+", new[] { "TestLineBreakComment" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "bc", 2),
+            new(TokenType.Text, "10", 2), new(TokenType.Text, "Long", 2), new(TokenType.Text, "comment", 2) }, 5 },
+
+        new object[] { @"
+    [ print If true elSe [ \
+    loop foReAch human ] \
+    ]
+", new[] { "TestDirectiveAndKeywords" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.LeftSquare, "[", 2),
+            new(TokenType.Text, "print", 2), new(TokenType.If, "If", 2), new(TokenType.Text, "true", 2), new(TokenType.Else, "elSe", 2),
+            new(TokenType.LeftSquare, "[", 2), new(TokenType.Text, "loop", 3), new(TokenType.Foreach, "foReAch", 3), new(TokenType.Text, "human", 3),
+            new(TokenType.RightSquare, "]", 3), new(TokenType.RightSquare, "]", 4) }, 5 },
+
+        new object[] { @"
+    print ski$()bidi bop$(name) $(no?)yes $(what?)
+    prin$(t [hello t]here $(general) 23$(light)sabers
+", new[] { "TestVariables" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "print", 2),
+            new(TokenType.Text, "ski$()bidi", 2), new(TokenType.Variable, "bop$(name)", 2), new(TokenType.Text, "$(no?)yes", 2),
+            new(TokenType.Text, "$(what?)", 2), new(TokenType.Text, "prin$(t", 3), new(TokenType.Text, "[hello", 3), new(TokenType.Text, "t]here", 3),
+            new(TokenType.Variable, "$(general)", 3), new(TokenType.Variable, "23$(light)sabers", 3) }, 4 },
+
+        new object[] { @"
+    cassie why am I here # This is a comment \
+    #? Console
+    print I have no idea #? Console $(0)
+    #?RemoteAdmin Hello \
+    #? !wowlo!
+", new[] { "TestScopeGuards" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "cassie", 2),
+            new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2),
+            new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
+            new(TokenType.Text, "idea", 4), new(TokenType.ScopeGuard, string.Empty, 4), new(TokenType.Identifier, "Console", 4),
+            new(TokenType.ScopeGuard, string.Empty, 5), new(TokenType.Identifier, "RemoteAdmin", 5), new(TokenType.Identifier, "Hello", 5),
+            new(TokenType.Identifier, "wowlo", 6) }, 7 },
+
+        new object[] { @"
+    cassie why am I here # This is a comment \
+    #! ServerConsoleCommands
+    print I have no idea #! ServerConsoleCommands
+    print This should not appear
+    #! Noclip! ?Announcer \
+    #!ServerConsoleCommands
+    print This should not appear #! Noclip
+    print Hello there #!Noclip Announcer
+    print Class d has micro p p #!
+    print 1 ...
+", new[] { "TestPermissionGuards" }, PlayerPermissions.Noclip | PlayerPermissions.Announcer, new Token[] { new(TokenType.Text, "cassie", 2),
+            new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2),
+            new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
+            new(TokenType.Text, "idea", 4), new(TokenType.Text, "print", 9), new(TokenType.Text, "Hello", 9), new(TokenType.Text, "there", 9),
+            new(TokenType.Text, "print", 10), new(TokenType.Text, "Class", 10), new(TokenType.Text, "d", 10), new(TokenType.Text, "has", 10),
+            new(TokenType.Text, "micro", 10), new(TokenType.Text, "p", 10), new(TokenType.Text, "p", 10), new(TokenType.Text, "print", 11),
+            new(TokenType.Text, "1", 11), new(TokenType.Text, "...", 11) }, 12 },
+
+        new object[] { "$(2) $(00001) $(0)\n$(3) $(4) $(5)#Hello $(3)", new[] { "TestSimpleArgs", "happenned ?", "#What", BlankLine, "number 1 5",
+            string.Empty }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "#What", 1), new(TokenType.Text, "happenned", 1),
+            new(TokenType.Text, "?", 1), new(TokenType.Text, "TestSimpleArgs", 1), new(TokenType.Text, "number", 2), new(TokenType.Text, "1", 2),
+            new(TokenType.Text, "5", 2) }, 2 },
+
+        new object[] { "$(15)", new[] { "TestBigNumArgs", null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+            " Hello $(test) " }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "Hello", 1), new(TokenType.Variable, "$(test)", 1) }, 1 },
+
+        new object[] { "$(1)", new[] { "TestInnerArgs", " Example\t$(1) \ninjection" }, PlayerPermissions.Noclip, new Token[] {
+            new(TokenType.Text, "Example", 1), new(TokenType.Text, "$(1)", 1), new(TokenType.Text, "injection", 1) }, 1 },
+
+        new object[] { @"
+    $(1)    $(2)
+    postfix$(0001)   postfix$(002)
+    $(1)prefix  $(2)prefix
+    su$(1)fix  su$(00002)fix
+", new[] { "TestNoTokensInjection", null, BlankLine }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "postfix", 3),
+            new(TokenType.Text, "postfix", 3), new(TokenType.Text, "prefix", 4),  new(TokenType.Text, "prefix", 4), new(TokenType.Text, "sufix", 5),
+            new(TokenType.Text, "su", 5), new(TokenType.Text, "fix", 5) }, 6 },
+
+        new object[] { @"
+    $(1)    $(2) $(3)  $(04)
+    postfix$(0001)   postfix$(002) postfix$(3) postfix$(4)
+    $(1)prefix  $(2)prefix $(3)prefix $(4)prefix
+    su$(1)fix  su$(00002)fix su$(3)fix su$(4)fix
+", new[] { "TestOneTokenInjection", "1", " 1", "1 ", " 1 " }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "1", 2),
+            new(TokenType.Text, "1", 2), new(TokenType.Text, "1", 2), new(TokenType.Text, "1", 2), new(TokenType.Text, "postfix1", 3),
+            new(TokenType.Text, "postfix", 3), new(TokenType.Text, "1", 3), new(TokenType.Text, "postfix1", 3), new(TokenType.Text, "postfix", 3),
+            new(TokenType.Text, "1", 3), new(TokenType.Text, "1prefix", 4),  new(TokenType.Text, "1prefix", 4), new(TokenType.Text, "1", 4),
+            new(TokenType.Text, "prefix", 4), new(TokenType.Text, "1", 4), new(TokenType.Text, "prefix", 4), new(TokenType.Text, "su1fix", 5),
+            new(TokenType.Text, "su", 5), new(TokenType.Text, "1fix", 5), new(TokenType.Text, "su1", 5), new(TokenType.Text, "fix", 5),
+            new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5), new(TokenType.Text, "fix", 5) }, 6 },
+
+        new object[] { @"
+    $(1)    $(2) $(3)  $(04)
+    postfix$(0001)   postfix$(002) postfix$(3) postfix$(4)
+    $(1)prefix  $(2)prefix $(3)prefix $(4)prefix
+    su$(1)fix  su$(00002)fix su$(3)fix su$(4)fix
+", new[] { "TestTwoTokensInjection", "1 2", " 1 2", "1 2 ", " 1 2 " }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "1", 2),
+            new(TokenType.Text, "2", 2), new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2), new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2),
+            new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2), new(TokenType.Text, "postfix1", 3), new(TokenType.Text, "2", 3),
+            new(TokenType.Text, "postfix", 3), new(TokenType.Text, "1", 3), new(TokenType.Text, "2", 3), new(TokenType.Text, "postfix1", 3),
+            new(TokenType.Text, "2", 3), new(TokenType.Text, "postfix", 3), new(TokenType.Text, "1", 3), new(TokenType.Text, "2", 3),
+            new(TokenType.Text, "1", 4), new(TokenType.Text, "2prefix", 4), new(TokenType.Text, "1", 4), new(TokenType.Text, "2prefix", 4),
+            new(TokenType.Text, "1", 4), new(TokenType.Text, "2", 4), new(TokenType.Text, "prefix", 4), new(TokenType.Text, "1", 4),
+            new(TokenType.Text, "2", 4), new(TokenType.Text, "prefix", 4), new(TokenType.Text, "su1", 5), new(TokenType.Text, "2fix", 5),
+            new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5), new(TokenType.Text, "2fix", 5), new(TokenType.Text, "su1", 5),
+            new(TokenType.Text, "2", 5), new(TokenType.Text, "fix", 5), new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5),
+            new(TokenType.Text, "2", 5), new(TokenType.Text, "fix", 5) }, 6 },
+
+        new object[] { @"
+    $(1)    $(2) $(3)  $(04)
+    postfix$(0001)   postfix$(002) postfix$(3) postfix$(4)
+    $(1)prefix  $(2)prefix $(3)prefix $(4)prefix
+    su$(1)fix  su$(00002)fix su$(3)fix su$(4)fix
+", new[] { "TestMultiTokensInjection", "1 2 (\n) 3", " 1 2 (\n) 3", "1 2 (\n) 3 ", " 1 2 (\n) 3 " }, PlayerPermissions.Noclip, new Token[] {
+            new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2), new(TokenType.Text, "(", 2), new(TokenType.Text, ")", 2), new(TokenType.Text, "3", 2),
+            new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2), new(TokenType.Text, "(", 2), new(TokenType.Text, ")", 2), new(TokenType.Text, "3", 2),
+            new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2), new(TokenType.Text, "(", 2), new(TokenType.Text, ")", 2), new(TokenType.Text, "3", 2),
+            new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2), new(TokenType.Text, "(", 2), new(TokenType.Text, ")", 2), new(TokenType.Text, "3", 2),
+            new(TokenType.Text, "postfix1", 3), new(TokenType.Text, "2", 3), new(TokenType.Text, "(", 3), new(TokenType.Text, ")", 3),
+            new(TokenType.Text, "3", 3), new(TokenType.Text, "postfix", 3), new(TokenType.Text, "1", 3), new(TokenType.Text, "2", 3),
+            new(TokenType.Text, "(", 3), new(TokenType.Text, ")", 3), new(TokenType.Text, "3", 3), new(TokenType.Text, "postfix1", 3),
+            new(TokenType.Text, "2", 3), new(TokenType.Text, "(", 3), new(TokenType.Text, ")", 3), new(TokenType.Text, "3", 3),
+            new(TokenType.Text, "postfix", 3), new(TokenType.Text, "1", 3), new(TokenType.Text, "2", 3), new(TokenType.Text, "(", 3),
+            new(TokenType.Text, ")", 3), new(TokenType.Text, "3", 3), new(TokenType.Text, "1", 4), new(TokenType.Text, "2", 4), new(TokenType.Text, "(", 4),
+            new(TokenType.Text, ")", 4), new(TokenType.Text, "3prefix", 4), new(TokenType.Text, "1", 4), new(TokenType.Text, "2", 4),
+            new(TokenType.Text, "(", 4), new(TokenType.Text, ")", 4), new(TokenType.Text, "3prefix", 4), new(TokenType.Text, "1", 4),
+            new(TokenType.Text, "2", 4), new(TokenType.Text, "(", 4), new(TokenType.Text, ")", 4), new(TokenType.Text, "3", 4),
+            new(TokenType.Text, "prefix", 4), new(TokenType.Text, "1", 4), new(TokenType.Text, "2", 4), new(TokenType.Text, "(", 4),
+            new(TokenType.Text, ")", 4), new(TokenType.Text, "3", 4), new(TokenType.Text, "prefix", 4), new(TokenType.Text, "su1", 5),
+            new(TokenType.Text, "2", 5), new(TokenType.Text, "(", 5), new(TokenType.Text, ")", 5), new(TokenType.Text, "3fix", 5),
+            new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5), new(TokenType.Text, "2", 5), new(TokenType.Text, "(", 5), new(TokenType.Text, ")", 5),
+            new(TokenType.Text, "3fix", 5), new(TokenType.Text, "su1", 5), new(TokenType.Text, "2", 5), new(TokenType.Text, "(", 5),
+            new(TokenType.Text, ")", 5), new(TokenType.Text, "3", 5), new(TokenType.Text, "fix", 5), new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5),
+            new(TokenType.Text, "2", 5), new(TokenType.Text, "(", 5), new(TokenType.Text, ")", 5), new(TokenType.Text, "3", 5), new(TokenType.Text, "fix", 5)
+        }, 6 }
     };
     #endregion
 
@@ -86,11 +218,10 @@ public class LexerTests
         lexer.IsAtEnd.Should().BeFalse();
     }
 
-    [Test]
-    public void Lexer_ShouldProperlyInitialize_WhenArgumenntsAreProvided()
+    [TestCaseSource(nameof(_argSizes))]
+    public void Lexer_ShouldProperlyInitialize_WhenArgumenntsAreProvided(int size)
     {
         // Act
-        const int size = 3;
         var lexer = new Lexer(BlankLine, new(new string[size], 0, size), null);
 
         // Assert
@@ -163,12 +294,11 @@ public class LexerTests
         lexer.IsAtEnd.Should().BeFalse();
     }
 
-    [Test]
-    public void Reset_ShouldProperlyResetLexer_WithNewArguments()
+    [TestCaseSource(nameof(_argSizes))]
+    public void Reset_ShouldProperlyResetLexer_WithNewArguments(int size)
     {
         // Arrange
         var lexer = new Lexer(BlankLine, EmptyArgs, null);
-        const int size = 3;
 
         // Act
         lexer.ScanNextLine();
@@ -226,12 +356,11 @@ public class LexerTests
         lexer.IsAtEnd.Should().BeFalse();
     }
 
-    [Test]
-    public void Reset_ShouldProperlyResetLexer_WithNewArgumentsAndSender()
+    [TestCaseSource(nameof(_argSizes))]
+    public void Reset_ShouldProperlyResetLexer_WithNewArgumentsAndSender(int size)
     {
         // Arrange
         var lexer = new Lexer(BlankLine, EmptyArgs, null);
-        const int size = 3;
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
 
         // Act
@@ -248,12 +377,11 @@ public class LexerTests
         lexer.IsAtEnd.Should().BeFalse();
     }
 
-    [Test]
-    public void Reset_ShouldProperlyResetLexer_WithNewArgumentsAndResolver()
+    [TestCaseSource(nameof(_argSizes))]
+    public void Reset_ShouldProperlyResetLexer_WithNewArgumentsAndResolver(int size)
     {
         // Arrange
         var lexer = new Lexer(BlankLine, EmptyArgs, null);
-        const int size = 3;
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
 
         // Act
@@ -292,12 +420,11 @@ public class LexerTests
         lexer.IsAtEnd.Should().BeFalse();
     }
 
-    [Test]
-    public void Reset_ShouldProperlyResetLexer_WithNewArgumentsAndSenderAndResolver()
+    [TestCaseSource(nameof(_argSizes))]
+    public void Reset_ShouldProperlyResetLexer_WithNewArgumentsAndSenderAndResolver(int size)
     {
         // Arrange
         var lexer = new Lexer(BlankLine, EmptyArgs, null);
-        const int size = 3;
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
 
@@ -342,11 +469,10 @@ public class LexerTests
         resolverMock.VerifyNoOtherCalls();
     }
 
-    [Test]
-    public void ScanNextLine_ShouldFail_WhenArgumentsArrayIsNull()
+    [TestCaseSource(nameof(_argSizes))]
+    public void ScanNextLine_ShouldFail_WhenArgumentsArrayIsNull(int argNum)
     {
         // Arrange
-        const int argNum = 2;
         var src = $"$({argNum}) $(var)";
         var lexer = new Lexer(src, new(), null);
 
@@ -362,11 +488,10 @@ public class LexerTests
         lexer.IsAtEnd.Should().BeFalse();
     }
 
-    [Test]
-    public void ScanNextLine_ShouldFail_WhenArgumentsArrayHasIncorrectOffset()
+    [TestCaseSource(nameof(_argSizes))]
+    public void ScanNextLine_ShouldFail_WhenArgumentsArrayHasIncorrectOffset(int argNum)
     {
         // Arrange
-        const int argNum = 2;
         var src = $"$({argNum}) bc";
         var lexer = new Lexer(src, new(new string[argNum], 0, argNum), null);
 
@@ -383,12 +508,11 @@ public class LexerTests
         lexer.IsAtEnd.Should().BeFalse();
     }
 
-    [Test]
-    public void ScanNextLine_ShouldFail_WhenArgumentDoesNotExist()
+    [TestCaseSource(nameof(_argSizes))]
+    public void ScanNextLine_ShouldFail_WhenArgumentDoesNotExist(int argNum)
     {
         // Arrange
-        const int argNum = 4;
-        const int actualSize = 2;
+        var actualSize = argNum - 2;
         var src = $"$({argNum}) ";
         var lexer = new Lexer(src, new(new string[actualSize + 1], 1, actualSize), null);
 
@@ -429,7 +553,6 @@ public class LexerTests
         lexer.Line.Should().Be(expectedLine);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeTrue();
-        senderMock.VerifyNoOtherCalls();
         result.Should().BeEquivalentTo(expectedTokens, opt => opt.ComparingByValue<Token>());
     }
     #endregion

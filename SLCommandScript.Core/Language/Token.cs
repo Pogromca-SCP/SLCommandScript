@@ -39,8 +39,8 @@ public readonly struct Token
     }
 
     /// <summary>
-    /// Converts this token into a human readoble string.
+    /// Converts this token into a human readable string.
     /// </summary>
     /// <returns>Human readable representation of this token.</returns>
-    public override string ToString() => $"{Type} '{Value}'";
+    public override string ToString() => $"{Type} '{Value}' at line {Line}";
 }

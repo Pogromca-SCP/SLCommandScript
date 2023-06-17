@@ -90,24 +90,14 @@ public class Lexer
     public bool IsAtEnd => _current >= Source.Length;
 
     /// <summary>
-    /// Current character.
+    /// Current character getter with bounds checking.
     /// </summary>
     private char Current => IsAtEnd ? '\0' : Source[_current];
 
     /// <summary>
-    /// Next character.
-    /// </summary>
-    private char Next => _current + 1 < Source.Length ? Source[_current + 1] : '\0';
-
-    /// <summary>
-    /// Previous character.
-    /// </summary>
-    private char Previous => Source[_current - 1];
-
-    /// <summary>
     /// Tells whether or not the lexer can continue reading the same line.
     /// </summary>
-    private bool CanRead => Current != '\n' || Previous == '\\' || (_current > 1 && Previous == '\r' && Source[_current - 2] == '\\');
+    private bool CanRead => Source[_current] != '\n' || Source[_current - 1] == '\\' || (Source[_current - 1] == '\r' && Source[_current - 2] == '\\');
 
     /// <summary>
     /// <see langword="true" /> if its top level tokenizer, <see langword="false" /> otherwise.
@@ -166,8 +156,7 @@ public class Lexer
         PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
         _tokens = new();
         _argLexers = new();
-        Line = 1;
-        Init();
+        Reset();
     }
 
     /// <summary>
@@ -175,16 +164,15 @@ public class Lexer
     /// </summary>
     /// <param name="source">Source code to tokenize.</param>
     /// <param name="line">Line number to use.</param>
-    private Lexer(string source, int line)
+    private Lexer(string source)
     {
-        Source = source;
+        Source = source ?? string.Empty;
         _arguments = new();
         Sender = null;
         PermissionsResolver = null;
         _tokens = new();
         _argLexers = null;
-        Line = line;
-        Init();
+        Reset();
     }
 
     /// <summary>
@@ -210,9 +198,12 @@ public class Lexer
     /// </summary>
     public void Reset()
     {
-        _tokens.Clear();
         Line = 1;
-        Init();
+        _hasMissingPerms = false;
+        _start = 0;
+        _current = 0;
+        ErrorMessage = null;
+        _prefix = string.Empty;
     }
 
     /// <summary>
@@ -296,18 +287,6 @@ public class Lexer
     }
 
     /// <summary>
-    /// Initializes lexer state.
-    /// </summary>
-    private void Init()
-    {
-        _hasMissingPerms = false;
-        _start = 0;
-        _current = 0;
-        ErrorMessage = null;
-        _prefix = string.Empty;
-    }
-
-    /// <summary>
     /// Scans a beggining of next token.
     /// </summary>
     /// <returns><see langword="true" /> if reading can continue, <see langword="false" /> otherwise.</returns>
@@ -334,13 +313,8 @@ public class Lexer
             case '\t':
                 break;
             case '\n':
-                if (IsTopLevel)
-                {
-                    ++Line;
-                    return false;
-                }
-
-                break;
+                ++Line;
+                return !IsTopLevel;
             default:
                 Text();
                 break;
@@ -455,12 +429,12 @@ public class Lexer
 
         while (!IsAtEnd && CanRead)
         {
-            if (Current == '\n')
+            if (Source[_current] == '\n')
             {
                 ++Line;
             }
 
-            if (skip || !IsAlpha(Current))
+            if (skip || !IsAlpha(Source[_current]))
             {
                 Advance();
             }
@@ -481,12 +455,11 @@ public class Lexer
 
         while (!IsAtEnd && CanRead)
         {
-            if (Current == '\n')
+            if (Source[_current] == '\n')
             {
                 ++Line;
             }
-
-            if (!_hasMissingPerms && IsAlpha(Current))
+            else if (!_hasMissingPerms && IsAlpha(Source[_current]))
             {
                 _start = _current;
 
@@ -548,7 +521,7 @@ public class Lexer
         
         while (!IsWhiteSpace(Current))
         {
-            if (Previous == '$' && Match('(') && !Match(')'))
+            if (Source[_current - 1] == '$' && Match('(') && !Match(')'))
             {
                 type = Argument(_current - 2, type == TokenType.Variable);
             }
@@ -608,7 +581,7 @@ public class Lexer
             while (IsDigit(Current))
             {
                 argNum *= 10;
-                argNum += Current - '0';
+                argNum += Source[_current] - '0';
                 Advance();
             }
 
@@ -652,8 +625,8 @@ public class Lexer
             return InjectArg(_argLexers[argNum], startedAt, isVarText);
         }
 
-        var lexer = new Lexer(_arguments.Array[_arguments.Offset + argNum - 1] ?? string.Empty, Line);
-        _argLexers.Add(argNum, lexer);
+        var lexer = new Lexer(_arguments.Array[_arguments.Offset + argNum - 1]);
+        _argLexers[argNum] = lexer;
         lexer.ScanNextLine();
 
         if (lexer.ErrorMessage is not null)
@@ -766,7 +739,7 @@ public class Lexer
 
         if (isEnd)
         {
-            _tokens.Add(token);
+            AddToken(token.Type, token.Value);
             return TokenType.None;
         }
 
@@ -784,14 +757,14 @@ public class Lexer
     /// <returns>Type of token to use in remaining token processing.</returns>
     private TokenType Inject2TokensArg(Lexer lexer, int startedAt, bool isVarText)
     {
+        var token = lexer._tokens[0];
+
         if (_start != startedAt)
         {
-            var token = lexer._tokens[0];
-
             if (IsWhiteSpace(lexer.Source[0]))
             {
                 AddToken(isVarText ? TokenType.Variable : TokenType.Text, GetTextWithPrefix(startedAt));
-                _tokens.Add(token);
+                AddToken(token.Type, token.Value);
             }
             else
             {
@@ -799,12 +772,16 @@ public class Lexer
                 AddToken(type, GetTextWithPrefix(startedAt) + token.Value);
             }
         }
+        else
+        {
+            AddToken(token.Type, token.Value);
+        }
 
         var lastToken = lexer._tokens[1];
 
         if (IsWhiteSpace(Current) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]))
         {
-            _tokens.Add(lastToken);
+            AddToken(lastToken.Type, lastToken.Value);
             return TokenType.None;
         }
 
@@ -822,12 +799,12 @@ public class Lexer
     /// <returns>Type of token to use in remaining token processing.</returns>
     private TokenType InjectNTokensArg(Lexer lexer, int startedAt, bool isVarText)
     {
-        IEnumerable<Token> toks = lexer._tokens;
+        IEnumerable<Token> tokens = lexer._tokens;
         var isEnd = IsWhiteSpace(Current) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]);
 
         if (!isEnd)
         {
-            toks = toks.Take(lexer._tokens.Count - 1);
+            tokens = tokens.Take(lexer._tokens.Count - 1);
         }
 
         if (_start != startedAt)
@@ -841,11 +818,14 @@ public class Lexer
                 var token = lexer._tokens[0];
                 var type = isVarText || token.Type == TokenType.Variable ? TokenType.Variable : TokenType.Text;
                 AddToken(type, GetTextWithPrefix(startedAt) + token.Value);
-                toks = toks.Skip(1);
+                tokens = tokens.Skip(1);
             }
         }
 
-        _tokens.AddRange(toks);
+        foreach (var token in tokens)
+        {
+            AddToken(token.Type, token.Value);
+        }
 
         if (isEnd)
         {
