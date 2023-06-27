@@ -39,6 +39,11 @@ public class Parser
     public string ErrorMessage { get; private set; }
 
     /// <summary>
+    /// Contains current commands scope.
+    /// </summary>
+    public CommandType Scope { get; private set; }
+
+    /// <summary>
     /// <see langword="true" /> if tokens end was reached, <see langword="false" /> otherwise.
     /// </summary>
     public bool IsAtEnd => _current >= _tokens.Count;
@@ -52,11 +57,6 @@ public class Parser
     /// Contains current token index.
     /// </summary>
     private int _current;
-
-    /// <summary>
-    /// Contains current commands scope.
-    /// </summary>
-    private CommandType _scope;
     #endregion
 
     #region State Management
@@ -67,7 +67,7 @@ public class Parser
     public Parser(IList<Token> tokens)
     {
         _tokens = tokens ?? new List<Token>();
-        _scope = AllScopes;
+        Scope = AllScopes;
         Reset();
     }
 
@@ -230,7 +230,7 @@ public class Parser
     /// <returns>Parsed command expression or <see langword="null" /> if something went wrong.</returns>
     private CommandExpr Command(bool isInner)
     {
-        var cmd = CommandsUtils.GetCommand(_scope, _tokens[_current].Value);
+        var cmd = CommandsUtils.GetCommand(Scope, _tokens[_current].Value);
 
         if (cmd is null)
         {
@@ -278,7 +278,7 @@ public class Parser
             Advance();
         }
 
-        _scope = scope == 0 ? AllScopes : scope;
+        Scope = scope == 0 ? AllScopes : scope;
     }
 
     /// <summary>

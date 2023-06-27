@@ -219,7 +219,7 @@ public class LexerTests
     }
 
     [TestCaseSource(nameof(_argSizes))]
-    public void Lexer_ShouldProperlyInitialize_WhenArgumenntsAreProvided(int size)
+    public void Lexer_ShouldProperlyInitialize_WhenArgumentsAreProvided(int size)
     {
         // Act
         var lexer = new Lexer(BlankLine, new(new string[size], 0, size), null);
