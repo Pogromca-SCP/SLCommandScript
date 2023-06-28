@@ -64,11 +64,11 @@ public class Parser
     /// Creates new parser instance.
     /// </summary>
     /// <param name="tokens">List with tokens to process.</param>
-    public Parser(IList<Token> tokens)
+    /// <param name="scope">Initial commands scope to use.</param>
+    public Parser(IList<Token> tokens, CommandType scope = AllScopes)
     {
         _tokens = tokens ?? new List<Token>();
-        Scope = AllScopes;
-        Reset();
+        Reset(scope);
     }
 
     /// <summary>
@@ -77,6 +77,11 @@ public class Parser
     /// <returns>Parsed expression or <see langword="null" /> if something went wrong.</returns>
     public Expr Parse()
     {
+        if (ErrorMessage is not null)
+        {
+            return null;
+        }
+
         var expr = ParseExpr(false);
 
         if (ErrorMessage is not null)
@@ -107,6 +112,16 @@ public class Parser
     {
         _current = 0;
         ErrorMessage = null;
+    }
+
+    /// <summary>
+    /// Resets the parsing process and changes used commands scope.
+    /// </summary>
+    /// <param name="newScope">New commands scope to use.</param>
+    public void Reset(CommandType newScope)
+    {
+        Scope = newScope;
+        Reset();
     }
 
     /// <summary>

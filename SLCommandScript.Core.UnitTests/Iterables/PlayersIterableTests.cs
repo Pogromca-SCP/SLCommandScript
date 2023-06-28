@@ -5,13 +5,14 @@ using PlayerRoles;
 using SLCommandScript.Core.Iterables;
 using FluentAssertions;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace SLCommandScript.Core.UnitTests.Iterables;
 
 [TestFixture]
 public class PlayersIterableTests
 {
-    private static Mock<Player>[][] PlayersMocks => new Mock<Player>[][] { };
+    private static Mock<Player>[][] PlayersMocks => new Mock<Player>[0][];
 
     private static Mock<Player> MockPlayer(string displayName, int id, Team team, string roleName, RoleTypeId roleId)
     {
@@ -24,42 +25,90 @@ public class PlayersIterableTests
         return playerMock;
     }
 
+    #region Constructor Tests
     [Test]
     public void PlayersIterable_ShouldProperlyInitialize_WhenProvidedCollectionIsNull()
     {
         // Act
-        var result = new PlayersIterable(null);
+        var iterable = new PlayersIterable(null);
 
         // Assert
-        result.IsAtEnd.Should().BeTrue();
+        iterable.IsAtEnd.Should().BeTrue();
     }
 
     [TestCaseSource(nameof(PlayersMocks))]
-    public void LoadNext_ShouldProperlySetVariables_WhenGoldFlow(Mock<Player>[] playersMocks)
+    public void PlayersIterable_ShouldProperlyInitialize_WhenProvidedCollectionIsNotNull(Mock<Player>[] players)
+    {
+        // Act
+        var iterable = new PlayersIterable(players.Select(m => m?.Object));
+
+        // Assert
+        iterable.IsAtEnd.Should().Be(players.Where(m => m is not null).IsEmpty());
+    }
+    #endregion
+
+    #region LoadNext Tests
+    [TestCaseSource(nameof(PlayersMocks))]
+    public void LoadNext_ShouldProperlyIterate_WhenProvidedDictionaryIsNull(Mock<Player>[] players)
     {
         // Arrange
-        var iter = new PlayersIterable(playersMocks.Select(m => m?.Object));
+        var iterable = new PlayersIterable(players.Select(m => m?.Object));
+        var count = 0;
 
         // Act
-        for (var index = 0; index < playersMocks.Length; ++index)
+        while (iterable.LoadNext(null))
         {
-            var mock = playersMocks[index];
-            var obj = mock.Object;
+            ++count;
         }
+
+        // Assert
+        iterable.IsAtEnd.Should().BeTrue();
+        count.Should().Be(players.Where(m => m is not null).Count());
     }
 
     [TestCaseSource(nameof(PlayersMocks))]
-    public void Reset_ShouldProperlyResetIterable(Mock<Player>[] playersMocks)
+    public void LoadNext_ShouldProperlySetVariables_WhenProvidedDictionaryIsNotNull(Mock<Player>[] players)
     {
         // Arrange
-        var iter = new PlayersIterable(playersMocks.Select(m => m?.Object));
-
-        while (iter.LoadNext(null)) {}
+        var iterable = new PlayersIterable(players.Select(m => m?.Object));
+        var filteredPlayers = players.Where(m => m is not null).ToArray();
+        var variables = new Dictionary<string, string>();
+        var count = 0;
 
         // Act
+        while (iterable.LoadNext(variables))
+        {
+            var playerMock = filteredPlayers[count];
+            var player = playerMock.Object;
+            variables["name"].Should().Be(player.DisplayNickname);
+            variables["id"].Should().Be(player.PlayerId.ToString());
+            variables["team"].Should().Be(player.Team.ToString());
+            variables["role"].Should().Be(player.RoleName);
+            variables["roleid"].Should().Be(player.Role.ToString());
+            playerMock.VerifyAll();
+            playerMock.VerifyNoOtherCalls();
+            ++count;
+        }
+
+        // Assert
+        iterable.IsAtEnd.Should().BeTrue();
+        count.Should().Be(filteredPlayers.Length);
+    }
+    #endregion
+
+    #region Reset Tests
+    [TestCaseSource(nameof(PlayersMocks))]
+    public void Reset_ShouldProperlyResetIterable(Mock<Player>[] players)
+    {
+        // Arrange
+        var iter = new PlayersIterable(players.Select(m => m?.Object));
+
+        // Act
+        while (iter.LoadNext(null)) { }
         iter.Reset();
 
         // Assert
-        iter.IsAtEnd.Should().BeFalse();
+        iter.IsAtEnd.Should().Be(players.Where(m => m is not null).IsEmpty());
     }
+    #endregion
 }

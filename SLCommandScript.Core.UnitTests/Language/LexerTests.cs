@@ -16,7 +16,7 @@ public class LexerTests
 
     private static readonly int[] _argSizes = { 2, 3, 4 };
 
-    #region Gold Flow Tests Sources
+    #region Gold Flow Test Case Sources
     private static readonly object[][] _testsData = {
         new object[] { string.Empty, new[] { "TestEmpty" }, PlayerPermissions.KickingAndShortTermBanning, new Token[0], 1 },
 
@@ -553,7 +553,7 @@ public class LexerTests
         lexer.Line.Should().Be(expectedLine);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeTrue();
-        result.Should().BeEquivalentTo(expectedTokens, opt => opt.ComparingByValue<Token>());
+        result.Should().BeEquivalentTo(expectedTokens, options => options.ComparingByValue<Token>());
     }
     #endregion
 }
