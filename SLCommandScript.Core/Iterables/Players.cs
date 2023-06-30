@@ -1,79 +1,34 @@
-﻿using SLCommandScript.Core.Interfaces;
+﻿using PluginAPI.Core;
 using System.Collections.Generic;
-using PluginAPI.Core;
+using SLCommandScript.Core.Interfaces;
 using System.Linq;
 using PlayerRoles;
 
 namespace SLCommandScript.Core.Iterables;
 
 /// <summary>
-/// Iterable wrapper for list of players.
+/// Iterable wrapper for a list of players.
 /// </summary>
-public class PlayersIterable : IIterable
+public class PlayersIterable : IterableListBase<Player>
 {
-    /// <summary>
-    /// Contains wrapped list of players.
-    /// </summary>
-    private readonly List<Player> _players;
-
-    /// <summary>
-    /// Contains index of current player.
-    /// </summary>
-    private int _current;
-
     /// <summary>
     /// Creates new iterable wrapper for players list.
     /// </summary>
     /// <param name="players">List of players to wrap.</param>
-    public PlayersIterable(IEnumerable<Player> players)
-    {
-        _players = new();
-
-        if (players is not null)
-        {
-            _players.AddRange(players.Where(p => p is not null));
-        }
-
-        Reset();
-    }
+    public PlayersIterable(IEnumerable<Player> players) : base(players) {}
 
     /// <summary>
-    /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
-    /// </summary>
-    public bool IsAtEnd => _current >= _players.Count;
-
-    /// <summary>
-    /// Performs next iteration step and loads new property values into provided dictionary.
+    /// Loads properties from current player and inserts them into a dictionary.
     /// </summary>
     /// <param name="targetVars">Dictionary to insert properties into.</param>
-    /// <returns><see langword="true" /> if the iteration can continue, <see langword="false" /> otherwise.</returns>
-    public bool LoadNext(IDictionary<string, string> targetVars)
+    /// <param name="obj">Player to load properties from.</param>
+    protected override void LoadVariables(IDictionary<string, string> targetVars, Player player)
     {
-        if (IsAtEnd)
-        {
-            return false;
-        }
-
-        if (targetVars is not null)
-        {
-            var player = _players[_current];
-            targetVars["name"] = player.DisplayNickname;
-            targetVars["id"] = player.PlayerId.ToString();
-            targetVars["team"] = player.Team.ToString();
-            targetVars["role"] = player.RoleName;
-            targetVars["roleid"] = player.Role.ToString();
-        }
-
-        ++_current;
-        return true;
-    }
-
-    /// <summary>
-    /// Resets iteration process.
-    /// </summary>
-    public void Reset()
-    {
-        _current = 0;
+        targetVars["name"] = player.DisplayNickname;
+        targetVars["id"] = player.PlayerId.ToString();
+        targetVars["team"] = player.Team.ToString();
+        targetVars["role"] = player.RoleName;
+        targetVars["roleid"] = player.Role.ToString();
     }
 }
 
