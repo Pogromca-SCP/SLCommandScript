@@ -274,7 +274,7 @@ public class InterpreterTests
         // Arrange
         var interpreter = new Interpreter(null);
 
-        var expr = new ForeachExpr(new CommandExpr(new ArgumentsInjectionTestCommand(), new[] { "$(test)", "$(i)", "$(index)", "$(I)" }, true),
+        var expr = new ForeachExpr(new CommandExpr(new ArgumentsInjectionTestCommand(), new[] { "$(test)", "$(i)", "$(index)", "$(I)", null }, true),
             new TestIterable());
 
         // Act
@@ -340,14 +340,11 @@ public class InterpreterTests
     {
         // Arrange
         var interpreter = new Interpreter(null);
-        var successMessage = "Command succeeded";
-        var goodCommandMock = new Mock<ICommand>(MockBehavior.Strict);
-        goodCommandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out successMessage)).Returns(true);
-        var failMessage = "Command failed";
-        var failCommandMock = new Mock<ICommand>(MockBehavior.Strict);
-        failCommandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out failMessage)).Returns(false);
+        var message = "Command succeeded";
+        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
+        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(true);
 
-        var expr = new IfExpr(new CommandExpr(failCommandMock.Object, new[] { "then" }, false), new CommandExpr(goodCommandMock.Object,
+        var expr = new IfExpr(new CommandExpr(null, null, false), new CommandExpr(commandMock.Object,
             new[] { "condition" }, false), null);
 
         // Act
@@ -356,11 +353,9 @@ public class InterpreterTests
         // Assert
         result.Should().BeFalse();
         interpreter.Sender.Should().BeNull();
-        interpreter.ErrorMessage.Should().Be(failMessage);
-        goodCommandMock.VerifyAll();
-        goodCommandMock.VerifyNoOtherCalls();
-        failCommandMock.VerifyAll();
-        failCommandMock.VerifyNoOtherCalls();
+        interpreter.ErrorMessage.Should().Be("Cannot execute a null command");
+        commandMock.VerifyAll();
+        commandMock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -437,15 +432,12 @@ public class InterpreterTests
     {
         // Arrange
         var interpreter = new Interpreter(null);
-        var successMessage = "Command succeeded";
-        var goodCommandMock = new Mock<ICommand>(MockBehavior.Strict);
-        goodCommandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out successMessage)).Returns(true);
-        var failMessage = "Command failed";
-        var failCommandMock = new Mock<ICommand>(MockBehavior.Strict);
-        failCommandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out failMessage)).Returns(false);
+        var message = "Command succeeded";
+        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
+        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(true);
 
-        var expr = new IfExpr(new ForeachExpr(null, null), new CommandExpr(failCommandMock.Object, new[] { "condition" }, false),
-            new CommandExpr(goodCommandMock.Object, new[] { "else" }, false));
+        var expr = new IfExpr(new ForeachExpr(null, null), new CommandExpr(null, null, false),
+            new CommandExpr(commandMock.Object, new[] { "else" }, false));
 
         // Act
         var result = interpreter.VisitIfExpr(expr);
@@ -454,10 +446,8 @@ public class InterpreterTests
         result.Should().BeTrue();
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
-        goodCommandMock.VerifyAll();
-        goodCommandMock.VerifyNoOtherCalls();
-        failCommandMock.VerifyAll();
-        failCommandMock.VerifyNoOtherCalls();
+        commandMock.VerifyAll();
+        commandMock.VerifyNoOtherCalls();
     }
     #endregion
 }
@@ -499,6 +489,6 @@ public class ArgumentsInjectionTestCommand : ICommand
         var firstArg = int.Parse(arguments.Array[1]);
         var thirdArg = int.Parse(arguments.Array[3]);
         response = null;
-        return firstArg == thirdArg && arguments.Array[2].Equals("$(index)") && arguments.Array[0].Equals("$(test)");
+        return firstArg == thirdArg && arguments.Array[2].Equals("$(index)") && arguments.Array[0].Equals("$(test)") && arguments.Array[4] is null;
     }
 }

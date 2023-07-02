@@ -90,12 +90,7 @@ public class Interpreter : IExprVisitor<bool>
 
         var args = expr.HasVariables && expr.Arguments.Length > 1 ? InjectArguments(expr.Arguments) : expr.Arguments;
         var result = expr.Cmd.Execute(new ArraySegment<string>(args, 1, args.Length - 1), Sender, out var message);
-
-        if (!result)
-        {
-            ErrorMessage = message;
-        }
-
+        ErrorMessage = result ? null : message;
         return result;
     }
 
@@ -193,7 +188,14 @@ public class Interpreter : IExprVisitor<bool>
 
         for (var index = 1; index < args.Length; ++index)
         {
-            results[index] = _variablePattern.Replace(args[index], m => _variables.ContainsKey(m.Groups[1].Value) ? _variables[m.Groups[1].Value] : m.Value);
+            var arg = args[index];
+
+            if (arg is not null)
+            {
+                arg = _variablePattern.Replace(arg, m => _variables.ContainsKey(m.Groups[1].Value) ? _variables[m.Groups[1].Value] : m.Value);
+            }
+
+            results[index] = arg;
         }
 
         return results;

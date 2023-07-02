@@ -1,46 +1,49 @@
 ﻿using PluginAPI.Core;
-using PluginAPI.Core.Attributes;
-using System;
-using SLCommandScript.Loader;
-using PluginAPI.Enums;
-using SLCommandScript.Core.Commands;
 using SLCommandScript.Core.Interfaces;
+using SLCommandScript.Loader;
+using System;
+using PluginAPI.Core.Attributes;
+using PluginAPI.Enums;
 
 namespace SLCommandScript;
 
-
 /// <summary>
-/// Defines plugin functionality
+/// Defines plugin functionality.
 /// </summary>
 public class Plugin
 {
+    public const string PluginName = "SLCommandScript";
+    public const string PluginVersion = "1.0.0";
+    public const string PluginDescription = "Simple, commands based scripting language.";
+    public const string PluginAuthor = "Adam Szerszenowicz";
+
     /// <summary>
-    /// Plugin prefix to use in logs
+    /// Plugin prefix to use in logs.
     /// </summary>
     private const string PluginPrefix = "SLCommandScript: ";
 
     /// <summary>
-    /// Stores plugin's singleton reference
+    /// Stores plugin's singleton reference.
     /// </summary>
     public static Plugin Singleton { get; private set; }
 
     /// <summary>
-    /// Prints an info message to server log
+    /// Prints an info message to server log.
     /// </summary>
-    /// <param name="message">Message to print</param>
+    /// <param name="message">Message to print.</param>
     public static void PrintLog(string message) => Log.Info(message, PluginPrefix);
 
     /// <summary>
-    /// Prints an error message to server log
+    /// Prints an error message to server log.
     /// </summary>
-    /// <param name="message">Message to print</param>
+    /// <param name="message">Message to print.</param>
     public static void PrintError(string message) => Log.Error(message, PluginPrefix);
 
     /// <summary>
-    /// Creates custom scripts loader instance
+    /// Creates custom scripts loader instance.
     /// </summary>
-    /// <param name="loaderType">Type of custom scripts loader to instantiate</param>
-    /// <returns>Custom scripts loader instance or default scripts loader instance if something goes wrong</returns>
+    /// <param name="loaderType">Type of custom scripts loader to instantiate.</param>
+    /// <returns>Custom scripts loader instance or default scripts loader instance if something goes wrong.</returns>
     private static IScriptsLoader ActivateLoaderInstance(Type loaderType)
     {
         try
@@ -49,27 +52,27 @@ public class Plugin
         }
         catch (Exception ex)
         {
-            PrintError($"An error has occured during custom scripts loader instance creation: {ex.Message}");
+            PrintError($"An error has occured during custom scripts loader instance creation: {ex.Message}.");
             return new FileScriptsLoader();
         }
     }
 
     /// <summary>
-    /// Stores plugin configuration
+    /// Stores plugin configuration.
     /// </summary>
     [PluginConfig]
     public Config PluginConfig;
 
     /// <summary>
-    /// Stores a reference to scripts loader
+    /// Stores a reference to scripts loader.
     /// </summary>
     private IScriptsLoader _scriptsLoader;
 
     /// <summary>
-    /// Loads and initializes the plugin
+    /// Loads and initializes the plugin.
     /// </summary>
     [PluginPriority(LoadPriority.Lowest)]
-    [PluginEntryPoint("SLCommandScript", "1.0.0", "Simple commands based scripting language for SCP: Secret Laboratory", "Adam Szerszenowicz")]
+    [PluginEntryPoint(PluginName, PluginVersion, PluginDescription, PluginAuthor)]
     void LoadPlugin()
     {
         PrintLog("Plugin load started...");
@@ -78,7 +81,7 @@ public class Plugin
     }
 
     /// <summary>
-    /// Reloads the plugin
+    /// Reloads the plugin.
     /// </summary>
     [PluginReload]
     void ReloadPlugin()
@@ -89,7 +92,7 @@ public class Plugin
     }
 
     /// <summary>
-    /// Unloads the plugin
+    /// Unloads the plugin.
     /// </summary>
     [PluginUnload]
     void UnloadPlugin()
@@ -103,19 +106,19 @@ public class Plugin
     }
 
     /// <summary>
-    /// Plugin components initialization
+    /// Plugin components initialization.
     /// </summary>
     private void Init()
     {
         Singleton = this;
         ReloadConfig();
         _scriptsLoader?.Dispose();
-        _scriptsLoader = InitScriptsLoader();
+        _scriptsLoader = LoadScriptsLoader();
         _scriptsLoader.InitScriptsLoader();
     }
 
     /// <summary>
-    /// Reloads plugin config values
+    /// Reloads plugin config values.
     /// </summary>
     private void ReloadConfig()
     {
@@ -124,9 +127,9 @@ public class Plugin
     }
 
     /// <summary>
-    /// Initializes scripts loader
+    /// Loads scripts loader.
     /// </summary>
-    private IScriptsLoader InitScriptsLoader()
+    private IScriptsLoader LoadScriptsLoader()
     {
         if (string.IsNullOrWhiteSpace(PluginConfig.CustomScriptsLoader))
         {
@@ -150,9 +153,9 @@ public class Plugin
     }
 
     /// <summary>
-    /// Retrieves custom scripts loader type
+    /// Retrieves custom scripts loader type.
     /// </summary>
-    /// <returns>Custom scripts loader type or null if nothing was found</returns>
+    /// <returns>Custom scripts loader type or <see langword="null" /> if nothing was found.</returns>
     private Type GetCustomScriptsLoader()
     {
         try
@@ -161,7 +164,7 @@ public class Plugin
         }
         catch (Exception ex)
         {
-            PrintError($"An error has occured during custom scripts loader type search: {ex.Message}");
+            PrintError($"An error has occured during custom scripts loader type search: {ex.Message}.");
             return null;
         }
     }
