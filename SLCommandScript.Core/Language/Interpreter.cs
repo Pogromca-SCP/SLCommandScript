@@ -160,7 +160,6 @@ public class Interpreter : IExprVisitor<bool>
         }
 
         var cond = expr.Condition.Accept(this);
-        ErrorMessage = null;
 
         if (cond)
         {
@@ -172,6 +171,7 @@ public class Interpreter : IExprVisitor<bool>
         }
         else
         {
+            ErrorMessage = null;
             return true;
         }
     }
