@@ -646,19 +646,19 @@ public class Lexer
     {
         if (_arguments.Array is null)
         {
-            ErrorMessage = $"[Lexer] Invalid argument $({argNum}), provided arguments array is null";
+            ErrorMessage = $"Invalid argument $({argNum}), provided arguments array is null";
             return;
         }
 
         if (_arguments.Offset < 1)
         {
-            ErrorMessage = $"[Lexer] Invalid argument $({argNum}), provided arguments array has incorrect offset ({_arguments.Offset})";
+            ErrorMessage = $"Invalid argument $({argNum}), provided arguments array has incorrect offset ({_arguments.Offset})";
             return;
         }
 
         if (argNum > _arguments.Count)
         {
-            ErrorMessage = $"[Lexer] Missing argument $({argNum}), sender provided only {_arguments.Count} arguments";
+            ErrorMessage = $"Missing argument $({argNum}), sender provided only {_arguments.Count} arguments";
         }
     }
 

@@ -32,7 +32,7 @@ public class VanillaPermissionsResolverTests
 
         // Assert
         result.Should().BeFalse();
-        message.Should().Be("[PermissionsResolver] Command sender is null");
+        message.Should().Be($"Cannot verify permission '{perm}', command sender is null");
     }
 
     [TestCaseSource(nameof(_invalidPermissionNames))]
@@ -46,7 +46,7 @@ public class VanillaPermissionsResolverTests
 
         // Assert
         result.Should().BeFalse();
-        message.Should().Be("[PermissionsResolver] Permission name is invalid");
+        message.Should().Be($"Permission name '{perm}' is invalid");
         senderMock.VerifyAll();
         senderMock.VerifyNoOtherCalls();
     }
@@ -62,7 +62,7 @@ public class VanillaPermissionsResolverTests
 
         // Assert
         result.Should().BeFalse();
-        message.Should().Be($"[PermissionsResolver] Permission '{perm}' does not exist");
+        message.Should().Be($"Permission '{perm}' does not exist");
         senderMock.VerifyAll();
         senderMock.VerifyNoOtherCalls();
     }

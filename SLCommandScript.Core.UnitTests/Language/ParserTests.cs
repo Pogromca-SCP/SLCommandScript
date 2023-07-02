@@ -31,8 +31,8 @@ public class ParserTests
 
     #region Error Flow Test Case Sources
     private static readonly object[][] _errorPaths = {
-        new object[] { new Token[] { new(TokenType.ScopeGuard, null, 1), new(TokenType.Identifier, "bc", 1) },
-            "[Parser] 'bc' is not a valid scope type", Parser.AllScopes }
+        new object[] { new Token[] { new(TokenType.ScopeGuard, null, 1), new(TokenType.Text, "bc", 1) },
+            "An unexpected token remained after parsing (TokenType: Text)", Parser.AllScopes }
     };
     #endregion
 

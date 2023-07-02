@@ -66,25 +66,25 @@ public class Interpreter : IExprVisitor<bool>
     {
         if (expr is null)
         {
-            ErrorMessage = "[Interpreter] Provided command expression is null";
+            ErrorMessage = "Provided command expression is null";
             return false;
         }
 
         if (expr.Cmd is null)
         {
-            ErrorMessage = "[Interpreter] Cannot execute a null command";
+            ErrorMessage = "Cannot execute a null command";
             return false;
         }
 
         if (expr.Arguments is null)
         {
-            ErrorMessage = "[Interpreter] Provided command arguments array is null";
+            ErrorMessage = "Provided command arguments array is null";
             return false;
         }
 
         if (expr.Arguments.Length < 1)
         {
-            ErrorMessage = "[Interpreter] Provided command arguments array is empty";
+            ErrorMessage = "Provided command arguments array is empty";
             return false;
         }
 
@@ -108,19 +108,19 @@ public class Interpreter : IExprVisitor<bool>
     {
         if (expr is null)
         {
-            ErrorMessage = "[Interpreter] Provided foreach directive is null";
+            ErrorMessage = "Provided foreach directive is null";
             return false;
         }
 
         if (expr.Body is null)
         {
-            ErrorMessage = "[Interpreter] Foreach directive body is null";
+            ErrorMessage = "Foreach directive body is null";
             return false;
         }
 
         if (expr.Iterable is null)
         {
-            ErrorMessage = "[Interpreter] Foreach directive iterable object is null";
+            ErrorMessage = "Foreach directive iterable object is null";
             return false;
         }
 
@@ -148,19 +148,19 @@ public class Interpreter : IExprVisitor<bool>
     {
         if (expr is null)
         {
-            ErrorMessage = "[Interpreter] Provided if directive is null";
+            ErrorMessage = "Provided if directive is null";
             return false;
         }
 
         if (expr.Then is null)
         {
-            ErrorMessage = "[Interpreter] If directive then branch is null";
+            ErrorMessage = "If directive then branch is null";
             return false;
         }
 
         if (expr.Condition is null)
         {
-            ErrorMessage = "[Interpreter] If directive condition is null";
+            ErrorMessage = "If directive condition is null";
             return false;
         }
 

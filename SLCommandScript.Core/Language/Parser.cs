@@ -98,7 +98,7 @@ public class Parser
 
         if (!IsAtEnd)
         {
-            ErrorMessage = "[Parser] An unexpected token was found after parsing";
+            ErrorMessage = $"An unexpected token remained after parsing (TokenType: {_tokens[_current].Type})";
             return null;
         }
   
@@ -225,13 +225,13 @@ public class Parser
 
         if (body is null)
         {
-            ErrorMessage ??= "[Parser] Directive body is null";
+            ErrorMessage ??= "Directive body is invalid";
             return null;
         }
 
         if (!Match(TokenType.RightSquare))
         {
-            ErrorMessage = "[Parser] Missing closing square for directive";
+            ErrorMessage = "Missing closing square bracket for directive";
             return null;
         }
 
@@ -249,7 +249,7 @@ public class Parser
 
         if (cmd is null)
         {
-            ErrorMessage = $"[Parser] Command '{_tokens[_current].Value}' was not found";
+            ErrorMessage = $"Command '{_tokens[_current].Value}' was not found";
             return null;
         }
 
@@ -285,7 +285,7 @@ public class Parser
 
             if (!parsed)
             {
-                ErrorMessage = $"[Parser] '{_tokens[_current].Value}' is not a valid scope type";
+                ErrorMessage = $"'{_tokens[_current].Value}' is not a valid scope name";
                 return;
             }
 
@@ -305,7 +305,7 @@ public class Parser
     {
         if (expr is null)
         {
-            ErrorMessage = "[Parser] Then branch expression for if directive is null";
+            ErrorMessage = "Then branch expression for if directive is invalid";
             return null;
         }
 
@@ -313,7 +313,7 @@ public class Parser
 
         if (condition is null)
         {
-            ErrorMessage = "[Parser] Condition for if directive is null";
+            ErrorMessage = "Condition expression for if directive is invalid";
             return null;
         }
 
@@ -325,7 +325,7 @@ public class Parser
 
             if (els is null)
             {
-                ErrorMessage = "[Parser] Else branch expression for if directive is null";
+                ErrorMessage = "Else branch expression for if directive is invalid";
                 return null;
             }
         }
@@ -342,13 +342,13 @@ public class Parser
     {
         if (body is null)
         {
-            ErrorMessage = "[Parser] Loop body for foreach directive is null";
+            ErrorMessage = "Loop body expression for foreach directive is invalid";
             return null;
         }
 
         if (CheckNot(TokenType.Text) || !Iterables.ContainsKey(_tokens[_current].Value))
         {
-            ErrorMessage = $"[Parser] '{_tokens[_current].Value}' is not a valid iterable object";
+            ErrorMessage = $"'{_tokens[_current].Value}' is not a valid iterable object name";
             return null;
         }
 
@@ -356,7 +356,7 @@ public class Parser
 
         if (provider is null)
         {
-            ErrorMessage = $"[Parser] Provider for '{_tokens[_current].Value}' iterable object is null";
+            ErrorMessage = $"Provider for '{_tokens[_current].Value}' iterable object is null";
             return null;
         }
 
@@ -364,7 +364,7 @@ public class Parser
 
         if (iter is null)
         {
-            ErrorMessage = $"[Parser] Provider for '{_tokens[_current].Value}' iterable object returned null";
+            ErrorMessage = $"Provider for '{_tokens[_current].Value}' iterable object returned null";
             return null;
         }
 

@@ -484,7 +484,7 @@ public class LexerTests
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().NotBeNull();
         lexer.Line.Should().Be(1);
-        lexer.ErrorMessage.Should().Be($"[Lexer] Invalid argument $({argNum}), provided arguments array is null");
+        lexer.ErrorMessage.Should().Be($"Invalid argument $({argNum}), provided arguments array is null");
         lexer.IsAtEnd.Should().BeFalse();
     }
 
@@ -504,7 +504,7 @@ public class LexerTests
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().NotBeNull();
         lexer.Line.Should().Be(1);
-        lexer.ErrorMessage.Should().Be($"[Lexer] Invalid argument $({argNum}), provided arguments array has incorrect offset (0)");
+        lexer.ErrorMessage.Should().Be($"Invalid argument $({argNum}), provided arguments array has incorrect offset (0)");
         lexer.IsAtEnd.Should().BeFalse();
     }
 
@@ -525,7 +525,7 @@ public class LexerTests
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().NotBeNull();
         lexer.Line.Should().Be(1);
-        lexer.ErrorMessage.Should().Be($"[Lexer] Missing argument $({argNum}), sender provided only {actualSize} arguments");
+        lexer.ErrorMessage.Should().Be($"Missing argument $({argNum}), sender provided only {actualSize} arguments");
         lexer.IsAtEnd.Should().BeFalse();
     }
 
