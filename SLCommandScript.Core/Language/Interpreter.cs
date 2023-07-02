@@ -2,8 +2,8 @@
 using System.Text.RegularExpressions;
 using CommandSystem;
 using System.Collections.Generic;
-using SLCommandScript.Core.Language.Expressions;
 using System;
+using SLCommandScript.Core.Language.Expressions;
 
 namespace SLCommandScript.Core.Language;
 
@@ -26,7 +26,7 @@ public class Interpreter : IExprVisitor<bool>
     /// <summary>
     /// Contains current error message.
     /// </summary>
-    public string ErrorMessage { get; set; }
+    public string ErrorMessage { get; private set; }
 
     /// <summary>
     /// Contains current variable values.
@@ -42,8 +42,7 @@ public class Interpreter : IExprVisitor<bool>
     public Interpreter(ICommandSender sender)
     {
         Reset(sender);
-        ErrorMessage = null;
-        _variables = new();
+        _variables = new(StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -53,6 +52,7 @@ public class Interpreter : IExprVisitor<bool>
     public void Reset(ICommandSender sender)
     {
         Sender = sender;
+        ErrorMessage = null;
     }
     #endregion
 
@@ -88,8 +88,8 @@ public class Interpreter : IExprVisitor<bool>
             return false;
         }
 
-        var args = expr.HasVariables && expr.Arguments.Length > 1 ? InjectArguments(expr.Arguments) : ClearArguments(expr.Arguments);
-        var result = expr.Cmd.Execute(new ArraySegment<string>(args, 1, args.Length), Sender, out var message);
+        var args = expr.HasVariables && expr.Arguments.Length > 1 ? InjectArguments(expr.Arguments) : expr.Arguments;
+        var result = expr.Cmd.Execute(new ArraySegment<string>(args, 1, args.Length - 1), Sender, out var message);
 
         if (!result)
         {
@@ -108,19 +108,19 @@ public class Interpreter : IExprVisitor<bool>
     {
         if (expr is null)
         {
-            ErrorMessage = "Provided foreach directive is null";
+            ErrorMessage = "Provided foreach expression is null";
             return false;
         }
 
         if (expr.Body is null)
         {
-            ErrorMessage = "Foreach directive body is null";
+            ErrorMessage = "Foreach expression body is null";
             return false;
         }
 
         if (expr.Iterable is null)
         {
-            ErrorMessage = "Foreach directive iterable object is null";
+            ErrorMessage = "Foreach expression iterable object is null";
             return false;
         }
 
@@ -148,23 +148,26 @@ public class Interpreter : IExprVisitor<bool>
     {
         if (expr is null)
         {
-            ErrorMessage = "Provided if directive is null";
+            ErrorMessage = "Provided if expression is null";
             return false;
         }
 
         if (expr.Then is null)
         {
-            ErrorMessage = "If directive then branch is null";
+            ErrorMessage = "If expression then branch is null";
             return false;
         }
 
         if (expr.Condition is null)
         {
-            ErrorMessage = "If directive condition is null";
+            ErrorMessage = "If expression condition is null";
             return false;
         }
 
-        if (expr.Condition.Accept(this))
+        var cond = expr.Condition.Accept(this);
+        ErrorMessage = null;
+
+        if (cond)
         {
             return expr.Then.Accept(this);
         }
@@ -179,23 +182,6 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <summary>
-    /// Sanitizes arguments values.
-    /// </summary>
-    /// <param name="args">Original arguments values.</param>
-    /// <returns>Arguments with sanitized values.</returns>
-    private string[] ClearArguments(string[] args)
-    {
-        var results = new string[args.Length];
-
-        for (var index = 0; index < args.Length; ++index)
-        {
-            results[index] = args[index] ?? string.Empty;
-        }
-
-        return results;
-    }
-
-    /// <summary>
     /// Injects appropriate values in place of variables.
     /// </summary>
     /// <param name="args">Original arguments values.</param>
@@ -203,20 +189,11 @@ public class Interpreter : IExprVisitor<bool>
     private string[] InjectArguments(string[] args)
     {
         var results = new string[args.Length];
-        results[0] = args[0] ?? string.Empty;
+        results[0] = args[0];
 
         for (var index = 1; index < args.Length; ++index)
         {
-            var arg = args[index];
-
-            if (arg is null)
-            {
-                results[index] = string.Empty;
-            }
-            else
-            {
-                results[index] = _variablePattern.Replace(arg, m => _variables.ContainsKey(m.Groups[0].Value) ? _variables[m.Groups[0].Value] : m.Value);
-            }
+            results[index] = _variablePattern.Replace(args[index], m => _variables.ContainsKey(m.Groups[1].Value) ? _variables[m.Groups[1].Value] : m.Value);
         }
 
         return results;
