@@ -90,6 +90,11 @@ public class Lexer
     public bool IsAtEnd => _current >= Source.Length;
 
     /// <summary>
+    /// Contains a list with processed tokens.
+    /// </summary>
+    public IList<Token> Tokens => _tokens;
+
+    /// <summary>
     /// Current character getter with bounds checking.
     /// </summary>
     private char Current => IsAtEnd ? '\0' : Source[_current];

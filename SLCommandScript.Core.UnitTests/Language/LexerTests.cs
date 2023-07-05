@@ -6,6 +6,7 @@ using Moq;
 using SLCommandScript.Core.Interfaces;
 using CommandSystem;
 using System.Collections.Generic;
+using Discord;
 
 namespace SLCommandScript.Core.UnitTests.Language;
 
@@ -200,6 +201,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeTrue();
+        lexer.Tokens.Should().BeEmpty();
     }
 
     [Test]
@@ -216,6 +218,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
 
     [TestCaseSource(nameof(_argSizes))]
@@ -232,6 +235,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
 
     [Test]
@@ -251,6 +255,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
 
     [Test]
@@ -270,6 +275,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
     #endregion
 
@@ -281,10 +287,11 @@ public class LexerTests
         var lexer = new Lexer(BlankLine, EmptyArgs, null);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
         lexer.Reset();
 
         // Assert
+        result.Should().BeEmpty();
         lexer.Source.Should().Be(BlankLine);
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().BeNull();
@@ -292,6 +299,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
 
     [TestCaseSource(nameof(_argSizes))]
@@ -301,10 +309,11 @@ public class LexerTests
         var lexer = new Lexer(BlankLine, EmptyArgs, null);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
         lexer.Reset(new ArraySegment<string>(new string[size], 0, size));
 
         // Assert
+        result.Should().BeEmpty();
         lexer.Source.Should().Be(BlankLine);
         lexer.Arguments.Should().HaveCount(size);
         lexer.Sender.Should().BeNull();
@@ -312,6 +321,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
 
     [Test]
@@ -322,10 +332,11 @@ public class LexerTests
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
         lexer.Reset(senderMock.Object);
 
         // Assert
+        result.Should().BeEmpty();
         lexer.Source.Should().Be(BlankLine);
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().Be(senderMock.Object);
@@ -333,6 +344,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
 
     [Test]
@@ -343,10 +355,11 @@ public class LexerTests
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
         lexer.Reset(resolverMock.Object);
 
         // Assert
+        result.Should().BeEmpty();
         lexer.Source.Should().Be(BlankLine);
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().BeNull();
@@ -354,6 +367,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
 
     [TestCaseSource(nameof(_argSizes))]
@@ -364,10 +378,11 @@ public class LexerTests
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
         lexer.Reset(new(new string[size], 0, size), senderMock.Object);
 
         // Assert
+        result.Should().BeEmpty();
         lexer.Source.Should().Be(BlankLine);
         lexer.Arguments.Should().HaveCount(size);
         lexer.Sender.Should().Be(senderMock.Object);
@@ -375,6 +390,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
 
     [TestCaseSource(nameof(_argSizes))]
@@ -385,10 +401,11 @@ public class LexerTests
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
         lexer.Reset(new ArraySegment<string>(new string[size], 0, size), resolverMock.Object);
 
         // Assert
+        result.Should().BeEmpty();
         lexer.Source.Should().Be(BlankLine);
         lexer.Arguments.Should().HaveCount(size);
         lexer.Sender.Should().BeNull();
@@ -396,6 +413,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
 
     [Test]
@@ -407,10 +425,11 @@ public class LexerTests
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
         lexer.Reset(senderMock.Object, resolverMock.Object);
 
         // Assert
+        result.Should().BeEmpty();
         lexer.Source.Should().Be(BlankLine);
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().Be(senderMock.Object);
@@ -418,6 +437,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
 
     [TestCaseSource(nameof(_argSizes))]
@@ -429,10 +449,11 @@ public class LexerTests
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
         lexer.Reset(new(new string[size], 0, size), senderMock.Object, resolverMock.Object);
 
         // Assert
+        result.Should().BeEmpty();
         lexer.Source.Should().Be(BlankLine);
         lexer.Arguments.Should().HaveCount(size);
         lexer.Sender.Should().Be(senderMock.Object);
@@ -440,6 +461,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEmpty();
     }
     #endregion
 
@@ -455,7 +477,7 @@ public class LexerTests
         var lexer = new Lexer(src, EmptyArgs, null, resolverMock.Object);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
 
         // Assert
         lexer.Source.Should().Be(src);
@@ -465,6 +487,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().Be(message);
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEquivalentTo(result);
         resolverMock.VerifyAll();
         resolverMock.VerifyNoOtherCalls();
     }
@@ -477,7 +500,7 @@ public class LexerTests
         var lexer = new Lexer(src, new(), null);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
 
         // Assert
         lexer.Source.Should().Be(src);
@@ -486,6 +509,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().Be($"Invalid argument $({argNum}), provided arguments array is null");
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEquivalentTo(result);
     }
 
     [TestCaseSource(nameof(_argSizes))]
@@ -496,7 +520,7 @@ public class LexerTests
         var lexer = new Lexer(src, new(new string[argNum], 0, argNum), null);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
 
         // Assert
         lexer.Source.Should().Be(src);
@@ -506,6 +530,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().Be($"Invalid argument $({argNum}), provided arguments array has incorrect offset (0)");
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEquivalentTo(result);
     }
 
     [TestCaseSource(nameof(_argSizes))]
@@ -517,7 +542,7 @@ public class LexerTests
         var lexer = new Lexer(src, new(new string[actualSize + 1], 1, actualSize), null);
 
         // Act
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
 
         // Assert
         lexer.Source.Should().Be(src);
@@ -527,6 +552,7 @@ public class LexerTests
         lexer.Line.Should().Be(1);
         lexer.ErrorMessage.Should().Be($"Missing argument $({argNum}), sender provided only {actualSize} arguments");
         lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeEquivalentTo(result);
     }
 
     [TestCaseSource(nameof(_testsData))]

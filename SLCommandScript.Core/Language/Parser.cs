@@ -305,7 +305,7 @@ public class Parser
     {
         if (expr is null)
         {
-            ErrorMessage = "Then branch expression for if directive is invalid";
+            ErrorMessage += "\nin if branch expression";
             return null;
         }
 
@@ -313,7 +313,7 @@ public class Parser
 
         if (condition is null)
         {
-            ErrorMessage = "Condition expression for if directive is invalid";
+            ErrorMessage = ErrorMessage is null ? "If condition expression is missing" : $"{ErrorMessage}\nin if condition expression";
             return null;
         }
 
@@ -325,7 +325,7 @@ public class Parser
 
             if (els is null)
             {
-                ErrorMessage = "Else branch expression for if directive is invalid";
+                ErrorMessage = ErrorMessage is null ? "Else branch expression is missing" : $"{ErrorMessage}\nin else branch expression";
                 return null;
             }
         }
@@ -342,7 +342,7 @@ public class Parser
     {
         if (body is null)
         {
-            ErrorMessage = "Loop body expression for foreach directive is invalid";
+            ErrorMessage += "\nin foreach loop body expression";
             return null;
         }
 
