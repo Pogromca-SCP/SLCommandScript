@@ -6,6 +6,7 @@ using PluginAPI.Enums;
 using System.IO;
 using SLCommandScript.Core.Commands;
 using PluginAPI.Core;
+using SLCommandScript.Core.Permissions;
 
 namespace SLCommandScript.Loader;
 
@@ -90,7 +91,7 @@ public class FileScriptsLoader : IScriptsLoader
             }
             else
             {
-                Plugin.PrintError($"Could not register command '{cmd.Command}'.");
+                PrintError($"Could not register command '{cmd.Command}'.");
             }
         }
 
@@ -109,7 +110,7 @@ public class FileScriptsLoader : IScriptsLoader
             }
             else
             {
-                Plugin.PrintError($"Could not unregister command '{cmd.Command}'.");
+                PrintError($"Could not unregister command '{cmd.Command}'.");
             }
         }
 
@@ -131,9 +132,79 @@ public class FileScriptsLoader : IScriptsLoader
     private const string ScriptFilesFilter = "*.slc";
 
     /// <summary>
+    /// Creates custom permissions resolver instance.
+    /// </summary>
+    /// <param name="resolverType">Type of custom permissions resolver to instantiate.</param>
+    /// <returns>Custom permissions resolver instance or <see langword="null" /> if something goes wrong.</returns>
+    private static IPermissionsResolver ActivateResolverInstance(Type resolverType)
+    {
+        try
+        {
+            return (IPermissionsResolver) Activator.CreateInstance(resolverType);
+        }
+        catch (Exception ex)
+        {
+            PrintError($"An error has occured during custom permissions resolver instance creation: {ex.Message}.");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Loads custom permissions resolver.
+    /// </summary>
+    /// <returns>Loaded permissions resolver or <see langword="null" /> if something goes wrong.</returns>
+    private static IPermissionsResolver LoadPermissionsResolver()
+    {
+        var typeName = Plugin.Singleton?.PluginConfig?.CustomPermissionsResolver;
+
+        if (string.IsNullOrWhiteSpace(typeName))
+        {
+            return null;
+        }
+
+        var loaderType = GetCustomPermissionsResolver(typeName);
+
+        if (loaderType is null)
+        {
+            return null;
+        }
+
+        if (!typeof(IPermissionsResolver).IsAssignableFrom(loaderType))
+        {
+            PrintError("Custom permissions resolver does not implement required interface.");
+            return null;
+        }
+
+        return ActivateResolverInstance(loaderType);
+    }
+
+    /// <summary>
+    /// Retrieves custom permissions resolver type.
+    /// </summary>
+    /// <returns>Custom permissions resolver type or <see langword="null" /> if nothing was found.</returns>
+    private static Type GetCustomPermissionsResolver(string typeName)
+    {
+        try
+        {
+            return Type.GetType(typeName);
+        }
+        catch (Exception ex)
+        {
+            PrintError($"An error has occured during custom permissions resolver type search: {ex.Message}.");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Prints an error message to server log.
+    /// </summary>
+    /// <param name="message">Message to print.</param>
+    private static void PrintError(string message) => Log.Error(message, "FileScriptsLoader: ");
+
+    /// <summary>
     /// Contains all scripts directories monitors.
     /// </summary>
-    private readonly Dictionary<CommandType, CommandsDirectory> _registeredDirectories = new();
+    private readonly List<CommandsDirectory> _registeredDirectories = new();
 
     /// <summary>
     /// Initializes scripts loader and loads the scripts.
@@ -144,10 +215,11 @@ public class FileScriptsLoader : IScriptsLoader
 
         if (handler is null)
         {
-            Plugin.PrintError("Cannot load plugin directory path.");
+            PrintError("Cannot load plugin directory path.");
             return;
         }
 
+        FileScriptCommand.PermissionsResolver = LoadPermissionsResolver() ?? new VanillaPermissionsResolver();
         LoadDirectory($"{handler.PluginDirectoryPath}/scripts/ra/", CommandType.RemoteAdmin);
         LoadDirectory($"{handler.PluginDirectoryPath}/scripts/server/", CommandType.Console);
         LoadDirectory($"{handler.PluginDirectoryPath}/scripts/client/", CommandType.GameConsole);
@@ -158,12 +230,13 @@ public class FileScriptsLoader : IScriptsLoader
     /// </summary>
     public void Dispose()
     {
-        foreach (var dir in _registeredDirectories.Values)
+        foreach (var dir in _registeredDirectories)
         {
             dir.Dispose();
         }
 
         _registeredDirectories.Clear();
+        FileScriptCommand.PermissionsResolver = null;
     }
 
     /// <summary>
@@ -178,7 +251,6 @@ public class FileScriptsLoader : IScriptsLoader
             Directory.CreateDirectory(directory);
         }
 
-        var dir = new CommandsDirectory(directory, handlerType);
-        _registeredDirectories[handlerType] = dir;
+        _registeredDirectories.Add(new CommandsDirectory(directory, handlerType));
     }
 }

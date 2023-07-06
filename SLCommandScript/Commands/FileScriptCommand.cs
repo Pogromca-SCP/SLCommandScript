@@ -1,4 +1,5 @@
 ﻿using CommandSystem;
+using SLCommandScript.Core.Interfaces;
 using System.Collections.Generic;
 using SLCommandScript.Core.Language;
 using System;
@@ -12,9 +13,19 @@ namespace SLCommandScript.Commands;
 public class FileScriptCommand : ICommand
 {
     /// <summary>
+    /// Contains permissions resolver type to use.
+    /// </summary>
+    public static IPermissionsResolver PermissionsResolver = null;
+
+    /// <summary>
     /// Contains currently loaded scripts.
     /// </summary>
-    private static readonly Dictionary<string, string> _loadedScripts = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, string> _loadedScripts = new();
+
+    /// <summary>
+    /// Contains scripts stack.
+    /// </summary>
+    private static readonly Stack<FileScriptCommand> _scriptsStack = new();
 
     /// <summary>
     /// Contains currently used interpreter.
@@ -22,14 +33,49 @@ public class FileScriptCommand : ICommand
     private static Interpreter _interpreter = null;
 
     /// <summary>
-    /// Tells how many scripts are currently nested.
+    /// Setups an interpretation process for the script.
     /// </summary>
-    private static int _nestLevel = 0;
+    /// <param name="lexer">Lexer used for tokenization.</param>
+    /// <returns>Error message if something goes wrong, <see langword="null" /> otherwise.</returns>
+    private static string Interpret(Lexer lexer)
+    {
+        var parser = new Parser(lexer.Tokens);
+
+        while (!lexer.IsAtEnd)
+        {
+            lexer.ScanNextLine();
+
+            if (lexer.ErrorMessage is not null)
+            {
+                return lexer.ErrorMessage;
+            }
+
+            parser.Reset();
+            var expr = parser.Parse();
+
+            if (parser.ErrorMessage is not null)
+            {
+                return parser.ErrorMessage;
+            }
+
+            if (expr is not null)
+            {
+                var result = expr.Accept(_interpreter);
+
+                if (!result)
+                {
+                    return _interpreter.ErrorMessage;
+                }
+            }
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// Contains command name.
     /// </summary>
-    public string Command { get; private set; }
+    public string Command { get; }
 
     /// <summary>
     /// Defines command aliases.
@@ -78,103 +124,40 @@ public class FileScriptCommand : ICommand
             return false;
         }
 
-        if (_nestLevel == 0)
+        _interpreter ??= new(sender);
+        _scriptsStack.Push(this);
+        var lexer = new Lexer(LoadSource(), arguments, sender, PermissionsResolver);
+        response = Interpret(lexer);
+        _scriptsStack.Pop();
+
+        if (!_scriptsStack.Contains(this))
         {
-            _interpreter = new(sender);
+            _loadedScripts.Remove(_file);
         }
 
-        ++_nestLevel;
-        string src;
-
-        if (_loadedScripts.ContainsKey(Command))
-        {
-            src = _loadedScripts[Command];
-        }
-        else
-        {
-            src = File.ReadAllText(_file);
-            _loadedScripts[Command] = src;
-        }
-
-        response = Interpret(new Lexer(src, arguments, sender));
-        --_nestLevel;
-
-        if (_nestLevel == 0)
+        if (_scriptsStack.Count < 1)
         {
             _interpreter = null;
-            _loadedScripts.Clear();
         }
 
         var result = response is null;
-        response ??= "Script executed successfully.";
+        response = result ? "Script executed successfully." : $"{response}\nat {Command}:{lexer.Line}";
         return result;
     }
 
     /// <summary>
-    /// Setups an interpretation process for the script.
+    /// Loads script source code.
     /// </summary>
-    /// <param name="lexer">Lexer used for tokenization.</param>
-    /// <returns>Error message if something goes wrong, <see langword="null" /> otherwise.</returns>
-    private string Interpret(Lexer lexer)
+    /// <returns>Loaded source code string.</returns>
+    private string LoadSource()
     {
-        var tokens = lexer.ScanNextLine();
-
-        if (lexer.ErrorMessage is not null)
+        if (_loadedScripts.ContainsKey(_file))
         {
-            return lexer.ErrorMessage;
+            return _loadedScripts[_file];
         }
 
-        var parser = new Parser(tokens);
-        var expr = parser.Parse();
-
-        if (parser.ErrorMessage is not null)
-        {
-            return parser.ErrorMessage;
-        }
-
-        var result = expr.Accept(_interpreter);
-
-        if (!result)
-        {
-            return _interpreter.ErrorMessage;
-        }
-
-        while (!lexer.IsAtEnd)
-        {
-            var message = ParseLoop(lexer, parser);
-
-            if (message is not null)
-            {
-                return message;
-            }
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// Performs a single parse loop step.
-    /// </summary>
-    /// <param name="lexer">Lexer used for tokenization.</param>
-    /// <param name="parser">Parser used for parsing.</param>
-    /// <returns>Error message if something goes wrong, <see langword="null" /> otherwise.</returns>
-    private string ParseLoop(Lexer lexer, Parser parser)
-    {
-        lexer.ScanNextLine();
-
-        if (lexer.ErrorMessage is not null)
-        {
-            return lexer.ErrorMessage;
-        }
-
-        var expr = parser.Parse();
-
-        if (parser.ErrorMessage is not null)
-        {
-            return parser.ErrorMessage;
-        }
-
-        var result = expr.Accept(_interpreter);
-        return result ? null : _interpreter.ErrorMessage;
+        var src = File.ReadAllText(_file);
+        _loadedScripts[_file] = src;
+        return src;
     }
 }

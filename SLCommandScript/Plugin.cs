@@ -31,13 +31,13 @@ public class Plugin
     /// Prints an info message to server log.
     /// </summary>
     /// <param name="message">Message to print.</param>
-    public static void PrintLog(string message) => Log.Info(message, PluginPrefix);
+    private static void PrintLog(string message) => Log.Info(message, PluginPrefix);
 
     /// <summary>
     /// Prints an error message to server log.
     /// </summary>
     /// <param name="message">Message to print.</param>
-    public static void PrintError(string message) => Log.Error(message, PluginPrefix);
+    private static void PrintError(string message) => Log.Error(message, PluginPrefix);
 
     /// <summary>
     /// Creates custom scripts loader instance.
@@ -129,6 +129,7 @@ public class Plugin
     /// <summary>
     /// Loads scripts loader.
     /// </summary>
+    /// <returns>Loaded scripts loader instance.</returns>
     private IScriptsLoader LoadScriptsLoader()
     {
         if (string.IsNullOrWhiteSpace(PluginConfig.CustomScriptsLoader))
