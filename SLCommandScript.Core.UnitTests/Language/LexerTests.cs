@@ -19,13 +19,13 @@ public class LexerTests
 
     #region Gold Flow Test Case Sources
     private static readonly object[][] _testsData = {
-        new object[] { string.Empty, new[] { "TestEmpty" }, PlayerPermissions.KickingAndShortTermBanning, new Token[0], 1 },
+        new object[] { string.Empty, new[] { "TestEmpty" }, PlayerPermissions.KickingAndShortTermBanning, new Token[0], 0 },
 
         new object[] { BlankLine, new[] { "TestBlank" }, PlayerPermissions.KickingAndShortTermBanning, new Token[0], 1 },
 
         new object[] { @"
 
-", new[] { "" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] {  }, 3 },
+", new[] { "" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] {  }, 2 },
 
         new object[] { @"
     cassie why am I here #What is the point of life?
@@ -33,14 +33,14 @@ public class LexerTests
 ", new[] { "TestBasicCommands" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "cassie", 2),
             new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2),
             new(TokenType.Text, "bc", 3), new(TokenType.Text, "5", 3), new(TokenType.Text, "I", 3), new(TokenType.Text, "have", 3),
-            new(TokenType.Text, "no", 3), new(TokenType.Text, "idea!", 3) }, 4 },
+            new(TokenType.Text, "no", 3), new(TokenType.Text, "idea!", 3) }, 3 },
 
         new object[] { @"
     bc 10 This is a very \
     long one boiiii
 ", new[] { "TestLineBreak" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "bc", 2), new(TokenType.Text, "10", 2),
             new(TokenType.Text, "This", 2), new(TokenType.Text, "is", 2), new(TokenType.Text, "a", 2), new(TokenType.Text, "very", 2),
-            new(TokenType.Text, "long", 3), new(TokenType.Text, "one", 3), new(TokenType.Text, "boiiii", 3) }, 4 },
+            new(TokenType.Text, "long", 3), new(TokenType.Text, "one", 3), new(TokenType.Text, "boiiii", 3) }, 3 },
 
         new object[] { "\\\r\\", new[] { "TestLineBreakText" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "\\", 1),
             new(TokenType.Text, "\\", 1) }, 1 },
@@ -53,7 +53,7 @@ public class LexerTests
     that is approaching \
     Provoking black clouds...
 ", new[] { "TestLineBreakComment" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "bc", 2),
-            new(TokenType.Text, "10", 2), new(TokenType.Text, "Long", 2), new(TokenType.Text, "comment", 2) }, 5 },
+            new(TokenType.Text, "10", 2), new(TokenType.Text, "Long", 2), new(TokenType.Text, "comment", 2) }, 4 },
 
         new object[] { @"
     [ print If true elSe [ \
@@ -62,7 +62,7 @@ public class LexerTests
 ", new[] { "TestDirectiveAndKeywords" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.LeftSquare, "[", 2),
             new(TokenType.Text, "print", 2), new(TokenType.If, "If", 2), new(TokenType.Text, "true", 2), new(TokenType.Else, "elSe", 2),
             new(TokenType.LeftSquare, "[", 2), new(TokenType.Text, "loop", 3), new(TokenType.Foreach, "foReAch", 3), new(TokenType.Text, "human", 3),
-            new(TokenType.RightSquare, "]", 3), new(TokenType.RightSquare, "]", 4) }, 5 },
+            new(TokenType.RightSquare, "]", 3), new(TokenType.RightSquare, "]", 4) }, 4 },
 
         new object[] { @"
     print ski$()bidi bop$(name) $(no?)yes $(what?)
@@ -70,7 +70,7 @@ public class LexerTests
 ", new[] { "TestVariables" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "print", 2),
             new(TokenType.Text, "ski$()bidi", 2), new(TokenType.Variable, "bop$(name)", 2), new(TokenType.Text, "$(no?)yes", 2),
             new(TokenType.Text, "$(what?)", 2), new(TokenType.Text, "prin$(t", 3), new(TokenType.Text, "[hello", 3), new(TokenType.Text, "t]here", 3),
-            new(TokenType.Variable, "$(general)", 3), new(TokenType.Variable, "23$(light)sabers", 3) }, 4 },
+            new(TokenType.Variable, "$(general)", 3), new(TokenType.Variable, "23$(light)sabers", 3) }, 3 },
 
         new object[] { @"
     cassie why am I here # This is a comment \
@@ -83,7 +83,7 @@ public class LexerTests
             new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
             new(TokenType.Text, "idea", 4), new(TokenType.ScopeGuard, string.Empty, 4), new(TokenType.Identifier, "Console", 4),
             new(TokenType.ScopeGuard, string.Empty, 5), new(TokenType.Identifier, "RemoteAdmin", 5), new(TokenType.Identifier, "Hello", 5),
-            new(TokenType.Identifier, "wowlo", 6) }, 7 },
+            new(TokenType.Identifier, "wowlo", 6) }, 6 },
 
         new object[] { @"
     cassie why am I here # This is a comment \
@@ -102,7 +102,7 @@ public class LexerTests
             new(TokenType.Text, "idea", 4), new(TokenType.Text, "print", 9), new(TokenType.Text, "Hello", 9), new(TokenType.Text, "there", 9),
             new(TokenType.Text, "print", 10), new(TokenType.Text, "Class", 10), new(TokenType.Text, "d", 10), new(TokenType.Text, "has", 10),
             new(TokenType.Text, "micro", 10), new(TokenType.Text, "p", 10), new(TokenType.Text, "p", 10), new(TokenType.Text, "print", 11),
-            new(TokenType.Text, "1", 11), new(TokenType.Text, "...", 11) }, 12 },
+            new(TokenType.Text, "1", 11), new(TokenType.Text, "...", 11) }, 11 },
 
         new object[] { "$(2) $(00001) $(0)\n$(3) $(4) $(5)#Hello $(3)", new[] { "TestSimpleArgs", "happenned ?", "#What", BlankLine, "number 1 5",
             string.Empty }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "#What", 1), new(TokenType.Text, "happenned", 1),
@@ -122,7 +122,7 @@ public class LexerTests
     su$(1)fix  su$(00002)fix
 ", new[] { "TestNoTokensInjection", null, BlankLine }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "postfix", 3),
             new(TokenType.Text, "postfix", 3), new(TokenType.Text, "prefix", 4),  new(TokenType.Text, "prefix", 4), new(TokenType.Text, "sufix", 5),
-            new(TokenType.Text, "su", 5), new(TokenType.Text, "fix", 5) }, 6 },
+            new(TokenType.Text, "su", 5), new(TokenType.Text, "fix", 5) }, 5 },
 
         new object[] { @"
     $(1)    $(2) $(3)  $(04)
@@ -135,7 +135,7 @@ public class LexerTests
             new(TokenType.Text, "1", 3), new(TokenType.Text, "1prefix", 4),  new(TokenType.Text, "1prefix", 4), new(TokenType.Text, "1", 4),
             new(TokenType.Text, "prefix", 4), new(TokenType.Text, "1", 4), new(TokenType.Text, "prefix", 4), new(TokenType.Text, "su1fix", 5),
             new(TokenType.Text, "su", 5), new(TokenType.Text, "1fix", 5), new(TokenType.Text, "su1", 5), new(TokenType.Text, "fix", 5),
-            new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5), new(TokenType.Text, "fix", 5) }, 6 },
+            new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5), new(TokenType.Text, "fix", 5) }, 5 },
 
         new object[] { @"
     $(1)    $(2) $(3)  $(04)
@@ -152,7 +152,7 @@ public class LexerTests
             new(TokenType.Text, "2", 4), new(TokenType.Text, "prefix", 4), new(TokenType.Text, "su1", 5), new(TokenType.Text, "2fix", 5),
             new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5), new(TokenType.Text, "2fix", 5), new(TokenType.Text, "su1", 5),
             new(TokenType.Text, "2", 5), new(TokenType.Text, "fix", 5), new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5),
-            new(TokenType.Text, "2", 5), new(TokenType.Text, "fix", 5) }, 6 },
+            new(TokenType.Text, "2", 5), new(TokenType.Text, "fix", 5) }, 5 },
 
         new object[] { @"
     $(1)    $(2) $(3)  $(04)
@@ -180,7 +180,7 @@ public class LexerTests
             new(TokenType.Text, "3fix", 5), new(TokenType.Text, "su1", 5), new(TokenType.Text, "2", 5), new(TokenType.Text, "(", 5),
             new(TokenType.Text, ")", 5), new(TokenType.Text, "3", 5), new(TokenType.Text, "fix", 5), new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5),
             new(TokenType.Text, "2", 5), new(TokenType.Text, "(", 5), new(TokenType.Text, ")", 5), new(TokenType.Text, "3", 5), new(TokenType.Text, "fix", 5)
-        }, 6 }
+        }, 5 }
     };
     #endregion
 
@@ -198,7 +198,7 @@ public class LexerTests
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().NotBeNull();
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeTrue();
         lexer.Tokens.Should().BeEmpty();
@@ -215,7 +215,7 @@ public class LexerTests
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().NotBeNull();
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();
@@ -232,7 +232,7 @@ public class LexerTests
         lexer.Arguments.Should().HaveCount(size);
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().NotBeNull();
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();
@@ -252,7 +252,7 @@ public class LexerTests
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().Be(senderMock.Object);
         lexer.PermissionsResolver.Should().NotBeNull();
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();
@@ -272,7 +272,7 @@ public class LexerTests
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().Be(resolverMock.Object);
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();
@@ -296,7 +296,7 @@ public class LexerTests
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().NotBeNull();
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();
@@ -318,7 +318,7 @@ public class LexerTests
         lexer.Arguments.Should().HaveCount(size);
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().NotBeNull();
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();
@@ -341,7 +341,7 @@ public class LexerTests
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().Be(senderMock.Object);
         lexer.PermissionsResolver.Should().NotBeNull();
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();
@@ -364,7 +364,7 @@ public class LexerTests
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().Be(resolverMock.Object);
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();
@@ -387,7 +387,7 @@ public class LexerTests
         lexer.Arguments.Should().HaveCount(size);
         lexer.Sender.Should().Be(senderMock.Object);
         lexer.PermissionsResolver.Should().NotBeNull();
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();
@@ -410,7 +410,7 @@ public class LexerTests
         lexer.Arguments.Should().HaveCount(size);
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().Be(resolverMock.Object);
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();
@@ -434,7 +434,7 @@ public class LexerTests
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().Be(senderMock.Object);
         lexer.PermissionsResolver.Should().Be(resolverMock.Object);
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();
@@ -458,7 +458,7 @@ public class LexerTests
         lexer.Arguments.Should().HaveCount(size);
         lexer.Sender.Should().Be(senderMock.Object);
         lexer.PermissionsResolver.Should().Be(resolverMock.Object);
-        lexer.Line.Should().Be(1);
+        lexer.Line.Should().Be(0);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeFalse();
         lexer.Tokens.Should().BeEmpty();

@@ -187,6 +187,7 @@ public class Lexer
     public IList<Token> ScanNextLine()
     {
         _tokens.Clear();
+        ++Line;
         var canRead = true;
 
         while (!IsAtEnd && canRead && ErrorMessage is null)
@@ -203,7 +204,7 @@ public class Lexer
     /// </summary>
     public void Reset()
     {
-        Line = 1;
+        Line = 0;
         _hasMissingPerms = false;
         _start = 0;
         _current = 0;
@@ -318,7 +319,6 @@ public class Lexer
             case '\t':
                 break;
             case '\n':
-                ++Line;
                 return !IsTopLevel;
             default:
                 Text();

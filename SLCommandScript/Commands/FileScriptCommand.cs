@@ -15,7 +15,7 @@ public class FileScriptCommand : ICommand
     /// <summary>
     /// Contains permissions resolver type to use.
     /// </summary>
-    public static IPermissionsResolver PermissionsResolver = null;
+    public static IPermissionsResolver PermissionsResolver { get; set; } = null;
 
     /// <summary>
     /// Contains currently loaded scripts.
@@ -25,7 +25,7 @@ public class FileScriptCommand : ICommand
     /// <summary>
     /// Contains scripts stack.
     /// </summary>
-    private static readonly Stack<FileScriptCommand> _scriptsStack = new();
+    private static readonly Stack<string> _scriptsStack = new();
 
     /// <summary>
     /// Contains currently used interpreter.
@@ -125,12 +125,12 @@ public class FileScriptCommand : ICommand
         }
 
         _interpreter ??= new(sender);
-        _scriptsStack.Push(this);
+        _scriptsStack.Push(_file);
         var lexer = new Lexer(LoadSource(), arguments, sender, PermissionsResolver);
         response = Interpret(lexer);
         _scriptsStack.Pop();
 
-        if (!_scriptsStack.Contains(this))
+        if (!_scriptsStack.Contains(_file))
         {
             _loadedScripts.Remove(_file);
         }
