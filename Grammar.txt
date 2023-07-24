@@ -1,28 +1,26 @@
-NOTE: The entire scripting language is NOT case sensitive!
+# NOTE: The entire scripting language is NOT case sensitive!
 
-<script> -> <line>*
-<line> -> <expression>? <comment>?    # Lines can be extended by ending them with " \".
+script			-> line*
+line			-> expression? comment? ([^\\]|\S\\) \n
 
-<expression> -> <command> | <directive>
-<inner_expression> -> <inner_command> | <directive>
-<argument> -> "$(" [0-9]+ ")"    # Script arguments are injected into expressions during tokenization
+expression		-> directive | command  # Expression contents can be modified with script arguments
+inner_expression	-> directive | inner_command
 
-<command> -> <cmd_name> <arg>*
-<inner_command> -> <cmd_name> <inner_arg>*
-<cmd_name> -> \S+
-<arg> -> \S+
-<inner_arg> -> <variable> | <arg>
-<variable> -> \S* ("$(" [a-z]+ ")" \S*)+
+command			-> TEXT+
+inner_command		-> TEXT inner_arg*
+inner_arg		-> variable | TEXT
+variable		-> \S* ("$(" IDENTIFIER ")" \S*)+
 
-<directive> -> "[" <directive_body> "]"
-<directive_body> -> <foreach_loop> | <if_expr>
-<foreach_loop> -> <inner_expression> "foreach" <iterable>    # Inner expression gets access to iterated object's properties as variables
-<if_expr> -> <expression> "if" <expression> ("else" <expression>)?
-<iterable> -> [a-z]+
+directive		-> "[" directive_body "]"
+directive_body		-> foreach_loop | if_expr
+foreach_loop		-> inner_expression "foreach" IDENTIFIER  # Inner expression gets access to iterated objects properties through variables
+if_expr			-> expression "if" expression ("else" expression)?
 
-<comment> -> \s "#" <comment_body> | ^ "#" <comment_body>
-<comment_body> -> <permissions_guard> | <scope_guard> | .*
-<permissions_guard> -> "!" <perm_name>*
-<scope_guard> -> "?" <scope_name>*
-<scope_name> -> "RemoteAdmin" | "Console" | "GameConsole"
-<perm_name> -> [a-z]+
+comment			-> "#" comment_body
+comment_body		-> permissions_guard | scope_guard | .*
+permissions_guard	-> "!" IDENTIFIER*
+scope_guard		-> "?" scope_name*
+scope_name		-> "RemoteAdmin" | "Console" | "GameConsole"
+
+TEXT			-> \S+
+IDENTIFIER		-> [a-z]+
