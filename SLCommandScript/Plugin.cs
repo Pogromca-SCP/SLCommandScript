@@ -13,7 +13,7 @@ namespace SLCommandScript;
 public class Plugin
 {
     public const string PluginName = "SLCommandScript";
-    public const string PluginVersion = "0.2.0";
+    public const string PluginVersion = "0.2.1";
     public const string PluginDescription = "Simple, commands based scripting language.";
     public const string PluginAuthor = "Adam Szerszenowicz";
 
@@ -21,11 +21,6 @@ public class Plugin
     /// Plugin prefix to use in logs.
     /// </summary>
     private const string PluginPrefix = "SLCommandScript: ";
-
-    /// <summary>
-    /// Stores plugin's singleton reference.
-    /// </summary>
-    public static Plugin Singleton { get; private set; }
 
     /// <summary>
     /// Prints an info message to server log.
@@ -101,7 +96,6 @@ public class Plugin
         _scriptsLoader?.Dispose();
         _scriptsLoader = null;
         PluginConfig = null;
-        Singleton = null;
         PrintLog("Plugin is unloaded.");
     }
 
@@ -110,11 +104,10 @@ public class Plugin
     /// </summary>
     private void Init()
     {
-        Singleton = this;
         ReloadConfig();
         _scriptsLoader?.Dispose();
         _scriptsLoader = LoadScriptsLoader();
-        _scriptsLoader.InitScriptsLoader();
+        _scriptsLoader.InitScriptsLoader(this, PluginConfig.CustomPermissionsResolver, PluginConfig.EnableScriptEventHandlers);
     }
 
     /// <summary>

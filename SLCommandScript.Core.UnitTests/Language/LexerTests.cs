@@ -6,7 +6,6 @@ using Moq;
 using SLCommandScript.Core.Interfaces;
 using CommandSystem;
 using System.Collections.Generic;
-using Discord;
 
 namespace SLCommandScript.Core.UnitTests.Language;
 
@@ -191,7 +190,7 @@ public class LexerTests
     public void Lexer_ShouldProperlyInitialize_WhenSourceIsNull()
     {
         // Act
-        var lexer = new Lexer(null, EmptyArgs, null);
+        using var lexer = new Lexer(null, EmptyArgs, null);
 
         // Assert
         lexer.Source.Should().Be(string.Empty);
@@ -208,7 +207,7 @@ public class LexerTests
     public void Lexer_ShouldProperlyInitialize_WhenSourceIsNotNull()
     {
         // Act
-        var lexer = new Lexer(BlankLine, EmptyArgs, null);
+        using var lexer = new Lexer(BlankLine, EmptyArgs, null);
 
         // Assert
         lexer.Source.Should().Be(BlankLine);
@@ -225,7 +224,7 @@ public class LexerTests
     public void Lexer_ShouldProperlyInitialize_WhenArgumentsAreProvided(int size)
     {
         // Act
-        var lexer = new Lexer(BlankLine, new(new string[size], 0, size), null);
+        using var lexer = new Lexer(BlankLine, new(new string[size], 0, size), null);
 
         // Assert
         lexer.Source.Should().Be(BlankLine);
@@ -245,7 +244,7 @@ public class LexerTests
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
 
         // Act
-        var lexer = new Lexer(BlankLine, EmptyArgs, senderMock.Object);
+        using var lexer = new Lexer(BlankLine, EmptyArgs, senderMock.Object);
 
         // Assert
         lexer.Source.Should().Be(BlankLine);
@@ -265,7 +264,7 @@ public class LexerTests
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
 
         // Act
-        var lexer = new Lexer(BlankLine, EmptyArgs, null, resolverMock.Object);
+        using var lexer = new Lexer(BlankLine, EmptyArgs, null, resolverMock.Object);
 
         // Assert
         lexer.Source.Should().Be(BlankLine);
@@ -284,7 +283,7 @@ public class LexerTests
     public void Reset_ShouldProperlyResetLexer()
     {
         // Arrange
-        var lexer = new Lexer(BlankLine, EmptyArgs, null);
+        using var lexer = new Lexer(BlankLine, EmptyArgs, null);
 
         // Act
         var result = lexer.ScanNextLine();
@@ -306,7 +305,7 @@ public class LexerTests
     public void Reset_ShouldProperlyResetLexer_WithNewArguments(int size)
     {
         // Arrange
-        var lexer = new Lexer(BlankLine, EmptyArgs, null);
+        using var lexer = new Lexer(BlankLine, EmptyArgs, null);
 
         // Act
         var result = lexer.ScanNextLine();
@@ -328,7 +327,7 @@ public class LexerTests
     public void Reset_ShouldProperlyResetLexer_WithNewSender()
     {
         // Arrange
-        var lexer = new Lexer(BlankLine, EmptyArgs, null);
+        using var lexer = new Lexer(BlankLine, EmptyArgs, null);
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
 
         // Act
@@ -351,7 +350,7 @@ public class LexerTests
     public void Reset_ShouldProperlyResetLexer_WithNewResolver()
     {
         // Arrange
-        var lexer = new Lexer(BlankLine, EmptyArgs, null);
+        using var lexer = new Lexer(BlankLine, EmptyArgs, null);
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
 
         // Act
@@ -374,7 +373,7 @@ public class LexerTests
     public void Reset_ShouldProperlyResetLexer_WithNewArgumentsAndSender(int size)
     {
         // Arrange
-        var lexer = new Lexer(BlankLine, EmptyArgs, null);
+        using var lexer = new Lexer(BlankLine, EmptyArgs, null);
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
 
         // Act
@@ -397,7 +396,7 @@ public class LexerTests
     public void Reset_ShouldProperlyResetLexer_WithNewArgumentsAndResolver(int size)
     {
         // Arrange
-        var lexer = new Lexer(BlankLine, EmptyArgs, null);
+        using var lexer = new Lexer(BlankLine, EmptyArgs, null);
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
 
         // Act
@@ -420,7 +419,7 @@ public class LexerTests
     public void Reset_ShouldProperlyResetLexer_WithNewSenderAndResolver()
     {
         // Arrange
-        var lexer = new Lexer(BlankLine, EmptyArgs, null);
+        using var lexer = new Lexer(BlankLine, EmptyArgs, null);
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
 
@@ -444,7 +443,7 @@ public class LexerTests
     public void Reset_ShouldProperlyResetLexer_WithNewArgumentsAndSenderAndResolver(int size)
     {
         // Arrange
-        var lexer = new Lexer(BlankLine, EmptyArgs, null);
+        using var lexer = new Lexer(BlankLine, EmptyArgs, null);
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
 
@@ -465,7 +464,49 @@ public class LexerTests
     }
     #endregion
 
+    #region Dispose Tests
+    [Test]
+    public void Dispose_ShouldReleaseResources()
+    {
+        // Arrange
+        var lexer = new Lexer(BlankLine, EmptyArgs, null);
+
+        // Act
+        lexer.Dispose();
+
+        // Assert
+        lexer.Source.Should().Be(BlankLine);
+        lexer.Sender.Should().BeNull();
+        lexer.PermissionsResolver.Should().NotBeNull();
+        lexer.Line.Should().Be(0);
+        lexer.ErrorMessage.Should().BeNull();
+        lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeNull();
+    }
+    #endregion
+
     #region ScanNextLine Tests
+    [Test]
+    public void ScanNextLine_ShouldFail_WhenLexerDisposeWasCalled()
+    {
+        // Arrange
+        var lexer = new Lexer(BlankLine, EmptyArgs, null);
+
+        // Act
+        lexer.Dispose();
+        var result = lexer.ScanNextLine();
+
+        // Assert
+        lexer.Source.Should().Be(BlankLine);
+        lexer.Sender.Should().BeNull();
+        lexer.PermissionsResolver.Should().NotBeNull();
+        lexer.Line.Should().Be(0);
+        lexer.ErrorMessage.Should().Be("Cannot tokenize script with disposed lexer");
+        lexer.IsAtEnd.Should().BeFalse();
+        lexer.Tokens.Should().BeNull();
+        result.Should().BeNull();
+    }
+
     [Test]
     public void ScanNextLine_ShouldFail_WhenPermissionsCheckEmitsAnError()
     {
@@ -474,7 +515,7 @@ public class LexerTests
         var message = "Permission check failed for some reason";
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
         resolverMock.Setup(x => x.CheckPermission(It.IsAny<ICommandSender>(), It.IsAny<string>(), out message)).Returns(false);
-        var lexer = new Lexer(src, EmptyArgs, null, resolverMock.Object);
+        using var lexer = new Lexer(src, EmptyArgs, null, resolverMock.Object);
 
         // Act
         var result = lexer.ScanNextLine();
@@ -497,7 +538,7 @@ public class LexerTests
     {
         // Arrange
         var src = $"$({argNum}) $(var)";
-        var lexer = new Lexer(src, new(), null);
+        using var lexer = new Lexer(src, new(), null);
 
         // Act
         var result = lexer.ScanNextLine();
@@ -517,7 +558,7 @@ public class LexerTests
     {
         // Arrange
         var src = $"$({argNum}) bc";
-        var lexer = new Lexer(src, new(new string[argNum], 0, argNum), null);
+        using var lexer = new Lexer(src, new(new string[argNum], 0, argNum), null);
 
         // Act
         var result = lexer.ScanNextLine();
@@ -539,7 +580,7 @@ public class LexerTests
         // Arrange
         var actualSize = argNum - 2;
         var src = $"$({argNum}) ";
-        var lexer = new Lexer(src, new(new string[actualSize + 1], 1, actualSize), null);
+        using var lexer = new Lexer(src, new(new string[actualSize + 1], 1, actualSize), null);
 
         // Act
         var result = lexer.ScanNextLine();
@@ -562,7 +603,7 @@ public class LexerTests
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
         senderMock.Setup(x => x.FullPermissions).Returns(false);
         senderMock.Setup(x => x.Permissions).Returns((ulong) perms);
-        var lexer = new Lexer(src, new(args, 1, args.Length - 1), senderMock.Object);
+        using var lexer = new Lexer(src, new(args, 1, args.Length - 1), senderMock.Object);
         var result = new List<Token>();
 
         // Act

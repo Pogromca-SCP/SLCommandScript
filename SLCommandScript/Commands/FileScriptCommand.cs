@@ -98,13 +98,6 @@ public class FileScriptCommand : ICommand
     /// <param name="file">Path to associated script.</param>
     public FileScriptCommand(string file)
     {
-        if (!File.Exists(file))
-        {
-            Command = null;
-            _file = null;
-            return;
-        }
-
         Command = Path.GetFileNameWithoutExtension(file);
         _file = file;
     }
@@ -118,16 +111,16 @@ public class FileScriptCommand : ICommand
     /// <returns><see langword="true" /> if command executed successfully, <see langword="false" /> otherwise.</returns>
     public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
-        if (_file is null)
-        {
-            response = "Script file does not exist.";
-            return false;
-        }
-
         _interpreter ??= new(sender);
         _scriptsStack.Push(_file);
-        var lexer = new Lexer(LoadSource(), arguments, sender, PermissionsResolver);
-        response = Interpret(lexer);
+        var line = 0;
+
+        using (var lexer = new Lexer(LoadSource(), arguments, sender, PermissionsResolver))
+        {
+            response = Interpret(lexer);
+            line = lexer.Line;
+        }
+
         _scriptsStack.Pop();
 
         if (!_scriptsStack.Contains(_file))
@@ -141,7 +134,7 @@ public class FileScriptCommand : ICommand
         }
 
         var result = response is null;
-        response = result ? "Script executed successfully." : $"{response}\nat {Command}:{lexer.Line}";
+        response = result ? "Script executed successfully." : $"{response}\nat {Command}:{line}";
         return result;
     }
 

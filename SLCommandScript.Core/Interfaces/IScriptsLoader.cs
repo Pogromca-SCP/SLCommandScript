@@ -10,5 +10,8 @@ public interface IScriptsLoader : IDisposable
     /// <summary>
     /// Initializes the scripts loader.
     /// </summary>
-    void InitScriptsLoader();
+    /// <param name="plugin">Plugin object.</param>
+    /// <param name="permsResolver">Custom permissions resolver to use.</param>
+    /// <param name="eventsEnabled">Tells if custom event handlers are enabled.</param>
+    void InitScriptsLoader(object plugin, string permsResolver, bool eventsEnabled);
 }

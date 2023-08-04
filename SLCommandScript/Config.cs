@@ -20,7 +20,7 @@ public class Config
     public string CustomPermissionsResolver { get; set; } = null;
 
     /// <summary>
-    /// Set to false in order to disable event handling with scripts.
+    /// Set to <see langword="false" /> in order to disable event handling with scripts.
     /// </summary>
     [Description("Set to false in order to disable event handling with scripts")]
     public bool EnableScriptEventHandlers { get; set; } = true;

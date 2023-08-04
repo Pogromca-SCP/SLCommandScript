@@ -174,11 +174,11 @@ public static class CommandsUtils
     /// <param name="command">Command to register/unregister.</param>
     /// <param name="doRegister">Set to <see langword="true" /> to register a command, set to <see langword="false" /> to unregister.</param>
     /// <returns>Types of affected command handlers.</returns>
-    private static CommandType ManageCommand(CommandType? commandType, ICommand command, bool doRegister)
+    private static CommandType ManageCommand(CommandType commandType, ICommand command, bool doRegister)
     {
         CommandType result = 0;
 
-        foreach (var handler in GetCommandHandlers(commandType.Value))
+        foreach (var handler in GetCommandHandlers(commandType))
         {
             if (doRegister)
             {

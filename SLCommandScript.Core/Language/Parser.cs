@@ -67,7 +67,7 @@ public class Parser
     /// <param name="scope">Initial commands scope to use.</param>
     public Parser(IList<Token> tokens, CommandType scope = AllScopes)
     {
-        _tokens = tokens ?? new List<Token>();
+        _tokens = tokens ?? new List<Token>(0);
         Reset(scope);
     }
 

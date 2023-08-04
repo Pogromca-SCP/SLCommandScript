@@ -171,7 +171,7 @@ public class FileScriptsLoader : IScriptsLoader
             Watcher.Deleted += (obj, args) => UnregisterEvent(args.FullPath);
             Watcher.Renamed += (obj, args) => RefreshEvent(args.OldFullPath, args.FullPath);
             FileScriptsEventHandlers.EventScripts = Commands;
-            EventManager.RegisterEvents<FileScriptsEventHandlers>(Plugin.Singleton);
+            EventManager.RegisterEvents<FileScriptsEventHandlers>(PluginObject);
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ public class FileScriptsLoader : IScriptsLoader
         public void Dispose()
         {
             Watcher.Dispose();
-            EventManager.UnregisterEvents<FileScriptsEventHandlers>(Plugin.Singleton);
+            EventManager.UnregisterEvents<FileScriptsEventHandlers>(PluginObject);
             FileScriptsEventHandlers.EventScripts = null;
         }
 
@@ -192,11 +192,6 @@ public class FileScriptsLoader : IScriptsLoader
         {
             var cmd = new FileScriptCommand(scriptFile);
             var name = cmd.Command;
-
-            if (name is null)
-            {
-                return;
-            }
 
             if (name.Length > 2 && name.StartsWith("on", StringComparison.OrdinalIgnoreCase))
             {
@@ -250,6 +245,11 @@ public class FileScriptsLoader : IScriptsLoader
     /// </summary>
     private const string ScriptFilesFilter = "*.slc";
 
+    /// <summary>
+    /// Contains plugin object.
+    /// </summary>
+    private static object PluginObject;
+
     #region Custom Permissions Resolver
     /// <summary>
     /// Creates custom permissions resolver instance.
@@ -272,11 +272,10 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Loads custom permissions resolver.
     /// </summary>
+    /// <param name="typeName">Custom permissions resolver type name.</param>
     /// <returns>Loaded permissions resolver or <see langword="null" /> if something goes wrong.</returns>
-    private static IPermissionsResolver LoadPermissionsResolver()
+    private static IPermissionsResolver LoadPermissionsResolver(string typeName)
     {
-        var typeName = Plugin.Singleton?.PluginConfig?.CustomPermissionsResolver;
-
         if (string.IsNullOrWhiteSpace(typeName))
         {
             return null;
@@ -301,6 +300,7 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Retrieves custom permissions resolver type.
     /// </summary>
+    /// <param name="typeName">Custom permissions resolver type name.</param>
     /// <returns>Custom permissions resolver type or <see langword="null" /> if nothing was found.</returns>
     private static Type GetCustomPermissionsResolver(string typeName)
     {
@@ -335,9 +335,12 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Initializes scripts loader and loads the scripts.
     /// </summary>
-    public void InitScriptsLoader()
+    /// <param name="plugin">Plugin object.</param>
+    /// <param name="permsResolver">Custom permissions resolver to use.</param>
+    /// <param name="eventsEnabled">Tells if custom event handlers are enabled.</param>
+    public void InitScriptsLoader(object plugin, string permsResolver, bool eventsEnabled)
     {
-        var handler = PluginHandler.Get(Plugin.Singleton);
+        var handler = PluginHandler.Get(plugin);
 
         if (handler is null)
         {
@@ -345,9 +348,10 @@ public class FileScriptsLoader : IScriptsLoader
             return;
         }
 
-        FileScriptCommand.PermissionsResolver = LoadPermissionsResolver() ?? new VanillaPermissionsResolver();
+        PluginObject = plugin;
+        FileScriptCommand.PermissionsResolver = LoadPermissionsResolver(permsResolver) ?? new VanillaPermissionsResolver();
         
-        if (Plugin.Singleton.PluginConfig.EnableScriptEventHandlers)
+        if (eventsEnabled)
         {
             LoadDirectory($"{handler.PluginDirectoryPath}/scripts/events/", null);
         }
@@ -371,6 +375,7 @@ public class FileScriptsLoader : IScriptsLoader
         _eventsDirectory?.Dispose();
         _eventsDirectory = null;
         FileScriptCommand.PermissionsResolver = null;
+        PluginObject = null;
     }
 
     /// <summary>

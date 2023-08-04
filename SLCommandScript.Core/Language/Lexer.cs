@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using CommandSystem;
 using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Permissions;
+using NorthwoodLib.Pools;
 using System.Linq;
 
 namespace SLCommandScript.Core.Language;
@@ -10,7 +11,7 @@ namespace SLCommandScript.Core.Language;
 /// <summary>
 /// Performs tokenization of provided source code.
 /// </summary>
-public class Lexer
+public class Lexer : IDisposable
 {
     #region Static Elements
     /// <summary>
@@ -59,7 +60,7 @@ public class Lexer
         get => _arguments;
         private set
         {
-            _argLexers.Clear();
+            ClearArguments();
             _arguments = value;
         }
     }
@@ -122,7 +123,7 @@ public class Lexer
     /// <summary>
     /// Contains a list to output found tokens into.
     /// </summary>
-    private readonly List<Token> _tokens;
+    private List<Token> _tokens;
 
     /// <summary>
     /// Caches provided arguments processing results.
@@ -159,7 +160,7 @@ public class Lexer
         _arguments = arguments;
         Sender = sender;
         PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
-        _tokens = new();
+        _tokens = ListPool<Token>.Shared.Rent();
         _argLexers = new();
         Reset();
     }
@@ -175,9 +176,23 @@ public class Lexer
         _arguments = new();
         Sender = null;
         PermissionsResolver = null;
-        _tokens = new();
+        _tokens = ListPool<Token>.Shared.Rent();
         _argLexers = null;
         Reset();
+    }
+
+    /// <summary>
+    /// Releases lexer resources.
+    /// </summary>
+    public void Dispose()
+    {
+        ListPool<Token>.Shared.Return(_tokens);
+        _tokens = null;
+
+        if (_argLexers is not null)
+        {
+            ClearArguments();
+        }
     }
 
     /// <summary>
@@ -186,6 +201,12 @@ public class Lexer
     /// <returns>List of all tokens found in processed line.</returns>
     public IList<Token> ScanNextLine()
     {
+        if (_tokens is null)
+        {
+            ErrorMessage = "Cannot tokenize script with disposed lexer";
+            return null;
+        }
+        
         _tokens.Clear();
         ++Line;
         var canRead = true;
@@ -290,6 +311,19 @@ public class Lexer
         Sender = sender;
         PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
         Reset();
+    }
+
+    /// <summary>
+    /// Disposes arguments lexers.
+    /// </summary>
+    private void ClearArguments()
+    {
+        foreach (var lexer in _argLexers.Values)
+        {
+            lexer.Dispose();
+        }
+
+        _argLexers.Clear();
     }
 
     /// <summary>

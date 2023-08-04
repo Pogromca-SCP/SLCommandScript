@@ -11,5 +11,5 @@ public class CustomScriptsLoaderExample : IScriptsLoader
 
     public void Dispose() => CommandsUtils.UnregisterCommand(CommandType.GameConsole, _command);
 
-    public void InitScriptsLoader() => CommandsUtils.RegisterCommand(CommandType.GameConsole, _command);
+    public void InitScriptsLoader(object plugin, string permsResolver, bool eventsEnabled) => CommandsUtils.RegisterCommand(CommandType.GameConsole, _command);
 }
