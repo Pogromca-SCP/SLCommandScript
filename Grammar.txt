@@ -1,9 +1,10 @@
 # NOTE: The entire scripting language is NOT case sensitive!
 
 script			-> line*
-line			-> expression? comment? ([^\\]|\S\\) \n
+line			-> expression? comment?  # Lines can be extended by ending them with \
 
 expression		-> directive | command  # Expression contents can be modified with script arguments
+script_arg		-> "$(" NUMBER ")"
 inner_expression	-> directive | inner_command
 
 command			-> TEXT+
@@ -12,9 +13,10 @@ inner_arg		-> variable | TEXT
 variable		-> \S* ("$(" IDENTIFIER ")" \S*)+
 
 directive		-> "[" directive_body "]"
-directive_body		-> foreach_loop | if_expr
+directive_body		-> foreach_loop | if_expr | delay_expr
 foreach_loop		-> inner_expression "foreach" IDENTIFIER  # Inner expression gets access to iterated objects properties through variables
 if_expr			-> expression "if" expression ("else" expression)?
+delay_expr		-> expression "delayby" NUMBER
 
 comment			-> "#" comment_body
 comment_body		-> permissions_guard | scope_guard | .*
@@ -24,3 +26,4 @@ scope_name		-> "RemoteAdmin" | "Console" | "GameConsole"
 
 TEXT			-> \S+
 IDENTIFIER		-> [a-z]+
+NUMBER			-> [0-9]+
