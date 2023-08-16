@@ -129,7 +129,7 @@ public class FileScriptCommand : ICommand
         if (Interlocked.Decrement(ref _calls) < 1)
         {
             var message = _loadedScripts.TryRemove(_file, out _) ? "Unloaded" : "Failed to unload";
-            Log.Debug($"{message} script - {_file}.slc", DebugPrefix);
+            Log.Debug($"{message} script - {Command}.slc", DebugPrefix);
         }
 
         var result = response is null;
@@ -149,7 +149,7 @@ public class FileScriptCommand : ICommand
         }
 
         var src = File.ReadAllText(_file);
-        Log.Debug($"Loaded script - {_file}.slc", DebugPrefix);
+        Log.Debug($"Loaded script - {Command}.slc", DebugPrefix);
         _loadedScripts[_file] = src;
         return src;
     }
