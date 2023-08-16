@@ -42,13 +42,7 @@ public static class CommandsUtils
     public static CommandType? RegisterCommand(CommandType commandType, ICommand command)
     {
         var registered = IsCommandRegistered(commandType, command);
-
-        if (registered == null)
-        {
-            return null;
-        }
-
-        return ManageCommand(commandType ^ registered.Value, command, true);
+        return registered == null ? null : ManageCommand(commandType ^ registered.Value, command, true);
     }
 
     /// <summary>
@@ -60,13 +54,7 @@ public static class CommandsUtils
     public static CommandType? UnregisterCommand(CommandType commandType, ICommand command)
     {
         var registered = IsCommandRegistered(commandType, command);
-
-        if (registered == null)
-        {
-            return null;
-        }
-
-        return ManageCommand(registered.Value, command, false);
+        return registered == null ? null : ManageCommand(registered.Value, command, false);
     }
 
     /// <summary>
@@ -120,13 +108,9 @@ public static class CommandsUtils
                 {
                     isFound = handler.TryGetCommand(alias, out var aliasResult);
 
-                    if (isFound)
+                    if (!isFound || foundCommand != aliasResult)
                     {
-                        isFound = foundCommand.Equals(aliasResult);
-                    }
-
-                    if (!isFound)
-                    {
+                        isFound = false;
                         break;
                     }
                 }

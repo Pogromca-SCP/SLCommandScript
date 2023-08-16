@@ -22,7 +22,7 @@ public class CommandExpr : Expr
     /// <summary>
     /// Whether or not this expression contains variables.
     /// </summary>
-    public bool HasVariables { get; }
+    public bool HasVariables { get; set; }
 
     /// <summary>
     /// Creates new command expression representation.

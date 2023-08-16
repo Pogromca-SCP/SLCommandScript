@@ -13,12 +13,17 @@ public abstract class IterableListBase<T> : IIterable
     /// <summary>
     /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
     /// </summary>
-    public bool IsAtEnd => _current >= _objects.Count;
+    public bool IsAtEnd => _current >= _count;
 
     /// <summary>
     /// Contains wrapped list of objects.
     /// </summary>
-    private readonly List<T> _objects;
+    private readonly IEnumerator<T> _objects;
+
+    /// <summary>
+    /// Amount of contained elements.
+    /// </summary>
+    private readonly int _count;
 
     /// <summary>
     /// Contains index of current object.
@@ -31,14 +36,10 @@ public abstract class IterableListBase<T> : IIterable
     /// <param name="objects">Objects to insert into wrapped list.</param>
     public IterableListBase(IEnumerable<T> objects)
     {
-        _objects = new();
-
-        if (objects is not null)
-        {
-            _objects.AddRange(objects.Where(o => o is not null));
-        }
-
-        Reset();
+        var list = objects?.Where(o => o is not null);
+        _objects = list?.GetEnumerator();
+        _count = list?.Count() ?? 0;
+        _current = 0;
     }
 
     /// <summary>
@@ -53,9 +54,11 @@ public abstract class IterableListBase<T> : IIterable
             return false;
         }
 
+        _objects.MoveNext();
+
         if (targetVars is not null)
         {
-            LoadVariables(targetVars, _objects[_current]);
+            LoadVariables(targetVars, _objects.Current);
         }
 
         ++_current;
@@ -67,6 +70,7 @@ public abstract class IterableListBase<T> : IIterable
     /// </summary>
     public void Reset()
     {
+        _objects.Reset();
         _current = 0;
     }
 

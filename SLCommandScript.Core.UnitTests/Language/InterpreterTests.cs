@@ -5,6 +5,7 @@ using Moq;
 using SLCommandScript.Core.Language.Expressions;
 using CommandSystem;
 using System;
+using System.Threading.Tasks;
 using SLCommandScript.Core.Interfaces;
 using System.Collections.Generic;
 
@@ -13,6 +14,8 @@ namespace SLCommandScript.Core.UnitTests.Language;
 [TestFixture]
 public class InterpreterTests
 {
+    private static bool[] _booleanValues = { false, true };
+
     #region ConstructorTests
     [Test]
     public void Interpreter_ShouldProperlyInitialize_WhenCommandSenderIsNull()
@@ -183,6 +186,95 @@ public class InterpreterTests
     }
     #endregion
 
+    #region VisitDelayExpr Tests
+    [Test]
+    public void VisitDelayExpr_ShouldFail_WhenExpressionIsNull()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+
+        // Act
+        var result = interpreter.VisitDelayExpr(null);
+
+        // Assert
+        result.Should().BeFalse();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be("Provided delay expression is null");
+    }
+
+    [Test]
+    public void VisitDelayExpr_ShouldFail_WhenBodyIsNull()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var expr = new DelayExpr(null, 0);
+
+        // Act
+        var result = interpreter.VisitDelayExpr(expr);
+
+        // Assert
+        result.Should().BeFalse();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be("Delay expression body is null");
+    }
+
+    [TestCaseSource(nameof(_booleanValues))]
+    public void VisitDelayExpr_ShouldExecuteSynchronously_WhenDurationIsTooShort(bool success)
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var message = success ? "Command succeeded" : "Command failed";
+        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
+        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(success);
+        var expr = new DelayExpr(new CommandExpr(commandMock.Object, new[] { "test" }, false), 0);
+
+        // Act
+        var result = interpreter.VisitDelayExpr(expr);
+
+        // Assert
+        result.Should().Be(success);
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be(success ? null : message);
+        commandMock.VerifyAll();
+        commandMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(_booleanValues))]
+    public async Task VisitDelayExpr_ShouldExecuteAsynchronously_WhenDurationIsValid(bool success)
+    {
+        // Arrange
+        var delay = 200;
+        var interpreter = new Interpreter(null);
+        var message = success ? "Command succeeded" : "Command failed";
+        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
+        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(success);
+        var expr = new DelayExpr(new CommandExpr(commandMock.Object, new[] { "test" }, false), delay);
+
+        // Act
+        var result = interpreter.VisitDelayExpr(expr);
+
+        // Assert
+        result.Should().BeTrue();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().BeNull();
+        
+        try
+        {
+            commandMock.VerifyAll();
+            commandMock.VerifyNoOtherCalls();
+        }
+        catch (Exception)
+        {
+            await Task.Delay(delay * 2);
+            commandMock.VerifyAll();
+            commandMock.VerifyNoOtherCalls();
+            return;
+        }
+
+        throw new Exception("Expected expression to execute asynchronously, but it was executed synchronously.");
+    }
+    #endregion
+
     #region VisitForeachExpr Tests
     [Test]
     public void VisitForeachExpr_ShouldFail_WhenExpressionIsNull()
@@ -269,7 +361,7 @@ public class InterpreterTests
     }
 
     [Test]
-    public void VisitForeachExpr_ShouldInjectArguments_WhenGoldFlow()
+    public void VisitForeachExpr_ShouldProperlyInjectArguments()
     {
         // Arrange
         var interpreter = new Interpreter(null);

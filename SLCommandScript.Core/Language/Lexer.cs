@@ -21,7 +21,8 @@ public class Lexer : IDisposable
     {
         { "if", TokenType.If },
         { "else", TokenType.Else },
-        { "foreach", TokenType.Foreach }
+        { "foreach", TokenType.Foreach },
+        { "delayby", TokenType.DelayBy }
     };
 
     /// <summary>

@@ -16,11 +16,11 @@ public interface IExprVisitor<T>
     T VisitCommandExpr(CommandExpr expr);
 
     /// <summary>
-    /// Visits an if expression.
+    /// Visits a delay expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    T VisitIfExpr(IfExpr expr);
+    T VisitDelayExpr(DelayExpr expr);
 
     /// <summary>
     /// Visits a foreach expression.
@@ -28,4 +28,11 @@ public interface IExprVisitor<T>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
     T VisitForeachExpr(ForeachExpr expr);
+
+    /// <summary>
+    /// Visits an if expression.
+    /// </summary>
+    /// <param name="expr">Expression to visit.</param>
+    /// <returns>Result value of the visit.</returns>
+    T VisitIfExpr(IfExpr expr);
 }

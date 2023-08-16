@@ -58,10 +58,12 @@ public class LexerTests
     [ print If true elSe [ \
     loop foReAch human ] \
     ]
+    [ print dELayBy 5 ]
 ", new[] { "TestDirectiveAndKeywords" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.LeftSquare, "[", 2),
             new(TokenType.Text, "print", 2), new(TokenType.If, "If", 2), new(TokenType.Text, "true", 2), new(TokenType.Else, "elSe", 2),
             new(TokenType.LeftSquare, "[", 2), new(TokenType.Text, "loop", 3), new(TokenType.Foreach, "foReAch", 3), new(TokenType.Text, "human", 3),
-            new(TokenType.RightSquare, "]", 3), new(TokenType.RightSquare, "]", 4) }, 4 },
+            new(TokenType.RightSquare, "]", 3), new(TokenType.RightSquare, "]", 4), new(TokenType.LeftSquare, "[", 5), new(TokenType.Text, "print", 5),
+            new(TokenType.DelayBy, "dELayBy", 5), new(TokenType.Text, "5", 5), new(TokenType.RightSquare, "]", 5) }, 5 },
 
         new object[] { @"
     print ski$()bidi bop$(name) $(no?)yes $(what?)

@@ -1,5 +1,7 @@
 ﻿using SLCommandScript.Core.Interfaces;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using PluginAPI.Core;
 using CommandSystem;
 using System.Collections.Generic;
 using System;
@@ -16,6 +18,22 @@ public class Interpreter : IExprVisitor<bool>
     /// Contains regular expression for variables.
     /// </summary>
     private static readonly Regex _variablePattern = new("\\$\\(([a-zA-Z]+)\\)");
+
+    /// <summary>
+    /// Executes delay expression.
+    /// </summary>
+    /// <param name="interp">Interpreter instance to use.</param>
+    /// <param name="expr">Expression to execute.</param>
+    private static async void ExecuteDelayExprAsync(Interpreter interp, DelayExpr expr)
+    {
+        await Task.Delay(expr.Duration);
+        var result = expr.Body.Accept(interp);
+
+        if (!result)
+        {
+            Log.Error(interp.ErrorMessage, "Async script: ");
+        }
+    }
 
     #region Fields and Properties
     /// <summary>
@@ -43,6 +61,18 @@ public class Interpreter : IExprVisitor<bool>
     {
         Reset(sender);
         _variables = new(StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Creates new interpreter instance.
+    /// </summary>
+    /// <param name="src">Interpreter to copy data from.</param>
+    private Interpreter(Interpreter src) : this(src.Sender)
+    {
+        foreach (var ent in src._variables)
+        {
+            _variables.Add(ent.Key, ent.Value);
+        }
     }
 
     /// <summary>
@@ -95,6 +125,35 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <summary>
+    /// Visits a delay expression.
+    /// </summary>
+    /// <param name="expr">Expression to visit.</param>
+    /// <returns>Result value of the visit.</returns>
+    public bool VisitDelayExpr(DelayExpr expr)
+    {
+        if (expr is null)
+        {
+            ErrorMessage = "Provided delay expression is null";
+            return false;
+        }
+
+        if (expr.Body is null)
+        {
+            ErrorMessage = "Delay expression body is null";
+            return false;
+        }
+
+        if (expr.Duration < 1)
+        {
+            return expr.Body.Accept(this);
+        }
+
+        ExecuteDelayExprAsync(new(this), expr);
+        ErrorMessage = null;
+        return true;
+    }
+
+    /// <summary>
     /// Visits a foreach expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
@@ -131,6 +190,7 @@ public class Interpreter : IExprVisitor<bool>
         }
 
         _variables.Clear();
+        ErrorMessage = null;
         return true;
     }
 

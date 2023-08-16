@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using PluginAPI.Enums;
+using System.Collections.Generic;
 using System;
 using SLCommandScript.Core.Interfaces;
-using PluginAPI.Enums;
+using SLCommandScript.Core.Iterables;
 using SLCommandScript.Core.Language.Expressions;
 using SLCommandScript.Core.Commands;
-using SLCommandScript.Core.Iterables;
+using NorthwoodLib.Pools;
 
 namespace SLCommandScript.Core.Language;
 
@@ -125,19 +126,16 @@ public class Parser
     }
 
     /// <summary>
-    /// Attempts to match specific token types.
+    /// Attempts to match specific token type.
     /// </summary>
-    /// <param name="types">Token types to match.</param>
-    /// <returns><see langword="true" /> if one of token types was matched, <see langword="false" /> otherwise.</returns>
-    private bool Match(params TokenType[] types)
+    /// <param name="types">Token type to match.</param>
+    /// <returns><see langword="true" /> if token type was matched, <see langword="false" /> otherwise.</returns>
+    private bool Match(TokenType type)
     {
-        foreach (var type in types)
+        if (Check(type))
         {
-            if (Check(type))
-            {
-                Advance();
-                return true;
-            }
+            Advance();
+            return true;
         }
 
         return false;
@@ -223,6 +221,11 @@ public class Parser
             body = Foreach(expr);
         }
 
+        if (Match(TokenType.DelayBy))
+        {
+            body = Delay(expr);
+        }
+
         if (body is null)
         {
             ErrorMessage ??= "Directive body is invalid";
@@ -253,7 +256,7 @@ public class Parser
             return null;
         }
 
-        var args = new List<string>();
+        var args = ListPool<string>.Shared.Rent();
         var hasVars = false;
         args.Add(_tokens[_current].Value);
         Advance();
@@ -269,7 +272,9 @@ public class Parser
             Advance();
         }
 
-        return new(cmd, args.ToArray(), hasVars);
+        var argsArr = args.ToArray();
+        ListPool<string>.Shared.Return(args);
+        return new(cmd, argsArr, hasVars);
     }
 
     /// <summary>
@@ -346,7 +351,13 @@ public class Parser
             return null;
         }
 
-        if (CheckNot(TokenType.Text) || !Iterables.ContainsKey(_tokens[_current].Value))
+        if (!Check(TokenType.Text))
+        {
+            ErrorMessage = "Iterable object name is missing";
+            return null;
+        }
+
+        if (!Iterables.ContainsKey(_tokens[_current].Value))
         {
             ErrorMessage = $"'{_tokens[_current].Value}' is not a valid iterable object name";
             return null;
@@ -370,6 +381,43 @@ public class Parser
 
         Advance();
         return new(body, iter);
+    }
+
+    /// <summary>
+    /// Parses a delay expression.
+    /// </summary>
+    /// <param name="body">Expression to execute after the delay.</param>
+    /// <returns>Parsed delay expression or <see langword="null" /> if something went wrong.</returns>
+    private DelayExpr Delay(Expr body)
+    {
+        if (body is null)
+        {
+            ErrorMessage += "\nin delay body expression";
+            return null;
+        }
+
+        if (!Check(TokenType.Text))
+        {
+            ErrorMessage = "Delay duration is missing";
+            return null;
+        }
+
+        var duration = 0;
+
+        foreach (var ch in _tokens[_current].Value)
+        {
+            if (ch < '0' || ch > '9')
+            {
+                ErrorMessage = $"'{_tokens[_current].Value}' is not a valid delay duration";
+                return null;
+            }
+
+            duration *= 10;
+            duration += ch - '0';
+        }
+
+        Advance();
+        return new(body, duration);
     }
     #endregion
 }
