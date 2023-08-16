@@ -1,9 +1,9 @@
 ﻿using PluginAPI.Core;
 using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Loader;
-using System;
 using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
+using SLCommandScript.Core.Reflection;
 
 namespace SLCommandScript;
 
@@ -33,24 +33,6 @@ public class Plugin
     /// </summary>
     /// <param name="message">Message to print.</param>
     private static void PrintError(string message) => Log.Error(message, PluginPrefix);
-
-    /// <summary>
-    /// Creates custom scripts loader instance.
-    /// </summary>
-    /// <param name="loaderType">Type of custom scripts loader to instantiate.</param>
-    /// <returns>Custom scripts loader instance or default scripts loader instance if something goes wrong.</returns>
-    private static IScriptsLoader ActivateLoaderInstance(Type loaderType)
-    {
-        try
-        {
-            return (IScriptsLoader) Activator.CreateInstance(loaderType);
-        }
-        catch (Exception ex)
-        {
-            PrintError($"An error has occured during custom scripts loader instance creation: {ex.Message}.");
-            return new FileScriptsLoader();
-        }
-    }
 
     /// <summary>
     /// Stores plugin configuration.
@@ -130,36 +112,14 @@ public class Plugin
             return new FileScriptsLoader();
         }
 
-        var loaderType = GetCustomScriptsLoader();
+        var loader = CustomTypesUtils.MakeCustomTypeInstance<IScriptsLoader>(PluginConfig.CustomScriptsLoader, out var message);
 
-        if (loaderType is null)
+        if (loader is null)
         {
+            PrintError(message);
             return new FileScriptsLoader();
         }
 
-        if (!typeof(IScriptsLoader).IsAssignableFrom(loaderType))
-        {
-            PrintError("Custom scripts loader does not implement required interface.");
-            return new FileScriptsLoader();
-        }
-
-        return ActivateLoaderInstance(loaderType);
-    }
-
-    /// <summary>
-    /// Retrieves custom scripts loader type.
-    /// </summary>
-    /// <returns>Custom scripts loader type or <see langword="null" /> if nothing was found.</returns>
-    private Type GetCustomScriptsLoader()
-    {
-        try
-        {
-            return Type.GetType(PluginConfig.CustomScriptsLoader);
-        }
-        catch (Exception ex)
-        {
-            PrintError($"An error has occured during custom scripts loader type search: {ex.Message}.");
-            return null;
-        }
+        return loader;
     }
 }

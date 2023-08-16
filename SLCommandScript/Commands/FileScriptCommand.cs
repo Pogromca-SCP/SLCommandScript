@@ -1,9 +1,12 @@
 ﻿using CommandSystem;
 using SLCommandScript.Core.Interfaces;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using SLCommandScript.Core.Language;
 using System;
 using System.IO;
+using System.Threading;
+
+using PluginAPI.Core;
 
 namespace SLCommandScript.Commands;
 
@@ -12,25 +15,12 @@ namespace SLCommandScript.Commands;
 /// </summary>
 public class FileScriptCommand : ICommand
 {
-    /// <summary>
-    /// Contains permissions resolver type to use.
-    /// </summary>
-    public static IPermissionsResolver PermissionsResolver { get; set; } = null;
+    private const string DebugPrefix = "Scripts cache: ";
 
     /// <summary>
     /// Contains currently loaded scripts.
     /// </summary>
-    private static readonly Dictionary<string, string> _loadedScripts = new();
-
-    /// <summary>
-    /// Contains scripts stack.
-    /// </summary>
-    private static readonly Stack<string> _scriptsStack = new();
-
-    /// <summary>
-    /// Contains currently used interpreter.
-    /// </summary>
-    private static Interpreter _interpreter = null;
+    private static readonly ConcurrentDictionary<string, string> _loadedScripts = new();
 
     /// <summary>
     /// Setups an interpretation process for the script.
@@ -40,6 +30,8 @@ public class FileScriptCommand : ICommand
     private static string Interpret(Lexer lexer)
     {
         var parser = new Parser(lexer.Tokens);
+        var resolver = new Resolver();
+        var interpreter = new Interpreter(lexer.Sender);
 
         while (!lexer.IsAtEnd)
         {
@@ -60,11 +52,12 @@ public class FileScriptCommand : ICommand
 
             if (expr is not null)
             {
-                var result = expr.Accept(_interpreter);
+                expr.Accept(resolver);
+                var result = expr.Accept(interpreter);
 
                 if (!result)
                 {
-                    return _interpreter.ErrorMessage;
+                    return interpreter.ErrorMessage;
                 }
             }
         }
@@ -93,13 +86,26 @@ public class FileScriptCommand : ICommand
     private readonly string _file;
 
     /// <summary>
+    /// Contains permissions resolver type to use.
+    /// </summary>
+    private readonly IPermissionsResolver _resolver;
+
+    /// <summary>
+    /// Contains script calls counter.
+    /// </summary>
+    private int _calls;
+
+    /// <summary>
     /// Initializes the command.
     /// </summary>
     /// <param name="file">Path to associated script.</param>
-    public FileScriptCommand(string file)
+    /// <param name="resolver">Permissions resolver to use.</param>
+    public FileScriptCommand(string file, IPermissionsResolver resolver)
     {
         Command = Path.GetFileNameWithoutExtension(file);
         _file = file;
+        _resolver = resolver;
+        _calls = 0;
     }
 
     /// <summary>
@@ -111,30 +117,23 @@ public class FileScriptCommand : ICommand
     /// <returns><see langword="true" /> if command executed successfully, <see langword="false" /> otherwise.</returns>
     public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
-        _interpreter ??= new(sender);
-        _scriptsStack.Push(_file);
+        Interlocked.Increment(ref _calls);
         var line = 0;
 
-        using (var lexer = new Lexer(LoadSource(), arguments, sender, PermissionsResolver))
+        using (var lexer = new Lexer(LoadSource(), arguments, sender, _resolver))
         {
             response = Interpret(lexer);
             line = lexer.Line;
         }
 
-        _scriptsStack.Pop();
-
-        if (!_scriptsStack.Contains(_file))
+        if (Interlocked.Decrement(ref _calls) < 1)
         {
-            _loadedScripts.Remove(_file);
-        }
-
-        if (_scriptsStack.Count < 1)
-        {
-            _interpreter = null;
+            var message = _loadedScripts.TryRemove(_file, out _) ? "Unloaded" : "Failed to unload";
+            Log.Debug($"{message} script - {_file}", DebugPrefix);
         }
 
         var result = response is null;
-        response = result ? "Script executed successfully." : $"{response}\nat {Command}:{line}";
+        response = result ? "Script executed successfully." : $"{response}\nat {Command}.slc:{line}";
         return result;
     }
 
@@ -150,6 +149,7 @@ public class FileScriptCommand : ICommand
         }
 
         var src = File.ReadAllText(_file);
+        Log.Debug($"Loaded script - {_file}", DebugPrefix);
         _loadedScripts[_file] = src;
         return src;
     }

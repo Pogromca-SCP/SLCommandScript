@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using PluginAPI.Enums;
-using SLCommandScript.Commands;
+using CommandSystem;
 using System;
 using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
 using PlayerStatsSystem;
 using MapGeneration.Distributors;
 using InventorySystem.Items.Firearms;
-using CommandSystem;
 using InventorySystem.Items.Usables;
 using InventorySystem.Items.Radio;
 using PlayerRoles.Voice;
@@ -41,7 +40,7 @@ public class FileScriptsEventHandlers
     /// <summary>
     /// Contains registered event handlers.
     /// </summary>
-    public static IDictionary<ServerEventType, FileScriptCommand> EventScripts { get; set; } = null;
+    public static Dictionary<ServerEventType, ICommand> EventScripts { get; } = new();
 
     /// <summary>
     /// Executes a command handler.
@@ -50,7 +49,7 @@ public class FileScriptsEventHandlers
     /// <param name="args">Event arguments to use.</param>
     private static void HandleEvent(ServerEventType eventType, params string[] args)
     {
-        if (EventScripts is null || !EventScripts.ContainsKey(eventType))
+        if (!EventScripts.ContainsKey(eventType))
         {
             return;
         }

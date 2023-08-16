@@ -1,13 +1,15 @@
 ﻿using SLCommandScript.Core.Interfaces;
 using System;
 using System.Collections.Generic;
-using SLCommandScript.Commands;
+using CommandSystem;
 using PluginAPI.Enums;
 using System.IO;
+using SLCommandScript.Commands;
 using SLCommandScript.Core.Commands;
 using PluginAPI.Events;
 using SLCommandScript.Events;
 using PluginAPI.Core;
+using SLCommandScript.Core.Reflection;
 using SLCommandScript.Core.Permissions;
 
 namespace SLCommandScript.Loader;
@@ -26,12 +28,17 @@ public class FileScriptsLoader : IScriptsLoader
         /// <summary>
         /// Contains all registered scripts commands from monitored directory.
         /// </summary>
-        public Dictionary<string, FileScriptCommand> Commands { get; private set; }
+        public Dictionary<string, ICommand> Commands { get; private set; }
 
         /// <summary>
         /// Contains handler type used for commands cleanup.
         /// </summary>
         public CommandType HandlerType { get; private set; }
+
+        /// <summary>
+        /// Permissions resolver to use.
+        /// </summary>
+        public IPermissionsResolver PermissionsResolver { get; private set; }
 
         /// <summary>
         /// File system watcher used to detect script files changes.
@@ -43,10 +50,12 @@ public class FileScriptsLoader : IScriptsLoader
         /// </summary>
         /// <param name="directory">File directory to monitor for changes.</param>
         /// <param name="handlerType">Type of handler to use.</param>
-        public CommandsDirectory(string directory, CommandType handlerType)
+        /// <param name="resolver">Permissions resolver to use.</param>
+        public CommandsDirectory(string directory, CommandType handlerType, IPermissionsResolver resolver)
         {
             Commands = new(StringComparer.OrdinalIgnoreCase);
             HandlerType = handlerType;
+            PermissionsResolver = resolver;
 
             Watcher = new(directory)
             {
@@ -85,7 +94,7 @@ public class FileScriptsLoader : IScriptsLoader
         /// <param name="scriptFile">Script file to register.</param>
         private void RegisterScript(string scriptFile)
         {
-            var cmd = new FileScriptCommand(scriptFile);
+            var cmd = new FileScriptCommand(scriptFile, PermissionsResolver);
             var registered = CommandsUtils.RegisterCommand(HandlerType, cmd);
 
             if (registered != null)
@@ -137,9 +146,19 @@ public class FileScriptsLoader : IScriptsLoader
     private class EventsDirectory : IDisposable
     {
         /// <summary>
+        /// Plugin object.
+        /// </summary>
+        public object PluginObject { get; private set; }
+
+        /// <summary>
         /// Contains all registered scripts commands from monitored directory.
         /// </summary>
-        public Dictionary<ServerEventType, FileScriptCommand> Commands { get; private set; }
+        public IDictionary<ServerEventType, ICommand> Commands { get; private set; }
+
+        /// <summary>
+        /// Permissions resolver to use.
+        /// </summary>
+        public IPermissionsResolver PermissionsResolver { get; private set; }
 
         /// <summary>
         /// File system watcher used to detect script files changes.
@@ -149,10 +168,14 @@ public class FileScriptsLoader : IScriptsLoader
         /// <summary>
         /// Creates new directory monitor and initializes the watcher.
         /// </summary>
+        /// <param name="plugin">Plugin object.</param>
         /// <param name="directory">File directory to monitor for changes.</param>
-        public EventsDirectory(string directory)
+        /// <param name="resolver">Permissions resolver to use.</param>
+        public EventsDirectory(object plugin, string directory, IPermissionsResolver resolver)
         {
-            Commands = new();
+            PluginObject = plugin;
+            Commands = FileScriptsEventHandlers.EventScripts;
+            PermissionsResolver = resolver;
 
             Watcher = new(directory)
             {
@@ -170,7 +193,6 @@ public class FileScriptsLoader : IScriptsLoader
             Watcher.Created += (obj, args) => RegisterEvent(args.FullPath);
             Watcher.Deleted += (obj, args) => UnregisterEvent(args.FullPath);
             Watcher.Renamed += (obj, args) => RefreshEvent(args.OldFullPath, args.FullPath);
-            FileScriptsEventHandlers.EventScripts = Commands;
             EventManager.RegisterEvents<FileScriptsEventHandlers>(PluginObject);
         }
 
@@ -181,7 +203,7 @@ public class FileScriptsLoader : IScriptsLoader
         {
             Watcher.Dispose();
             EventManager.UnregisterEvents<FileScriptsEventHandlers>(PluginObject);
-            FileScriptsEventHandlers.EventScripts = null;
+            Commands.Clear();
         }
 
         /// <summary>
@@ -190,7 +212,7 @@ public class FileScriptsLoader : IScriptsLoader
         /// <param name="scriptFile">Event script file to register.</param>
         private void RegisterEvent(string scriptFile)
         {
-            var cmd = new FileScriptCommand(scriptFile);
+            var cmd = new FileScriptCommand(scriptFile, PermissionsResolver);
             var name = cmd.Command;
 
             if (name.Length > 2 && name.StartsWith("on", StringComparison.OrdinalIgnoreCase))
@@ -246,77 +268,6 @@ public class FileScriptsLoader : IScriptsLoader
     private const string ScriptFilesFilter = "*.slc";
 
     /// <summary>
-    /// Contains plugin object.
-    /// </summary>
-    private static object PluginObject;
-
-    #region Custom Permissions Resolver
-    /// <summary>
-    /// Creates custom permissions resolver instance.
-    /// </summary>
-    /// <param name="resolverType">Type of custom permissions resolver to instantiate.</param>
-    /// <returns>Custom permissions resolver instance or <see langword="null" /> if something goes wrong.</returns>
-    private static IPermissionsResolver ActivateResolverInstance(Type resolverType)
-    {
-        try
-        {
-            return (IPermissionsResolver) Activator.CreateInstance(resolverType);
-        }
-        catch (Exception ex)
-        {
-            PrintError($"An error has occured during custom permissions resolver instance creation: {ex.Message}.");
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// Loads custom permissions resolver.
-    /// </summary>
-    /// <param name="typeName">Custom permissions resolver type name.</param>
-    /// <returns>Loaded permissions resolver or <see langword="null" /> if something goes wrong.</returns>
-    private static IPermissionsResolver LoadPermissionsResolver(string typeName)
-    {
-        if (string.IsNullOrWhiteSpace(typeName))
-        {
-            return null;
-        }
-
-        var loaderType = GetCustomPermissionsResolver(typeName);
-
-        if (loaderType is null)
-        {
-            return null;
-        }
-
-        if (!typeof(IPermissionsResolver).IsAssignableFrom(loaderType))
-        {
-            PrintError("Custom permissions resolver does not implement required interface.");
-            return null;
-        }
-
-        return ActivateResolverInstance(loaderType);
-    }
-
-    /// <summary>
-    /// Retrieves custom permissions resolver type.
-    /// </summary>
-    /// <param name="typeName">Custom permissions resolver type name.</param>
-    /// <returns>Custom permissions resolver type or <see langword="null" /> if nothing was found.</returns>
-    private static Type GetCustomPermissionsResolver(string typeName)
-    {
-        try
-        {
-            return Type.GetType(typeName);
-        }
-        catch (Exception ex)
-        {
-            PrintError($"An error has occured during custom permissions resolver type search: {ex.Message}.");
-            return null;
-        }
-    }
-    #endregion
-
-    /// <summary>
     /// Prints an error message to server log.
     /// </summary>
     /// <param name="message">Message to print.</param>
@@ -348,17 +299,22 @@ public class FileScriptsLoader : IScriptsLoader
             return;
         }
 
-        PluginObject = plugin;
-        FileScriptCommand.PermissionsResolver = LoadPermissionsResolver(permsResolver) ?? new VanillaPermissionsResolver();
+        var permissionsResolver = CustomTypesUtils.MakeCustomTypeInstance<IPermissionsResolver>(permsResolver, out var message);
+
+        if (permissionsResolver is null)
+        {
+            PrintError(message);
+            permissionsResolver = new VanillaPermissionsResolver();
+        }
         
         if (eventsEnabled)
         {
-            LoadDirectory($"{handler.PluginDirectoryPath}/scripts/events/", null);
+            LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", null, permissionsResolver);
         }
 
-        LoadDirectory($"{handler.PluginDirectoryPath}/scripts/ra/", CommandType.RemoteAdmin);
-        LoadDirectory($"{handler.PluginDirectoryPath}/scripts/server/", CommandType.Console);
-        LoadDirectory($"{handler.PluginDirectoryPath}/scripts/client/", CommandType.GameConsole);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", CommandType.RemoteAdmin, permissionsResolver);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", CommandType.Console, permissionsResolver);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/client/", CommandType.GameConsole, permissionsResolver);
     }
 
     /// <summary>
@@ -374,16 +330,16 @@ public class FileScriptsLoader : IScriptsLoader
         _registeredDirectories.Clear();
         _eventsDirectory?.Dispose();
         _eventsDirectory = null;
-        FileScriptCommand.PermissionsResolver = null;
-        PluginObject = null;
     }
 
     /// <summary>
     /// Loads all scripts from directory.
     /// </summary>
+    /// <param name="plugin">Plugin object.</param>
     /// <param name="directory">Directory to load.</param>
     /// <param name="handlerType">Handler to use for commands registration.</param>
-    private void LoadDirectory(string directory, CommandType? handlerType)
+    /// <param name="resolver">Permissions resolver to use.</param>
+    private void LoadDirectory(object plugin, string directory, CommandType? handlerType, IPermissionsResolver resolver)
     {
         if (!Directory.Exists(directory))
         {
@@ -392,10 +348,10 @@ public class FileScriptsLoader : IScriptsLoader
 
         if (handlerType == null)
         {
-            _eventsDirectory = new EventsDirectory(directory);
+            _eventsDirectory = new EventsDirectory(plugin, directory, resolver);
             return;
         }
 
-        _registeredDirectories.Add(new CommandsDirectory(directory, handlerType.Value));
+        _registeredDirectories.Add(new CommandsDirectory(directory, handlerType.Value, resolver));
     }
 }
