@@ -2,7 +2,7 @@
 using SLCommandScript.Core.Interfaces;
 using System.Collections.Concurrent;
 using SLCommandScript.Core.Language;
-using NorthwoodLib.Pools;
+using System.Linq;
 using System;
 using System.IO;
 using System.Threading;
@@ -99,18 +99,8 @@ public class FileScriptCommand : ICommand, IUsageProvider
                 _usage = null;
             }
 
-            var list = ListPool<string>.Shared.Rent();
-
-            foreach (var item in value)
-            {
-                if (!string.IsNullOrWhiteSpace(item))
-                {
-                    list.Add(item);
-                }
-            }
-
-            _usage = list.Count > 0 ? list.ToArray() : null;
-            ListPool<string>.Shared.Return(list);
+            var usage = value.Where(i => !string.IsNullOrWhiteSpace(i));
+            _usage = usage.Count() > 0 ? usage.ToArray() : null;
         }
     }
 
