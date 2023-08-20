@@ -73,8 +73,7 @@ public class FileScriptsEventHandlers
 
     [PluginEvent(ServerEventType.PlayerBanned)]
     void OnPlayerBanned(Player player, Player issuer, string reason, long duration) =>
-        HandleEvent(ServerEventType.PlayerBanned, "PlayerBanned", player.PlayerId.ToString(), player.DisplayNickname, issuer.PlayerId.ToString(),
-            issuer.DisplayNickname, reason);
+        HandleEvent(ServerEventType.PlayerBanned, "PlayerBanned", player.PlayerId.ToString(), player.DisplayNickname, reason);
 
     [PluginEvent(ServerEventType.PlayerKicked)]
     void OnPlayerKicked(Player player, ICommandSender issuer, string reason) =>
@@ -87,7 +86,8 @@ public class FileScriptsEventHandlers
 
     [PluginEvent(ServerEventType.PlayerChangeRole)]
     void OnChangeRole(Player player, PlayerRoleBase oldRole, RoleTypeId newRole, RoleChangeReason reason) =>
-        HandleEvent(ServerEventType.PlayerChangeRole, "PlayerChangeRole", player.PlayerId.ToString(), player.DisplayNickname, newRole.ToString());
+        HandleEvent(ServerEventType.PlayerChangeRole, "PlayerChangeRole", player.PlayerId.ToString(), player.DisplayNickname, oldRole.RoleTypeId.ToString(),
+            newRole.ToString(), reason.ToString());
 
     [PluginEvent(ServerEventType.PlayerPreauth)]
     void OnPreauth(string userid, string ipAddress, long expiration, CentralAuthPreauthFlags flags, string country, byte[] signature, ConnectionRequest req, int index) =>
@@ -123,14 +123,38 @@ public class FileScriptsEventHandlers
 
     #region State
     [PluginEvent(ServerEventType.PlayerDeath)]
-    void OnPlayerDied(Player player, Player attacker, DamageHandlerBase damageHandler) =>
-        HandleEvent(ServerEventType.PlayerDeath, "PlayerDeath", player.PlayerId.ToString(), player.DisplayNickname,
-            attacker.PlayerId.ToString(), attacker.DisplayNickname);
+    void OnPlayerDied(Player player, Player attacker, DamageHandlerBase damageHandler)
+    {
+        const ServerEventType eventType = ServerEventType.PlayerDeath;
+        const string eventName = "PlayerDeath";
+
+        if (attacker is null)
+        {
+            HandleEvent(eventType, eventName, player.PlayerId.ToString(), player.DisplayNickname);
+        }
+        else
+        {
+            HandleEvent(eventType, eventName, player.PlayerId.ToString(), player.DisplayNickname, attacker.PlayerId.ToString(),
+                attacker.DisplayNickname);
+        }
+    }
 
     [PluginEvent(ServerEventType.PlayerChangeSpectator)]
-    void OnPlayerChangesSpectatedPlayer(Player player, Player oldTarget, Player newTarget) =>
-        HandleEvent(ServerEventType.PlayerChangeSpectator, "PlayerChangeSpectator", player.PlayerId.ToString(), player.DisplayNickname,
-            oldTarget.PlayerId.ToString(), oldTarget.DisplayNickname, newTarget.PlayerId.ToString(), newTarget.DisplayNickname);
+    void OnPlayerChangesSpectatedPlayer(Player player, Player oldTarget, Player newTarget)
+    {
+        const ServerEventType eventType = ServerEventType.PlayerChangeSpectator;
+        const string eventName = "PlayerChangeSpectator";
+
+        if (oldTarget is null)
+        {
+            HandleEvent(eventType, eventName, player.PlayerId.ToString(), player.DisplayNickname, newTarget.PlayerId.ToString(), newTarget.DisplayNickname);
+        }
+        else
+        {
+            HandleEvent(eventType, eventName, player.PlayerId.ToString(), player.DisplayNickname, newTarget.PlayerId.ToString(), newTarget.DisplayNickname,
+                oldTarget.PlayerId.ToString(), oldTarget.DisplayNickname);
+        }
+    }
 
     [PluginEvent(ServerEventType.PlayerEscape)]
     void OnPlayerEscaped(Player player, RoleTypeId role) =>
@@ -147,9 +171,26 @@ public class FileScriptsEventHandlers
             target.PlayerId.ToString(), target.DisplayNickname);
 
     [PluginEvent(ServerEventType.PlayerDamage)]
-    void OnPlayerDamage(Player player, Player attacker, DamageHandlerBase damageHandler) =>
-        HandleEvent(ServerEventType.PlayerDamage, "PlayerDamage", player.PlayerId.ToString(), player.DisplayNickname, attacker.PlayerId.ToString(),
-            attacker.DisplayNickname);
+    void OnPlayerDamage(Player player, Player attacker, DamageHandlerBase damageHandler)
+    {
+        if (player is null)
+        {
+            return;
+        }
+
+        const ServerEventType eventType = ServerEventType.PlayerDamage;
+        const string eventName = "PlayerDamage";
+
+        if (attacker is null)
+        {
+            HandleEvent(eventType, eventName, player.PlayerId.ToString(), player.DisplayNickname);
+        }
+        else
+        {
+            HandleEvent(eventType, eventName, player.PlayerId.ToString(), player.DisplayNickname, attacker.PlayerId.ToString(),
+                attacker.DisplayNickname);
+        }
+    }
 
     [PluginEvent(ServerEventType.PlayerReceiveEffect)]
     void OnReceiveEffect(Player player, StatusEffectBase effect, byte intensity, float duration) =>
@@ -177,7 +218,7 @@ public class FileScriptsEventHandlers
 
     [PluginEvent(ServerEventType.PlayerUsingIntercom)]
     void OnPlayerUsingIntercom(Player player, IntercomState state) =>
-        HandleEvent(ServerEventType.PlayerUsingIntercom, "PlayerUsingIntercom", player.PlayerId.ToString(), player.DisplayNickname);
+        HandleEvent(ServerEventType.PlayerUsingIntercom, "PlayerUsingIntercom", player.PlayerId.ToString(), player.DisplayNickname, state.ToString());
 
     [PluginEvent(ServerEventType.PlayerCloseGenerator)]
     void OnPlayerClosesGenerator(Player player, Scp079Generator gen) =>
@@ -233,26 +274,25 @@ public class FileScriptsEventHandlers
 
     [PluginEvent(ServerEventType.PlayerDryfireWeapon)]
     void OnPlayerDryfireWeapon(Player player, Firearm item) =>
-        HandleEvent(ServerEventType.PlayerDryfireWeapon, "PlayerDryfireWeapon", player.PlayerId.ToString(), player.DisplayNickname);
+        HandleEvent(ServerEventType.PlayerDryfireWeapon, "PlayerDryfireWeapon", item.ItemTypeId.ToString(), player.PlayerId.ToString(), player.DisplayNickname);
 
     [PluginEvent(ServerEventType.PlayerReloadWeapon)]
     void OnReloadWeapon(Player player, Firearm gun) =>
-        HandleEvent(ServerEventType.PlayerReloadWeapon, "PlayerReloadWeapon", player.PlayerId.ToString(), player.DisplayNickname);
+        HandleEvent(ServerEventType.PlayerReloadWeapon, "PlayerReloadWeapon", gun.ItemTypeId.ToString(), player.PlayerId.ToString(), player.DisplayNickname);
 
     [PluginEvent(ServerEventType.PlayerShotWeapon)]
     void OnShotWeapon(Player player, Firearm gun) =>
-        HandleEvent(ServerEventType.PlayerShotWeapon, "PlayerShotWeapon", player.PlayerId.ToString(), player.DisplayNickname);
+        HandleEvent(ServerEventType.PlayerShotWeapon, "PlayerShotWeapon", gun.ItemTypeId.ToString(), player.PlayerId.ToString(), player.DisplayNickname);
 
     [PluginEvent(ServerEventType.PlayerUnloadWeapon)]
     void OnUnloadWeapon(Player player, Firearm gun) =>
-        HandleEvent(ServerEventType.PlayerUnloadWeapon, "PlayerUnloadWeapon", player.PlayerId.ToString(), player.DisplayNickname);
+        HandleEvent(ServerEventType.PlayerUnloadWeapon, "PlayerUnloadWeapon", gun.ItemTypeId.ToString(), player.PlayerId.ToString(), player.DisplayNickname);
     #endregion
 
     #region Items
     [PluginEvent(ServerEventType.PlayerCancelUsingItem)]
     void OnPlayerCancelsUsingItem(Player player, UsableItem item) =>
-        HandleEvent(ServerEventType.PlayerCancelUsingItem, "PlayerCancelUsingItem", item.ItemTypeId.ToString(),
-            player.PlayerId.ToString(), player.DisplayNickname);
+        HandleEvent(ServerEventType.PlayerCancelUsingItem, "PlayerCancelUsingItem", item.ItemTypeId.ToString(), player.PlayerId.ToString(), player.DisplayNickname);
 
     [PluginEvent(ServerEventType.PlayerChangeItem)]
     void OnPlayerChangesItem(Player player, ushort oldItem, ushort newItem) =>
@@ -419,8 +459,7 @@ public class FileScriptsEventHandlers
     #region Commands
     [PluginEvent(ServerEventType.PlayerGameConsoleCommand)]
     void OnPlayerGameconsoleCommand(Player player, string command, string[] arguments) =>
-        HandleEvent(ServerEventType.PlayerGameConsoleCommand, "PlayerGameConsoleCommand", player.PlayerId.ToString(), player.DisplayNickname,
-            command);
+        HandleEvent(ServerEventType.PlayerGameConsoleCommand, "PlayerGameConsoleCommand", player.PlayerId.ToString(), player.DisplayNickname, command);
 
     [PluginEvent(ServerEventType.RemoteAdminCommand)]
     void OnRemoteadminCommand(ICommandSender sender, string command, string[] arguments) => HandleEvent(ServerEventType.RemoteAdminCommand,
@@ -436,7 +475,7 @@ public class FileScriptsEventHandlers
 
     [PluginEvent(ServerEventType.PlayerGameConsoleCommandExecuted)]
     void OnPlayerGameconsoleCommandExecuted(Player player, string command, string[] arguments, bool result, string response) =>
-        HandleEvent(ServerEventType.PlayerGameConsoleCommandExecuted, "PlayerGameConsoleCommandExecuted", command);
+        HandleEvent(ServerEventType.PlayerGameConsoleCommandExecuted, "PlayerGameConsoleCommandExecuted", player.PlayerId.ToString(), player.DisplayNickname, command);
 
     [PluginEvent(ServerEventType.ConsoleCommandExecuted)]
     void OnConsoleCommandExecuted(ICommandSender sender, string command, string[] arguments, bool result, string response) =>
@@ -447,179 +486,179 @@ public class FileScriptsEventHandlers
     #region General
     [PluginEvent(ServerEventType.CassieAnnouncesScpTermination)]
     void OnCassieAnnouncScpTermination(Player scp, DamageHandlerBase damageHandler, string announcement) =>
-        HandleEvent(ServerEventType.CassieAnnouncesScpTermination, "CassieAnnouncesScpTermination", scp?.RoleName, announcement);
+        HandleEvent(ServerEventType.CassieAnnouncesScpTermination, "CassieAnnouncesScpTermination", scp.RoleName, announcement);
     #endregion
 
     #region 914
     [PluginEvent(ServerEventType.Scp914Activate)]
     public void OnScp914Activate(Player player, Scp914KnobSetting knobSetting) => HandleEvent(ServerEventType.Scp914Activate, "Scp914Activate",
-        player?.PlayerId.ToString(), player?.DisplayNickname, knobSetting.ToString());
+        player.PlayerId.ToString(), player.DisplayNickname, knobSetting.ToString());
 
     [PluginEvent(ServerEventType.Scp914KnobChange)]
     public void OnScp914KnobChange(Player player, Scp914KnobSetting knobSetting, Scp914KnobSetting previousKnobSetting) =>
-        HandleEvent(ServerEventType.Scp914KnobChange, "Scp914KnobChange", player?.PlayerId.ToString(), player?.DisplayNickname, knobSetting.ToString());
+        HandleEvent(ServerEventType.Scp914KnobChange, "Scp914KnobChange", player.PlayerId.ToString(), player.DisplayNickname, knobSetting.ToString());
 
     [PluginEvent(ServerEventType.Scp914UpgradeInventory)]
     public void OnScp914UpgradeInventory(Player player, ItemBase item, Scp914KnobSetting knobSetting) =>
-        HandleEvent(ServerEventType.Scp914UpgradeInventory, "Scp914UpgradeInventory", player?.PlayerId.ToString(), player?.DisplayNickname,
-            item?.ItemTypeId.ToString(), knobSetting.ToString());
+        HandleEvent(ServerEventType.Scp914UpgradeInventory, "Scp914UpgradeInventory", player.PlayerId.ToString(), player.DisplayNickname,
+            item.ItemTypeId.ToString(), knobSetting.ToString());
 
     [PluginEvent(ServerEventType.Scp914UpgradePickup)]
     public void OnScp914UpgradePickup(ItemPickupBase item, Vector3 outputPosition, Scp914KnobSetting knobSetting) =>
-        HandleEvent(ServerEventType.Scp914UpgradePickup, "Scp914UpgradePickup", item?.Info.ItemId.ToString(), knobSetting.ToString());
+        HandleEvent(ServerEventType.Scp914UpgradePickup, "Scp914UpgradePickup", item.Info.ItemId.ToString(), knobSetting.ToString());
 
     [PluginEvent(ServerEventType.Scp914PickupUpgraded)]
     public void OnScp914PickupUpgraded(ItemPickupBase item, Vector3 newPosition, Scp914KnobSetting knobSetting) =>
-        HandleEvent(ServerEventType.Scp914PickupUpgraded, "Scp914PickupUpgraded", item?.Info.ItemId.ToString(), knobSetting.ToString());
+        HandleEvent(ServerEventType.Scp914PickupUpgraded, "Scp914PickupUpgraded", item.Info.ItemId.ToString(), knobSetting.ToString());
 
     [PluginEvent(ServerEventType.Scp914InventoryItemUpgraded)]
     public void OnScp914InventoryItemUpgraded(Player player, ItemBase item, Scp914KnobSetting knobSetting) =>
-        HandleEvent(ServerEventType.Scp914InventoryItemUpgraded, "Scp914InventoryItemUpgraded", player?.PlayerId.ToString(), player?.DisplayNickname,
-            item?.ItemTypeId.ToString(), knobSetting.ToString());
+        HandleEvent(ServerEventType.Scp914InventoryItemUpgraded, "Scp914InventoryItemUpgraded", player.PlayerId.ToString(), player.DisplayNickname,
+            item.ItemTypeId.ToString(), knobSetting.ToString());
 
     [PluginEvent(ServerEventType.Scp914ProcessPlayer)]
     public void OnScp914ProcessPlayer(Player player, Scp914KnobSetting knobSetting, Vector3 outPosition) =>
-        HandleEvent(ServerEventType.Scp914ProcessPlayer, "Scp914ProcessPlayer", player?.PlayerId.ToString(), player?.DisplayNickname, knobSetting.ToString());
+        HandleEvent(ServerEventType.Scp914ProcessPlayer, "Scp914ProcessPlayer", player.PlayerId.ToString(), player.DisplayNickname, knobSetting.ToString());
     #endregion
 
     #region 106
     [PluginEvent(ServerEventType.Scp106Stalking)]
     public void OnScp106Stalking(Player player, bool activate) => HandleEvent(ServerEventType.Scp106Stalking, "Scp106Stalking",
-        player?.PlayerId.ToString(), player?.DisplayNickname);
+        player.PlayerId.ToString(), player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp106TeleportPlayer)]
     public void OnScp106TeleportPlayer(Player player, Player target) => HandleEvent(ServerEventType.Scp106TeleportPlayer, "Scp106TeleportPlayer",
-        player?.PlayerId.ToString(), player?.DisplayNickname, target?.PlayerId.ToString(), target?.DisplayNickname);
+        player.PlayerId.ToString(), player.DisplayNickname, target.PlayerId.ToString(), target.DisplayNickname);
     #endregion
 
     #region 173
     [PluginEvent(ServerEventType.Scp173PlaySound)]
-    public void OnScp173PlaySound(Player player, Scp173AudioPlayer.Scp173SoundId soundId) => HandleEvent(ServerEventType.Scp173PlaySound,
-        "Scp173PlaySound", player?.PlayerId.ToString(), player?.DisplayNickname);
+    public void OnScp173PlaySound(Player player, Scp173AudioPlayer.Scp173SoundId soundId) => HandleEvent(ServerEventType.Scp173PlaySound, "Scp173PlaySound",
+        player.PlayerId.ToString(), player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp173BreakneckSpeeds)]
     public void OnScp173BreakneckSpeeds(Player player, bool activate) => HandleEvent(ServerEventType.Scp173BreakneckSpeeds, "Scp173BreakneckSpeeds",
-        player?.PlayerId.ToString(), player?.DisplayNickname);
+        player.PlayerId.ToString(), player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp173NewObserver)]
-    public void OnScp173NewObserver(Player player, Player target) => HandleEvent(ServerEventType.Scp173NewObserver, "Scp173NewObserver",
-        player?.PlayerId.ToString(), player?.DisplayNickname, target?.PlayerId.ToString(), target?.DisplayNickname);
+    public void OnScp173NewObserver(Player player, Player target) => HandleEvent(ServerEventType.Scp173NewObserver, "Scp173NewObserver", player.PlayerId.ToString(),
+        player.DisplayNickname, target.PlayerId.ToString(), target.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp173SnapPlayer)]
-    public void OnScp173SnapPlayer(Player player, Player target) => HandleEvent(ServerEventType.Scp173SnapPlayer, "Scp173SnapPlayer",
-        player?.PlayerId.ToString(), player?.DisplayNickname, target?.PlayerId.ToString(), target?.DisplayNickname);
+    public void OnScp173SnapPlayer(Player player, Player target) => HandleEvent(ServerEventType.Scp173SnapPlayer, "Scp173SnapPlayer", player.PlayerId.ToString(),
+        player.DisplayNickname, target.PlayerId.ToString(), target.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp173CreateTantrum)]
-    public void OnScp173CreateTantrum(Player player) => HandleEvent(ServerEventType.Scp173CreateTantrum, "Scp173CreateTantrum",
-        player?.PlayerId.ToString(), player?.DisplayNickname);
+    public void OnScp173CreateTantrum(Player player) => HandleEvent(ServerEventType.Scp173CreateTantrum, "Scp173CreateTantrum", player.PlayerId.ToString(),
+        player.DisplayNickname);
     #endregion
 
     #region 939
     [PluginEvent(ServerEventType.Scp939CreateAmnesticCloud)]
     public void OnScp939CreateAmnesticCloud(Player player) => HandleEvent(ServerEventType.Scp939CreateAmnesticCloud, "Scp939CreateAmnesticCloud",
-        player?.PlayerId.ToString(), player?.DisplayNickname);
+        player.PlayerId.ToString(), player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp939Lunge)]
-    public void OnScp939Lunge(Player player, Scp939LungeState state) => HandleEvent(ServerEventType.Scp939Lunge, "Scp939Lunge",
-        player?.PlayerId.ToString(), player?.DisplayNickname);
+    public void OnScp939Lunge(Player player, Scp939LungeState state) => HandleEvent(ServerEventType.Scp939Lunge, "Scp939Lunge", player.PlayerId.ToString(),
+        player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp939Attack)]
-    public void OnScp939Attack(Player player, IDestructible target) => HandleEvent(ServerEventType.Scp939Attack, "Scp939Attack",
-        player?.PlayerId.ToString(), player?.DisplayNickname);
+    public void OnScp939Attack(Player player, IDestructible target) => HandleEvent(ServerEventType.Scp939Attack, "Scp939Attack", player.PlayerId.ToString(),
+        player.DisplayNickname);
     #endregion
 
     #region 079
     [PluginEvent(ServerEventType.Scp079GainExperience)]
     public void OnScp079GainExperience(Player player, int amount, Scp079HudTranslation reason) => HandleEvent(ServerEventType.Scp079GainExperience,
-        "Scp079GainExperience", player?.PlayerId.ToString(), player?.DisplayNickname, amount.ToString(), reason.ToString());
+        "Scp079GainExperience", player.PlayerId.ToString(), player.DisplayNickname, amount.ToString(), reason.ToString());
 
     [PluginEvent(ServerEventType.Scp079LevelUpTier)]
-    public void OnScp079LevelUpTier(Player player, int tier) => HandleEvent(ServerEventType.Scp079LevelUpTier, "Scp079LevelUpTier",
-        player?.PlayerId.ToString(), player?.DisplayNickname, tier.ToString());
+    public void OnScp079LevelUpTier(Player player, int tier) => HandleEvent(ServerEventType.Scp079LevelUpTier, "Scp079LevelUpTier", player.PlayerId.ToString(),
+        player.DisplayNickname, tier.ToString());
 
     [PluginEvent(ServerEventType.Scp079UseTesla)]
-    public void OnScp079UseTesla(Player player, TeslaGate tesla) => HandleEvent(ServerEventType.Scp079UseTesla, "Scp079UseTesla",
-        player?.PlayerId.ToString(), player?.DisplayNickname);
+    public void OnScp079UseTesla(Player player, TeslaGate tesla) => HandleEvent(ServerEventType.Scp079UseTesla, "Scp079UseTesla", player.PlayerId.ToString(),
+        player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp079LockdownRoom)]
     public void OnScp079LockdownRoom(Player player, RoomIdentifier room) => HandleEvent(ServerEventType.Scp079LockdownRoom, "Scp079LockdownRoom",
-        player?.PlayerId.ToString(), player?.DisplayNickname, room?.Name.ToString());
+        player.PlayerId.ToString(), player.DisplayNickname, room.Name.ToString());
 
     [PluginEvent(ServerEventType.Scp079CancelRoomLockdown)]
-    public void OnScp079CancelRoomLockdown(Player player, RoomIdentifier room) => HandleEvent(ServerEventType.Scp079CancelRoomLockdown,
-        "Scp079CancelRoomLockdown", player?.PlayerId.ToString(), player?.DisplayNickname, room?.Name.ToString());
+    public void OnScp079CancelRoomLockdown(Player player, RoomIdentifier room) => HandleEvent(ServerEventType.Scp079CancelRoomLockdown, "Scp079CancelRoomLockdown",
+        player.PlayerId.ToString(), player.DisplayNickname, room.Name.ToString());
 
     [PluginEvent(ServerEventType.Scp079LockDoor)]
-    public void OnScp079LockDoor(Player player, DoorVariant door) => HandleEvent(ServerEventType.Scp079LockDoor, "Scp079LockDoor",
-        player?.PlayerId.ToString(), player?.DisplayNickname);
+    public void OnScp079LockDoor(Player player, DoorVariant door) => HandleEvent(ServerEventType.Scp079LockDoor, "Scp079LockDoor", player.PlayerId.ToString(),
+        player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp079UnlockDoor)]
-    public void OnScp079UnLockDoor(Player player, DoorVariant door) => HandleEvent(ServerEventType.Scp079UnlockDoor, "Scp079UnlockDoor",
-        player?.PlayerId.ToString(), player?.DisplayNickname);
+    public void OnScp079UnLockDoor(Player player, DoorVariant door) => HandleEvent(ServerEventType.Scp079UnlockDoor, "Scp079UnlockDoor", player.PlayerId.ToString(),
+        player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp079BlackoutZone)]
     public void OnScp079BlackoutZone(Player player, FacilityZone zone) => HandleEvent(ServerEventType.Scp079BlackoutZone, "Scp079BlackoutZone",
-        player?.PlayerId.ToString(), player?.DisplayNickname, zone.ToString());
+        player.PlayerId.ToString(), player.DisplayNickname, zone.ToString());
 
     [PluginEvent(ServerEventType.Scp079BlackoutRoom)]
     public void OnScp079BlackoutRoom(Player player, RoomIdentifier room) => HandleEvent(ServerEventType.Scp079BlackoutRoom, "Scp079BlackoutRoom",
-        player?.PlayerId.ToString(), player?.DisplayNickname, room?.Name.ToString());
+        player.PlayerId.ToString(), player.DisplayNickname, room.Name.ToString());
 
     [PluginEvent(ServerEventType.Scp079CameraChanged)]
     public void OnScp079ChangedCamera(Player player, Scp079Camera camera) => HandleEvent(ServerEventType.Scp079CameraChanged, "Scp079CameraChanged",
-        player?.PlayerId.ToString(), player?.DisplayNickname, camera?.Label);
+        player.PlayerId.ToString(), player.DisplayNickname, camera.Label);
     #endregion
 
     #region 049
     [PluginEvent(ServerEventType.Scp049ResurrectBody)]
-    public void OnScp049ResurrectBody(Player player, Player target, BasicRagdoll body) => HandleEvent(ServerEventType.Scp049ResurrectBody,
-        "Scp049ResurrectBody", player?.PlayerId.ToString(), player?.DisplayNickname, target?.PlayerId.ToString(), target?.DisplayNickname);
+    public void OnScp049ResurrectBody(Player player, Player target, BasicRagdoll body) => HandleEvent(ServerEventType.Scp049ResurrectBody, "Scp049ResurrectBody",
+        player.PlayerId.ToString(), player.DisplayNickname, target.PlayerId.ToString(), target.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp049StartResurrectingBody)]
     public void OnScp049StartResurrectingBody(Player player, Player target, BasicRagdoll body, bool canResurrect) =>
-        HandleEvent(ServerEventType.Scp049StartResurrectingBody, "Scp049StartResurrectingBody", player?.PlayerId.ToString(), player?.DisplayNickname,
-            target?.PlayerId.ToString(), target?.DisplayNickname);
+        HandleEvent(ServerEventType.Scp049StartResurrectingBody, "Scp049StartResurrectingBody", player.PlayerId.ToString(), player.DisplayNickname,
+            target.PlayerId.ToString(), target.DisplayNickname);
     #endregion
 
     #region 096
     [PluginEvent(ServerEventType.Scp096AddingTarget)]
     public void OnScp096AddTarget(Player player, Player target, bool isForLooking) => HandleEvent(ServerEventType.Scp096AddingTarget, "Scp096AddingTarget",
-        player?.PlayerId.ToString(), player?.DisplayNickname, target?.PlayerId.ToString(), target?.DisplayNickname);
+        player.PlayerId.ToString(), player.DisplayNickname, target.PlayerId.ToString(), target.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp096Enraging)]
-    public void OnScp096Enrage(Player player, float initialDuration) => HandleEvent(ServerEventType.Scp096Enraging, "Scp096Enraging",
-        player?.PlayerId.ToString(), player?.DisplayNickname);
+    public void OnScp096Enrage(Player player, float initialDuration) => HandleEvent(ServerEventType.Scp096Enraging, "Scp096Enraging", player.PlayerId.ToString(),
+        player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp096ChangeState)]
     public void OnScp096CalmDown(Player player, Scp096RageState rageState) => HandleEvent(ServerEventType.Scp096ChangeState, "Scp096ChangeState",
-        player?.PlayerId.ToString(), player?.DisplayNickname, rageState.ToString());
+        player.PlayerId.ToString(), player.DisplayNickname, rageState.ToString());
 
     [PluginEvent(ServerEventType.Scp096Charging)]
-    public void OnScp096Charge(Player player) => HandleEvent(ServerEventType.Scp096Charging, "Scp096Charging", player?.PlayerId.ToString(),
-        player?.DisplayNickname);
+    public void OnScp096Charge(Player player) => HandleEvent(ServerEventType.Scp096Charging, "Scp096Charging", player.PlayerId.ToString(),
+        player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp096PryingGate)]
-    public void OnScp096PryGate(Player player, PryableDoor gate) => HandleEvent(ServerEventType.Scp096PryingGate, "Scp096PryingGate",
-        player?.PlayerId.ToString(), player?.DisplayNickname);
+    public void OnScp096PryGate(Player player, PryableDoor gate) => HandleEvent(ServerEventType.Scp096PryingGate, "Scp096PryingGate", player.PlayerId.ToString(),
+        player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp096TryNotCry)]
-    public void OnScp096TryingNotCry(Player player) => HandleEvent(ServerEventType.Scp096TryNotCry, "Scp096TryNotCry", player?.PlayerId.ToString(),
-        player?.DisplayNickname);
+    public void OnScp096TryingNotCry(Player player) => HandleEvent(ServerEventType.Scp096TryNotCry, "Scp096TryNotCry", player.PlayerId.ToString(),
+        player.DisplayNickname);
 
     [PluginEvent(ServerEventType.Scp096StartCrying)]
-    public void OnScp096StartCrying(Player player) => HandleEvent(ServerEventType.Scp096StartCrying, "Scp096StartCrying", player?.PlayerId.ToString(),
-        player?.DisplayNickname);
+    public void OnScp096StartCrying(Player player) => HandleEvent(ServerEventType.Scp096StartCrying, "Scp096StartCrying", player.PlayerId.ToString(),
+        player.DisplayNickname);
     #endregion
     #endregion
 
     #region Bans
     [PluginEvent(ServerEventType.BanIssued)]
-    void OnBanIssued(BanDetails banDetails, BanHandler.BanType banType) => HandleEvent(ServerEventType.BanIssued, "BanIssued", banType.ToString());
+    void OnBanIssued(BanDetails banDetails, BanHandler.BanType banType) => HandleEvent(ServerEventType.BanIssued, "BanIssued", banDetails.Id, banType.ToString());
 
     [PluginEvent(ServerEventType.BanRevoked)]
-    void OnBanRevoked(string id, BanHandler.BanType banType) => HandleEvent(ServerEventType.BanRevoked, "BanRevoked", banType.ToString());
+    void OnBanRevoked(string id, BanHandler.BanType banType) => HandleEvent(ServerEventType.BanRevoked, "BanRevoked", id, banType.ToString());
 
     [PluginEvent(ServerEventType.BanUpdated)]
-    void OnBanUpdated(BanDetails banDetails, BanHandler.BanType banType) => HandleEvent(ServerEventType.BanUpdated, "BanUpdated", banType.ToString());
+    void OnBanUpdated(BanDetails banDetails, BanHandler.BanType banType) => HandleEvent(ServerEventType.BanUpdated, "BanUpdated", banDetails.Id, banType.ToString());
     #endregion
 }

@@ -2,6 +2,7 @@
 using SLCommandScript.Core.Interfaces;
 using System.Collections.Concurrent;
 using SLCommandScript.Core.Language;
+using NorthwoodLib.Pools;
 using System;
 using System.IO;
 using System.Threading;
@@ -13,8 +14,13 @@ namespace SLCommandScript.Commands;
 /// <summary>
 /// Command used to launch interpreted scripts.
 /// </summary>
-public class FileScriptCommand : ICommand
+public class FileScriptCommand : ICommand, IUsageProvider
 {
+    /// <summary>
+    /// Default command description to use.
+    /// </summary>
+    public const string DefaultDescription = "Custom script command.";
+
     private const string DebugPrefix = "Scripts cache: ";
 
     /// <summary>
@@ -78,7 +84,35 @@ public class FileScriptCommand : ICommand
     /// <summary>
     /// Contains command description.
     /// </summary>
-    public string Description => $"Executes custom script from {Command}.slc file.";
+    public string Description { get => _desc; set => _desc = string.IsNullOrWhiteSpace(value) ? DefaultDescription : value; }
+
+    /// <summary>
+    /// Describes command arguments usage.
+    /// </summary>
+    public string[] Usage
+    {
+        get => _usage;
+        set
+        {
+            if (value is null || value.Length < 1)
+            {
+                _usage = null;
+            }
+
+            var list = ListPool<string>.Shared.Rent();
+
+            foreach (var item in value)
+            {
+                if (!string.IsNullOrWhiteSpace(item))
+                {
+                    list.Add(item);
+                }
+            }
+
+            _usage = list.Count > 0 ? list.ToArray() : null;
+            ListPool<string>.Shared.Return(list);
+        }
+    }
 
     /// <summary>
     /// Holds full path to script file.
@@ -89,6 +123,16 @@ public class FileScriptCommand : ICommand
     /// Contains permissions resolver type to use.
     /// </summary>
     private readonly IPermissionsResolver _resolver;
+
+    /// <summary>
+    /// Contains command description.
+    /// </summary>
+    private string _desc;
+
+    /// <summary>
+    /// Describes command arguments usage.
+    /// </summary>
+    private string[] _usage;
 
     /// <summary>
     /// Contains script calls counter.
@@ -105,6 +149,8 @@ public class FileScriptCommand : ICommand
         Command = Path.GetFileNameWithoutExtension(file);
         _file = file;
         _resolver = resolver;
+        _desc = DefaultDescription;
+        _usage = null;
         _calls = 0;
     }
 

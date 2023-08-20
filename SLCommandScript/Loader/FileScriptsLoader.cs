@@ -1,16 +1,16 @@
 ﻿using SLCommandScript.Core.Interfaces;
 using System;
 using System.Collections.Generic;
-using CommandSystem;
 using PluginAPI.Enums;
 using System.IO;
 using SLCommandScript.Commands;
 using SLCommandScript.Core.Commands;
-using PluginAPI.Events;
+using CommandSystem;
 using SLCommandScript.Events;
+using PluginAPI.Events;
 using PluginAPI.Core;
-using SLCommandScript.Core.Reflection;
 using SLCommandScript.Core.Permissions;
+using SLCommandScript.Core.Reflection;
 
 namespace SLCommandScript.Loader;
 
@@ -28,7 +28,7 @@ public class FileScriptsLoader : IScriptsLoader
         /// <summary>
         /// Contains all registered scripts commands from monitored directory.
         /// </summary>
-        public Dictionary<string, ICommand> Commands { get; private set; }
+        public Dictionary<string, FileScriptCommand> Commands { get; private set; }
 
         /// <summary>
         /// Contains handler type used for commands cleanup.
@@ -46,6 +46,11 @@ public class FileScriptsLoader : IScriptsLoader
         public FileSystemWatcher Watcher { get; private set; }
 
         /// <summary>
+        /// File system watcher used to detect description files changes.
+        /// </summary>
+        public FileSystemWatcher JSONWatcher { get; private set; }
+
+        /// <summary>
         /// Creates new directory monitor and initializes the watcher.
         /// </summary>
         /// <param name="directory">File directory to monitor for changes.</param>
@@ -56,14 +61,7 @@ public class FileScriptsLoader : IScriptsLoader
             Commands = new(StringComparer.OrdinalIgnoreCase);
             HandlerType = handlerType;
             PermissionsResolver = resolver;
-
-            Watcher = new(directory)
-            {
-                NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName,
-                Filter = ScriptFilesFilter,
-                IncludeSubdirectories = true,
-                EnableRaisingEvents = true
-            };
+            Watcher = CreateWatcher(directory, ScriptFilesFilter);
 
             foreach (var file in Directory.EnumerateFiles(directory, ScriptFilesFilter, SearchOption.AllDirectories))
             {
@@ -73,6 +71,16 @@ public class FileScriptsLoader : IScriptsLoader
             Watcher.Created += (obj, args) => RegisterScript(args.FullPath);
             Watcher.Deleted += (obj, args) => UnregisterScript(args.FullPath);
             Watcher.Renamed += (obj, args) => RefreshScript(args.OldFullPath, args.FullPath);
+            JSONWatcher = CreateWatcher(directory, DescriptionFilesFilter);
+
+            foreach (var file in Directory.EnumerateFiles(directory, DescriptionFilesFilter, SearchOption.AllDirectories))
+            {
+                UpdateScriptDescription(file);
+            }
+
+            JSONWatcher.Created += (obj, args) => UpdateScriptDescription(args.FullPath);
+            JSONWatcher.Renamed += (obj, args) => UpdateScriptDescription(args.FullPath);
+            JSONWatcher.Changed += (obj, args) => UpdateScriptDescription(args.FullPath);
         }
 
         /// <summary>
@@ -81,6 +89,7 @@ public class FileScriptsLoader : IScriptsLoader
         public void Dispose()
         {
             Watcher.Dispose();
+            JSONWatcher.Dispose();
 
             foreach (var command in Commands.Values)
             {
@@ -100,6 +109,7 @@ public class FileScriptsLoader : IScriptsLoader
             if (registered != null)
             {
                 Commands[cmd.Command] = cmd;
+                PrintLog($"Registered command '{cmd.Command}' for {HandlerType}.");
             }
             else
             {
@@ -119,6 +129,7 @@ public class FileScriptsLoader : IScriptsLoader
             if (removed != null)
             {
                 Commands.Remove(cmd.Command);
+                PrintLog($"Unregistered command '{cmd.Command}' from {HandlerType}.");
             }
             else
             {
@@ -135,6 +146,38 @@ public class FileScriptsLoader : IScriptsLoader
         {
             UnregisterScript(oldFileName);
             RegisterScript(newFileName);
+        }
+
+        /// <summary>
+        /// Updates script command description info.
+        /// </summary>
+        /// <param name="descFile">Description file name to use.</param>
+        private void UpdateScriptDescription(string descFile)
+        {
+            var name = Path.GetFileNameWithoutExtension(descFile);
+
+            if (!Commands.ContainsKey(name))
+            {
+                PrintError($"Could not update description for command '{name}'.");
+                return;
+            }
+
+            var cmd = Commands[name];
+            CommandDescription desc;
+            
+            try
+            {
+                desc = JsonSerialize.FromFile<CommandDescription>(descFile);
+            }
+            catch (Exception ex)
+            {
+                PrintError($"An error has occured during '{cmd.Command}' description deserialization: {ex.Message}");
+                return;
+            }
+
+            cmd.Description = desc.Description;
+            cmd.Usage = desc.Usage;
+            PrintLog($"Description update for '{cmd.Command}' command finished successfully.");
         }
     }
     #endregion
@@ -176,14 +219,7 @@ public class FileScriptsLoader : IScriptsLoader
             PluginObject = plugin;
             Commands = FileScriptsEventHandlers.EventScripts;
             PermissionsResolver = resolver;
-
-            Watcher = new(directory)
-            {
-                NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName,
-                Filter = ScriptFilesFilter,
-                IncludeSubdirectories = true,
-                EnableRaisingEvents = true
-            };
+            Watcher = CreateWatcher(directory, ScriptFilesFilter);
 
             foreach (var file in Directory.EnumerateFiles(directory, ScriptFilesFilter, SearchOption.AllDirectories))
             {
@@ -225,6 +261,11 @@ public class FileScriptsLoader : IScriptsLoader
             if (parsed)
             {
                 Commands[result] = cmd;
+                PrintLog($"Registered event handler for '{result}' event.");
+            }
+            else
+            {
+                PrintError($"Could not register event handler for '{name}' event.");
             }
         }
 
@@ -246,6 +287,11 @@ public class FileScriptsLoader : IScriptsLoader
             if (parsed)
             {
                 Commands.Remove(result);
+                PrintLog($"Unregistered event handler for '{result}' event.");
+            }
+            else
+            {
+                PrintError($"Could not unregister event handler for '{name}' event.");
             }
         }
 
@@ -268,10 +314,40 @@ public class FileScriptsLoader : IScriptsLoader
     private const string ScriptFilesFilter = "*.slc";
 
     /// <summary>
+    /// Defines description files extension filter.
+    /// </summary>
+    private const string DescriptionFilesFilter = "*.json";
+
+    /// <summary>
+    /// Prefix string to use in logs.
+    /// </summary>
+    private const string LoaderPrefix = "FileScriptsLoader: ";
+
+    /// <summary>
+    /// Prints a message to server log.
+    /// </summary>
+    /// <param name="message">Message to print.</param>
+    private static void PrintLog(string message) => Log.Info(message, LoaderPrefix);
+
+    /// <summary>
     /// Prints an error message to server log.
     /// </summary>
     /// <param name="message">Message to print.</param>
-    private static void PrintError(string message) => Log.Error(message, "FileScriptsLoader: ");
+    private static void PrintError(string message) => Log.Error(message, LoaderPrefix);
+
+    /// <summary>
+    /// Creates new file system watcher.
+    /// </summary>
+    /// <param name="path">Path to watch.</param>
+    /// <param name="filter">Files filter to use.</param>
+    /// <returns>Newly created file watcher.</returns>
+    private static FileSystemWatcher CreateWatcher(string path, string filter) => new(path)
+    {
+        NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName,
+        Filter = filter,
+        IncludeSubdirectories = true,
+        EnableRaisingEvents = true
+    };
 
     /// <summary>
     /// Contains all scripts directories monitors.
@@ -299,12 +375,26 @@ public class FileScriptsLoader : IScriptsLoader
             return;
         }
 
-        var permissionsResolver = CustomTypesUtils.MakeCustomTypeInstance<IPermissionsResolver>(permsResolver, out var message);
+        IPermissionsResolver permissionsResolver;
 
-        if (permissionsResolver is null)
+        if (string.IsNullOrWhiteSpace(permsResolver))
         {
-            PrintError(message);
+            PrintLog("Using default permissions resolver.");
             permissionsResolver = new VanillaPermissionsResolver();
+        }
+        else
+        {
+            permissionsResolver = CustomTypesUtils.MakeCustomTypeInstance<IPermissionsResolver>(permsResolver, out var message);
+
+            if (permissionsResolver is null)
+            {
+                PrintError(message);
+                permissionsResolver = new VanillaPermissionsResolver();
+            }
+            else
+            {
+                PrintLog("Custom permissions resolver loaded successfully.");
+            }
         }
         
         if (eventsEnabled)
