@@ -10,7 +10,7 @@ public class CustomScriptsLoaderExample : IScriptsLoader
 {
     private readonly TestCustomLoaderCommand _command = new();
 
-    public void Dispose() => CommandsUtils.UnregisterCommand(CommandType.GameConsole, _command);
+    public void Dispose() => CommandsUtils.UnregisterCommand(CommandType.Console, _command);
 
-    public void InitScriptsLoader(object plugin, ScriptsLoaderConfig loaderConfig) => CommandsUtils.RegisterCommand(CommandType.GameConsole, _command);
+    public void InitScriptsLoader(object plugin, ScriptsLoaderConfig loaderConfig) => CommandsUtils.RegisterCommand(CommandType.Console, _command);
 }
