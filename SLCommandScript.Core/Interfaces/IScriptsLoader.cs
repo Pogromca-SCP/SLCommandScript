@@ -1,5 +1,4 @@
 ﻿using System;
-using PluginAPI.Enums;
 
 namespace SLCommandScript.Core.Interfaces;
 
@@ -12,8 +11,6 @@ public interface IScriptsLoader : IDisposable
     /// Initializes the scripts loader.
     /// </summary>
     /// <param name="plugin">Plugin object.</param>
-    /// <param name="permsResolver">Custom permissions resolver to use.</param>
-    /// <param name="eventsEnabled">Tells if custom event handlers are enabled.</param>
-    /// <param name="enabledScopes">Tells which console scopes are enabled.</param>
-    void InitScriptsLoader(object plugin, string permsResolver, bool eventsEnabled, CommandType enabledScopes);
+    /// <param name="loaderConfig">Scripts loader configuration to use.</param>
+    void InitScriptsLoader(object plugin, ScriptsLoaderConfig loaderConfig);
 }

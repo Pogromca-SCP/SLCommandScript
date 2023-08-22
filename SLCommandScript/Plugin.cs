@@ -1,7 +1,8 @@
 ﻿using PluginAPI.Core;
+using PluginAPI.Core.Attributes;
+using SLCommandScript.Core;
 using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Loader;
-using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
 using SLCommandScript.Core.Reflection;
 
@@ -37,8 +38,14 @@ public class Plugin
     /// <summary>
     /// Stores plugin configuration.
     /// </summary>
-    [PluginConfig]
+    [PluginConfig("pluginConfig")]
     public Config PluginConfig;
+
+    /// <summary>
+    /// Stores scripts loader configuration.
+    /// </summary>
+    [PluginConfig("scriptsLoaderConfig")]
+    public ScriptsLoaderConfig ScriptsLoaderConfig;
 
     /// <summary>
     /// Stores a reference to scripts loader.
@@ -86,19 +93,26 @@ public class Plugin
     /// </summary>
     private void Init()
     {
-        ReloadConfig();
+        ReloadConfigs();
         _scriptsLoader?.Dispose();
         _scriptsLoader = LoadScriptsLoader();
-        _scriptsLoader.InitScriptsLoader(this, PluginConfig.CustomPermissionsResolver, PluginConfig.EnableScriptEventHandlers, PluginConfig.AllowedScriptCommandTypes);
+        _scriptsLoader.InitScriptsLoader(this, ScriptsLoaderConfig);
     }
 
     /// <summary>
     /// Reloads plugin config values.
     /// </summary>
-    private void ReloadConfig()
+    private void ReloadConfigs()
     {
         var handler = PluginHandler.Get(this);
-        handler?.LoadConfig(this, nameof(PluginConfig));
+
+        if (handler is null)
+        {
+            return;
+        }
+
+        handler.LoadConfig(this, nameof(PluginConfig));
+        handler.LoadConfig(this, nameof(ScriptsLoaderConfig));
     }
 
     /// <summary>

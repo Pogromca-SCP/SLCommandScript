@@ -9,6 +9,7 @@ using CommandSystem;
 using SLCommandScript.Events;
 using PluginAPI.Events;
 using PluginAPI.Core;
+using SLCommandScript.Core;
 using SLCommandScript.Core.Permissions;
 using SLCommandScript.Core.Reflection;
 
@@ -163,11 +164,11 @@ public class FileScriptsLoader : IScriptsLoader
             }
 
             var cmd = Commands[name];
-            CommandDescription desc;
+            CommandMetaData desc;
             
             try
             {
-                desc = JsonSerialize.FromFile<CommandDescription>(descFile);
+                desc = JsonSerialize.FromFile<CommandMetaData>(descFile);
             }
             catch (Exception ex)
             {
@@ -177,6 +178,7 @@ public class FileScriptsLoader : IScriptsLoader
 
             cmd.Description = desc.Description;
             cmd.Usage = desc.Usage;
+            cmd.Arity = desc.Arity;
             PrintLog($"Description update for '{cmd.Command}' command finished successfully.");
         }
     }
@@ -248,7 +250,7 @@ public class FileScriptsLoader : IScriptsLoader
         /// <param name="scriptFile">Event script file to register.</param>
         private void RegisterEvent(string scriptFile)
         {
-            var cmd = new FileScriptCommand(scriptFile, PermissionsResolver);
+            var cmd = new ScriptCommandBase(scriptFile, PermissionsResolver);
             var name = cmd.Command;
 
             if (name.Length > 2 && name.StartsWith("on", StringComparison.OrdinalIgnoreCase))
@@ -363,11 +365,10 @@ public class FileScriptsLoader : IScriptsLoader
     /// Initializes scripts loader and loads the scripts.
     /// </summary>
     /// <param name="plugin">Plugin object.</param>
-    /// <param name="permsResolver">Custom permissions resolver to use.</param>
-    /// <param name="eventsEnabled">Tells if custom event handlers are enabled.</param>
-    /// <param name="enabledScopes">Tells which console scopes are enabled.</param>
-    public void InitScriptsLoader(object plugin, string permsResolver, bool eventsEnabled, CommandType enabledScopes)
+    /// <param name="loaderConfig">Scripts loader configuration to use.</param>
+    public void InitScriptsLoader(object plugin, ScriptsLoaderConfig loaderConfig)
     {
+        loaderConfig ??= new();
         var handler = PluginHandler.Get(plugin);
 
         if (handler is null)
@@ -378,14 +379,14 @@ public class FileScriptsLoader : IScriptsLoader
 
         IPermissionsResolver permissionsResolver;
 
-        if (string.IsNullOrWhiteSpace(permsResolver))
+        if (string.IsNullOrWhiteSpace(loaderConfig.CustomPermissionsResolver))
         {
             PrintLog("Using default permissions resolver.");
             permissionsResolver = new VanillaPermissionsResolver();
         }
         else
         {
-            permissionsResolver = CustomTypesUtils.MakeCustomTypeInstance<IPermissionsResolver>(permsResolver, out var message);
+            permissionsResolver = CustomTypesUtils.MakeCustomTypeInstance<IPermissionsResolver>(loaderConfig.CustomPermissionsResolver, out var message);
 
             if (permissionsResolver is null)
             {
@@ -398,10 +399,10 @@ public class FileScriptsLoader : IScriptsLoader
             }
         }
         
-        LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", eventsEnabled ? CommandType.GameConsole : 0, permissionsResolver);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", enabledScopes & CommandType.RemoteAdmin, permissionsResolver);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", enabledScopes & CommandType.Console, permissionsResolver);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/client/", enabledScopes & CommandType.GameConsole, permissionsResolver);
+        LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", loaderConfig.EnableScriptEventHandlers ? CommandType.GameConsole : 0, permissionsResolver);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", loaderConfig.AllowedScriptCommandTypes & CommandType.RemoteAdmin, permissionsResolver);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", loaderConfig.AllowedScriptCommandTypes & CommandType.Console, permissionsResolver);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/client/", loaderConfig.AllowedScriptCommandTypes & CommandType.GameConsole, permissionsResolver);
     }
 
     /// <summary>
