@@ -14,7 +14,7 @@ variable		-> \S* ("$(" IDENTIFIER ")" \S*)+
 
 directive		-> "[" directive_body "]"
 directive_body		-> foreach_loop | if_expr | delay_expr
-foreach_loop		-> inner_expression "foreach" IDENTIFIER  # Inner expression gets access to iterated objects properties through variables
+foreach_loop		-> inner_expression "foreach" TEXT  # Inner expression gets access to iterated objects properties through variables
 if_expr			-> expression "if" expression ("else" expression)?
 delay_expr		-> expression "delayby" NUMBER
 

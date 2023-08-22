@@ -365,7 +365,8 @@ public class FileScriptsLoader : IScriptsLoader
     /// <param name="plugin">Plugin object.</param>
     /// <param name="permsResolver">Custom permissions resolver to use.</param>
     /// <param name="eventsEnabled">Tells if custom event handlers are enabled.</param>
-    public void InitScriptsLoader(object plugin, string permsResolver, bool eventsEnabled)
+    /// <param name="enabledScopes">Tells which console scopes are enabled.</param>
+    public void InitScriptsLoader(object plugin, string permsResolver, bool eventsEnabled, CommandType enabledScopes)
     {
         var handler = PluginHandler.Get(plugin);
 
@@ -397,14 +398,10 @@ public class FileScriptsLoader : IScriptsLoader
             }
         }
         
-        if (eventsEnabled)
-        {
-            LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", null, permissionsResolver);
-        }
-
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", CommandType.RemoteAdmin, permissionsResolver);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", CommandType.Console, permissionsResolver);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/client/", CommandType.GameConsole, permissionsResolver);
+        LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", eventsEnabled ? CommandType.GameConsole : 0, permissionsResolver);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", enabledScopes & CommandType.RemoteAdmin, permissionsResolver);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", enabledScopes & CommandType.Console, permissionsResolver);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/client/", enabledScopes & CommandType.GameConsole, permissionsResolver);
     }
 
     /// <summary>
@@ -429,19 +426,25 @@ public class FileScriptsLoader : IScriptsLoader
     /// <param name="directory">Directory to load.</param>
     /// <param name="handlerType">Handler to use for commands registration.</param>
     /// <param name="resolver">Permissions resolver to use.</param>
-    private void LoadDirectory(object plugin, string directory, CommandType? handlerType, IPermissionsResolver resolver)
+    private void LoadDirectory(object plugin, string directory, CommandType handlerType, IPermissionsResolver resolver)
     {
+        if (handlerType == 0)
+        {
+            return;
+        }
+
         if (!Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
         }
 
-        if (handlerType == null)
+        if (plugin is null)
+        {
+            _registeredDirectories.Add(new CommandsDirectory(directory, handlerType, resolver));
+        }
+        else
         {
             _eventsDirectory = new EventsDirectory(plugin, directory, resolver);
-            return;
         }
-
-        _registeredDirectories.Add(new CommandsDirectory(directory, handlerType.Value, resolver));
     }
 }

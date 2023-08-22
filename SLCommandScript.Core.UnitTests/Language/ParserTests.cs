@@ -32,22 +32,22 @@ public class ParserTests
 
     #region Error Flow Test Case Sources
     private static readonly object[][] _errorPaths = {
-        new object[] { new Token[] { new(TokenType.ScopeGuard, null, 1), new(TokenType.Text, "bc", 1) },
-            "An unexpected token remained after parsing (TokenType: Text)" },
+        new object[] { new Token[] { new(TokenType.ScopeGuard, null, 1), new(TokenType.Variable, "bc", 1) },
+            "An unexpected token remained after parsing (TokenType: Variable)" },
 
-        new object[] { new Token[] { new(TokenType.ScopeGuard, null, 1), new(TokenType.Identifier, "RemoteAdmin", 1),
-            new(TokenType.Identifier, "Test", 1), new(TokenType.Identifier, "Console", 1) }, "'Test' is not a valid scope name" },
+        new object[] { new Token[] { new(TokenType.ScopeGuard, null, 1), new(TokenType.Text, "RemoteAdmin", 1),
+            new(TokenType.Text, "Test", 1), new(TokenType.Text, "Console", 1) }, "'Test' is not a valid scope name" },
 
-        new object[] { new Token[] { new(TokenType.Foreach, "foreach", 1), new(TokenType.Identifier, "RemoteAdmin", 1),
-            new(TokenType.Identifier, "Test", 1) }, "Command 'foreach' was not found" },
+        new object[] { new Token[] { new(TokenType.Foreach, "foreach", 1), new(TokenType.Text, "RemoteAdmin", 1),
+            new(TokenType.Text, "Test", 1) }, "Command 'foreach' was not found" },
 
-        new object[] { new Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "foreach", 1), new(TokenType.Identifier, "RemoteAdmin", 1),
-            new(TokenType.Identifier, "Test", 1), new(TokenType.RightSquare, "]", 1) }, "Command 'foreach' was not found" },
+        new object[] { new Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "foreach", 1), new(TokenType.Text, "RemoteAdmin", 1),
+            new(TokenType.Text, "Test", 1), new(TokenType.RightSquare, "]", 1) }, "Command 'foreach' was not found" },
 
-        new object[] { new Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Identifier, "RemoteAdmin", 1),
-            new(TokenType.Identifier, "Test", 1), new(TokenType.RightSquare, "]", 1) }, "Directive body is invalid" },
+        new object[] { new Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "RemoteAdmin", 1),
+            new(TokenType.Text, "Test", 1), new(TokenType.RightSquare, "]", 1) }, "Directive body is invalid" },
 
-        new object[] { new Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Identifier, "RemoteAdmin", 1),
+        new object[] { new Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "RemoteAdmin", 1),
             new(TokenType.Foreach, "foreach", 1), new(TokenType.Text, "test", 1) }, "Missing closing square bracket for directive" },
 
         new object[] { new Token[] { new(TokenType.LeftSquare, "[", 1),  new(TokenType.If, "if", 1),
@@ -112,18 +112,18 @@ public class ParserTests
 
         // bc 5 #? Console
         new object[] { new Token[] { new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1), new(TokenType.ScopeGuard, null, 1),
-            new(TokenType.Identifier, "Console", 1) }, new CommandExpr(new BroadcastCommand(), new[] { "bc", "5" }, false), CommandType.Console },
+            new(TokenType.Text, "Console", 1) }, new CommandExpr(new BroadcastCommand(), new[] { "bc", "5" }, false), CommandType.Console },
 
         // bc 5 Test #? console gameCONsole
         new object[] { new Token[] { new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1), new(TokenType.Variable, "Test", 1),
-            new(TokenType.ScopeGuard, null, 1), new(TokenType.Identifier, "console", 1), new(TokenType.Identifier, "gameCONsole", 1) },
+            new(TokenType.ScopeGuard, null, 1), new(TokenType.Text, "console", 1), new(TokenType.Text, "gameCONsole", 1) },
             new CommandExpr(new BroadcastCommand(), new[] { "bc", "5", "Test" }, false), CommandType.Console | CommandType.GameConsole },
 
         // [ bc 5 Test if bc 5 Test ] #? console remoTEADmin
         new object[] { new Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1),
             new(TokenType.Text, "Test", 1), new(TokenType.If, "if", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1),
             new(TokenType.Variable, "Test", 1), new(TokenType.RightSquare, "]", 1), new(TokenType.ScopeGuard, null, 1),
-            new(TokenType.Identifier, "console", 1), new(TokenType.Identifier, "remoTEADmin", 1) },
+            new(TokenType.Text, "console", 1), new(TokenType.Text, "remoTEADmin", 1) },
             new IfExpr(new CommandExpr(new BroadcastCommand(), new[] { "bc", "5", "Test" }, false),
                 new CommandExpr(new BroadcastCommand(), new[] { "bc", "5", "Test" }, true), null), CommandType.Console | CommandType.RemoteAdmin },
 
@@ -131,8 +131,8 @@ public class ParserTests
         new object[] { new Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1),
             new(TokenType.Text, "Test", 1), new(TokenType.If, "if", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1),
             new(TokenType.Variable, "$(Test)", 1), new(TokenType.Else, "else", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1),
-            new(TokenType.Text, "Test", 1), new(TokenType.RightSquare, "]", 1), new(TokenType.ScopeGuard, null, 1), new(TokenType.Identifier, "console", 1),
-            new(TokenType.Identifier, "remoTEADmin", 1), new(TokenType.Identifier, "gameConsole", 1) }, new IfExpr(new CommandExpr(
+            new(TokenType.Text, "Test", 1), new(TokenType.RightSquare, "]", 1), new(TokenType.ScopeGuard, null, 1), new(TokenType.Text, "console", 1),
+            new(TokenType.Text, "remoTEADmin", 1), new(TokenType.Text, "gameConsole", 1) }, new IfExpr(new CommandExpr(
                 new BroadcastCommand(), new[] { "bc", "5", "Test" }, false),
                 new CommandExpr(new BroadcastCommand(), new[] { "bc", "5", "$(Test)" }, true),
                 new CommandExpr(new BroadcastCommand(), new[] { "bc", "5", "Test" }, false)), Parser.AllScopes },
@@ -161,10 +161,10 @@ public class ParserTests
                     new BroadcastCommand(), new[] { "bc", "5", "test" }, false),
                     new CommandExpr(new CassieCommand(), new[] { "cassie", "hello" }, false), null)), Parser.AllScopes },
 
-        // [ bc 5 $(name) delayby 3 ]
+        // [ bc 5 $(na5me) delayby 3 ]
         new object[] { new Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1),
-            new(TokenType.Text, "5", 1), new(TokenType.Variable, "$(name)", 1), new(TokenType.DelayBy, "delayby", 1), new(TokenType.Text, "3", 1),
-            new(TokenType.RightSquare, "]", 1) }, new DelayExpr(new CommandExpr(new BroadcastCommand(), new[] { "bc", "5", "$(name)" }, true), 3),
+            new(TokenType.Text, "5", 1), new(TokenType.Variable, "$(na5me)", 1), new(TokenType.DelayBy, "delayby", 1), new(TokenType.Text, "3", 1),
+            new(TokenType.RightSquare, "]", 1) }, new DelayExpr(new CommandExpr(new BroadcastCommand(), new[] { "bc", "5", "$(na5me)" }, true), 3),
             Parser.AllScopes },
 
         // [ [ bc 5 Test foreach test ] delayby 034 ]

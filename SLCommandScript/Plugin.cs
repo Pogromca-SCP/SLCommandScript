@@ -13,7 +13,7 @@ namespace SLCommandScript;
 public class Plugin
 {
     public const string PluginName = "SLCommandScript";
-    public const string PluginVersion = "0.2.2";
+    public const string PluginVersion = "0.2.3";
     public const string PluginDescription = "Simple, commands based scripting language.";
     public const string PluginAuthor = "Adam Szerszenowicz";
 
@@ -89,7 +89,7 @@ public class Plugin
         ReloadConfig();
         _scriptsLoader?.Dispose();
         _scriptsLoader = LoadScriptsLoader();
-        _scriptsLoader.InitScriptsLoader(this, PluginConfig.CustomPermissionsResolver, PluginConfig.EnableScriptEventHandlers);
+        _scriptsLoader.InitScriptsLoader(this, PluginConfig.CustomPermissionsResolver, PluginConfig.EnableScriptEventHandlers, PluginConfig.AllowedScriptCommandTypes);
     }
 
     /// <summary>

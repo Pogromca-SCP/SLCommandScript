@@ -9,7 +9,6 @@ public enum TokenType : byte
     LeftSquare,
     RightSquare,
     ScopeGuard,
-    Identifier,
     Variable,
     Text,
     If,

@@ -78,7 +78,7 @@ public class Parser
     /// <returns>Parsed expression or <see langword="null" /> if something went wrong.</returns>
     public Expr Parse()
     {
-        if (ErrorMessage is not null)
+        if (ErrorMessage is not null || IsAtEnd)
         {
             return null;
         }
@@ -263,7 +263,7 @@ public class Parser
 
         while (CheckNot(TokenType.ScopeGuard) && (!isInner || (_tokens[_current].Type != TokenType.RightSquare && _tokens[_current].Type < TokenType.If)))
         {
-            if (_tokens[_current].Type == TokenType.Variable && isInner)
+            if (_tokens[_current].Type == TokenType.Variable && isInner && !hasVars)
             {
                 hasVars = true;
             }
@@ -284,9 +284,9 @@ public class Parser
     {
         CommandType scope = 0;
 
-        while (Check(TokenType.Identifier))
+        while (Check(TokenType.Text))
         {
-            var parsed = Enum.TryParse<CommandType>(_tokens[_current].Value, true, out var result);
+            var parsed = Enum.TryParse<CommandType>(_tokens[_current].Value ?? string.Empty, true, out var result);
 
             if (!parsed)
             {

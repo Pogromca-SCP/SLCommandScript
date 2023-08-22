@@ -41,9 +41,9 @@ public class FileScriptCommand : ICommand, IUsageProvider
 
         while (!lexer.IsAtEnd)
         {
-            lexer.ScanNextLine();
+            var result = lexer.ScanNextLine();
 
-            if (lexer.ErrorMessage is not null)
+            if (!result)
             {
                 return lexer.ErrorMessage;
             }
@@ -59,7 +59,7 @@ public class FileScriptCommand : ICommand, IUsageProvider
             if (expr is not null)
             {
                 expr.Accept(resolver);
-                var result = expr.Accept(interpreter);
+                result = expr.Accept(interpreter);
 
                 if (!result)
                 {

@@ -190,7 +190,7 @@ public class Lexer : IDisposable
         ListPool<Token>.Shared.Return(_tokens);
         _tokens = null;
 
-        if (_argLexers is not null)
+        if (IsTopLevel)
         {
             ClearArguments();
         }
@@ -199,15 +199,25 @@ public class Lexer : IDisposable
     /// <summary>
     /// Tokenizes next source code line.
     /// </summary>
-    /// <returns>List of all tokens found in processed line.</returns>
-    public IList<Token> ScanNextLine()
+    /// <returns><see langword="true" /> if tokenization finished without errors, <see langword="false" /> otherwise.</returns>
+    public bool ScanNextLine()
     {
+        if (ErrorMessage is not null)
+        {
+            return false;
+        }
+
         if (_tokens is null)
         {
             ErrorMessage = "Cannot tokenize script with disposed lexer";
-            return null;
+            return false;
         }
-        
+
+        if (IsAtEnd)
+        {
+            return true;
+        }
+
         _tokens.Clear();
         ++Line;
         var canRead = true;
@@ -218,7 +228,7 @@ public class Lexer : IDisposable
             canRead = ScanToken();
         }
 
-        return _tokens;
+        return ErrorMessage is null;
     }
 
     /// <summary>
@@ -590,7 +600,7 @@ public class Lexer : IDisposable
             Advance();
         }
 
-        AddToken(TokenType.Identifier);
+        AddToken(TokenType.Text);
     }
 
     /// <summary>
@@ -667,9 +677,9 @@ public class Lexer : IDisposable
 
         var lexer = new Lexer(_arguments.Array[_arguments.Offset + argNum - 1]);
         _argLexers[argNum] = lexer;
-        lexer.ScanNextLine();
+        var result = lexer.ScanNextLine();
 
-        if (lexer.ErrorMessage is not null)
+        if (!result)
         {
             ErrorMessage = $"{lexer.ErrorMessage}\nat $({argNum})";
             return TokenType.Text;
