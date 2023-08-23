@@ -286,7 +286,7 @@ public class Parser
 
         while (Check(TokenType.Text))
         {
-            var parsed = Enum.TryParse<CommandType>(_tokens[_current].Value ?? string.Empty, true, out var result);
+            var parsed = Enum.TryParse<CommandType>(_tokens[_current].Value, true, out var result);
 
             if (!parsed)
             {
