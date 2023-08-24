@@ -250,7 +250,7 @@ public class FileScriptsLoader : IScriptsLoader
         /// <param name="scriptFile">Event script file to register.</param>
         private void RegisterEvent(string scriptFile)
         {
-            var cmd = new ScriptCommandBase(scriptFile, PermissionsResolver);
+            var cmd = new FileScriptCommandBase(scriptFile, PermissionsResolver);
             var name = cmd.Command;
 
             if (name.Length > 2 && name.StartsWith("on", StringComparison.OrdinalIgnoreCase))
@@ -313,7 +313,7 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Defines script files extension filter.
     /// </summary>
-    private const string ScriptFilesFilter = "*.slc";
+    private const string ScriptFilesFilter = "*.slcs";
 
     /// <summary>
     /// Defines description files extension filter.

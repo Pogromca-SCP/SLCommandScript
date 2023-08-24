@@ -8,7 +8,7 @@ namespace SLCommandScript.Commands;
 /// <summary>
 /// Script command used to launch interpreted scripts.
 /// </summary>
-public class FileScriptCommand : ScriptCommandBase, IUsageProvider
+public class FileScriptCommand : FileScriptCommandBase, IUsageProvider
 {
     /// <summary>
     /// Describes command arguments usage.

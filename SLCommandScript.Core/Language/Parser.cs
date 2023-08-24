@@ -19,19 +19,42 @@ public class Parser
     /// </summary>
     public const CommandType AllScopes = CommandType.RemoteAdmin | CommandType.Console | CommandType.GameConsole;
 
+    #region Iterables
     /// <summary>
     /// Contains iterable objects providers used in foreach expressions.
     /// </summary>
     public static Dictionary<string, Func<IIterable>> Iterables { get; } = new(StringComparer.OrdinalIgnoreCase)
     {
+        // Players
         { "player", PlayerIterablesProvider.AllPlayers },
         { "classd", PlayerIterablesProvider.AllClassDs },
         { "scientist", PlayerIterablesProvider.AllScientists },
         { "mtf", PlayerIterablesProvider.AllMTFs },
         { "chaos", PlayerIterablesProvider.AllChaos },
         { "scp", PlayerIterablesProvider.AllSCPs },
-        { "human", PlayerIterablesProvider.AllHumans }
+        { "human", PlayerIterablesProvider.AllHumans },
+        { "tutorial", PlayerIterablesProvider.AllTutorials },
+        { "spectator", PlayerIterablesProvider.AllSpectators },
+        { "alive_player", PlayerIterablesProvider.AllAlive },
+        { "disarmed_player", PlayerIterablesProvider.AllDisarmed },
+
+        // Rooms
+        { "room", RoomIterablesProvider.AllRooms },
+        { "lcz_room", RoomIterablesProvider.AllLightRooms },
+        { "hcz_room", RoomIterablesProvider.AllHeavyRooms },
+        { "ez_room", RoomIterablesProvider.AllEntranceRooms },
+        { "surface_room", RoomIterablesProvider.AllSurfaceRooms },
+
+        // Doors
+        { "door", DoorIterablesProvider.AllDoors },
+        { "breakable_door", DoorIterablesProvider.AllBreakableDoors },
+        { "gate", DoorIterablesProvider.AllGates },
+        { "locked_door", DoorIterablesProvider.AllLockedDoors },
+        { "unlocked_door", DoorIterablesProvider.AllUnlockedDoors },
+        { "opened_door", DoorIterablesProvider.AllOpenedDoors },
+        { "closed_door", DoorIterablesProvider.AllClosedDoors }
     };
+    #endregion
 
     #region Fields and Properties
     /// <summary>
@@ -351,7 +374,7 @@ public class Parser
             return null;
         }
 
-        if (!Check(TokenType.Text))
+        if (IsAtEnd || _tokens[_current].Type < TokenType.Variable)
         {
             ErrorMessage = "Iterable object name is missing";
             return null;

@@ -13,7 +13,7 @@ namespace SLCommandScript.Commands;
 /// <summary>
 /// Base class for script executing commands.
 /// </summary>
-public class ScriptCommandBase : ICommand
+public class FileScriptCommandBase : ICommand
 {
     /// <summary>
     /// Default command description to use.
@@ -110,7 +110,7 @@ public class ScriptCommandBase : ICommand
     /// </summary>
     /// <param name="file">Path to associated script.</param>
     /// <param name="resolver">Permissions resolver to use.</param>
-    public ScriptCommandBase(string file, IPermissionsResolver resolver)
+    public FileScriptCommandBase(string file, IPermissionsResolver resolver)
     {
         Command = Path.GetFileNameWithoutExtension(file);
         _file = file;
@@ -140,11 +140,11 @@ public class ScriptCommandBase : ICommand
         if (Interlocked.Decrement(ref _calls) < 1)
         {
             var message = _loadedScripts.TryRemove(_file, out _) ? "Unloaded" : "Failed to unload";
-            Log.Debug($"{message} script - {Command}.slc", DebugPrefix);
+            Log.Debug($"{message} script - {Command}.slcs", DebugPrefix);
         }
 
         var result = response is null;
-        response = result ? "Script executed successfully." : $"{response}\nat {Command}.slc:{line}";
+        response = result ? "Script executed successfully." : $"{response}\nat {Command}.slcs:{line}";
         return result;
     }
 
@@ -160,7 +160,7 @@ public class ScriptCommandBase : ICommand
         }
 
         var src = File.ReadAllText(_file);
-        Log.Debug($"Loaded script - {Command}.slc", DebugPrefix);
+        Log.Debug($"Loaded script - {Command}.slcs", DebugPrefix);
         _loadedScripts[_file] = src;
         return src;
     }
