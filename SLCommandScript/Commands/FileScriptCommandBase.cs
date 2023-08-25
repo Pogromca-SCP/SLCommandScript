@@ -35,7 +35,6 @@ public class FileScriptCommandBase : ICommand
     private static string Interpret(Lexer lexer)
     {
         var parser = new Parser(lexer.Tokens);
-        var resolver = new Resolver();
         var interpreter = new Interpreter(lexer.Sender);
 
         while (!lexer.IsAtEnd)
@@ -57,7 +56,6 @@ public class FileScriptCommandBase : ICommand
 
             if (expr is not null)
             {
-                expr.Accept(resolver);
                 result = expr.Accept(interpreter);
 
                 if (!result)
