@@ -14,7 +14,7 @@ namespace SLCommandScript;
 public class Plugin
 {
     public const string PluginName = "SLCommandScript";
-    public const string PluginVersion = "0.2.3";
+    public const string PluginVersion = "0.3.0";
     public const string PluginDescription = "Simple, commands based scripting language.";
     public const string PluginAuthor = "Adam Szerszenowicz";
 

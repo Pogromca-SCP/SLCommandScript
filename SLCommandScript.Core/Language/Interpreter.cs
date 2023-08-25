@@ -1,10 +1,10 @@
 ﻿using SLCommandScript.Core.Interfaces;
+using System.Collections.Generic;
+using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using PluginAPI.Core;
 using CommandSystem;
-using System.Collections.Generic;
-using System;
 using SLCommandScript.Core.Language.Expressions;
 
 namespace SLCommandScript.Core.Language;
@@ -14,6 +14,34 @@ namespace SLCommandScript.Core.Language;
 /// </summary>
 public class Interpreter : IExprVisitor<bool>
 {
+    /// <summary>
+    /// Represents variables scope.
+    /// </summary>
+    private class Scope : Dictionary<string, string>
+    {
+        /// <summary>
+        /// Contains reference to higher variable scope.
+        /// </summary>
+        public Scope Next;
+
+        /// <summary>
+        /// Creates new variables scope.
+        /// </summary>
+        /// <param name="next">Higher variables scope to copy values from.</param>
+        public Scope(Scope next) : base(StringComparer.OrdinalIgnoreCase)
+        {
+            Next = next;
+
+            if (next is not null)
+            {
+                foreach (var ent in next)
+                {
+                    Add(ent.Key, ent.Value);
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Contains regular expression for variables.
     /// </summary>
@@ -49,7 +77,7 @@ public class Interpreter : IExprVisitor<bool>
     /// <summary>
     /// Contains current variable values.
     /// </summary>
-    private readonly Dictionary<string, string> _variables;
+    private Scope _variables;
     #endregion
 
     #region State Management
@@ -60,18 +88,21 @@ public class Interpreter : IExprVisitor<bool>
     public Interpreter(ICommandSender sender)
     {
         Reset(sender);
-        _variables = new(StringComparer.OrdinalIgnoreCase);
+        _variables = null;
     }
 
     /// <summary>
     /// Creates new interpreter instance.
     /// </summary>
     /// <param name="src">Interpreter to copy data from.</param>
-    private Interpreter(Interpreter src) : this(src.Sender)
+    private Interpreter(Interpreter src)
     {
-        foreach (var ent in src._variables)
+        Reset(src.Sender);
+        _variables = src._variables is null ? null : new(src._variables);
+
+        if (_variables is not null)
         {
-            _variables.Add(ent.Key, ent.Value);
+            _variables.Next = null;
         }
     }
 
@@ -178,18 +209,20 @@ public class Interpreter : IExprVisitor<bool>
             return false;
         }
 
+        _variables = new(_variables);
+
         while (expr.Iterable.LoadNext(_variables))
         {
             var result = expr.Body.Accept(this);
 
             if (!result)
             {
-                _variables.Clear();
+                _variables = _variables.Next;
                 return false;
             }
         }
 
-        _variables.Clear();
+        _variables = _variables.Next;
         ErrorMessage = null;
         return true;
     }
@@ -243,6 +276,11 @@ public class Interpreter : IExprVisitor<bool>
     /// <returns>Arguments with injected variables values.</returns>
     private string[] InjectArguments(string[] args)
     {
+        if (_variables is null)
+        {
+            return args;
+        }
+
         var results = new string[args.Length];
         results[0] = args[0];
 
