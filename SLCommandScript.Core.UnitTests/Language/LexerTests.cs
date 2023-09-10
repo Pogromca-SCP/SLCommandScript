@@ -567,7 +567,7 @@ public class LexerTests
 
         // Act
         var result = lexer.ScanNextLine();
-        lexer.Reset(newSrc, new(), senderMock.Object, resolverMock.Object);
+        lexer.Reset(newSrc, senderMock.Object, resolverMock.Object);
 
         // Assert
         result.Should().BeEmpty();
@@ -663,7 +663,6 @@ public class LexerTests
 
         // Assert
         lexer.Source.Should().Be(string.Empty);
-        lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().BeNull();
         lexer.Line.Should().Be(0);
@@ -685,13 +684,13 @@ public class LexerTests
         var result = lexer.ScanNextLine();
 
         // Assert
-        lexer.Source.Should().Be(BlankLine);
+        lexer.Source.Should().Be(src);
         lexer.Arguments.Should().BeEmpty();
         lexer.Sender.Should().BeNull();
         lexer.PermissionsResolver.Should().NotBeNull();
-        lexer.Line.Should().Be(0);
-        lexer.ErrorMessage.Should().Be("Invalid argument $(1), provided arguments array is null");
-        lexer.IsAtEnd.Should().BeFalse();
+        lexer.Line.Should().Be(1);
+        lexer.ErrorMessage.Should().Be("Invalid argument $(1), provided arguments array has incorrect offset (0)");
+        lexer.IsAtEnd.Should().BeTrue();
         result.Should().BeEmpty();
     }
 
