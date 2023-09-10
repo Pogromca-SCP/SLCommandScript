@@ -59,7 +59,7 @@ public class Interpreter : IExprVisitor<bool>
 
         if (!result)
         {
-            Log.Error(interp.ErrorMessage, "Async script: ");
+            Log.Error(interp.ErrorMessage, expr.Name is null ? "Async script: " : $"Async script ('{expr.Name}'): ");
         }
     }
 

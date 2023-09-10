@@ -34,20 +34,19 @@ public class FileScriptCommandBase : ICommand
     /// <returns>Error message if something goes wrong, <see langword="null" /> otherwise.</returns>
     private static string Interpret(Lexer lexer)
     {
-        var parser = new Parser(lexer.Tokens);
+        var parser = new Parser();
         var interpreter = new Interpreter(lexer.Sender);
 
         while (!lexer.IsAtEnd)
         {
-            var result = lexer.ScanNextLine();
+            var tokens = lexer.ScanNextLine();
 
-            if (!result)
+            if (lexer.ErrorMessage is not null)
             {
                 return lexer.ErrorMessage;
             }
 
-            parser.Reset();
-            var expr = parser.Parse();
+            var expr = parser.Parse(tokens);
 
             if (parser.ErrorMessage is not null)
             {
@@ -56,7 +55,7 @@ public class FileScriptCommandBase : ICommand
 
             if (expr is not null)
             {
-                result = expr.Accept(interpreter);
+                var result = expr.Accept(interpreter);
 
                 if (!result)
                 {
@@ -127,13 +126,10 @@ public class FileScriptCommandBase : ICommand
     public virtual bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
         Interlocked.Increment(ref _calls);
-        var line = 0;
-
-        using (var lexer = new Lexer(LoadSource(), arguments, sender, _resolver))
-        {
-            response = Interpret(lexer);
-            line = lexer.Line;
-        }
+        var lexer = Lexer.Rent(LoadSource(), arguments, sender, _resolver);
+        response = Interpret(lexer);
+        var line = lexer.Line;
+        Lexer.Return(lexer);
 
         if (Interlocked.Decrement(ref _calls) < 1)
         {

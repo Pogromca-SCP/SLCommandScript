@@ -65,17 +65,17 @@ public class Parser
     /// <summary>
     /// Contains current commands scope.
     /// </summary>
-    public CommandType Scope { get; private set; }
+    public CommandType Scope { get; set; } = AllScopes;
 
     /// <summary>
     /// <see langword="true" /> if tokens end was reached, <see langword="false" /> otherwise.
     /// </summary>
-    public bool IsAtEnd => _current >= _tokens.Count;
+    private bool IsAtEnd => _current >= _tokens.Count;
 
     /// <summary>
     /// Contains a list with tokens to process.
     /// </summary>
-    private readonly IList<Token> _tokens;
+    private IList<Token> _tokens;
 
     /// <summary>
     /// Contains current token index.
@@ -85,31 +85,26 @@ public class Parser
 
     #region State Management
     /// <summary>
-    /// Creates new parser instance.
-    /// </summary>
-    /// <param name="tokens">List with tokens to process.</param>
-    /// <param name="scope">Initial commands scope to use.</param>
-    public Parser(IList<Token> tokens, CommandType scope = AllScopes)
-    {
-        _tokens = tokens ?? new List<Token>(0);
-        Reset(scope);
-    }
-
-    /// <summary>
     /// Parses an expression from provided tokens list.
     /// </summary>
+    /// <param name="tokens">List with tokens to process.</param>
     /// <returns>Parsed expression or <see langword="null" /> if something went wrong.</returns>
-    public Expr Parse()
+    public Expr Parse(IList<Token> tokens)
     {
-        if (ErrorMessage is not null || IsAtEnd)
+        if (tokens is null)
         {
+            ErrorMessage = "Provided tokens list to parse was null";
             return null;
         }
 
+        ErrorMessage = null;
+        _tokens = tokens;
+        _current = 0;
         var expr = ParseExpr(false);
 
         if (ErrorMessage is not null)
         {
+            _tokens = null;
             return null;
         }
 
@@ -117,35 +112,19 @@ public class Parser
 
         if (ErrorMessage is not null)
         {
+            _tokens = null;
             return null;
         }
 
         if (!IsAtEnd)
         {
             ErrorMessage = $"An unexpected token remained after parsing (TokenType: {_tokens[_current].Type})";
+            _tokens = null;
             return null;
         }
-  
+
+        _tokens = null;
         return expr;
-    }
-
-    /// <summary>
-    /// Resets the parsing process.
-    /// </summary>
-    public void Reset()
-    {
-        _current = 0;
-        ErrorMessage = null;
-    }
-
-    /// <summary>
-    /// Resets the parsing process and changes used commands scope.
-    /// </summary>
-    /// <param name="newScope">New commands scope to use.</param>
-    public void Reset(CommandType newScope)
-    {
-        Scope = newScope;
-        Reset();
     }
 
     /// <summary>
@@ -440,7 +419,15 @@ public class Parser
         }
 
         Advance();
-        return new(body, duration);
+        string name = null;
+
+        if (!IsAtEnd && _tokens[_current].Type > TokenType.ScopeGuard)
+        {
+            name = _tokens[_current].Value;
+            Advance();
+        }
+
+        return new(body, duration, name);
     }
     #endregion
 }

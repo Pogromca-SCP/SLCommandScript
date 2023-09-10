@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System;
+using System.Collections.Concurrent;
 using CommandSystem;
 using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Permissions;
-using NorthwoodLib.Pools;
 using System.Linq;
 
 namespace SLCommandScript.Core.Language;
@@ -11,7 +11,7 @@ namespace SLCommandScript.Core.Language;
 /// <summary>
 /// Performs tokenization of provided source code.
 /// </summary>
-public class Lexer : IDisposable
+public class Lexer
 {
     #region Static Elements
     /// <summary>
@@ -24,6 +24,78 @@ public class Lexer : IDisposable
         { "foreach", TokenType.Foreach },
         { "delayby", TokenType.DelayBy }
     };
+
+    /// <summary>
+    /// Contains all available top level lexers.
+    /// </summary>
+    private static readonly ConcurrentQueue<Lexer> _topLevelLexers = new();
+
+    /// <summary>
+    /// Contains all available argument lexers.
+    /// </summary>
+    private static readonly ConcurrentQueue<Lexer> _argumentLexers = new();
+
+    /// <summary>
+    /// Rents a top level lexer instance.
+    /// </summary>
+    /// <param name="source">Source code to tokenize.</param>
+    /// <param name="arguments">Script arguments to inject.</param>
+    /// <param name="sender">Command sender to use for permissions guards evaluation.</param>
+    /// <param name="resolver">Permissions resolver to use for permissions guards evaluation.</param>
+    /// <returns>Rented top level lexer.</returns>
+    public static Lexer Rent(string source, ArraySegment<string> arguments, ICommandSender sender, IPermissionsResolver resolver = null)
+    {
+        if (!_topLevelLexers.TryDequeue(out var result))
+        {
+            result = new(true);
+        }
+
+        result.Reset(source, arguments, sender, resolver);
+        return result;
+    }
+
+    /// <summary>
+    /// Returns a lexer instance to the correct pool.
+    /// </summary>
+    /// <param name="lexer">Lexer to return.</param>
+    public static void Return(Lexer lexer)
+    {
+        if (lexer is not null)
+        {
+            lexer.Source = string.Empty;
+            lexer.ErrorMessage = null;
+
+            if (lexer.IsTopLevel)
+            {
+                lexer.Arguments = new();
+                lexer.Sender = null;
+                lexer.PermissionsResolver = null;
+                lexer.ClearArguments();
+                lexer._prefix = string.Empty;
+                _topLevelLexers.Enqueue(lexer);
+            }
+            else
+            {
+                _argumentLexers.Enqueue(lexer);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Rents an argument lexer instance.
+    /// </summary>
+    /// <param name="source">Source code to tokenize.</param>
+    /// <returns>Rented argument lexer.</returns>
+    private static Lexer Rent(string source)
+    {
+        if (!_argumentLexers.TryDequeue(out var result))
+        {
+            result = new(false);
+        }
+
+        result.Reset(source);
+        return result;
+    }
 
     /// <summary>
     /// Checks if provided character is a whitespace.
@@ -51,7 +123,7 @@ public class Lexer : IDisposable
     /// <summary>
     /// Contains tokenized source code.
     /// </summary>
-    public string Source { get; }
+    public string Source { get; private set; }
 
     /// <summary>
     /// Contains script arguments.
@@ -92,11 +164,6 @@ public class Lexer : IDisposable
     public bool IsAtEnd => _current >= Source.Length;
 
     /// <summary>
-    /// Contains a list with processed tokens.
-    /// </summary>
-    public IList<Token> Tokens => _tokens;
-
-    /// <summary>
     /// Current character getter with bounds checking.
     /// </summary>
     private char Current => IsAtEnd ? '\0' : Source[_current];
@@ -124,7 +191,7 @@ public class Lexer : IDisposable
     /// <summary>
     /// Contains a list to output found tokens into.
     /// </summary>
-    private List<Token> _tokens;
+    private readonly List<Token> _tokens;
 
     /// <summary>
     /// Caches provided arguments processing results.
@@ -151,71 +218,26 @@ public class Lexer : IDisposable
     /// <summary>
     /// Creates new lexer instance.
     /// </summary>
-    /// <param name="source">Source code to tokenize.</param>
-    /// <param name="arguments">Script arguments to inject.</param>
-    /// <param name="">Command sender to use for permissions guards evaluation.</param>
-    /// <param name="">Permissions resolver to use for permissions guards evaluation.</param>
-    public Lexer(string source, ArraySegment<string> arguments, ICommandSender sender, IPermissionsResolver resolver = null)
+    /// <param name="isTopLevel">Whether or not this lexer should be top level.</param>
+    private Lexer(bool isTopLevel)
     {
-        Source = source ?? string.Empty;
-        _arguments = arguments;
-        Sender = sender;
-        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
-        _tokens = ListPool<Token>.Shared.Rent();
-        _argLexers = new();
-        Reset();
-    }
-
-    /// <summary>
-    /// Creates new lexer instance.
-    /// </summary>
-    /// <param name="source">Source code to tokenize.</param>
-    /// <param name="line">Line number to use.</param>
-    private Lexer(string source)
-    {
-        Source = source ?? string.Empty;
+        Source = string.Empty;
         _arguments = new();
         Sender = null;
         PermissionsResolver = null;
-        _tokens = ListPool<Token>.Shared.Rent();
-        _argLexers = null;
-        Reset();
-    }
-
-    /// <summary>
-    /// Releases lexer resources.
-    /// </summary>
-    public void Dispose()
-    {
-        ListPool<Token>.Shared.Return(_tokens);
-        _tokens = null;
-
-        if (IsTopLevel)
-        {
-            ClearArguments();
-        }
+        _tokens = new();
+        _argLexers = isTopLevel ? new() : null;
     }
 
     /// <summary>
     /// Tokenizes next source code line.
     /// </summary>
-    /// <returns><see langword="true" /> if tokenization finished without errors, <see langword="false" /> otherwise.</returns>
-    public bool ScanNextLine()
+    /// <returns>List with processed tokens.</returns>
+    public IList<Token> ScanNextLine()
     {
-        if (ErrorMessage is not null)
+        if (ErrorMessage is not null || IsAtEnd)
         {
-            return false;
-        }
-
-        if (_tokens is null)
-        {
-            ErrorMessage = "Cannot tokenize script with disposed lexer";
-            return false;
-        }
-
-        if (IsAtEnd)
-        {
-            return true;
+            return _tokens;
         }
 
         _tokens.Clear();
@@ -228,7 +250,7 @@ public class Lexer : IDisposable
             canRead = ScanToken();
         }
 
-        return ErrorMessage is null;
+        return _tokens;
     }
 
     /// <summary>
@@ -242,6 +264,16 @@ public class Lexer : IDisposable
         _current = 0;
         ErrorMessage = null;
         _prefix = string.Empty;
+    }
+
+    /// <summary>
+    /// Resets the tokenization process.
+    /// </summary>
+    /// <param name="source">New source code to tokenize.</param>
+    public void Reset(string source)
+    {
+        Source = source ?? string.Empty;
+        Reset();
     }
 
     /// <summary>
@@ -270,6 +302,42 @@ public class Lexer : IDisposable
     /// <param name="resolver">New permissions resolver to use.</param>
     public void Reset(IPermissionsResolver resolver)
     {
+        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        Reset();
+    }
+
+    /// <summary>
+    /// Resets the tokenization process.
+    /// </summary>
+    /// <param name="source">New source code to tokenize.</param>
+    /// <param name="arguments">New script arguments to inject.</param>
+    public void Reset(string source, ArraySegment<string> arguments)
+    {
+        Source = source ?? string.Empty;
+        Arguments = arguments;
+        Reset();
+    }
+
+    /// <summary>
+    /// Resets the tokenization process.
+    /// </summary>
+    /// <param name="source">New source code to tokenize.</param>
+    /// <param name="sender">New command sender to use.</param>
+    public void Reset(string source, ICommandSender sender)
+    {
+        Source = source ?? string.Empty;
+        Sender = sender;
+        Reset();
+    }
+
+    /// <summary>
+    /// Resets the tokenization process.
+    /// </summary>
+    /// <param name="source">New source code to tokenize.</param>
+    /// <param name="resolver">New permissions resolver to use.</param>
+    public void Reset(string source, IPermissionsResolver resolver)
+    {
+        Source = source ?? string.Empty;
         PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
         Reset();
     }
@@ -325,13 +393,71 @@ public class Lexer : IDisposable
     }
 
     /// <summary>
+    /// Resets the tokenization process.
+    /// </summary>
+    /// <param name="source">New source code to tokenize.</param>
+    /// <param name="sender">New command sender to use.</param>
+    /// <param name="resolver">New permissions resolver to use.</param>
+    public void Reset(string source, ICommandSender sender, IPermissionsResolver resolver)
+    {
+        Source = source ?? string.Empty;
+        Sender = sender;
+        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        Reset();
+    }
+
+    /// <summary>
+    /// Resets the tokenization process.
+    /// </summary>
+    /// <param name="source">New source code to tokenize.</param>
+    /// <param name="arguments">New script arguments to inject.</param>
+    /// <param name="resolver">New permissions resolver to use.</param>
+    public void Reset(string source, ArraySegment<string> arguments, IPermissionsResolver resolver)
+    {
+        Source = source ?? string.Empty;
+        Arguments = arguments;
+        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        Reset();
+    }
+
+    /// <summary>
+    /// Resets the tokenization process.
+    /// </summary>
+    /// <param name="source">New source code to tokenize.</param>
+    /// <param name="arguments">New script arguments to inject.</param>
+    /// <param name="sender">New command sender to use.</param>
+    public void Reset(string source, ArraySegment<string> arguments, ICommandSender sender)
+    {
+        Source = source ?? string.Empty;
+        Arguments = arguments;
+        Sender = sender;
+        Reset();
+    }
+
+    /// <summary>
+    /// Resets the tokenization process.
+    /// </summary>
+    /// <param name="source">New source code to tokenize.</param>
+    /// <param name="arguments">New script arguments to inject.</param>
+    /// <param name="sender">New command sender to use.</param>
+    /// <param name="resolver">New permissions resolver to use.</param>
+    public void Reset(string source, ArraySegment<string> arguments, ICommandSender sender, IPermissionsResolver resolver)
+    {
+        Source = source ?? string.Empty;
+        Arguments = arguments;
+        Sender = sender;
+        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        Reset();
+    }
+
+    /// <summary>
     /// Disposes arguments lexers.
     /// </summary>
     private void ClearArguments()
     {
         foreach (var lexer in _argLexers.Values)
         {
-            lexer.Dispose();
+            Return(lexer);
         }
 
         _argLexers.Clear();
@@ -675,11 +801,11 @@ public class Lexer : IDisposable
             return InjectArg(_argLexers[argNum], startedAt, isVarText);
         }
 
-        var lexer = new Lexer(_arguments.Array[_arguments.Offset + argNum - 1]);
+        var lexer = Rent(_arguments.Array[_arguments.Offset + argNum - 1]);
         _argLexers[argNum] = lexer;
-        var result = lexer.ScanNextLine();
+        lexer.ScanNextLine();
 
-        if (!result)
+        if (lexer.ErrorMessage is not null)
         {
             ErrorMessage = $"{lexer.ErrorMessage}\nat $({argNum})";
             return TokenType.Text;

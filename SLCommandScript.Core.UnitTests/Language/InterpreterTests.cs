@@ -207,7 +207,7 @@ public class InterpreterTests
     {
         // Arrange
         var interpreter = new Interpreter(null);
-        var expr = new DelayExpr(null, 0);
+        var expr = new DelayExpr(null, 0, null);
 
         // Act
         var result = interpreter.VisitDelayExpr(expr);
@@ -226,7 +226,7 @@ public class InterpreterTests
         var message = success ? "Command succeeded" : "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(success);
-        var expr = new DelayExpr(new CommandExpr(commandMock.Object, new[] { "test" }, false), 0);
+        var expr = new DelayExpr(new CommandExpr(commandMock.Object, new[] { "test" }, false), 0, null);
 
         // Act
         var result = interpreter.VisitDelayExpr(expr);
@@ -248,7 +248,7 @@ public class InterpreterTests
         var message = success ? "Command succeeded" : "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(success);
-        var expr = new DelayExpr(new CommandExpr(commandMock.Object, new[] { "test" }, false), delay);
+        var expr = new DelayExpr(new CommandExpr(commandMock.Object, new[] { "test" }, false), delay, null);
 
         // Act
         var result = interpreter.VisitDelayExpr(expr);
