@@ -42,7 +42,7 @@ public static class PlayerIterablesProvider
     /// Retrieves iterable object for all players.
     /// </summary>
     /// <returns>Iterable object for all players.</returns>
-    public static IIterable AllPlayers() => new PlayersIterable(Player.GetPlayers());
+    public static IIterable AllPlayers() => new PlayersIterable(GetValidPlayers());
 
     /// <summary>
     /// Retrieves iterable object for all class d personnel.
@@ -105,9 +105,15 @@ public static class PlayerIterablesProvider
     public static IIterable AllDisarmed() => FilteredPlayers(p => p.IsDisarmed);
 
     /// <summary>
+    /// Retrieves all players without dedicated server instance.
+    /// </summary>
+    /// <returns>Filtered list of valid players.</returns>
+    private static IEnumerable<Player> GetValidPlayers() => ServerStatic.IsDedicated ? Player.GetPlayers().Where(p => !p.IsServer) : Player.GetPlayers();
+
+    /// <summary>
     /// Retrieves iterable object for filtered players.
     /// </summary>
     /// <param name="filter">Filter to apply.</param>
     /// <returns>Iterable object for filtered players.</returns>
-    private static IIterable FilteredPlayers(Func<Player, bool> filter) => new PlayersIterable(Player.GetPlayers().Where(filter));
+    private static IIterable FilteredPlayers(Func<Player, bool> filter) => new PlayersIterable(GetValidPlayers().Where(filter));
 }
