@@ -787,10 +787,8 @@ public class LexerTests
     public void ScanNextLine_ShouldReturnProperTokens_WhenGoldFlow(string src, string[] args, PlayerPermissions perms, Token[] expectedTokens, int expectedLine)
     {
         // Arrange
-        var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
-        senderMock.Setup(x => x.FullPermissions).Returns(false);
-        senderMock.Setup(x => x.Permissions).Returns((ulong) perms);
-        var lexer = Lexer.Rent(src, new(args, 1, args.Length - 1), senderMock.Object);
+        var resolver = new LexerTestResolver(perms);
+        var lexer = Lexer.Rent(src, new(args, 1, args.Length - 1), null, resolver);
         var result = new List<Token>();
 
         // Act
@@ -802,12 +800,29 @@ public class LexerTests
         // Assert
         lexer.Source.Should().Be(src);
         lexer.Arguments.Should().HaveCount(args.Length - 1);
-        lexer.Sender.Should().Be(senderMock.Object);
-        lexer.PermissionsResolver.Should().NotBeNull();
+        lexer.Sender.Should().BeNull();
+        lexer.PermissionsResolver.Should().Be(resolver);
         lexer.Line.Should().Be(expectedLine);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeTrue();
         result.Should().BeEquivalentTo(expectedTokens, options => options.ComparingByValue<Token>());
     }
     #endregion
+}
+
+public class LexerTestResolver : IPermissionsResolver
+{
+    public PlayerPermissions Permissions { get; }
+
+    public LexerTestResolver(PlayerPermissions permissions)
+    {
+        Permissions = permissions;
+    }
+
+    public bool CheckPermission(ICommandSender sender, string permission, out string message)
+    {
+        var parsed = Enum.TryParse<PlayerPermissions>(permission, true, out var result);
+        message = null;
+        return parsed && (result & Permissions) != 0;
+    }
 }
