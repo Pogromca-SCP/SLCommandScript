@@ -196,9 +196,9 @@ public class FileScriptsLoader : IScriptsLoader
         public object PluginObject { get; private set; }
 
         /// <summary>
-        /// Contains all registered scripts commands from monitored directory.
+        /// Contains used event handler.
         /// </summary>
-        public IDictionary<ServerEventType, ICommand> Commands { get; private set; }
+        public FileScriptsEventHandler Handler { get; private set; }
 
         /// <summary>
         /// Permissions resolver to use.
@@ -219,7 +219,7 @@ public class FileScriptsLoader : IScriptsLoader
         public EventsDirectory(object plugin, string directory, IPermissionsResolver resolver)
         {
             PluginObject = plugin;
-            Commands = FileScriptsEventHandlers.EventScripts;
+            Handler = new();
             PermissionsResolver = resolver;
             Watcher = CreateWatcher(directory, ScriptFilesFilter);
 
@@ -231,7 +231,7 @@ public class FileScriptsLoader : IScriptsLoader
             Watcher.Created += (obj, args) => RegisterEvent(args.FullPath);
             Watcher.Deleted += (obj, args) => UnregisterEvent(args.FullPath);
             Watcher.Renamed += (obj, args) => RefreshEvent(args.OldFullPath, args.FullPath);
-            EventManager.RegisterEvents<FileScriptsEventHandlers>(PluginObject);
+            EventManager.RegisterEvents(PluginObject, Handler);
         }
 
         /// <summary>
@@ -240,8 +240,7 @@ public class FileScriptsLoader : IScriptsLoader
         public void Dispose()
         {
             Watcher.Dispose();
-            EventManager.UnregisterEvents<FileScriptsEventHandlers>(PluginObject);
-            Commands.Clear();
+            EventManager.UnregisterEvents(PluginObject, Handler);
         }
 
         /// <summary>
@@ -262,7 +261,7 @@ public class FileScriptsLoader : IScriptsLoader
 
             if (parsed)
             {
-                Commands[result] = cmd;
+                Handler.EventScripts[result] = cmd;
                 PrintLog($"Registered event handler for '{result}' event.");
             }
             else
@@ -288,7 +287,7 @@ public class FileScriptsLoader : IScriptsLoader
 
             if (parsed)
             {
-                Commands.Remove(result);
+                Handler.EventScripts.Remove(result);
                 PrintLog($"Unregistered event handler for '{result}' event.");
             }
             else
