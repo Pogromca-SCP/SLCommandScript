@@ -5,7 +5,6 @@ using PluginAPI.Enums;
 using System.IO;
 using SLCommandScript.Commands;
 using SLCommandScript.Core.Commands;
-using CommandSystem;
 using SLCommandScript.Events;
 using PluginAPI.Events;
 using PluginAPI.Core;
@@ -80,8 +79,9 @@ public class FileScriptsLoader : IScriptsLoader
             }
 
             JSONWatcher.Created += (obj, args) => UpdateScriptDescription(args.FullPath);
-            JSONWatcher.Renamed += (obj, args) => UpdateScriptDescription(args.FullPath);
             JSONWatcher.Changed += (obj, args) => UpdateScriptDescription(args.FullPath);
+            JSONWatcher.Deleted += (obj, args) => ClearScriptDescription(args.FullPath);
+            JSONWatcher.Renamed += (obj, args) => RefreshDescription(args.OldFullPath, args.FullPath);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ public class FileScriptsLoader : IScriptsLoader
             }
             else
             {
-                PrintError($"Could not register command '{cmd.Command}'.");
+                PrintError($"Could not register command '{cmd.Command}' for {HandlerType}.");
             }
         }
 
@@ -134,7 +134,7 @@ public class FileScriptsLoader : IScriptsLoader
             }
             else
             {
-                PrintError($"Could not unregister command '{cmd.Command}'.");
+                PrintError($"Could not unregister command '{cmd.Command}' from {HandlerType}.");
             }
         }
 
@@ -150,6 +150,17 @@ public class FileScriptsLoader : IScriptsLoader
         }
 
         /// <summary>
+        /// Refreshes commands descriptions.
+        /// </summary>
+        /// <param name="oldDescName">Old description file to clear.</param>
+        /// <param name="newDescName">New description file name to update.</param>
+        private void RefreshDescription(string oldDescName, string newDescName)
+        {
+            ClearScriptDescription(oldDescName);
+            UpdateScriptDescription(newDescName);
+        }
+
+        /// <summary>
         /// Updates script command description info.
         /// </summary>
         /// <param name="descFile">Description file name to use.</param>
@@ -159,7 +170,7 @@ public class FileScriptsLoader : IScriptsLoader
 
             if (!Commands.ContainsKey(name))
             {
-                PrintError($"Could not update description for command '{name}'.");
+                PrintError($"Could not update description for command '{name}' in {HandlerType}.");
                 return;
             }
 
@@ -172,14 +183,35 @@ public class FileScriptsLoader : IScriptsLoader
             }
             catch (Exception ex)
             {
-                PrintError($"An error has occured during '{cmd.Command}' description deserialization: {ex.Message}");
+                PrintError($"An error has occured during '{cmd.Command}' in {HandlerType} description deserialization: {ex.Message}");
                 return;
             }
 
             cmd.Description = desc.Description;
             cmd.Usage = desc.Usage;
             cmd.Arity = desc.Arity;
-            PrintLog($"Description update for '{cmd.Command}' command finished successfully.");
+            PrintLog($"Description update for '{cmd.Command}' command in {HandlerType} finished successfully.");
+        }
+
+        /// <summary>
+        /// Clears script command description info.
+        /// </summary>
+        /// <param name="descFile">Description file name to use.</param>
+        private void ClearScriptDescription(string descFile)
+        {
+            var name = Path.GetFileNameWithoutExtension(descFile);
+
+            if (!Commands.ContainsKey(name))
+            {
+                PrintError($"Could not clear description for command '{name}' in {HandlerType}.");
+                return;
+            }
+
+            var cmd = Commands[name];
+            cmd.Description = FileScriptCommandBase.DefaultDescription;
+            cmd.Usage = null;
+            cmd.Arity = 0;
+            PrintLog($"Description clear for '{cmd.Command}' command in {HandlerType} finished successfully.");
         }
     }
     #endregion
