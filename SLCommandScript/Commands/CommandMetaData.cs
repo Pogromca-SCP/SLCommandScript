@@ -19,4 +19,9 @@ public class CommandMetaData : IJsonSerializable
     /// Contains expected amount of arguments.
     /// </summary>
     public byte Arity { get; set; } = 0;
+
+    /// <summary>
+    /// Text to display when help for command is requested.
+    /// </summary>
+    public string Help { get; set; } = null;
 }

@@ -1,8 +1,11 @@
 ﻿using NUnit.Framework;
 using PluginAPI.Enums;
+using CommandSystem;
+using CommandSystem.Commands.RemoteAdmin.Broadcasts;
+using CommandSystem.Commands.RemoteAdmin;
+using CommandSystem.Commands.Shared;
 using System.Collections.Generic;
 using System.Linq;
-using CommandSystem;
 using RemoteAdmin;
 using SLCommandScript.Core.Commands;
 using FluentAssertions;
@@ -37,6 +40,8 @@ public class CommandsUtilsTests
 
     private static readonly string[] _commandsToRegister = { "wtf", "dotheflip", "weeee" };
 
+    private static readonly ICommand[] _exampleCommands = { new BroadcastCommand(), new CassieCommand(), new HelpCommand(ClientCommandHandler.Create()) };
+
     private static IEnumerable<object[]> AllHandlersXInvalidCommands => JoinArrays(_allHandlerTypes, _invalidCommandNames);
 
     private static IEnumerable<object[]> AllHandlersXInvalidAliases => JoinArrays(_allHandlerTypes, _invalidAliases);
@@ -44,6 +49,8 @@ public class CommandsUtilsTests
     private static IEnumerable<object[]> ValidHandlersXExistingCommandNames => JoinArrays(_validHandlerTypes, _existingCommandNames);
 
     private static IEnumerable<object[]> ValidHandlersXCommandsToRegister => JoinArrays(_validHandlerTypes, _commandsToRegister);
+
+    private static IEnumerable<object[]> ValidHandlersXExampleCommands => JoinArrays(_validHandlerTypes, _exampleCommands);
 
     private static IEnumerable<object[]> JoinArrays<TFirst, TSecond>(TFirst[] first, TSecond[] second) =>
         first.SelectMany(f => second.Select(s => new object[] { f, s }));
@@ -265,23 +272,18 @@ public class CommandsUtilsTests
         commandMock.VerifyNoOtherCalls();
     }
 
-    [TestCaseSource(nameof(ValidHandlersXExistingCommandNames))]
-    public void IsCommandRegistered_ShouldReturnProperResult_WhenGoldFlow(CommandType handlerType, string commandName)
+    [TestCaseSource(nameof(ValidHandlersXExampleCommands))]
+    public void IsCommandRegistered_ShouldReturnProperResult_WhenGoldFlow(CommandType handlerType, ICommand command)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
-        commandMock.Setup(x => x.Aliases).Returns((string[]) null);
-        var handlersTypes = GetExpectedCommandHandlers(handlerType).Where(h => h.TryGetCommand(commandName, out var _)).Select(GetCommandHandlerType);
+        var handlersTypes = GetExpectedCommandHandlers(handlerType).Where(h => h.TryGetCommand(command.Command, out var _)).Select(GetCommandHandlerType);
         var expectedResult = JoinCommandTypes(handlersTypes);
 
         // Act
-        var result = CommandsUtils.IsCommandRegistered(handlerType, commandMock.Object);
+        var result = CommandsUtils.IsCommandRegistered(handlerType, command);
 
         // Assert
         result.Should().Be(expectedResult);
-        commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
     #endregion
 

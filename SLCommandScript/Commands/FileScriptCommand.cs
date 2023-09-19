@@ -2,13 +2,14 @@
 using System.Linq;
 using SLCommandScript.Core.Interfaces;
 using System;
+using System.Text.RegularExpressions;
 
 namespace SLCommandScript.Commands;
 
 /// <summary>
 /// Script command used to launch interpreted scripts.
 /// </summary>
-public class FileScriptCommand : FileScriptCommandBase, IUsageProvider
+public class FileScriptCommand : FileScriptCommandBase, IUsageProvider, IHelpProvider
 {
     /// <summary>
     /// Describes command arguments usage.
@@ -34,6 +35,11 @@ public class FileScriptCommand : FileScriptCommandBase, IUsageProvider
     public byte Arity { get; set; }
 
     /// <summary>
+    /// Text to display when help for command is requested.
+    /// </summary>
+    public string Help { get; set; }
+
+    /// <summary>
     /// Describes command arguments usage.
     /// </summary>
     private string[] _usage;
@@ -46,8 +52,20 @@ public class FileScriptCommand : FileScriptCommandBase, IUsageProvider
     public FileScriptCommand(string file, IPermissionsResolver resolver) : base(file, resolver)
     {
         Arity = 0;
+        Help = null;
         _usage = null;
     }
+
+    /// <summary>
+    /// Generates message for help command.
+    /// </summary>
+    /// <param name="arguments">Arguments provided by sender.</param>
+    /// <returns>Generated help message.</returns>
+    public string GetHelp(ArraySegment<string> arguments) => string.IsNullOrWhiteSpace(Help) ? Description : new Regex("\\$\\(([1-9][0-9]*)\\)").Replace(Help, m =>
+    {
+        var index = int.Parse(m.Groups[1].Value);
+        return index > arguments.Count ? m.Value : arguments.At(index - 1);
+    });
 
     /// <summary>
     /// Executes the command.

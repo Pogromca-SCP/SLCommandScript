@@ -102,15 +102,19 @@ public static class CommandsUtils
         {
             var isFound = handler.TryGetCommand(command.Command, out var foundCommand);
 
-            if (isFound && command.Aliases is not null)
+            if (command.Aliases is not null && isFound)
             {
                 foreach (var alias in command.Aliases)
                 {
                     isFound = handler.TryGetCommand(alias, out var aliasResult);
 
-                    if (!isFound || foundCommand != aliasResult)
+                    if (isFound && !ReferenceEquals(foundCommand, aliasResult))
                     {
                         isFound = false;
+                    }
+
+                    if (!isFound)
+                    {
                         break;
                     }
                 }

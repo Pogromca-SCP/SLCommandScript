@@ -190,6 +190,7 @@ public class FileScriptsLoader : IScriptsLoader
             cmd.Description = desc.Description;
             cmd.Usage = desc.Usage;
             cmd.Arity = desc.Arity;
+            cmd.Help = desc.Help;
             PrintLog($"Description update for '{cmd.Command}' command in {HandlerType} finished successfully.");
         }
 
@@ -211,6 +212,7 @@ public class FileScriptsLoader : IScriptsLoader
             cmd.Description = FileScriptCommandBase.DefaultDescription;
             cmd.Usage = null;
             cmd.Arity = 0;
+            cmd.Help = null;
             PrintLog($"Description clear for '{cmd.Command}' command in {HandlerType} finished successfully.");
         }
     }
