@@ -36,11 +36,6 @@ public class FileScriptsLoader : IScriptsLoader
         public CommandType HandlerType { get; private set; }
 
         /// <summary>
-        /// Permissions resolver to use.
-        /// </summary>
-        public IPermissionsResolver PermissionsResolver { get; private set; }
-
-        /// <summary>
         /// File system watcher used to detect script files changes.
         /// </summary>
         public FileSystemWatcher Watcher { get; private set; }
@@ -55,12 +50,10 @@ public class FileScriptsLoader : IScriptsLoader
         /// </summary>
         /// <param name="directory">File directory to monitor for changes.</param>
         /// <param name="handlerType">Type of handler to use.</param>
-        /// <param name="resolver">Permissions resolver to use.</param>
-        public CommandsDirectory(string directory, CommandType handlerType, IPermissionsResolver resolver)
+        public CommandsDirectory(string directory, CommandType handlerType)
         {
             Commands = new(StringComparer.OrdinalIgnoreCase);
             HandlerType = handlerType;
-            PermissionsResolver = resolver;
             Watcher = CreateWatcher(directory, ScriptFilesFilter);
 
             foreach (var file in Directory.EnumerateFiles(directory, ScriptFilesFilter, SearchOption.AllDirectories))
@@ -104,7 +97,7 @@ public class FileScriptsLoader : IScriptsLoader
         /// <param name="scriptFile">Script file to register.</param>
         private void RegisterScript(string scriptFile)
         {
-            var cmd = new FileScriptCommand(scriptFile, PermissionsResolver);
+            var cmd = new FileScriptCommand(scriptFile);
             var registered = CommandsUtils.RegisterCommand(HandlerType, cmd);
 
             if (registered != null)
@@ -225,6 +218,11 @@ public class FileScriptsLoader : IScriptsLoader
     private class EventsDirectory : IDisposable
     {
         /// <summary>
+        /// Contains event handler prefix string.
+        /// </summary>
+        public const string EventHandlerPrefix = "on";
+
+        /// <summary>
         /// Plugin object.
         /// </summary>
         public object PluginObject { get; private set; }
@@ -233,11 +231,6 @@ public class FileScriptsLoader : IScriptsLoader
         /// Contains used event handler.
         /// </summary>
         public FileScriptsEventHandler Handler { get; private set; }
-
-        /// <summary>
-        /// Permissions resolver to use.
-        /// </summary>
-        public IPermissionsResolver PermissionsResolver { get; private set; }
 
         /// <summary>
         /// File system watcher used to detect script files changes.
@@ -249,12 +242,10 @@ public class FileScriptsLoader : IScriptsLoader
         /// </summary>
         /// <param name="plugin">Plugin object.</param>
         /// <param name="directory">File directory to monitor for changes.</param>
-        /// <param name="resolver">Permissions resolver to use.</param>
-        public EventsDirectory(object plugin, string directory, IPermissionsResolver resolver)
+        public EventsDirectory(object plugin, string directory)
         {
             PluginObject = plugin;
             Handler = new();
-            PermissionsResolver = resolver;
             Watcher = CreateWatcher(directory, ScriptFilesFilter);
 
             foreach (var file in Directory.EnumerateFiles(directory, ScriptFilesFilter, SearchOption.AllDirectories))
@@ -283,10 +274,10 @@ public class FileScriptsLoader : IScriptsLoader
         /// <param name="scriptFile">Event script file to register.</param>
         private void RegisterEvent(string scriptFile)
         {
-            var cmd = new FileScriptCommandBase(scriptFile, PermissionsResolver);
+            var cmd = new FileScriptCommandBase(scriptFile);
             var name = cmd.Command;
 
-            if (name.Length > 2 && name.StartsWith("on", StringComparison.OrdinalIgnoreCase))
+            if (name.Length > 2 && name.StartsWith(EventHandlerPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 name = name.Substring(2);
             }
@@ -312,7 +303,7 @@ public class FileScriptsLoader : IScriptsLoader
         {
             var name = Path.GetFileNameWithoutExtension(scriptFile);
             
-            if (name.Length > 2 && name.StartsWith("on", StringComparison.OrdinalIgnoreCase))
+            if (name.Length > 2 && name.StartsWith(EventHandlerPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 name = name.Substring(2);
             }
@@ -401,7 +392,6 @@ public class FileScriptsLoader : IScriptsLoader
     /// <param name="loaderConfig">Scripts loader configuration to use.</param>
     public void InitScriptsLoader(object plugin, ScriptsLoaderConfig loaderConfig)
     {
-        loaderConfig ??= new();
         var handler = PluginHandler.Get(plugin);
 
         if (handler is null)
@@ -432,10 +422,12 @@ public class FileScriptsLoader : IScriptsLoader
             }
         }
         
-        LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", loaderConfig.EnableScriptEventHandlers ? CommandType.Console : 0, permissionsResolver);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", loaderConfig.AllowedScriptCommandTypes & CommandType.RemoteAdmin, permissionsResolver);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", loaderConfig.AllowedScriptCommandTypes & CommandType.Console, permissionsResolver);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/client/", loaderConfig.AllowedScriptCommandTypes & CommandType.GameConsole, permissionsResolver);
+        FileScriptCommandBase.PermissionsResolver = permissionsResolver;
+        FileScriptCommandBase.ConcurrentExecutionsLimit = loaderConfig.ScriptExecutionsLimit;
+        LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", loaderConfig.EnableScriptEventHandlers ? CommandType.Console : 0);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", loaderConfig.AllowedScriptCommandTypes & CommandType.RemoteAdmin);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", loaderConfig.AllowedScriptCommandTypes & CommandType.Console);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/client/", loaderConfig.AllowedScriptCommandTypes & CommandType.GameConsole);
     }
 
     /// <summary>
@@ -451,6 +443,8 @@ public class FileScriptsLoader : IScriptsLoader
         _registeredDirectories.Clear();
         _eventsDirectory?.Dispose();
         _eventsDirectory = null;
+        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
+        FileScriptCommandBase.PermissionsResolver = null;
     }
 
     /// <summary>
@@ -459,8 +453,7 @@ public class FileScriptsLoader : IScriptsLoader
     /// <param name="plugin">Plugin object.</param>
     /// <param name="directory">Directory to load.</param>
     /// <param name="handlerType">Handler to use for commands registration.</param>
-    /// <param name="resolver">Permissions resolver to use.</param>
-    private void LoadDirectory(object plugin, string directory, CommandType handlerType, IPermissionsResolver resolver)
+    private void LoadDirectory(object plugin, string directory, CommandType handlerType)
     {
         if (handlerType == 0)
         {
@@ -474,11 +467,11 @@ public class FileScriptsLoader : IScriptsLoader
 
         if (plugin is null)
         {
-            _registeredDirectories.Add(new CommandsDirectory(directory, handlerType, resolver));
+            _registeredDirectories.Add(new CommandsDirectory(directory, handlerType));
         }
         else
         {
-            _eventsDirectory = new EventsDirectory(plugin, directory, resolver);
+            _eventsDirectory = new EventsDirectory(plugin, directory);
         }
     }
 }

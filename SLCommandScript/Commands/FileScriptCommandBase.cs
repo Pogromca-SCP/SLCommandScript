@@ -1,7 +1,7 @@
 ﻿using CommandSystem;
+using SLCommandScript.Core.Interfaces;
 using System.Collections.Concurrent;
 using SLCommandScript.Core.Language;
-using SLCommandScript.Core.Interfaces;
 using System;
 using System.IO;
 using System.Threading;
@@ -21,6 +21,16 @@ public class FileScriptCommandBase : ICommand
     public const string DefaultDescription = "Custom script command.";
 
     private const string DebugPrefix = "Scripts cache: ";
+
+    /// <summary>
+    /// Contains permissions resolver object to use.
+    /// </summary>
+    public static IPermissionsResolver PermissionsResolver { get; set; } = null;
+
+    /// <summary>
+    /// Contains a maximum amount of concurrent executions a single script can have.
+    /// </summary>
+    public static int ConcurrentExecutionsLimit { get; set; } = 0;
 
     /// <summary>
     /// Contains currently loaded scripts.
@@ -88,11 +98,6 @@ public class FileScriptCommandBase : ICommand
     private readonly string _file;
 
     /// <summary>
-    /// Contains permissions resolver type to use.
-    /// </summary>
-    private readonly IPermissionsResolver _resolver;
-
-    /// <summary>
     /// Contains command description.
     /// </summary>
     private string _desc;
@@ -106,12 +111,10 @@ public class FileScriptCommandBase : ICommand
     /// Initializes the command.
     /// </summary>
     /// <param name="file">Path to associated script.</param>
-    /// <param name="resolver">Permissions resolver to use.</param>
-    public FileScriptCommandBase(string file, IPermissionsResolver resolver)
+    public FileScriptCommandBase(string file)
     {
         Command = Path.GetFileNameWithoutExtension(file);
         _file = file;
-        _resolver = resolver;
         _desc = DefaultDescription;
         _calls = 0;
     }
@@ -125,8 +128,14 @@ public class FileScriptCommandBase : ICommand
     /// <returns><see langword="true" /> if command executed successfully, <see langword="false" /> otherwise.</returns>
     public virtual bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
-        Interlocked.Increment(ref _calls);
-        var lexer = Lexer.Rent(LoadSource(), arguments, sender, _resolver);
+        if (Interlocked.Increment(ref _calls) > ConcurrentExecutionsLimit)
+        {
+            Interlocked.Decrement(ref _calls);
+            response = "Script execution terminated due to exceeded concurrent executions limit";
+            return false;
+        }
+
+        var lexer = Lexer.Rent(LoadSource(), arguments, sender, PermissionsResolver);
         response = Interpret(lexer);
         var line = lexer.Line;
         Lexer.Return(lexer);

@@ -1,6 +1,5 @@
 ﻿using CommandSystem;
 using System.Linq;
-using SLCommandScript.Core.Interfaces;
 using System;
 using System.Text.RegularExpressions;
 
@@ -48,8 +47,7 @@ public class FileScriptCommand : FileScriptCommandBase, IUsageProvider, IHelpPro
     /// Initializes the command.
     /// </summary>
     /// <param name="file">Path to associated script.</param>
-    /// <param name="resolver">Permissions resolver to use.</param>
-    public FileScriptCommand(string file, IPermissionsResolver resolver) : base(file, resolver)
+    public FileScriptCommand(string file) : base(file)
     {
         Arity = 0;
         Help = null;
