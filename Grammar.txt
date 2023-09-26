@@ -10,7 +10,7 @@ inner_expression	-> directive | inner_command
 command			-> TEXT+
 inner_command		-> TEXT inner_arg*
 inner_arg		-> variable | TEXT
-variable		-> \S* ("$(" IDENTIFIER ")" \S*)+
+variable		-> \S* ("$(" TEXT ")" \S*)+
 
 directive		-> "[" directive_body "]"
 directive_body		-> foreach_loop | if_expr | delay_expr
@@ -20,10 +20,9 @@ delay_expr		-> expression "delayby" NUMBER TEXT?
 
 comment			-> "#" comment_body
 comment_body		-> permissions_guard | scope_guard | .*
-permissions_guard	-> "!" IDENTIFIER*
+permissions_guard	-> "!" TEXT*
 scope_guard		-> "?" scope_name*
 scope_name		-> "RemoteAdmin" | "Console" | "GameConsole"
 
 TEXT			-> \S+
-IDENTIFIER		-> [a-z]+
 NUMBER			-> [0-9]+

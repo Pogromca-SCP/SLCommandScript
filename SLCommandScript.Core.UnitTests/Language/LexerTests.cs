@@ -69,8 +69,8 @@ public class LexerTests
     print ski$()bidi bop$(name) $(no?)yes $(what?)
     prin$(t [hello t]here $(general) 23$(light)sabers
 ", new[] { "TestVariables" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "print", 2),
-            new(TokenType.Text, "ski$()bidi", 2), new(TokenType.Variable, "bop$(name)", 2), new(TokenType.Text, "$(no?)yes", 2),
-            new(TokenType.Text, "$(what?)", 2), new(TokenType.Text, "prin$(t", 3), new(TokenType.Text, "[hello", 3), new(TokenType.Text, "t]here", 3),
+            new(TokenType.Text, "ski$()bidi", 2), new(TokenType.Variable, "bop$(name)", 2), new(TokenType.Variable, "$(no?)yes", 2),
+            new(TokenType.Variable, "$(what?)", 2), new(TokenType.Text, "prin$(t", 3), new(TokenType.Text, "[hello", 3), new(TokenType.Text, "t]here", 3),
             new(TokenType.Variable, "$(general)", 3), new(TokenType.Variable, "23$(light)sabers", 3) }, 3 },
 
         new object[] { @"
@@ -89,21 +89,22 @@ public class LexerTests
         new object[] { @"
     cassie why am I here # This is a comment \
     #! ServerConsoleCommands
-    print I have no idea #! ServerConsoleCommands
+    print I have no idea #! \ServerC?..6onsoleCommands
     print This should not appear
     #! Noclip! ?Announcer \
     #!ServerConsoleCommands
     print This should not appear #! Noclip
     print Hello there #!Noclip Announcer
     print Class d has micro p p #!
-    print 1 ...
+    print 1 ... #! \
+    !92424..awwghow*(
 ", new[] { "TestPermissionGuards" }, PlayerPermissions.Noclip | PlayerPermissions.Announcer, new Token[] { new(TokenType.Text, "cassie", 2),
             new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2),
             new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
             new(TokenType.Text, "idea", 4), new(TokenType.Text, "print", 9), new(TokenType.Text, "Hello", 9), new(TokenType.Text, "there", 9),
             new(TokenType.Text, "print", 10), new(TokenType.Text, "Class", 10), new(TokenType.Text, "d", 10), new(TokenType.Text, "has", 10),
             new(TokenType.Text, "micro", 10), new(TokenType.Text, "p", 10), new(TokenType.Text, "p", 10), new(TokenType.Text, "print", 11),
-            new(TokenType.Text, "1", 11), new(TokenType.Text, "...", 11) }, 11 },
+            new(TokenType.Text, "1", 11), new(TokenType.Text, "...", 11) }, 12 },
 
         new object[] { "$(2) $(00001) $(0)\n$(3) $(4) $(5)#Hello $(3)", new[] { "TestSimpleArgs", "happenned ?", "#What", BlankLine, "number 1 5",
             string.Empty }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "#What", 1), new(TokenType.Text, "happenned", 1),
@@ -114,7 +115,7 @@ public class LexerTests
             " Hello $(test) " }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "Hello", 1), new(TokenType.Variable, "$(test)", 1) }, 1 },
 
         new object[] { "$(1)", new[] { "TestInnerArgs", " Example\t$(1) \ninjection" }, PlayerPermissions.Noclip, new Token[] {
-            new(TokenType.Text, "Example", 1), new(TokenType.Text, "$(1)", 1), new(TokenType.Text, "injection", 1) }, 1 },
+            new(TokenType.Text, "Example", 1), new(TokenType.Variable, "$(1)", 1), new(TokenType.Text, "injection", 1) }, 1 },
 
         new object[] { @"
     $(1)    $(2)
@@ -821,6 +822,7 @@ public class LexerTestResolver : IPermissionsResolver
 
     public bool CheckPermission(ICommandSender sender, string permission, out string message)
     {
+        Console.WriteLine($"Lexer test permission resolving: {permission}");
         var parsed = Enum.TryParse<PlayerPermissions>(permission, true, out var result);
         message = null;
         return parsed && (result & Permissions) != 0;

@@ -45,7 +45,7 @@ public class Interpreter : IExprVisitor<bool>
     /// <summary>
     /// Contains regular expression for variables.
     /// </summary>
-    private static readonly Regex _variablePattern = new("\\$\\(([a-zA-Z]+)\\)");
+    private static readonly Regex _variablePattern = new("\\$\\(([^)\\s]+)\\)");
 
     /// <summary>
     /// Executes delay expression.

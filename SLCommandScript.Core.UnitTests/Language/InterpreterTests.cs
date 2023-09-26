@@ -366,7 +366,7 @@ public class InterpreterTests
         // Arrange
         var interpreter = new Interpreter(null);
 
-        var expr = new ForeachExpr(new CommandExpr(new ArgumentsInjectionTestCommand(), new[] { "$(test)", "$(i)", "$(index)", "$(I)", null }, true),
+        var expr = new ForeachExpr(new CommandExpr(new ArgumentsInjectionTestCommand(), new[] { "$(test)", "$(i)", "$(index)", "$(I)", null, "$(wut?))$(wut?))" }, true),
             new TestIterable());
 
         // Act
@@ -558,6 +558,7 @@ public class TestIterable : IIterable
         }
 
         targetVars["i"] = _index.ToString();
+        targetVars["wut?"] = "hello";
         ++_index;
         return true;
     }
@@ -578,9 +579,10 @@ public class ArgumentsInjectionTestCommand : ICommand
 
     public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
-        var firstArg = int.Parse(arguments.Array[1]);
-        var thirdArg = int.Parse(arguments.Array[3]);
+        var firstArg = int.Parse(arguments.At(0));
+        var thirdArg = int.Parse(arguments.At(2));
         response = null;
-        return firstArg == thirdArg && arguments.Array[2].Equals("$(index)") && arguments.Array[0].Equals("$(test)") && arguments.Array[4] is null;
+        return firstArg == thirdArg && arguments.At(1).Equals("$(index)") && arguments.At(-1).Equals("$(test)") && arguments.At(3) is null &&
+            arguments.At(4).Equals("hello)hello)");
     }
 }

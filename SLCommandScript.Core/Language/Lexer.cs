@@ -169,6 +169,11 @@ public class Lexer
     private char Current => IsAtEnd ? '\0' : Source[_current];
 
     /// <summary>
+    /// Next character getter with bounds checking.
+    /// </summary>
+    private char Next => _current + 1 < Source.Length ? Source[_current + 1] : '\0';
+
+    /// <summary>
     /// Tells whether or not the lexer can continue reading the same line.
     /// </summary>
     private bool CanRead => Source[_current] != '\n' || Source[_current - 1] == '\\' || (Source[_current - 1] == '\r' && Source[_current - 2] == '\\');
@@ -631,11 +636,7 @@ public class Lexer
 
         while (!IsAtEnd && CanRead)
         {
-            if (Source[_current] == '\n')
-            {
-                ++Line;
-            }
-            else if (!_hasMissingPerms && IsAlpha(Source[_current]))
+            if (!_hasMissingPerms && !IsWhiteSpace(Source[_current]) && (Source[_current] != '\\' || (Next != '\r' && Next != '\n')))
             {
                 _start = _current;
 
@@ -643,7 +644,7 @@ public class Lexer
                 {
                     Advance();
                 }
-                while (IsAlpha(Current));
+                while (!IsWhiteSpace(Current));
 
                 _hasMissingPerms = !PermissionsResolver.CheckPermission(Sender, Source.Substring(_start, _current - _start), out var message);
 
@@ -653,8 +654,15 @@ public class Lexer
                     return;
                 }
             }
+            else
+            {
+                if (Source[_current] == '\n')
+                {
+                    ++Line;
+                }
 
-            Advance();
+                Advance();
+            }
         }
     }
 
@@ -767,7 +775,7 @@ public class Lexer
             }
         }
 
-        while (IsAlpha(Current))
+        while (!IsWhiteSpace(Current) && Source[_current] != ')')
         {
             Advance();
         }
