@@ -169,14 +169,14 @@ public class Lexer
     private char Current => IsAtEnd ? '\0' : Source[_current];
 
     /// <summary>
-    /// Next character getter with bounds checking.
-    /// </summary>
-    private char Next => _current + 1 < Source.Length ? Source[_current + 1] : '\0';
-
-    /// <summary>
     /// Tells whether or not the lexer can continue reading the same line.
     /// </summary>
     private bool CanRead => Source[_current] != '\n' || Source[_current - 1] == '\\' || (Source[_current - 1] == '\r' && Source[_current - 2] == '\\');
+
+    /// <summary>
+    /// Tells whether or not the current character is not a line extension.
+    /// </summary>
+    private bool IsNotLineExtend => _current + 1 < Source.Length && Source[_current + 1] != '\n' && Source[_current + 1] != '\r';
 
     /// <summary>
     /// <see langword="true" /> if its top level tokenizer, <see langword="false" /> otherwise.
@@ -636,7 +636,7 @@ public class Lexer
 
         while (!IsAtEnd && CanRead)
         {
-            if (!_hasMissingPerms && !IsWhiteSpace(Source[_current]) && (Source[_current] != '\\' || (Next != '\r' && Next != '\n')))
+            if (!_hasMissingPerms && !IsWhiteSpace(Source[_current]) && (Source[_current] != '\\' || IsNotLineExtend))
             {
                 _start = _current;
 
