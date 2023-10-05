@@ -2,7 +2,6 @@
 using PluginAPI.Core.Attributes;
 using SLCommandScript.Core;
 using SLCommandScript.Core.Interfaces;
-using SLCommandScript.Loader;
 using PluginAPI.Enums;
 using SLCommandScript.Core.Reflection;
 
@@ -84,6 +83,7 @@ public class Plugin
         PrintLog("Plugin unload started...");
         _scriptsLoader?.Dispose();
         _scriptsLoader = null;
+        ScriptsLoaderConfig = null;
         PluginConfig = null;
         PrintLog("Plugin is unloaded.");
     }
@@ -96,7 +96,7 @@ public class Plugin
         ReloadConfigs();
         _scriptsLoader?.Dispose();
         _scriptsLoader = LoadScriptsLoader();
-        _scriptsLoader.InitScriptsLoader(this, ScriptsLoaderConfig);
+        _scriptsLoader?.InitScriptsLoader(this, ScriptsLoaderConfig);
     }
 
     /// <summary>
@@ -118,24 +118,24 @@ public class Plugin
     /// <summary>
     /// Loads scripts loader.
     /// </summary>
-    /// <returns>Loaded scripts loader instance.</returns>
+    /// <returns>Loaded scripts loader instance or <see langword="null" /> if something went wrong.</returns>
     private IScriptsLoader LoadScriptsLoader()
     {
-        if (string.IsNullOrWhiteSpace(PluginConfig.CustomScriptsLoader))
+        if (string.IsNullOrWhiteSpace(PluginConfig?.ScriptsLoaderImplementation))
         {
-            PrintLog("Using default scripts loader.");
-            return new FileScriptsLoader();
+            PrintError("Scripts loader implementation name is blank.");
+            return null;
         }
 
-        var loader = CustomTypesUtils.MakeCustomTypeInstance<IScriptsLoader>(PluginConfig.CustomScriptsLoader, out var message);
+        var loader = CustomTypesUtils.MakeCustomTypeInstance<IScriptsLoader>(PluginConfig.ScriptsLoaderImplementation, out var message);
 
         if (loader is null)
         {
             PrintError(message);
-            return new FileScriptsLoader();
+            return null;
         }
 
-        PrintLog("Custom scripts loader loaded successfully.");
+        PrintLog("Scripts loader loaded successfully.");
         return loader;
     }
 }

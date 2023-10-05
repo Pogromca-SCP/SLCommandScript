@@ -3,16 +3,16 @@ using System;
 using System.Collections.Generic;
 using PluginAPI.Enums;
 using System.IO;
-using SLCommandScript.Commands;
+using SLCommandScript.FileScriptsLoader.Commands;
 using SLCommandScript.Core.Commands;
-using SLCommandScript.Events;
+using SLCommandScript.FileScriptsLoader.Events;
 using PluginAPI.Events;
 using PluginAPI.Core;
 using SLCommandScript.Core;
 using SLCommandScript.Core.Permissions;
 using SLCommandScript.Core.Reflection;
 
-namespace SLCommandScript.Loader;
+namespace SLCommandScript.FileScriptsLoader;
 
 /// <summary>
 /// Server files script loader.
@@ -169,7 +169,7 @@ public class FileScriptsLoader : IScriptsLoader
 
             var cmd = Commands[name];
             CommandMetaData desc;
-            
+
             try
             {
                 desc = JsonSerialize.FromFile<CommandMetaData>(descFile);
@@ -302,7 +302,7 @@ public class FileScriptsLoader : IScriptsLoader
         private void UnregisterEvent(string scriptFile)
         {
             var name = Path.GetFileNameWithoutExtension(scriptFile);
-            
+
             if (name.Length > 2 && name.StartsWith(EventHandlerPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 name = name.Substring(2);
@@ -421,7 +421,7 @@ public class FileScriptsLoader : IScriptsLoader
                 PrintLog("Custom permissions resolver loaded successfully.");
             }
         }
-        
+
         FileScriptCommandBase.PermissionsResolver = permissionsResolver;
         FileScriptCommandBase.ConcurrentExecutionsLimit = loaderConfig.ScriptExecutionsLimit;
         LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", loaderConfig.EnableScriptEventHandlers ? CommandType.Console : 0);

@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLCommandScript.Core", "SLC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLCommandScript.Core.UnitTests", "SLCommandScript.Core.UnitTests\SLCommandScript.Core.UnitTests.csproj", "{4085D0D0-A19D-458A-90CB-5B4E980849F6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomLoaderExample", "CustomLoaderExample\CustomLoaderExample.csproj", "{94C81489-F5A7-4149-9615-649DC29AC68F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLCommandScript.FileScriptsLoader", "SLCommandScript.FileScriptsLoader\SLCommandScript.FileScriptsLoader.csproj", "{2F29EFF0-A85B-4D7D-86E9-68EECC16BD34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{4085D0D0-A19D-458A-90CB-5B4E980849F6}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{4085D0D0-A19D-458A-90CB-5B4E980849F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4085D0D0-A19D-458A-90CB-5B4E980849F6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{94C81489-F5A7-4149-9615-649DC29AC68F}.Debug|Any CPU.ActiveCfg = Release|Any CPU
-		{94C81489-F5A7-4149-9615-649DC29AC68F}.Debug|Any CPU.Build.0 = Release|Any CPU
-		{94C81489-F5A7-4149-9615-649DC29AC68F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{94C81489-F5A7-4149-9615-649DC29AC68F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F29EFF0-A85B-4D7D-86E9-68EECC16BD34}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{2F29EFF0-A85B-4D7D-86E9-68EECC16BD34}.Debug|Any CPU.Build.0 = Release|Any CPU
+		{2F29EFF0-A85B-4D7D-86E9-68EECC16BD34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F29EFF0-A85B-4D7D-86E9-68EECC16BD34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

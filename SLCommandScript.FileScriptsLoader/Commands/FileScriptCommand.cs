@@ -3,7 +3,7 @@ using System.Linq;
 using System;
 using System.Text.RegularExpressions;
 
-namespace SLCommandScript.Commands;
+namespace SLCommandScript.FileScriptsLoader.Commands;
 
 /// <summary>
 /// Script command used to launch interpreted scripts.

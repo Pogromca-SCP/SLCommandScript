@@ -6,7 +6,7 @@ using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
 using PluginAPI.Events;
 
-namespace SLCommandScript.Events;
+namespace SLCommandScript.FileScriptsLoader.Events;
 
 /// <summary>
 /// Handles server events using script files.

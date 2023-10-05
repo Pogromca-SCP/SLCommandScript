@@ -8,8 +8,8 @@ namespace SLCommandScript;
 public class Config
 {
     /// <summary>
-    /// Custom scripts loader implementation to use, leave empty if not needed.
+    /// Scripts loader implementation to use, provided as fully a qualified type name.
     /// </summary>
-    [Description("Custom scripts loader implementation to use, leave empty if not needed")]
-    public string CustomScriptsLoader { get; set; } = null;
+    [Description("Scripts loader implementation to use, provided as a fully qualified type name")]
+    public string ScriptsLoaderImplementation { get; set; } = "SLCommandScript.FileScriptsLoader.FileScriptsLoader, SLCommandScript.FileScriptsLoader";
 }

@@ -8,7 +8,7 @@ using System.Threading;
 
 using PluginAPI.Core;
 
-namespace SLCommandScript.Commands;
+namespace SLCommandScript.FileScriptsLoader.Commands;
 
 /// <summary>
 /// Base class for script executing commands.

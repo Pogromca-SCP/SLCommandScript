@@ -17,8 +17,4 @@
 	<ItemGroup>
 		<ProjectReference Include="../SLCommandScript.Core/SLCommandScript.Core.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-		<Reference Include="Assembly-CSharp" HintPath="$(SL_REFERENCES)/Assembly-CSharp.dll" />
-		<Reference Include="CommandSystem.Core" HintPath="$(SL_REFERENCES)/CommandSystem.Core.dll" />
-	</ItemGroup>
 </Project>
