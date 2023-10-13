@@ -36,7 +36,7 @@ public class CommandsUtilsTests
     private static readonly CommandType[] _validHandlerTypes = { CommandType.RemoteAdmin, CommandType.GameConsole,
         CommandType.RemoteAdmin | CommandType.GameConsole };
 
-    private static readonly string[] _existingCommandNames = { "help", "bc", "cassie" };
+    private static readonly string[] _existingCommandNames = { "help", "HelP", "bc", "cassie", "BC" };
 
     private static readonly string[] _commandsToRegister = { "wtf", "dotheflip", "weeee" };
 

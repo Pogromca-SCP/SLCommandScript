@@ -1,7 +1,6 @@
 ﻿using CommandSystem;
 using System.Linq;
 using System;
-using System.Text.RegularExpressions;
 
 namespace SLCommandScript.FileScriptsLoader.Commands;
 
@@ -59,11 +58,7 @@ public class FileScriptCommand : FileScriptCommandBase, IUsageProvider, IHelpPro
     /// </summary>
     /// <param name="arguments">Arguments provided by sender.</param>
     /// <returns>Generated help message.</returns>
-    public string GetHelp(ArraySegment<string> arguments) => string.IsNullOrWhiteSpace(Help) ? Description : new Regex("\\$\\(([1-9][0-9]*)\\)").Replace(Help, m =>
-    {
-        var index = int.Parse(m.Groups[1].Value);
-        return index > arguments.Count ? m.Value : arguments.At(index - 1);
-    });
+    public string GetHelp(ArraySegment<string> arguments) => string.IsNullOrWhiteSpace(Help) ? Description : Help;
 
     /// <summary>
     /// Executes the command.

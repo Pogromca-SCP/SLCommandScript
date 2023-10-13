@@ -1,12 +1,10 @@
 ﻿using CommandSystem;
 using SLCommandScript.Core.Interfaces;
+using SLCommandScript.FileScriptsLoader.Helpers;
 using System.Collections.Concurrent;
 using SLCommandScript.Core.Language;
 using System;
-using System.IO;
 using System.Threading;
-
-using PluginAPI.Core;
 
 namespace SLCommandScript.FileScriptsLoader.Commands;
 
@@ -20,8 +18,6 @@ public class FileScriptCommandBase : ICommand
     /// </summary>
     public const string DefaultDescription = "Custom script command.";
 
-    private const string DebugPrefix = "Scripts cache: ";
-
     /// <summary>
     /// Contains permissions resolver object to use.
     /// </summary>
@@ -33,9 +29,19 @@ public class FileScriptCommandBase : ICommand
     public static int ConcurrentExecutionsLimit { get; set; } = 0;
 
     /// <summary>
+    /// Contains file system helper object to use.
+    /// </summary>
+    public static IFileSystemHelper FileSystemHelper { get => _filesHelper ?? new FileSystemHelper(); set => _filesHelper = value; }
+
+    /// <summary>
     /// Contains currently loaded scripts.
     /// </summary>
-    private static readonly ConcurrentDictionary<string, string> _loadedScripts = new();
+    private static readonly ConcurrentDictionary<FileScriptCommandBase, string> _loadedScripts = new();
+
+    /// <summary>
+    /// Contains file system helper object to use.
+    /// </summary>
+    private static IFileSystemHelper _filesHelper = null;
 
     /// <summary>
     /// Setups an interpretation process for the script.
@@ -113,7 +119,7 @@ public class FileScriptCommandBase : ICommand
     /// <param name="file">Path to associated script.</param>
     public FileScriptCommandBase(string file)
     {
-        Command = Path.GetFileNameWithoutExtension(file);
+        Command = FileSystemHelper.GetFileNameWithoutExtension(file);
         _file = file;
         _desc = DefaultDescription;
         _calls = 0;
@@ -142,8 +148,7 @@ public class FileScriptCommandBase : ICommand
 
         if (Interlocked.Decrement(ref _calls) < 1)
         {
-            var message = _loadedScripts.TryRemove(_file, out _) ? "Unloaded" : "Failed to unload";
-            Log.Debug($"{message} script - {Command}.slcs", DebugPrefix);
+            _loadedScripts.TryRemove(this, out _);
         }
 
         var result = response is null;
@@ -157,14 +162,12 @@ public class FileScriptCommandBase : ICommand
     /// <returns>Loaded source code string.</returns>
     private string LoadSource()
     {
-        if (_loadedScripts.ContainsKey(_file))
+        if (!_loadedScripts.TryGetValue(this, out var src))
         {
-            return _loadedScripts[_file];
+            src = FileSystemHelper.ReadFile(_file);
+            _loadedScripts.TryAdd(this, src);
         }
 
-        var src = File.ReadAllText(_file);
-        Log.Debug($"Loaded script - {Command}.slcs", DebugPrefix);
-        _loadedScripts[_file] = src;
         return src;
     }
 }
