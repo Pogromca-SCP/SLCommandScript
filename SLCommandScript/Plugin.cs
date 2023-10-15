@@ -93,26 +93,19 @@ public class Plugin
     /// </summary>
     private void Init()
     {
-        ReloadConfigs();
         _scriptsLoader?.Dispose();
-        _scriptsLoader = LoadScriptsLoader();
-        _scriptsLoader?.InitScriptsLoader(this, ScriptsLoaderConfig);
-    }
-
-    /// <summary>
-    /// Reloads plugin config values.
-    /// </summary>
-    private void ReloadConfigs()
-    {
         var handler = PluginHandler.Get(this);
 
         if (handler is null)
         {
+            PrintError("Plugin handler not found.");
             return;
         }
 
         handler.LoadConfig(this, nameof(PluginConfig));
         handler.LoadConfig(this, nameof(ScriptsLoaderConfig));
+        _scriptsLoader = LoadScriptsLoader();
+        _scriptsLoader?.InitScriptsLoader(this, handler, ScriptsLoaderConfig);
     }
 
     /// <summary>
@@ -121,7 +114,7 @@ public class Plugin
     /// <returns>Loaded scripts loader instance or <see langword="null" /> if something went wrong.</returns>
     private IScriptsLoader LoadScriptsLoader()
     {
-        if (string.IsNullOrWhiteSpace(PluginConfig?.ScriptsLoaderImplementation))
+        if (string.IsNullOrWhiteSpace(PluginConfig.ScriptsLoaderImplementation))
         {
             PrintError("Scripts loader implementation name is blank.");
             return null;

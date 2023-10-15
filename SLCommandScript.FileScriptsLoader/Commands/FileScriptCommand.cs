@@ -20,6 +20,7 @@ public class FileScriptCommand : FileScriptCommandBase, IUsageProvider, IHelpPro
             if (value is null || value.Length < 1)
             {
                 _usage = null;
+                return;
             }
 
             var usage = value.Where(i => !string.IsNullOrWhiteSpace(i));

@@ -389,17 +389,10 @@ public class FileScriptsLoader : IScriptsLoader
     /// Initializes scripts loader and loads the scripts.
     /// </summary>
     /// <param name="plugin">Plugin object.</param>
+    /// <param name="handler">Plugin handler object.</param>
     /// <param name="loaderConfig">Scripts loader configuration to use.</param>
-    public void InitScriptsLoader(object plugin, ScriptsLoaderConfig loaderConfig)
+    public void InitScriptsLoader(object plugin, PluginHandler handler, ScriptsLoaderConfig loaderConfig)
     {
-        var handler = PluginHandler.Get(plugin);
-
-        if (handler is null)
-        {
-            PrintError("Cannot load plugin directory path.");
-            return;
-        }
-
         IPermissionsResolver permissionsResolver;
 
         if (string.IsNullOrWhiteSpace(loaderConfig.CustomPermissionsResolver))

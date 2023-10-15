@@ -1,4 +1,5 @@
 ﻿using System;
+using PluginAPI.Core;
 
 namespace SLCommandScript.Core.Interfaces;
 
@@ -11,6 +12,7 @@ public interface IScriptsLoader : IDisposable
     /// Initializes the scripts loader.
     /// </summary>
     /// <param name="plugin">Plugin object.</param>
+    /// <param name="handler">Plugin handler object.</param>
     /// <param name="loaderConfig">Scripts loader configuration to use.</param>
-    void InitScriptsLoader(object plugin, ScriptsLoaderConfig loaderConfig);
+    void InitScriptsLoader(object plugin, PluginHandler handler, ScriptsLoaderConfig loaderConfig);
 }

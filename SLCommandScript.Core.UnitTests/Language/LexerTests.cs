@@ -87,10 +87,21 @@ public class LexerTests
             new(TokenType.Text, "wowlo", 6) }, 6 },
 
         new object[] { @"
+    \cassie why am I here \# This is a comment \
+    #? Console
+    print \I \have no id\ea \[
+", new[] { "TestQuotation" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "cassie", 2),
+            new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2), new(TokenType.Text, "#", 2),
+            new(TokenType.Text, "This", 2), new(TokenType.Text, "is", 2), new(TokenType.Text, "a", 2), new(TokenType.Text, "comment", 2),
+            new(TokenType.ScopeGuard, string.Empty, 3), new(TokenType.Text, "Console", 3),
+            new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
+            new(TokenType.Text, "id\\ea", 4), new(TokenType.Text, "[", 4) }, 4 },
+
+        new object[] { @"
     cassie why am I here # This is a comment \
     #! ServerConsoleCommands
-    print I have no idea #! \ServerC?..6onsoleCommands
-    print This should not appear
+    print \I have no idea #! \ServerC?..6onsoleCommands
+    print \This \should not appear
     #! Noclip! ?Announcer \
     #!ServerConsoleCommands
     print This should not appear #! Noclip

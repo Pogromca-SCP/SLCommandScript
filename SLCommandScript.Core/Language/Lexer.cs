@@ -671,6 +671,13 @@ public class Lexer
     /// </summary>
     private void LineExtend()
     {
+        if (!IsWhiteSpace(Current))
+        {
+            ++_start;
+            Text();
+            return;
+        }
+
         if (IsTopLevel)
         {
             var matched = Match('\r');

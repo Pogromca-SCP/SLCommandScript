@@ -31,7 +31,7 @@ public class FileScriptsEventHandler
         }
 
         var cmd = EventScripts[eventType];
-        var result = cmd.Execute(new ArraySegment<string>(args, 1, args.Length - 1), ServerConsole.Scs, out var message);
+        var result = cmd.Execute(new(args, 1, args.Length - 1), ServerConsole.Scs, out var message);
 
         if (!result)
         {

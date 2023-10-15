@@ -141,7 +141,16 @@ public class FileScriptCommandBase : ICommand
             return false;
         }
 
-        var lexer = Lexer.Rent(LoadSource(), arguments, sender, PermissionsResolver);
+        var src = LoadSource();
+
+        if (src is null)
+        {
+            Interlocked.Decrement(ref _calls);
+            response = $"Cannot read script from file '{Command}.slcs'";
+            return false;
+        }
+
+        var lexer = Lexer.Rent(src, arguments, sender, PermissionsResolver);
         response = Interpret(lexer);
         var line = lexer.Line;
         Lexer.Return(lexer);
@@ -164,7 +173,15 @@ public class FileScriptCommandBase : ICommand
     {
         if (!_loadedScripts.TryGetValue(this, out var src))
         {
-            src = FileSystemHelper.ReadFile(_file);
+            try
+            {
+                src = FileSystemHelper.ReadFile(_file);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
             _loadedScripts.TryAdd(this, src);
         }
 

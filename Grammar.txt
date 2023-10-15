@@ -1,4 +1,5 @@
 # NOTE: The entire scripting language is NOT case sensitive!
+# NOTE: Symbols [, ] and # can be quoted with \ when they should be used as text
 
 script			-> line*
 line			-> expression? comment?  # Lines can be extended by ending them with \
