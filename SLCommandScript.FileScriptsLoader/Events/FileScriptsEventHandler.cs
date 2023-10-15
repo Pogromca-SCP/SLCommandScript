@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using PluginAPI.Enums;
 using CommandSystem;
-using System;
 using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
 using PluginAPI.Events;
