@@ -150,7 +150,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(null);
         var message = "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(false);
+        commandMock.Setup(x => x.Execute(new(new[] { "example", "args" }, 1, 1), null, out message)).Returns(false);
         var expr = new CommandExpr(commandMock.Object, new[] { "example", "args" }, false);
 
         // Act
@@ -171,7 +171,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(null);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), null, out message)).Returns(true);
         var expr = new CommandExpr(commandMock.Object, new[] { "test" }, false);
 
         // Act
@@ -225,7 +225,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(null);
         var message = success ? "Command succeeded" : "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(success);
+        commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), null, out message)).Returns(success);
         var expr = new DelayExpr(new CommandExpr(commandMock.Object, new[] { "test" }, false), 0, null);
 
         // Act
@@ -247,7 +247,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(null);
         var message = success ? "Command succeeded" : "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(success);
+        commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), null, out message)).Returns(success);
         var expr = new DelayExpr(new CommandExpr(commandMock.Object, new[] { "test" }, false), delay, null);
 
         // Act
@@ -346,7 +346,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(null);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "test", "args", "$(arg)" }, 1, 2), null, out message)).Returns(true);
         var expr = new ForeachExpr(new CommandExpr(commandMock.Object, new[] { "test", "args", "$(arg)" }, false), new TestIterable());
 
         // Act
@@ -434,7 +434,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(null);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(true);
 
         var expr = new IfExpr(new CommandExpr(null, null, false), new CommandExpr(commandMock.Object,
             new[] { "condition" }, false), null);
@@ -457,7 +457,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(null);
         var message = "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(false);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(false);
 
         var expr = new IfExpr(new ForeachExpr(null, null), new CommandExpr(commandMock.Object, new[] { "condition" }, false),
             new CommandExpr(commandMock.Object, new[] { "else" }, false));
@@ -480,7 +480,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(null);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(true);
 
         var expr = new IfExpr(new CommandExpr(commandMock.Object, new[] { "then" }, false), new CommandExpr(commandMock.Object,
             new[] { "condition" }, false), null);
@@ -503,7 +503,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(null);
         var message = "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(false);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(false);
 
         var expr = new IfExpr(new ForeachExpr(null, null), new CommandExpr(commandMock.Object,
             new[] { "condition" }, false), null);
@@ -526,7 +526,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(null);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), It.IsAny<ICommandSender>(), out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(true);
 
         var expr = new IfExpr(new ForeachExpr(null, null), new CommandExpr(null, null, false),
             new CommandExpr(commandMock.Object, new[] { "else" }, false));

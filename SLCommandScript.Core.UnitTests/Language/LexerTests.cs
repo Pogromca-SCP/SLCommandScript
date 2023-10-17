@@ -713,7 +713,7 @@ public class LexerTests
         const string src = "#!Test Perm Fail";
         var message = "Permission check failed for some reason";
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
-        resolverMock.Setup(x => x.CheckPermission(It.IsAny<ICommandSender>(), It.IsAny<string>(), out message)).Returns(false);
+        resolverMock.Setup(x => x.CheckPermission(null, "Test", out message)).Returns(false);
         var lexer = Lexer.Rent(src, EmptyArgs, null, resolverMock.Object);
 
         // Act
