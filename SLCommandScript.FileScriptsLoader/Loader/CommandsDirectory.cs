@@ -24,6 +24,11 @@ public class CommandsDirectory : IDisposable
     /// </summary>
     public const string ScriptDescriptionExtension = "json";
 
+    /// <summary>
+    /// Updates command description.
+    /// </summary>
+    /// <param name="cmd">Command to update.</param>
+    /// <param name="data">New description values to set.</param>
     private static void UpdateCommandDesc(FileScriptCommand cmd, CommandMetaData data)
     {
         cmd.Description = data.Description;
@@ -257,8 +262,7 @@ public class CommandsDirectory : IDisposable
     /// Unregisters a script command.
     /// </summary>
     /// <param name="path">Script command file to unregister.</param>
-    /// <param name="cmd">Command to unregister.</param>
-    /// <returns><see langword="true" /> if unregistered without issues, <see langword="false" /> otherwise.</returns>
+    /// <returns>Unregistered command if no issues occured, <see langword="null" /> otherwise.</returns>
     private ICommand UnregisterCommand(string path)
     {
         var dir = HelpersProvider.FileSystemHelper.GetDirectory(path);
