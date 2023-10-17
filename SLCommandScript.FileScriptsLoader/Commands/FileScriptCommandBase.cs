@@ -1,8 +1,8 @@
 ﻿using CommandSystem;
 using SLCommandScript.Core.Interfaces;
-using SLCommandScript.FileScriptsLoader.Helpers;
 using System.Collections.Concurrent;
 using SLCommandScript.Core.Language;
+using SLCommandScript.FileScriptsLoader.Helpers;
 using System;
 using System.Threading;
 
@@ -29,19 +29,9 @@ public class FileScriptCommandBase : ICommand
     public static int ConcurrentExecutionsLimit { get; set; } = 0;
 
     /// <summary>
-    /// Contains file system helper object to use.
-    /// </summary>
-    public static IFileSystemHelper FileSystemHelper { get => _filesHelper ?? new FileSystemHelper(); set => _filesHelper = value; }
-
-    /// <summary>
     /// Contains currently loaded scripts.
     /// </summary>
     private static readonly ConcurrentDictionary<FileScriptCommandBase, string> _loadedScripts = new();
-
-    /// <summary>
-    /// Contains file system helper object to use.
-    /// </summary>
-    private static IFileSystemHelper _filesHelper = null;
 
     /// <summary>
     /// Setups an interpretation process for the script.
@@ -119,7 +109,7 @@ public class FileScriptCommandBase : ICommand
     /// <param name="file">Path to associated script.</param>
     public FileScriptCommandBase(string file)
     {
-        Command = FileSystemHelper.GetFileNameWithoutExtension(file);
+        Command = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(file);
         _file = file;
         _desc = DefaultDescription;
         _calls = 0;
@@ -175,7 +165,7 @@ public class FileScriptCommandBase : ICommand
         {
             try
             {
-                src = FileSystemHelper.ReadFile(_file);
+                src = HelpersProvider.FileSystemHelper.ReadFile(_file);
             }
             catch (Exception)
             {

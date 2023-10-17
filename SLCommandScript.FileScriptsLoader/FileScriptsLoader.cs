@@ -38,14 +38,9 @@ public class FileScriptsLoader : IScriptsLoader
     /// </summary>
     /// <param name="path">Path to watch.</param>
     /// <param name="filter">Files filter to use.</param>
+    /// <param name="includeSubdirectories">Whether or not subdirectories should be monitored.</param>
     /// <returns>Newly created file watcher.</returns>
-    private static FileSystemWatcher CreateWatcher(string path, string filter) => new(new System.IO.FileSystemWatcher(path)
-    {
-        NotifyFilter = System.IO.NotifyFilters.CreationTime | System.IO.NotifyFilters.DirectoryName | System.IO.NotifyFilters.FileName,
-        Filter = filter,
-        IncludeSubdirectories = true,
-        EnableRaisingEvents = true
-    });
+    private static FileSystemWatcherHelper CreateWatcher(string path, string filter, bool includeSubdirectories) => new(path, filter, includeSubdirectories);
 
     /// <summary>
     /// Contains all scripts directories monitors.
@@ -102,7 +97,8 @@ public class FileScriptsLoader : IScriptsLoader
 
         FileScriptCommandBase.PermissionsResolver = permissionsResolver;
         FileScriptCommandBase.ConcurrentExecutionsLimit = loaderConfig.ScriptExecutionsLimit;
-        FileScriptCommandBase.FileSystemHelper = new FileSystemHelper();
+        HelpersProvider.FileSystemHelper ??= new FileSystemHelper();
+        HelpersProvider.FileSystemWatcherHelperFactory ??= CreateWatcher;
         LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", loaderConfig.EnableScriptEventHandlers ? CommandType.Console : 0);
         LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", loaderConfig.AllowedScriptCommandTypes & CommandType.RemoteAdmin);
         LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", loaderConfig.AllowedScriptCommandTypes & CommandType.Console);
@@ -124,8 +120,8 @@ public class FileScriptsLoader : IScriptsLoader
         _eventsDirectory = null;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         FileScriptCommandBase.PermissionsResolver = null;
-        FileScriptCommandBase.FileSystemHelper = null;
-        EventsDirectory.PluginHelper = null;
+        HelpersProvider.FileSystemHelper = null;
+        HelpersProvider.FileSystemWatcherHelperFactory = null;
     }
 
     /// <summary>
@@ -141,19 +137,18 @@ public class FileScriptsLoader : IScriptsLoader
             return;
         }
 
-        if (!FileScriptCommandBase.FileSystemHelper.DirectoryExists(directory))
+        if (!HelpersProvider.FileSystemHelper.DirectoryExists(directory))
         {
-            FileScriptCommandBase.FileSystemHelper.CreateDirectory(directory);
+            HelpersProvider.FileSystemHelper.CreateDirectory(directory);
         }
 
         if (plugin is null)
         {
-            _registeredDirectories.Add(new CommandsDirectory(CreateWatcher(directory, "*.*"), handlerType));
+            _registeredDirectories.Add(new CommandsDirectory(HelpersProvider.FileSystemWatcherHelperFactory(directory, "*.*", true), handlerType));
         }
         else
         {
-            EventsDirectory.PluginHelper = new PluginHelper();
-            _eventsDirectory = new EventsDirectory(plugin, CreateWatcher(directory, EventsDirectory.ScriptFilesFilter));
+            _eventsDirectory = new EventsDirectory(plugin, HelpersProvider.FileSystemWatcherHelperFactory(directory, EventsDirectory.ScriptFilesFilter, false));
         }
     }
 }

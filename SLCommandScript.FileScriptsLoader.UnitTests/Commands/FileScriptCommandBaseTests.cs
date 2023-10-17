@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
-using SLCommandScript.FileScriptsLoader.Commands;
-using FluentAssertions;
 using Moq;
 using SLCommandScript.FileScriptsLoader.Helpers;
+using SLCommandScript.FileScriptsLoader.Commands;
+using FluentAssertions;
 using System;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
@@ -33,7 +33,7 @@ public class FileScriptCommandBaseTests
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
         var result = new FileScriptCommandBase(null)
@@ -53,7 +53,7 @@ public class FileScriptCommandBaseTests
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
         var result = new FileScriptCommandBase(null)
@@ -74,7 +74,7 @@ public class FileScriptCommandBaseTests
         const string newDesc = "HelloThere!";
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
         var result = new FileScriptCommandBase(null)
@@ -96,7 +96,7 @@ public class FileScriptCommandBaseTests
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Throws(new Exception());
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
         var action = () => new FileScriptCommandBase(null);
@@ -114,7 +114,7 @@ public class FileScriptCommandBaseTests
         const string testName = "test";
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns(testName);
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
         var result = new FileScriptCommandBase(null);
@@ -135,7 +135,7 @@ public class FileScriptCommandBaseTests
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         var cmd = new FileScriptCommandBase(null);
 
@@ -156,7 +156,7 @@ public class FileScriptCommandBaseTests
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
         fileSystemMock.Setup(x => x.ReadFile(null)).Throws(new Exception());
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 1;
         var cmd = new FileScriptCommandBase(null);
 
@@ -177,7 +177,7 @@ public class FileScriptCommandBaseTests
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
         fileSystemMock.Setup(x => x.ReadFile(null)).Returns(src);
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 1;
         var cmd = new FileScriptCommandBase(null);
 
@@ -198,7 +198,7 @@ public class FileScriptCommandBaseTests
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
         fileSystemMock.Setup(x => x.ReadFile(null)).Returns(src);
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 1;
         var cmd = new FileScriptCommandBase(null);
 

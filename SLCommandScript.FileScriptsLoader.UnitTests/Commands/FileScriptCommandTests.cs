@@ -15,7 +15,7 @@ public class FileScriptCommandTests
     {
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
         var result = new FileScriptCommand(null)
@@ -34,7 +34,7 @@ public class FileScriptCommandTests
     {
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
         var result = new FileScriptCommand(null)
@@ -53,7 +53,7 @@ public class FileScriptCommandTests
     {
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
         var result = new FileScriptCommand(null)
@@ -73,7 +73,7 @@ public class FileScriptCommandTests
         var usage = new[] { "Option", "Args..." };
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
         var result = new FileScriptCommand(null)
@@ -94,7 +94,7 @@ public class FileScriptCommandTests
     {
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         var cmd = new FileScriptCommand(null)
         {
@@ -115,7 +115,7 @@ public class FileScriptCommandTests
     {
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         var cmd = new FileScriptCommand(null)
         {
@@ -137,7 +137,7 @@ public class FileScriptCommandTests
         const string help = "I don't know what I'm supposed to do.";
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         var cmd = new FileScriptCommand(null)
         {
@@ -160,7 +160,7 @@ public class FileScriptCommandTests
     {
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         var cmd = new FileScriptCommand(null)
         {
@@ -184,7 +184,7 @@ public class FileScriptCommandTests
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
         fileSystemMock.Setup(x => x.ReadFile(null)).Returns(string.Empty);
-        FileScriptCommandBase.FileSystemHelper = fileSystemMock.Object;
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 1;
         var cmd = new FileScriptCommand(null);
 

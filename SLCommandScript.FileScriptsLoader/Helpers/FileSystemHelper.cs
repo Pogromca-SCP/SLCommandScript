@@ -23,6 +23,13 @@ public interface IFileSystemHelper
     void CreateDirectory(string path);
 
     /// <summary>
+    /// Returns the directory the specified path resides in.
+    /// </summary>
+    /// <param name="path">The path of the file.</param>
+    /// <returns>The directory the specified path resides in.</returns>
+    string GetDirectory(string path);
+
+    /// <summary>
     /// Returns the file extension of the specified path.
     /// </summary>
     /// <param name="path">The path of the file.</param>
@@ -85,6 +92,13 @@ public class FileSystemHelper : IFileSystemHelper
     /// </summary>
     /// <param name="path">Directory to create.</param>
     public void CreateDirectory(string path) => Directory.CreateDirectory(path);
+
+    /// <summary>
+    /// Returns the directory the specified path resides in.
+    /// </summary>
+    /// <param name="path">The path of the file.</param>
+    /// <returns>The directory the specified path resides in.</returns>
+    public string GetDirectory(string path) => Path.GetDirectoryName(path);
 
     /// <summary>
     /// Returns the file extension of the specified path.

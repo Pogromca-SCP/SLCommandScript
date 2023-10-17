@@ -1,8 +1,9 @@
 ﻿using System;
-using SLCommandScript.FileScriptsLoader.Helpers;
 using SLCommandScript.FileScriptsLoader.Events;
-using SLCommandScript.FileScriptsLoader.Commands;
+using SLCommandScript.FileScriptsLoader.Helpers;
 using System.IO;
+using PluginAPI.Events;
+using SLCommandScript.FileScriptsLoader.Commands;
 using PluginAPI.Enums;
 
 namespace SLCommandScript.FileScriptsLoader.Loader;
@@ -23,16 +24,6 @@ public class EventsDirectory : IDisposable
     public const string EventHandlerPrefix = "on";
 
     /// <summary>
-    /// Contains currently used plugin helper.
-    /// </summary>
-    public static IPluginHelper PluginHelper { get => _pluginHelper ?? new PluginHelper(); set => _pluginHelper = value; }
-
-    /// <summary>
-    /// Contains currently used plugin helper.
-    /// </summary>
-    private static IPluginHelper _pluginHelper = null;
-
-    /// <summary>
     /// Contains plugin object.
     /// </summary>
     public object PluginObject { get; }
@@ -45,14 +36,14 @@ public class EventsDirectory : IDisposable
     /// <summary>
     /// File system watcher used to detect script files changes.
     /// </summary>
-    public IFileSystemWatcher Watcher { get; }
+    public IFileSystemWatcherHelper Watcher { get; }
 
     /// <summary>
     /// Creates new directory monitor and initializes the watcher.
     /// </summary>
     /// <param name="plugin">Plugin object.</param>
     /// <param name="watcher">File system watcher to use.</param>
-    public EventsDirectory(object plugin, IFileSystemWatcher watcher)
+    public EventsDirectory(object plugin, IFileSystemWatcherHelper watcher)
     {
         PluginObject = plugin;
         Handler = new();
@@ -63,7 +54,7 @@ public class EventsDirectory : IDisposable
             return;
         }
 
-        foreach (var file in FileScriptCommandBase.FileSystemHelper.EnumerateFiles(Watcher.Directory, ScriptFilesFilter, SearchOption.AllDirectories))
+        foreach (var file in HelpersProvider.FileSystemHelper.EnumerateFiles(Watcher.Directory, ScriptFilesFilter, SearchOption.TopDirectoryOnly))
         {
             RegisterEvent(file);
         }
@@ -77,7 +68,7 @@ public class EventsDirectory : IDisposable
             return;
         }
 
-        PluginHelper.RegisterEvents(PluginObject, Handler);
+        EventManager.RegisterEvents(PluginObject, Handler);
     }
 
     /// <summary>
@@ -92,7 +83,7 @@ public class EventsDirectory : IDisposable
             return;
         }
 
-        PluginHelper.UnregisterEvents(PluginObject, Handler);
+        EventManager.UnregisterEvents(PluginObject, Handler);
     }
 
     /// <summary>
@@ -128,7 +119,7 @@ public class EventsDirectory : IDisposable
     /// <param name="scriptFile">Event script file to unregister.</param>
     private void UnregisterEvent(string scriptFile)
     {
-        var name = FileScriptCommandBase.FileSystemHelper.GetFileNameWithoutExtension(scriptFile);
+        var name = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(scriptFile);
 
         if (name.Length > EventHandlerPrefix.Length && name.StartsWith(EventHandlerPrefix, StringComparison.OrdinalIgnoreCase))
         {

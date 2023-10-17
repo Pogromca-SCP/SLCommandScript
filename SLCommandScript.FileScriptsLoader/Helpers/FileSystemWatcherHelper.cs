@@ -1,11 +1,12 @@
 ﻿using System;
+using System.IO;
 
 namespace SLCommandScript.FileScriptsLoader.Helpers;
 
 /// <summary>
 /// Interface encapsulating file system watcher for easier testing.
 /// </summary>
-public interface IFileSystemWatcher : IDisposable
+public interface IFileSystemWatcherHelper : IDisposable
 {
     /// <summary>
     /// Contains watched directory.
@@ -15,33 +16,33 @@ public interface IFileSystemWatcher : IDisposable
     /// <summary>
     /// Event invoked on file creation.
     /// </summary>
-    event System.IO.FileSystemEventHandler Created;
+    event FileSystemEventHandler Created;
 
     /// <summary>
     /// Event invoked on file change.
     /// </summary>
-    event System.IO.FileSystemEventHandler Changed;
+    event FileSystemEventHandler Changed;
 
     /// <summary>
     /// Event invoked on file renaming.
     /// </summary>
-    event System.IO.RenamedEventHandler Renamed;
+    event RenamedEventHandler Renamed;
 
     /// <summary>
     /// Event invoked on file deletion.
     /// </summary>
-    event System.IO.FileSystemEventHandler Deleted;
+    event FileSystemEventHandler Deleted;
 }
 
 /// <summary>
 /// Handles file system watching.
 /// </summary>
-public class FileSystemWatcher : IFileSystemWatcher
+public class FileSystemWatcherHelper : IFileSystemWatcherHelper
 {
     /// <summary>
     /// Contains wrapped file watcher.
     /// </summary>
-    private readonly System.IO.FileSystemWatcher _watcher;
+    private readonly FileSystemWatcher _watcher;
 
     /// <summary>
     /// Contains watched directory.
@@ -51,10 +52,19 @@ public class FileSystemWatcher : IFileSystemWatcher
     /// <summary>
     /// Initializes new file system watcher.
     /// </summary>
-    /// <param name="watcher">Watcher to wrap.</param>
-    public FileSystemWatcher(System.IO.FileSystemWatcher watcher)
+    /// <param name="path">Path to watch.</param>
+    /// <param name="filter">Files filter to use.</param>
+    /// <param name="includeSubdirectories">Whether or not subdirectories should be monitored.</param>
+    public FileSystemWatcherHelper(string path, string filter, bool includeSubdirectories)
     {
-        _watcher = watcher;
+        _watcher = new(path)
+        {
+            NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName,
+            Filter = filter,
+            IncludeSubdirectories = includeSubdirectories,
+            EnableRaisingEvents = true
+        };
+
         _watcher.Created += Created;
         _watcher.Changed += Changed;
         _watcher.Renamed += Renamed;
@@ -76,20 +86,20 @@ public class FileSystemWatcher : IFileSystemWatcher
     /// <summary>
     /// Event invoked on file creation.
     /// </summary>
-    public event System.IO.FileSystemEventHandler Created;
+    public event FileSystemEventHandler Created;
 
     /// <summary>
     /// Event invoked on file change.
     /// </summary>
-    public event System.IO.FileSystemEventHandler Changed;
+    public event FileSystemEventHandler Changed;
 
     /// <summary>
     /// Event invoked on file renaming.
     /// </summary>
-    public event System.IO.RenamedEventHandler Renamed;
+    public event RenamedEventHandler Renamed;
 
     /// <summary>
     /// Event invoked on file deletion.
     /// </summary>
-    public event System.IO.FileSystemEventHandler Deleted;
+    public event FileSystemEventHandler Deleted;
 }
