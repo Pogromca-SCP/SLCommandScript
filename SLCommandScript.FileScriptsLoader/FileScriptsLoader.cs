@@ -121,6 +121,7 @@ public class FileScriptsLoader : IScriptsLoader
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         FileScriptCommandBase.PermissionsResolver = null;
         HelpersProvider.FileSystemHelper = null;
+        HelpersProvider.PluginHelper = null;
         HelpersProvider.FileSystemWatcherHelperFactory = null;
     }
 
@@ -148,6 +149,7 @@ public class FileScriptsLoader : IScriptsLoader
         }
         else
         {
+            HelpersProvider.PluginHelper ??= new PluginHelper();
             _eventsDirectory = new EventsDirectory(plugin, HelpersProvider.FileSystemWatcherHelperFactory(directory, EventsDirectory.ScriptFilesFilter, false));
         }
     }

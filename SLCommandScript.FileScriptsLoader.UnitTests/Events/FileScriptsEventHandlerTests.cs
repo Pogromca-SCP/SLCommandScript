@@ -2,10 +2,10 @@
 using PluginAPI.Enums;
 using PluginAPI.Events;
 using SLCommandScript.FileScriptsLoader.Events;
+using System.Reflection;
 using Moq;
 using CommandSystem;
 using System;
-using FluentAssertions;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Events;
 
@@ -18,9 +18,18 @@ public class FileScriptsEventHandlerTests
         new object[] { ServerEventType.RoundStart, new RoundStartEvent() }
     };
 
-    private static readonly object _pluginMock = new();
+    #region HandleEvent Tests
+    [TestCaseSource(nameof(_testedEvents))]
+    public void HandleEvent_ShouldNotThrow_WhenEventIsNotRegistered(ServerEventType type, IEventArguments args)
+    {
+        // Arrange
+        var handler = new FileScriptsEventHandler();
+        var method = handler.GetType().GetMethod($"On{type}", BindingFlags.Instance | BindingFlags.NonPublic);
 
-    #region Registered Tests
+        // Act
+        method.Invoke(handler, new object[] { args });
+    }
+
     [TestCaseSource(nameof(_testedEvents))]
     public void HandleEvent_ShouldExecuteScript_WhenEventIsRegistered(ServerEventType type, IEventArguments args)
     {
@@ -30,19 +39,14 @@ public class FileScriptsEventHandlerTests
         var cmdMock = new Mock<ICommand>(MockBehavior.Strict);
         cmdMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), ServerConsole.Scs, out message)).Returns(true);
         handler.EventScripts.Add(type, cmdMock.Object);
-        EventManager.RegisterEvents(_pluginMock, handler);
+        var method = handler.GetType().GetMethod($"On{type}", BindingFlags.Instance | BindingFlags.NonPublic);
 
         // Act
-        var result = EventManager.ExecuteEvent(args);
+        method.Invoke(handler, new object[] { args });
 
         // Assert
-        result.Should().BeTrue();
-        handler.EventScripts.Should().Contain(e => e.Key == type);
         cmdMock.VerifyAll();
         cmdMock.VerifyNoOtherCalls();
-
-        // Cleanup
-        EventManager.UnregisterEvents(_pluginMock, handler);
     }
     #endregion
 }

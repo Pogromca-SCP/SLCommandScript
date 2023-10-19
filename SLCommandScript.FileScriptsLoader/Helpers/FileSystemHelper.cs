@@ -58,12 +58,11 @@ public interface IFileSystemHelper
     CommandMetaData ReadMetadataFromJson(string path);
 
     /// <summary>
-    /// Returns an enumerable collection of file names and directories in a specified path.
+    /// Returns an enumerable collection of  directories in a specified path.
     /// </summary>
     /// <param name="path">The path to the directory to search.</param>
-    /// <param name="searchOption">Specifies whether the search operation should include only the current directory or should include all subdirectories.</param>
-    /// <returns>An enumerable collection of the full names (including paths) for the files and directories in the directory.</returns>
-    IEnumerable<string> EnumeratePath(string path, SearchOption searchOption);
+    /// <returns>An enumerable collection of the full names (including paths) for the directories in the directory.</returns>
+    IEnumerable<string> EnumerateDirectories(string path);
 
     /// <summary>
     /// Returns an enumerable collection of file names that match a search pattern in a specified path.
@@ -129,12 +128,11 @@ public class FileSystemHelper : IFileSystemHelper
     public CommandMetaData ReadMetadataFromJson(string path) => JsonSerialize.FromFile<CommandMetaData>(path);
 
     /// <summary>
-    /// Returns an enumerable collection of file names and directories in a specified path.
+    /// Returns an enumerable collection of  directories in a specified path.
     /// </summary>
     /// <param name="path">The path to the directory to search.</param>
-    /// <param name="searchOption">Specifies whether the search operation should include only the current directory or should include all subdirectories.</param>
-    /// <returns>An enumerable collection of the full names (including paths) for the files and directories in the directory.</returns>
-    public IEnumerable<string> EnumeratePath(string path, SearchOption searchOption) => Directory.EnumerateFileSystemEntries(path, "*", searchOption);
+    /// <returns>An enumerable collection of the full names (including paths) for the directories in the directory.</returns>
+    public IEnumerable<string> EnumerateDirectories(string path) => Directory.EnumerateDirectories(path);
 
     /// <summary>
     /// Returns an enumerable collection of file names that match a search pattern in a specified path.

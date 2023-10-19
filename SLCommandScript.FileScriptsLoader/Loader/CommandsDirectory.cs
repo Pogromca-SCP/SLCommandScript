@@ -4,8 +4,8 @@ using SLCommandScript.FileScriptsLoader.Commands;
 using CommandSystem;
 using PluginAPI.Enums;
 using SLCommandScript.FileScriptsLoader.Helpers;
-using System.IO;
 using SLCommandScript.Core.Commands;
+using System.IO;
 
 namespace SLCommandScript.FileScriptsLoader.Loader;
 
@@ -23,6 +23,11 @@ public class CommandsDirectory : IDisposable
     /// Contains description files extension.
     /// </summary>
     public const string ScriptDescriptionExtension = "json";
+
+    /// <summary>
+    /// Defines description files extension filter.
+    /// </summary>
+    public const string DescriptionFilesFilter = "*.json";
 
     /// <summary>
     /// Updates command description.
@@ -74,11 +79,7 @@ public class CommandsDirectory : IDisposable
             return;
         }
 
-        foreach (var file in HelpersProvider.FileSystemHelper.EnumeratePath(Watcher.Directory, SearchOption.AllDirectories))
-        {
-            RegisterFile(file);
-        }
-
+        LoadInitialFiles();
         Watcher.Created += (obj, args) => RegisterFile(args.FullPath);
         Watcher.Changed += (obj, args) => RefreshDescription(args.FullPath);
         Watcher.Deleted += (obj, args) => UnregisterFile(args.FullPath);
@@ -95,6 +96,32 @@ public class CommandsDirectory : IDisposable
         foreach (var command in Commands.Values)
         {
             CommandsUtils.UnregisterCommand(HandlerType, command);
+        }
+    }
+
+    /// <summary>
+    /// Loads initial files and directories.
+    /// </summary>
+    private void LoadInitialFiles()
+    {
+        foreach (var dir in HelpersProvider.FileSystemHelper.EnumerateDirectories(Watcher.Directory))
+        {
+            var cmd = new FileScriptDirectoryCommand(HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(dir));
+
+            if (RegisterCommand(dir, cmd))
+            {
+                Directories[dir] = cmd;
+            }
+        }
+
+        foreach (var path in HelpersProvider.FileSystemHelper.EnumerateFiles(Watcher.Directory, EventsDirectory.ScriptFilesFilter, SearchOption.AllDirectories))
+        {
+            RegisterCommand(path, new FileScriptCommand(path));
+        }
+
+        foreach (var path in HelpersProvider.FileSystemHelper.EnumerateFiles(Watcher.Directory, DescriptionFilesFilter, SearchOption.AllDirectories))
+        {
+            UpdateScriptDescription(path);
         }
     }
 
