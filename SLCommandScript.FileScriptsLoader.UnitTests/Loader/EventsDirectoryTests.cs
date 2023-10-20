@@ -14,9 +14,9 @@ namespace SLCommandScript.FileScriptsLoader.UnitTests.Loader;
 [TestFixture]
 public class EventsDirectoryTests
 {
-    #region Tests Utils
     private const string _testDirectory = "eventsTest";
 
+    #region Test Case Sources
     private static readonly string[] _invalidEvents = { string.Empty, "hello", "there" };
 
     private static readonly string[] _validEvents = { $"{ServerEventType.PlayerDeath}", $"On{ServerEventType.Scp079CameraChanged}", $"on{ServerEventType.PlaceBlood}" };
@@ -28,7 +28,9 @@ public class EventsDirectoryTests
     private static IEnumerable<object[]> ValidEvents = JoinArrays(_validEvents, _eventTypes);
 
     private static IEnumerable<object[]> JoinArrays(string[] names, ServerEventType[] types) => names.Select((n, index) => new object[] { n, types[index] });
+    #endregion
 
+    #region Helper Methods
     private static Mock<IFileSystemWatcherHelper> MakeWatcherMock()
     {
         var watcherMock = new Mock<IFileSystemWatcherHelper>(MockBehavior.Strict);

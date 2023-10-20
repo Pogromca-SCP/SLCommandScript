@@ -218,7 +218,7 @@ public class CommandsDirectory : IDisposable
     {
         var dir = HelpersProvider.FileSystemHelper.GetDirectory(path);
         var hasParent = Directories.ContainsKey(dir);
-        var registered = hasParent ? HandlerType : CommandsUtils.RegisterCommand(HandlerType, cmd);
+        var registered = hasParent ? (string.IsNullOrWhiteSpace(cmd.Command) ? null : HandlerType) : CommandsUtils.RegisterCommand(HandlerType, cmd);
 
         if (registered == null)
         {
@@ -306,7 +306,7 @@ public class CommandsDirectory : IDisposable
             Commands.TryGetValue(name, out cmd);
         }
 
-        var removed = hasParent ? HandlerType : CommandsUtils.UnregisterCommand(HandlerType, cmd);
+        var removed = hasParent ? (string.IsNullOrWhiteSpace(cmd.Command) ? null : HandlerType) : CommandsUtils.UnregisterCommand(HandlerType, cmd);
 
         if (removed == null)
         {
