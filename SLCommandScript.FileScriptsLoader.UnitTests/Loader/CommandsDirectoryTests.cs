@@ -735,11 +735,750 @@ public class CommandsDirectoryTests
     #endregion
 
     #region Changed Tests
+    [TestCaseSource(nameof(InvalidCommandsXTypes))]
+    [TestCaseSource(nameof(ValidCommandsXTypes))]
+    public void Changed_ShouldDoNothing_WhenFileTypeIsNotSupported(string name, CommandType type)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{name}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, type);
+
+        // Act
+        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void Changed_ShouldNotUpdateCommand_WhenCommandIsNotFound()
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{_testCommand}")).Returns(CommandsDirectory.ScriptDescriptionExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{_testCommand}")).Returns(_testCommand);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{_testCommand}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+
+        // Act
+        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, _testDirectory, _testCommand));
+
+        // Assert
+        dir.Directories.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void Changed_ShouldNotUpdateCommandFromParent_WhenCommandIsNotFound()
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{_testCommand}")).Returns(CommandsDirectory.ScriptDescriptionExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{_testCommand}")).Returns(_testCommand);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{_testCommand}")).Returns(_testParent);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Directories.Add(_testParent, new(_testParent));
+
+        // Act
+        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, _testDirectory, _testCommand));
+
+        // Assert
+        dir.Directories.Should().HaveCount(1);
+        dir.Directories[_testParent].AllCommands.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void Changed_ShouldNotUpdateCommand_WhenCommandHasIncorrectType()
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{_testCommand}")).Returns(CommandsDirectory.ScriptDescriptionExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{_testCommand}")).Returns(_testCommand);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{_testCommand}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Commands.Add(_testCommand, new FileScriptDirectoryCommand(_testCommand));
+
+        // Act
+        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, _testDirectory, _testCommand));
+
+        // Assert
+        dir.Directories.Should().BeEmpty();
+        dir.Commands.Should().HaveCount(1);
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void Changed_ShouldNotUpdateCommandFromParent_WhenCommandHasIncorrectType()
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{_testCommand}")).Returns(CommandsDirectory.ScriptDescriptionExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{_testCommand}")).Returns(_testCommand);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{_testCommand}")).Returns(_testParent);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Directories.Add(_testParent, new(_testParent));
+        dir.Directories[_testParent].RegisterCommand(new FileScriptDirectoryCommand(_testCommand));
+
+        // Act
+        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, _testDirectory, _testCommand));
+
+        // Assert
+        dir.Directories.Should().HaveCount(1);
+        dir.Directories[_testParent].AllCommands.Should().HaveCount(1);
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void Changed_ShouldNotUpdateCommand_WhenJsonSerializerThrows()
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{_testCommand}")).Returns(CommandsDirectory.ScriptDescriptionExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{_testCommand}")).Returns(_testCommand);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{_testCommand}")).Returns(string.Empty);
+        fileSystemMock.Setup(x => x.ReadMetadataFromJson($"{_testDirectory}\\{_testCommand}")).Throws(new Exception());
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        var cmd = new FileScriptCommand($"{_testDirectory}\\{_testCommand}");
+        dir.Commands.Add(cmd.Command, cmd);
+
+        // Act
+        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, _testDirectory, _testCommand));
+
+        // Assert
+        cmd.Command.Should().Be(_testCommand);
+        cmd.Aliases.Should().BeNull();
+        cmd.Description.Should().Be(FileScriptCommandBase.DefaultDescription);
+        cmd.Usage.Should().BeNull();
+        cmd.Arity.Should().Be(0);
+        cmd.Help.Should().BeNull();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void Changed_ShouldNotUpdateCommandFromParent_WhenJsonSerializerThrows()
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{_testCommand}")).Returns(CommandsDirectory.ScriptDescriptionExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{_testCommand}")).Returns(_testCommand);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{_testCommand}")).Returns(_testParent);
+        fileSystemMock.Setup(x => x.ReadMetadataFromJson($"{_testDirectory}\\{_testCommand}")).Throws(new Exception());
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Directories.Add(_testParent, new(_testParent));
+        var cmd = new FileScriptCommand($"{_testDirectory}\\{_testCommand}");
+        dir.Directories[_testParent].RegisterCommand(cmd);
+
+        // Act
+        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, _testDirectory, _testCommand));
+
+        // Assert
+        cmd.Command.Should().Be(_testCommand);
+        cmd.Aliases.Should().BeNull();
+        cmd.Description.Should().Be(FileScriptCommandBase.DefaultDescription);
+        cmd.Usage.Should().BeNull();
+        cmd.Arity.Should().Be(0);
+        cmd.Help.Should().BeNull();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void Changed_ShouldUpdateCommand_WhenCommandIsFound()
+    {
+        // Arrange
+        var newData = new CommandMetaData()
+        {
+            Description = "example",
+            Usage = new[] { "Hello", "there" },
+            Arity = 4,
+            Help = "HEEEEELP!!!"
+        };
+
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{_testCommand}")).Returns(CommandsDirectory.ScriptDescriptionExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{_testCommand}")).Returns(_testCommand);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{_testCommand}")).Returns(string.Empty);
+        fileSystemMock.Setup(x => x.ReadMetadataFromJson($"{_testDirectory}\\{_testCommand}")).Returns(newData);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        var cmd = new FileScriptCommand($"{_testDirectory}\\{_testCommand}");
+        dir.Commands.Add(cmd.Command, cmd);
+
+        // Act
+        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, _testDirectory, _testCommand));
+
+        // Assert
+        cmd.Command.Should().Be(_testCommand);
+        cmd.Aliases.Should().BeNull();
+        cmd.Description.Should().Be(newData.Description);
+        cmd.Usage.Should().BeEquivalentTo(newData.Usage);
+        cmd.Arity.Should().Be(newData.Arity);
+        cmd.Help.Should().Be(newData.Help);
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void Changed_ShouldUpdateCommandFromParent_WhenCommandIsFound()
+    {
+        // Arrange
+        var newData = new CommandMetaData()
+        {
+            Description = "example2",
+            Usage = new[] { "Sequel" },
+            Arity = 9,
+            Help = "AAAAAA!!!"
+        };
+
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{_testCommand}")).Returns(CommandsDirectory.ScriptDescriptionExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{_testCommand}")).Returns(_testCommand);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{_testCommand}")).Returns(_testParent);
+        fileSystemMock.Setup(x => x.ReadMetadataFromJson($"{_testDirectory}\\{_testCommand}")).Returns(newData);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Directories.Add(_testParent, new(_testParent));
+        var cmd = new FileScriptCommand($"{_testDirectory}\\{_testCommand}");
+        dir.Directories[_testParent].RegisterCommand(cmd);
+
+        // Act
+        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, _testDirectory, _testCommand));
+
+        // Assert
+        cmd.Command.Should().Be(_testCommand);
+        cmd.Aliases.Should().BeNull();
+        cmd.Description.Should().Be(newData.Description);
+        cmd.Usage.Should().BeEquivalentTo(newData.Usage);
+        cmd.Arity.Should().Be(newData.Arity);
+        cmd.Help.Should().Be(newData.Help);
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
     #endregion
 
     #region Deleted Tests
+    [TestCaseSource(nameof(InvalidCommandsXTypes))]
+    [TestCaseSource(nameof(ValidCommandsXTypes))]
+    public void Deleted_ShouldDoNothing_WhenFileTypeIsNotSupported(string name, CommandType type)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{name}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, type);
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(ValidCommandsXTypes))]
+    public void Deleted_ShouldNotUnregisterParent_WhenCommandIsNotFound(string name, CommandType type)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(true);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, type);
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(_validCommands))]
+    public void Deleted_ShouldNotUnregisterParentFromParent_WhenCommandIsNotFound(string name)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(true);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(_testParent);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Directories.Add(_testParent, new(_testParent));
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().HaveCount(1);
+        dir.Directories[_testParent].AllCommands.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(InvalidCommandsXTypes))]
+    public void Deleted_ShouldNotUnregisterParent_WhenCommandNameIsInvalid(string name, CommandType type)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(true);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, type);
+        var cmd = new FileScriptDirectoryCommand(name);
+        dir.Directories.Add($"{_testDirectory}\\{name}", cmd);
+        dir.Commands.Add(cmd.Command, cmd);
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().ContainKey($"{_testDirectory}\\{name}");
+        dir.Directories[$"{_testDirectory}\\{name}"].Should().Be(cmd);
+        dir.Commands.Should().ContainKey(name);
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(_invalidCommands))]
+    public void Deleted_ShouldNotUnregisterParentFromParent_WhenCommandNameIsInvalid(string name)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(true);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(_testParent);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Directories.Add(_testParent, new(_testParent));
+        dir.Directories[_testParent].RegisterCommand(new FileScriptDirectoryCommand($"'{name}'"));
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().HaveCount(1);
+        dir.Directories[_testParent].AllCommands.Should().Contain(c => c.Command.Equals($"'{name}'"));
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(ValidCommandsXTypes))]
+    public void Deleted_ShouldUnregisterParent_WhenCommandNameIsValid(string name, CommandType type)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new[] { $"{_testDirectory}\\{name}" }, new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(true);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, type);
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        GetCommandHandler(type).AllCommands.Should().NotContain(c => c.Command.Equals(name));
+        dir.Directories.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(_validCommands))]
+    public void Deleted_ShouldUnregisterParentFromParent_WhenCommandNameIsValid(string name)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(true);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(_testParent);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Directories.Add(_testParent, new(_testParent));
+        dir.Directories[_testParent].RegisterCommand(new FileScriptDirectoryCommand(name));
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().HaveCount(1);
+        dir.Directories[_testParent].AllCommands.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(ValidCommandsXTypes))]
+    public void Deleted_ShouldNotUnregisterCommand_WhenCommandIsNotFound(string name, CommandType type)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{name}")).Returns(CommandsDirectory.ScriptFileExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, type);
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(_validCommands))]
+    public void Deleted_ShouldNotUnregisterCommandFromParent_WhenCommandIsNotFound(string name)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{name}")).Returns(CommandsDirectory.ScriptFileExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(_testParent);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Directories.Add(_testParent, new(_testParent));
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().HaveCount(1);
+        dir.Directories[_testParent].AllCommands.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(InvalidCommandsXTypes))]
+    public void Deleted_ShouldNotUnregisterCommand_WhenCommandNameIsInvalid(string name, CommandType type)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{name}")).Returns(CommandsDirectory.ScriptFileExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, type);
+        var cmd = new FileScriptDirectoryCommand(name);
+        dir.Commands.Add(cmd.Command, cmd);
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().BeEmpty();
+        dir.Commands.Should().ContainKey(cmd.Command);
+        dir.Commands[cmd.Command].Should().Be(cmd);
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(_invalidCommands))]
+    public void Deleted_ShouldNotUnregisterCommandFromParent_WhenCommandNameIsInvalid(string name)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{name}")).Returns(CommandsDirectory.ScriptFileExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(_testParent);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Directories.Add(_testParent, new(_testParent));
+        dir.Directories[_testParent].RegisterCommand(new FileScriptDirectoryCommand($"'{name}'"));
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().HaveCount(1);
+        dir.Directories[_testParent].AllCommands.Should().Contain(c => c.Command.Equals($"'{name}'"));
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(ValidCommandsXTypes))]
+    public void Deleted_ShouldUnregisterCommand_WhenCommandNameIsValid(string name, CommandType type)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new[] { $"{_testDirectory}\\{name}" }, new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{name}")).Returns(CommandsDirectory.ScriptFileExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, type);
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        GetCommandHandler(type).AllCommands.Should().NotContain(c => c.Command.Equals(name));
+        dir.Directories.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(_validCommands))]
+    public void Deleted_ShouldUnregisterCommandToParent_WhenCommandNameIsValid(string name)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{name}")).Returns(CommandsDirectory.ScriptFileExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(_testParent);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Directories.Add(_testParent, new(_testParent));
+        dir.Directories[_testParent].RegisterCommand(new FileScriptDirectoryCommand(name));
+
+        // Act
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, _testDirectory, name));
+
+        // Assert
+        dir.Directories.Should().HaveCount(1);
+        dir.Directories[_testParent].AllCommands.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
     #endregion
 
     #region Renamed Tests
+    [TestCaseSource(nameof(InvalidCommandsXTypes))]
+    [TestCaseSource(nameof(ValidCommandsXTypes))]
+    public void Renamed_ShouldDoNothing_WhenFileTypeIsNotSupported(string name, CommandType type)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{_testCommand}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{_testCommand}")).Returns(string.Empty);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{name}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, type);
+
+        // Act
+        watcherMock.Raise(x => x.Renamed += null, new RenamedEventArgs(WatcherChangeTypes.Renamed, _testDirectory, name, _testCommand));
+
+        // Assert
+        GetCommandHandler(type).AllCommands.Should().NotContain(c => c.Command.Equals(name));
+        dir.Directories.Should().BeEmpty();
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(ValidCommandsXTypes))]
+    public void Renamed_ShouldReplaceParent_WhenCommandNameIsValid(string name, CommandType type)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new[] { $"{_testDirectory}\\{_testCommand}" }, new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{_testCommand}")).Returns(true);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{_testCommand}")).Returns(_testCommand);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{_testCommand}")).Returns(string.Empty);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(true);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, type);
+
+        // Act
+        watcherMock.Raise(x => x.Renamed += null, new RenamedEventArgs(WatcherChangeTypes.Renamed, _testDirectory, name, _testCommand));
+
+        // Assert
+        var handler = GetCommandHandler(type);
+        handler.AllCommands.Should().NotContain(c => c.Command.Equals(_testCommand));
+        handler.AllCommands.Should().Contain(c => c.Command.Equals(name));
+        dir.Directories.Should().HaveCount(1);
+        dir.Directories.Should().ContainKey($"{_testDirectory}\\{name}");
+        dir.Commands.Should().HaveCount(1);
+        dir.Commands.Should().ContainKey(name);
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+
+        // Cleanup
+        handler.UnregisterCommand(dir.Directories[$"{_testDirectory}\\{name}"]);
+    }
+
+    [TestCaseSource(nameof(ValidCommandsXTypes))]
+    public void Renamed_ShouldReplaceCommand_WhenCommandNameIsValid(string name, CommandType type)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new[] { $"{_testDirectory}\\{_testCommand}" }, new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{_testCommand}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{_testCommand}")).Returns(CommandsDirectory.ScriptFileExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{_testCommand}")).Returns(_testCommand);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{_testCommand}")).Returns(string.Empty);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{name}")).Returns(CommandsDirectory.ScriptFileExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(string.Empty);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, type);
+
+        // Act
+        watcherMock.Raise(x => x.Renamed += null, new RenamedEventArgs(WatcherChangeTypes.Renamed, _testDirectory, name, _testCommand));
+
+        // Assert
+        var handler = GetCommandHandler(type);
+        handler.AllCommands.Should().NotContain(c => c.Command.Equals(_testCommand));
+        handler.AllCommands.Should().Contain(c => c.Command.Equals(name));
+        dir.Directories.Should().BeEmpty();
+        dir.Commands.Should().HaveCount(1);
+        dir.Commands.Should().ContainKey(name);
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+
+        // Cleanup
+        handler.UnregisterCommand(dir.Commands[name]);
+    }
+
+    [TestCaseSource(nameof(_validCommands))]
+    public void Renamed_ShouldReplaceCommandInsideParent_WhenCommandNameIsValid(string name)
+    {
+        // Arrange
+        var fileSystemMock = MakeFilesHelper(new string[0], new string[0], new string[0]);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{_testCommand}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{_testCommand}")).Returns(CommandsDirectory.ScriptFileExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{_testCommand}")).Returns(_testCommand);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{_testCommand}")).Returns(_testParent);
+        fileSystemMock.Setup(x => x.DirectoryExists($"{_testDirectory}\\{name}")).Returns(false);
+        fileSystemMock.Setup(x => x.GetFileExtension($"{_testDirectory}\\{name}")).Returns(CommandsDirectory.ScriptFileExtension);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetDirectory($"{_testDirectory}\\{name}")).Returns(_testParent);
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var watcherMock = MakeWatcherMock();
+        var dir = new CommandsDirectory(watcherMock.Object, _testType);
+        dir.Directories.Add(_testParent, new(_testParent));
+        dir.Directories[_testParent].RegisterCommand(new FileScriptDirectoryCommand(_testCommand));
+
+        // Act
+        watcherMock.Raise(x => x.Renamed += null, new RenamedEventArgs(WatcherChangeTypes.Renamed, _testDirectory, name, _testCommand));
+
+        // Assert
+        dir.Directories.Should().HaveCount(1);
+        var children = dir.Directories[_testParent].AllCommands;
+        children.Should().NotContain(c => c.Command.Equals(_testCommand));
+        children.Should().Contain(c => c.Command.Equals(name));
+        dir.Commands.Should().BeEmpty();
+        watcherMock.VerifyAll();
+        watcherMock.VerifyNoOtherCalls();
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+    }
     #endregion
 }

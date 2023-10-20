@@ -306,11 +306,11 @@ public class CommandsDirectory : IDisposable
             Commands.TryGetValue(name, out cmd);
         }
 
-        var removed = hasParent ? (string.IsNullOrWhiteSpace(cmd.Command) ? null : HandlerType) : CommandsUtils.UnregisterCommand(HandlerType, cmd);
+        var removed = hasParent ? (string.IsNullOrWhiteSpace(cmd?.Command) ? null : HandlerType) : CommandsUtils.UnregisterCommand(HandlerType, cmd);
 
         if (removed == null)
         {
-            FileScriptsLoader.PrintError($"Could not unregister command '{cmd.Command}' from {HandlerType}.");
+            FileScriptsLoader.PrintError($"Could not unregister command '{cmd?.Command}' from {HandlerType}.");
             return null;
         }
 
