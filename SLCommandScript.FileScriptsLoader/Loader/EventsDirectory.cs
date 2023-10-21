@@ -68,7 +68,7 @@ public class EventsDirectory : IDisposable
             return;
         }
 
-        HelpersProvider.PluginHelper.RegisterEvents(PluginObject, Handler);
+        EventManager.RegisterEvents(PluginObject, Handler);
     }
 
     /// <summary>
@@ -83,7 +83,7 @@ public class EventsDirectory : IDisposable
             return;
         }
 
-        HelpersProvider.PluginHelper.UnregisterEvents(PluginObject, Handler);
+        EventManager.UnregisterEvents(PluginObject, Handler);
     }
 
     /// <summary>

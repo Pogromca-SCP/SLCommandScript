@@ -28,7 +28,6 @@ public class FileScriptsLoaderTests
     {
         // Arrange
         HelpersProvider.FileSystemHelper = null;
-        HelpersProvider.PluginHelper = null;
         HelpersProvider.FileSystemWatcherHelperFactory = null;
         FileScriptCommandBase.PermissionsResolver = null;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
@@ -39,7 +38,6 @@ public class FileScriptsLoaderTests
 
         // Assert
         HelpersProvider.FileSystemHelper.Should().BeNull();
-        HelpersProvider.PluginHelper.Should().BeNull();
         HelpersProvider.FileSystemWatcherHelperFactory.Should().BeNull();
         FileScriptCommandBase.PermissionsResolver.Should().BeNull();
         FileScriptCommandBase.ConcurrentExecutionsLimit.Should().Be(0);
@@ -50,7 +48,6 @@ public class FileScriptsLoaderTests
     {
         // Arrange
         HelpersProvider.FileSystemHelper = null;
-        HelpersProvider.PluginHelper = null;
         HelpersProvider.FileSystemWatcherHelperFactory = null;
         FileScriptCommandBase.PermissionsResolver = null;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
@@ -61,7 +58,6 @@ public class FileScriptsLoaderTests
 
         // Assert
         HelpersProvider.FileSystemHelper.Should().BeNull();
-        HelpersProvider.PluginHelper.Should().BeNull();
         HelpersProvider.FileSystemWatcherHelperFactory.Should().BeNull();
         FileScriptCommandBase.PermissionsResolver.Should().BeNull();
         FileScriptCommandBase.ConcurrentExecutionsLimit.Should().Be(0);
@@ -74,7 +70,6 @@ public class FileScriptsLoaderTests
     {
         // Arrange
         HelpersProvider.FileSystemHelper = null;
-        HelpersProvider.PluginHelper = null;
         HelpersProvider.FileSystemWatcherHelperFactory = null;
         FileScriptCommandBase.PermissionsResolver = null;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
@@ -92,7 +87,6 @@ public class FileScriptsLoaderTests
 
         // Assert
         HelpersProvider.FileSystemHelper.Should().NotBeNull();
-        HelpersProvider.PluginHelper.Should().BeNull();
         HelpersProvider.FileSystemWatcherHelperFactory.Should().NotBeNull();
         FileScriptCommandBase.PermissionsResolver.Should().NotBeNull();
         FileScriptCommandBase.PermissionsResolver.GetType().Should().Be(typeof(VanillaPermissionsResolver));
@@ -106,7 +100,6 @@ public class FileScriptsLoaderTests
     {
         // Arrange
         HelpersProvider.FileSystemHelper = null;
-        HelpersProvider.PluginHelper = null;
         HelpersProvider.FileSystemWatcherHelperFactory = null;
         FileScriptCommandBase.PermissionsResolver = null;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
@@ -124,7 +117,6 @@ public class FileScriptsLoaderTests
 
         // Assert
         HelpersProvider.FileSystemHelper.Should().NotBeNull();
-        HelpersProvider.PluginHelper.Should().BeNull();
         HelpersProvider.FileSystemWatcherHelperFactory.Should().NotBeNull();
         FileScriptCommandBase.PermissionsResolver.Should().NotBeNull();
         FileScriptCommandBase.PermissionsResolver.GetType().Should().Be(typeof(CustomResolver));
@@ -138,7 +130,6 @@ public class FileScriptsLoaderTests
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.DirectoryExists(It.IsAny<string>())).Returns(true);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        HelpersProvider.PluginHelper = null;
         HelpersProvider.FileSystemWatcherHelperFactory = _testWatcherFactory;
         FileScriptCommandBase.PermissionsResolver = null;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
@@ -156,7 +147,6 @@ public class FileScriptsLoaderTests
 
         // Assert
         HelpersProvider.FileSystemHelper.Should().Be(fileSystemMock.Object);
-        HelpersProvider.PluginHelper.Should().NotBeNull();
         HelpersProvider.FileSystemWatcherHelperFactory.Should().Be(_testWatcherFactory);
         FileScriptCommandBase.PermissionsResolver.Should().NotBeNull();
         FileScriptCommandBase.PermissionsResolver.GetType().Should().Be(typeof(VanillaPermissionsResolver));
@@ -175,7 +165,6 @@ public class FileScriptsLoaderTests
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.DirectoryExists(It.IsAny<string>())).Returns(true);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        HelpersProvider.PluginHelper = null;
         HelpersProvider.FileSystemWatcherHelperFactory = _testWatcherFactory;
         FileScriptCommandBase.PermissionsResolver = null;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
@@ -193,7 +182,6 @@ public class FileScriptsLoaderTests
 
         // Assert
         HelpersProvider.FileSystemHelper.Should().Be(fileSystemMock.Object);
-        HelpersProvider.PluginHelper.Should().BeNull();
         HelpersProvider.FileSystemWatcherHelperFactory.Should().Be(_testWatcherFactory);
         FileScriptCommandBase.PermissionsResolver.Should().NotBeNull();
         FileScriptCommandBase.PermissionsResolver.GetType().Should().Be(typeof(VanillaPermissionsResolver));
@@ -210,7 +198,6 @@ public class FileScriptsLoaderTests
         fileSystemMock.Setup(x => x.DirectoryExists(It.IsAny<string>())).Returns(false);
         fileSystemMock.Setup(x => x.CreateDirectory(It.IsAny<string>()));
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        HelpersProvider.PluginHelper = null;
         HelpersProvider.FileSystemWatcherHelperFactory = _testWatcherFactory;
         FileScriptCommandBase.PermissionsResolver = null;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
@@ -222,7 +209,6 @@ public class FileScriptsLoaderTests
 
         // Assert
         HelpersProvider.FileSystemHelper.Should().Be(fileSystemMock.Object);
-        HelpersProvider.PluginHelper.Should().NotBeNull();
         HelpersProvider.FileSystemWatcherHelperFactory.Should().Be(_testWatcherFactory);
         FileScriptCommandBase.PermissionsResolver.Should().NotBeNull();
         FileScriptCommandBase.PermissionsResolver.GetType().Should().Be(typeof(VanillaPermissionsResolver));
@@ -241,9 +227,6 @@ public class FileScriptsLoaderTests
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.DirectoryExists(It.IsAny<string>())).Returns(true);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var pluginMock = new Mock<IPluginHelper>(MockBehavior.Strict);
-        pluginMock.Setup(x => x.UnregisterEvents(plugin, It.IsAny<object>()));
-        HelpersProvider.PluginHelper = pluginMock.Object;
         HelpersProvider.FileSystemWatcherHelperFactory = _testWatcherFactory;
         var loader = new FileScriptsLoader();
         loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), _emptyTypesArray), null);
@@ -255,12 +238,9 @@ public class FileScriptsLoaderTests
         FileScriptCommandBase.ConcurrentExecutionsLimit.Should().Be(0);
         FileScriptCommandBase.PermissionsResolver.Should().BeNull();
         HelpersProvider.FileSystemHelper.Should().BeNull();
-        HelpersProvider.PluginHelper.Should().BeNull();
         HelpersProvider.FileSystemWatcherHelperFactory.Should().BeNull();
         fileSystemMock.VerifyAll();
         fileSystemMock.VerifyNoOtherCalls();
-        pluginMock.VerifyAll();
-        pluginMock.VerifyNoOtherCalls();
     }
     #endregion
 }
