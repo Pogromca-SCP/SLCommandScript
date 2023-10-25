@@ -159,7 +159,7 @@ public class FileScriptsLoader : IScriptsLoader
 
         if (plugin is null)
         {
-            _registeredDirectories.Add(new CommandsDirectory(HelpersProvider.FileSystemWatcherHelperFactory(directory, "*.*", true), handlerType));
+            _registeredDirectories.Add(new CommandsDirectory(HelpersProvider.FileSystemWatcherHelperFactory(directory, null, true), handlerType));
         }
         else
         {

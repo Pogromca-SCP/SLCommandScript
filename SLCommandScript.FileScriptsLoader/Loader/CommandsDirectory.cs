@@ -17,12 +17,12 @@ public class CommandsDirectory : IDisposable
     /// <summary>
     /// Contains script files extension.
     /// </summary>
-    public const string ScriptFileExtension = "slcs";
+    public const string ScriptFileExtension = ".slcs";
 
     /// <summary>
     /// Contains description files extension.
     /// </summary>
-    public const string ScriptDescriptionExtension = "json";
+    public const string ScriptDescriptionExtension = ".json";
 
     /// <summary>
     /// Defines description files extension filter.

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 
+using PluginAPI.Core;
+
 namespace SLCommandScript.FileScriptsLoader.Helpers;
 
 /// <summary>
@@ -84,6 +86,11 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
             IncludeSubdirectories = includeSubdirectories,
             EnableRaisingEvents = true
         };
+
+        _watcher.Created += (obj, args) => Log.Debug($"Created: {args.Name}", "FilesWatcher: ");
+        _watcher.Changed += (obj, args) => Log.Debug($"Changed: {args.Name}", "FilesWatcher: ");
+        _watcher.Renamed += (obj, args) => Log.Debug($"Renamed: {args.OldName} -> {args.Name}", "FilesWatcher: ");
+        _watcher.Deleted += (obj, args) => Log.Debug($"Deleted: {args.Name}", "FilesWatcher: ");
     }
 
     /// <summary>
@@ -103,5 +110,9 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
     /// <summary>
     /// Disposes wrapped watcher.
     /// </summary>
-    protected void DisposeWatcher() => _watcher.Dispose();
+    protected void DisposeWatcher()
+    {
+        _watcher.EnableRaisingEvents = false;
+        _watcher.Dispose();
+    }
 }
