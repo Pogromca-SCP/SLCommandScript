@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using SLCommandScript.FileScriptsLoader.Commands;
+using System.Collections.Generic;
 using CommandSystem;
 using PluginAPI.Enums;
 using SLCommandScript.FileScriptsLoader.Helpers;
@@ -87,9 +87,23 @@ public class CommandsDirectory : IDisposable
     }
 
     /// <summary>
-    /// Disposes the watcher and performs command cleanup.
+    /// Releases resources.
+    /// </summary>
+    ~CommandsDirectory() => DisposeAndUnregisterCommands();
+
+    /// <summary>
+    /// Releases resources.
     /// </summary>
     public void Dispose()
+    {
+        DisposeAndUnregisterCommands();
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Disposes the watcher and performs command cleanup.
+    /// </summary>
+    protected void DisposeAndUnregisterCommands()
     {
         Watcher?.Dispose();
 
@@ -100,17 +114,25 @@ public class CommandsDirectory : IDisposable
     }
 
     /// <summary>
+    /// Processes and formats directory path.
+    /// </summary>
+    /// <param name="path">Path to process.</param>
+    /// <returns>Processed path.</returns>
+    private string ProcessDirectoryPath(string path) =>
+        path.Length > Watcher.Directory.Length ? path.Substring(Watcher.Directory.Length).Replace('\\', '/').TrimStart('/') : string.Empty;
+
+    /// <summary>
     /// Loads initial files and directories.
     /// </summary>
     private void LoadInitialFiles()
     {
-        foreach (var dir in HelpersProvider.FileSystemHelper.EnumerateDirectories(Watcher.Directory))
+        foreach (var path in HelpersProvider.FileSystemHelper.EnumerateDirectories(Watcher.Directory))
         {
-            var cmd = new FileScriptDirectoryCommand(HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(dir));
+            var cmd = new FileScriptDirectoryCommand(ProcessDirectoryPath(path));
 
-            if (RegisterCommand(dir, cmd))
+            if (RegisterCommand(path, cmd))
             {
-                Directories[dir] = cmd;
+                Directories[cmd.Path] = cmd;
             }
         }
 
@@ -133,11 +155,11 @@ public class CommandsDirectory : IDisposable
     {
         if (HelpersProvider.FileSystemHelper.DirectoryExists(path))
         {
-            var cmd = new FileScriptDirectoryCommand(HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(path));
+            var cmd = new FileScriptDirectoryCommand(ProcessDirectoryPath(path));
             
             if (RegisterCommand(path, cmd))
             {
-                Directories[path] = cmd;
+                Directories[cmd.Path] = cmd;
             }
 
             return;
@@ -183,7 +205,7 @@ public class CommandsDirectory : IDisposable
 
             if (cmd is not null)
             {
-                Directories.Remove(path);
+                Directories.Remove(cmd.Path);
             }
 
             return;
@@ -216,21 +238,17 @@ public class CommandsDirectory : IDisposable
     /// <returns><see langword="true" /> if registered without issues, <see langword="false" /> otherwise.</returns>
     private bool RegisterCommand(string path, ICommand cmd)
     {
-        var dir = HelpersProvider.FileSystemHelper.GetDirectory(path);
+        var dir = ProcessDirectoryPath(HelpersProvider.FileSystemHelper.GetDirectory(path));
         var hasParent = Directories.ContainsKey(dir);
-        var registered = hasParent ? (string.IsNullOrWhiteSpace(cmd.Command) ? null : HandlerType) : CommandsUtils.RegisterCommand(HandlerType, cmd);
+        var registered = hasParent ? (CommandsUtils.RegisterCommand(Directories[dir], cmd) == true ? HandlerType : null) : CommandsUtils.RegisterCommand(HandlerType, cmd);
 
-        if (registered == null)
+        if (registered != HandlerType)
         {
             FileScriptsLoader.PrintError($"Could not register command '{cmd.Command}' for {HandlerType}.");
             return false;
         }
 
-        if (hasParent)
-        {
-            Directories[dir].RegisterCommand(cmd);
-        }
-        else
+        if (!hasParent)
         {
             Commands[cmd.Command] = cmd;
         }
@@ -246,7 +264,7 @@ public class CommandsDirectory : IDisposable
     /// <returns><see langword="true" /> if updated without issues, <see langword="false" /> otherwise.</returns>
     private bool UpdateScriptDescription(string path)
     {
-        var dir = HelpersProvider.FileSystemHelper.GetDirectory(path);
+        var dir = ProcessDirectoryPath(HelpersProvider.FileSystemHelper.GetDirectory(path));
         var hasParent = Directories.ContainsKey(dir);
         var name = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(path);
         ICommand foundCommand;
@@ -292,7 +310,7 @@ public class CommandsDirectory : IDisposable
     /// <returns>Unregistered command if no issues occured, <see langword="null" /> otherwise.</returns>
     private ICommand UnregisterCommand(string path)
     {
-        var dir = HelpersProvider.FileSystemHelper.GetDirectory(path);
+        var dir = ProcessDirectoryPath(HelpersProvider.FileSystemHelper.GetDirectory(path));
         var hasParent = Directories.ContainsKey(dir);
         var name = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(path);
         ICommand cmd;
@@ -306,19 +324,15 @@ public class CommandsDirectory : IDisposable
             Commands.TryGetValue(name, out cmd);
         }
 
-        var removed = hasParent ? (string.IsNullOrWhiteSpace(cmd?.Command) ? null : HandlerType) : CommandsUtils.UnregisterCommand(HandlerType, cmd);
+        var removed = hasParent ? (CommandsUtils.UnregisterCommand(Directories[dir], cmd) == true ? HandlerType : null) : CommandsUtils.UnregisterCommand(HandlerType, cmd);
 
-        if (removed == null)
+        if (removed != HandlerType)
         {
             FileScriptsLoader.PrintError($"Could not unregister command '{cmd?.Command}' from {HandlerType}.");
             return null;
         }
 
-        if (hasParent)
-        {
-            Directories[dir].UnregisterCommand(cmd);
-        }
-        else
+        if (!hasParent)
         {
             Commands.Remove(cmd.Command);
         }

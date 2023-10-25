@@ -10,18 +10,22 @@ namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 public class FileScriptDirectoryCommandTests
 {
     #region Constructor Tests
-    [TestCase("hello")]
-    [TestCase(null)]
-    [TestCase("wnebgosg")]
-    public void FileScriptDirectoryCommand_ShouldProperlyInitialize(string name)
+    [TestCase("hello", "hello")]
+    [TestCase(null, null)]
+    [TestCase("example/", "")]
+    [TestCase("/example", "example")]
+    [TestCase("example/test", "test")]
+    [TestCase("example/multiple//test", "test")]
+    public void FileScriptDirectoryCommand_ShouldProperlyInitialize(string path, string name)
     {
         // Act
-        var result = new FileScriptDirectoryCommand(name);
+        var result = new FileScriptDirectoryCommand(path);
 
         // Assert
         result.Command.Should().Be(name);
         result.Aliases.Should().BeNull();
         result.Description.Should().Be("Parent command containing all scripts in a directory.");
+        result.Path.Should().Be(path);
     }
     #endregion
 

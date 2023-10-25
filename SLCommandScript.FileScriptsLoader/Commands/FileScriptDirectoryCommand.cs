@@ -24,12 +24,19 @@ public class FileScriptDirectoryCommand : ParentCommand
     public override string Description { get; }
 
     /// <summary>
+    /// Contains shortened directory path.
+    /// </summary>
+    public string Path { get; }
+
+    /// <summary>
     /// Initializes the command.
     /// </summary>
-    /// <param name="name">Name to use.</param>
-    public FileScriptDirectoryCommand(string name)
+    /// <param name="path">Path to use.</param>
+    public FileScriptDirectoryCommand(string path)
     {
-        Command = name;
+        Path = path;
+        var index = path?.LastIndexOf('/') ?? -1;
+        Command = index < 0 ? path : path.Substring(index + 1);
         Description = "Parent command containing all scripts in a directory.";
     }
 

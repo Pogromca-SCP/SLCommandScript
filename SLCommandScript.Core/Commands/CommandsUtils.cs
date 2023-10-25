@@ -58,6 +58,44 @@ public static class CommandsUtils
     }
 
     /// <summary>
+    /// Registers a command to specific handler.
+    /// </summary>
+    /// <param name="handler">Handler to register to.</param>
+    /// <param name="command">Command to register.</param>
+    /// <returns><see langword="true" /> if command was registered, <see langword="false" /> otherwise or <see langword="null" /> if command or handler is invalid.</returns>
+    public static bool? RegisterCommand(ICommandHandler handler, ICommand command)
+    {
+        var registered = IsCommandRegistered(handler, command);
+
+        if (registered == false)
+        {
+            handler.RegisterCommand(command);
+            return true;
+        }
+
+        return registered == null ? null : false;
+    }
+
+    /// <summary>
+    /// Unregisters a command from specific handler.
+    /// </summary>
+    /// <param name="handler">Handler to unregister from.</param>
+    /// <param name="command">Command to unregister.</param>
+    /// <returns><see langword="true" /> if command was unregistered, <see langword="false" /> otherwise or <see langword="null" /> if command or handler is invalid.</returns>
+    public static bool? UnregisterCommand(ICommandHandler handler, ICommand command)
+    {
+        var registered = IsCommandRegistered(handler, command);
+
+        if (registered == true)
+        {
+            handler.UnregisterCommand(command);
+            return true;
+        }
+
+        return registered == null ? null : false;
+    }
+
+    /// <summary>
     /// Attempts to get a command from specific handlers.
     /// </summary>
     /// <param name="commandType">Command handlers to search in.</param>
@@ -127,6 +165,42 @@ public static class CommandsUtils
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Checks if provided command is already registered in specific handler.
+    /// </summary>
+    /// <param name="handler">Handler to check.</param>
+    /// <param name="command">Command to check.</param>
+    /// <returns><see langword="true" /> if command is already registered, <see langword="false" /> otherwise or <see langword="null" /> if command or handler is invalid.</returns>
+    public static bool? IsCommandRegistered(ICommandHandler handler, ICommand command)
+    {
+        if (handler is null || IsCommandInvalid(command))
+        {
+            return null;
+        }
+
+        var isFound = handler.TryGetCommand(command.Command, out var foundCommand);
+
+        if (command.Aliases is not null && isFound)
+        {
+            foreach (var alias in command.Aliases)
+            {
+                isFound = handler.TryGetCommand(alias, out var aliasResult);
+
+                if (isFound && !ReferenceEquals(foundCommand, aliasResult))
+                {
+                    isFound = false;
+                }
+
+                if (!isFound)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return isFound;
     }
 
     /// <summary>

@@ -50,6 +50,26 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
     public string Directory => _watcher.Path;
 
     /// <summary>
+    /// Event invoked on file creation.
+    /// </summary>
+    public event FileSystemEventHandler Created { add => _watcher.Created += value; remove => _watcher.Created -= value; }
+
+    /// <summary>
+    /// Event invoked on file change.
+    /// </summary>
+    public event FileSystemEventHandler Changed { add => _watcher.Changed += value; remove => _watcher.Changed -= value; }
+
+    /// <summary>
+    /// Event invoked on file renaming.
+    /// </summary>
+    public event RenamedEventHandler Renamed { add => _watcher.Renamed += value; remove => _watcher.Renamed -= value; }
+
+    /// <summary>
+    /// Event invoked on file deletion.
+    /// </summary>
+    public event FileSystemEventHandler Deleted { add => _watcher.Deleted += value; remove => _watcher.Deleted -= value; }
+
+    /// <summary>
     /// Initializes new file system watcher.
     /// </summary>
     /// <param name="path">Path to watch.</param>
@@ -64,42 +84,24 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
             IncludeSubdirectories = includeSubdirectories,
             EnableRaisingEvents = true
         };
-
-        _watcher.Created += Created;
-        _watcher.Changed += Changed;
-        _watcher.Renamed += Renamed;
-        _watcher.Deleted += Deleted;
     }
 
     /// <summary>
-    /// Unbinds events and releases unmanaged resources.
+    /// Releases resources.
+    /// </summary>
+    ~FileSystemWatcherHelper() => DisposeWatcher();
+
+    /// <summary>
+    /// Releases resources.
     /// </summary>
     public void Dispose()
     {
-        _watcher.Created -= Created;
-        _watcher.Changed -= Changed;
-        _watcher.Renamed -= Renamed;
-        _watcher.Deleted -= Deleted;
-        _watcher.Dispose();
+        DisposeWatcher();
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
-    /// Event invoked on file creation.
+    /// Disposes wrapped watcher.
     /// </summary>
-    public event FileSystemEventHandler Created;
-
-    /// <summary>
-    /// Event invoked on file change.
-    /// </summary>
-    public event FileSystemEventHandler Changed;
-
-    /// <summary>
-    /// Event invoked on file renaming.
-    /// </summary>
-    public event RenamedEventHandler Renamed;
-
-    /// <summary>
-    /// Event invoked on file deletion.
-    /// </summary>
-    public event FileSystemEventHandler Deleted;
+    protected void DisposeWatcher() => _watcher.Dispose();
 }

@@ -8,6 +8,7 @@ using SLCommandScript.Core.Permissions;
 using SLCommandScript.Core.Reflection;
 using SLCommandScript.FileScriptsLoader.Commands;
 using PluginAPI.Enums;
+using System;
 
 namespace SLCommandScript.FileScriptsLoader;
 
@@ -106,9 +107,23 @@ public class FileScriptsLoader : IScriptsLoader
     }
 
     /// <summary>
-    /// Unloads scripts and releases unmanaged resources.
+    /// Releases resources.
+    /// </summary>
+    ~FileScriptsLoader() => PerformCleanup();
+
+    /// <summary>
+    /// Releases resources.
     /// </summary>
     public void Dispose()
+    {
+        PerformCleanup();
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Unloads scripts and helpers.
+    /// </summary>
+    protected void PerformCleanup()
     {
         foreach (var dir in _registeredDirectories)
         {

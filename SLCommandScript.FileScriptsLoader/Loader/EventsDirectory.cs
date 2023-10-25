@@ -72,9 +72,23 @@ public class EventsDirectory : IDisposable
     }
 
     /// <summary>
-    /// Disposes the watcher and unregisters events.
+    /// Releases resources.
+    /// </summary>
+    ~EventsDirectory() => DisposeAndUnregisterEvents();
+
+    /// <summary>
+    /// Releases resources.
     /// </summary>
     public void Dispose()
+    {
+        DisposeAndUnregisterEvents();
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Disposes the watcher and unregisters events.
+    /// </summary>
+    protected void DisposeAndUnregisterEvents()
     {
         Watcher?.Dispose();
 
