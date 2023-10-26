@@ -62,6 +62,7 @@ public class EventsDirectory : IDisposable
         Watcher.Created += (obj, args) => RegisterEvent(args.FullPath);
         Watcher.Deleted += (obj, args) => UnregisterEvent(args.FullPath);
         Watcher.Renamed += (obj, args) => RefreshEvent(args.OldFullPath, args.FullPath);
+        Watcher.Error += (obj, args) => FileScriptsLoader.PrintError($"An events watcher error has occured: {args.GetException().Message}");
 
         if (PluginObject is null)
         {

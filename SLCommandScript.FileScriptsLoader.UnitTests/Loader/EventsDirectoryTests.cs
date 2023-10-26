@@ -39,6 +39,7 @@ public class EventsDirectoryTests
         watcherMock.SetupAdd(x => x.Created += It.IsAny<FileSystemEventHandler>());
         watcherMock.SetupAdd(x => x.Deleted += It.IsAny<FileSystemEventHandler>());
         watcherMock.SetupAdd(x => x.Renamed += It.IsAny<RenamedEventHandler>());
+        watcherMock.SetupAdd(x => x.Error += It.IsAny<ErrorEventHandler>());
         return watcherMock;
     }
 

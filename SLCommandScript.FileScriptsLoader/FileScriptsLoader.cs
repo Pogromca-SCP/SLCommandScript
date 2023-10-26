@@ -4,11 +4,11 @@ using SLCommandScript.FileScriptsLoader.Helpers;
 using System.Collections.Generic;
 using SLCommandScript.FileScriptsLoader.Loader;
 using SLCommandScript.Core;
-using SLCommandScript.Core.Permissions;
-using SLCommandScript.Core.Reflection;
 using SLCommandScript.FileScriptsLoader.Commands;
 using PluginAPI.Enums;
 using System;
+using SLCommandScript.Core.Permissions;
+using SLCommandScript.Core.Reflection;
 
 namespace SLCommandScript.FileScriptsLoader;
 
@@ -21,6 +21,11 @@ public class FileScriptsLoader : IScriptsLoader
     /// Prefix string to use in logs.
     /// </summary>
     private const string LoaderPrefix = "FileScriptsLoader: ";
+
+    /// <summary>
+    /// Contains a reference to initialized instance.
+    /// </summary>
+    private static FileScriptsLoader _instance = null;
 
     /// <summary>
     /// Prints a message to server log.
@@ -73,30 +78,16 @@ public class FileScriptsLoader : IScriptsLoader
             return;
         }
 
+        if (_instance is not null)
+        {
+            PrintError("Only one instance of FileScriptsLoader can be initialized.");
+            return;
+        }
+
+        _instance = this;
+        PrintLog("Initializing scripts loader...");
         loaderConfig ??= new();
-        IPermissionsResolver permissionsResolver;
-
-        if (string.IsNullOrWhiteSpace(loaderConfig.CustomPermissionsResolver))
-        {
-            PrintLog("Using default permissions resolver.");
-            permissionsResolver = new VanillaPermissionsResolver();
-        }
-        else
-        {
-            permissionsResolver = CustomTypesUtils.MakeCustomTypeInstance<IPermissionsResolver>(loaderConfig.CustomPermissionsResolver, out var message);
-
-            if (permissionsResolver is null)
-            {
-                PrintError(message);
-                permissionsResolver = new VanillaPermissionsResolver();
-            }
-            else
-            {
-                PrintLog("Custom permissions resolver loaded successfully.");
-            }
-        }
-
-        FileScriptCommandBase.PermissionsResolver = permissionsResolver;
+        FileScriptCommandBase.PermissionsResolver = LoadPermissionsResolver(loaderConfig.CustomPermissionsResolver);
         FileScriptCommandBase.ConcurrentExecutionsLimit = loaderConfig.ScriptExecutionsLimit;
         HelpersProvider.FileSystemHelper ??= new FileSystemHelper();
         HelpersProvider.FileSystemWatcherHelperFactory ??= CreateWatcher;
@@ -104,6 +95,7 @@ public class FileScriptsLoader : IScriptsLoader
         LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", loaderConfig.AllowedScriptCommandTypes & CommandType.RemoteAdmin);
         LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", loaderConfig.AllowedScriptCommandTypes & CommandType.Console);
         LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/client/", loaderConfig.AllowedScriptCommandTypes & CommandType.GameConsole);
+        PrintLog("Scripts loader is initialized.");
     }
 
     /// <summary>
@@ -125,6 +117,8 @@ public class FileScriptsLoader : IScriptsLoader
     /// </summary>
     protected void PerformCleanup()
     {
+        PrintLog("Disabling scripts loader...");
+
         foreach (var dir in _registeredDirectories)
         {
             dir.Dispose();
@@ -133,10 +127,46 @@ public class FileScriptsLoader : IScriptsLoader
         _registeredDirectories.Clear();
         _eventsDirectory?.Dispose();
         _eventsDirectory = null;
+
+        if (!ReferenceEquals(_instance, this))
+        {
+            PrintLog("Scripts loader is disabled but static helpers are still active.");
+            return;
+        }
+
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         FileScriptCommandBase.PermissionsResolver = null;
         HelpersProvider.FileSystemHelper = null;
         HelpersProvider.FileSystemWatcherHelperFactory = null;
+        _instance = null;
+        PrintLog("Scripts loader is disabled.");
+    }
+
+    /// <summary>
+    /// Loads permissions resolver instance to use.
+    /// </summary>
+    /// <param name="resolverToUse">Custom type of resolver to use.</param>
+    /// <returns>Loaded permissions resolver instance.</returns>
+    private IPermissionsResolver LoadPermissionsResolver(string resolverToUse)
+    {
+        if (string.IsNullOrWhiteSpace(resolverToUse))
+        {
+            PrintLog("Using default permissions resolver.");
+            return new VanillaPermissionsResolver();
+        }
+
+        var permissionsResolver = CustomTypesUtils.MakeCustomTypeInstance<IPermissionsResolver>(resolverToUse, out var message);
+
+        if (permissionsResolver is null)
+        {
+            PrintError(message);
+            return new VanillaPermissionsResolver();
+        }
+        else
+        {
+            PrintLog("Custom permissions resolver loaded successfully.");
+            return permissionsResolver;
+        }
     }
 
     /// <summary>
@@ -159,10 +189,12 @@ public class FileScriptsLoader : IScriptsLoader
 
         if (plugin is null)
         {
+            PrintLog($"Initializing commands directory for {handlerType}...");
             _registeredDirectories.Add(new CommandsDirectory(HelpersProvider.FileSystemWatcherHelperFactory(directory, null, true), handlerType));
         }
         else
         {
+            PrintLog("Initializing events directory...");
             _eventsDirectory = new EventsDirectory(plugin, HelpersProvider.FileSystemWatcherHelperFactory(directory, EventsDirectory.ScriptFilesFilter, false));
         }
     }

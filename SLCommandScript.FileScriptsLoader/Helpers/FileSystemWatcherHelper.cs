@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 
-using PluginAPI.Core;
-
 namespace SLCommandScript.FileScriptsLoader.Helpers;
 
 /// <summary>
@@ -34,6 +32,11 @@ public interface IFileSystemWatcherHelper : IDisposable
     /// Event invoked on file deletion.
     /// </summary>
     event FileSystemEventHandler Deleted;
+
+    /// <summary>
+    /// Event invoked on error.
+    /// </summary>
+    event ErrorEventHandler Error;
 }
 
 /// <summary>
@@ -72,6 +75,11 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
     public event FileSystemEventHandler Deleted { add => _watcher.Deleted += value; remove => _watcher.Deleted -= value; }
 
     /// <summary>
+    /// Event invoked on error.
+    /// </summary>
+    public event ErrorEventHandler Error { add => _watcher.Error += value; remove => _watcher.Error -= value; }
+
+    /// <summary>
     /// Initializes new file system watcher.
     /// </summary>
     /// <param name="path">Path to watch.</param>
@@ -86,11 +94,6 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
             IncludeSubdirectories = includeSubdirectories,
             EnableRaisingEvents = true
         };
-
-        _watcher.Created += (obj, args) => Log.Debug($"Created: {args.Name}", "FilesWatcher: ");
-        _watcher.Changed += (obj, args) => Log.Debug($"Changed: {args.Name}", "FilesWatcher: ");
-        _watcher.Renamed += (obj, args) => Log.Debug($"Renamed: {args.OldName} -> {args.Name}", "FilesWatcher: ");
-        _watcher.Deleted += (obj, args) => Log.Debug($"Deleted: {args.Name}", "FilesWatcher: ");
     }
 
     /// <summary>
