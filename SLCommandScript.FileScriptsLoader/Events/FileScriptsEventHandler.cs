@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using PluginAPI.Enums;
-using CommandSystem;
+﻿using CommandSystem;
 using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
+using PluginAPI.Enums;
 using PluginAPI.Events;
+using System.Collections.Generic;
 
 namespace SLCommandScript.FileScriptsLoader.Events;
 
@@ -15,7 +15,7 @@ public class FileScriptsEventHandler
     /// <summary>
     /// Contains registered event handling scripts.
     /// </summary>
-    public Dictionary<ServerEventType, ICommand> EventScripts { get; } = new();
+    public Dictionary<ServerEventType, ICommand> EventScripts { get; } = [];
 
     /// <summary>
     /// Executes a command handler.

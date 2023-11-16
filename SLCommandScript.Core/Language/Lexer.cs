@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System;
-using System.Collections.Concurrent;
-using CommandSystem;
+﻿using CommandSystem;
 using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Permissions;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SLCommandScript.Core.Language;
@@ -230,7 +230,7 @@ public class Lexer
         _arguments = new();
         Sender = null;
         PermissionsResolver = null;
-        _tokens = new();
+        _tokens = [];
         _argLexers = isTopLevel ? new() : null;
     }
 

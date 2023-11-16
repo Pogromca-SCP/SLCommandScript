@@ -1,8 +1,8 @@
-﻿using PluginAPI.Core;
-using System.Collections.Generic;
+﻿using PlayerRoles;
+using PluginAPI.Core;
 using SLCommandScript.Core.Interfaces;
-using PlayerRoles;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SLCommandScript.Core.Iterables;
@@ -10,14 +10,9 @@ namespace SLCommandScript.Core.Iterables;
 /// <summary>
 /// Iterable wrapper for a list of players.
 /// </summary>
-public class PlayersIterable : IterableListBase<Player>
+/// <param name="players">List of players to wrap.</param>
+public class PlayersIterable(IEnumerable<Player> players) : IterableListBase<Player>(players)
 {
-    /// <summary>
-    /// Creates new iterable wrapper for players list.
-    /// </summary>
-    /// <param name="players">List of players to wrap.</param>
-    public PlayersIterable(IEnumerable<Player> players) : base(players) {}
-
     /// <summary>
     /// Loads properties from current player and inserts them into a dictionary.
     /// </summary>

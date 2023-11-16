@@ -1,9 +1,9 @@
-﻿using PluginAPI.Enums;
-using System.Collections.Generic;
-using CommandSystem;
-using System.Linq;
-using RemoteAdmin;
+﻿using CommandSystem;
 using GameCore;
+using PluginAPI.Enums;
+using RemoteAdmin;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SLCommandScript.Core.Commands;
 
@@ -15,7 +15,7 @@ public static class CommandsUtils
     /// <summary>
     /// Defines command handlers hierarchy for command searches.
     /// </summary>
-    private static readonly CommandType[] _handlersHierarchy = { CommandType.RemoteAdmin, CommandType.Console, CommandType.GameConsole };
+    private static readonly CommandType[] _handlersHierarchy = [CommandType.RemoteAdmin, CommandType.Console, CommandType.GameConsole];
 
     /// <summary>
     /// Retrieves all appropriate command handlers for specific command type.

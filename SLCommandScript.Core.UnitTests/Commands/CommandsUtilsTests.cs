@@ -1,15 +1,15 @@
-﻿using NUnit.Framework;
-using PluginAPI.Enums;
-using CommandSystem;
-using CommandSystem.Commands.RemoteAdmin.Broadcasts;
+﻿using CommandSystem;
 using CommandSystem.Commands.RemoteAdmin;
+using CommandSystem.Commands.RemoteAdmin.Broadcasts;
 using CommandSystem.Commands.Shared;
-using System.Collections.Generic;
-using System.Linq;
-using RemoteAdmin;
-using SLCommandScript.Core.Commands;
 using FluentAssertions;
 using Moq;
+using NUnit.Framework;
+using PluginAPI.Enums;
+using RemoteAdmin;
+using SLCommandScript.Core.Commands;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SLCommandScript.Core.UnitTests.Commands;
 
@@ -21,26 +21,25 @@ public class CommandsUtilsTests
     private const CommandType InvalidCommandType = CommandType.Console;
 
     #region Test Case Sources
-    private static readonly CommandType[] _allHandlerTypes = { CommandType.RemoteAdmin, CommandType.Console,
+    private static readonly CommandType[] _allHandlerTypes = [CommandType.RemoteAdmin, CommandType.Console,
         CommandType.GameConsole, CommandType.RemoteAdmin | CommandType.Console, CommandType.RemoteAdmin | CommandType.GameConsole,
-        CommandType.GameConsole | CommandType.Console, CommandType.RemoteAdmin | CommandType.GameConsole | CommandType.Console };
+        CommandType.GameConsole | CommandType.Console, CommandType.RemoteAdmin | CommandType.GameConsole | CommandType.Console];
 
-    private static readonly string[] _invalidCommandNames = { null, "", " ", " \t ", "  \t  \t\t" };
+    private static readonly string[] _invalidCommandNames = [null, "", " ", " \t ", "  \t  \t\t"];
 
-    private static readonly string[] _validCommandNames = { "hello", "item list", "?.cassie" };
+    private static readonly string[] _validCommandNames = ["hello", "item list", "?.cassie"];
 
-    private static readonly string[][] _invalidAliases = { new[] { "  " }, new[] { null, "test" }, new[] { "hello", "  \t", "   ", null } };
+    private static readonly string[][] _invalidAliases = [["  "], [null, "test"], ["hello", "  \t", "   ", null]];
 
-    private static readonly string[][] _validAliases = { null, new[] { "string", "example" }, new string[0] };
+    private static readonly string[][] _validAliases = [null, ["string", "example"], []];
 
-    private static readonly CommandType[] _validHandlerTypes = { CommandType.RemoteAdmin, CommandType.GameConsole,
-        CommandType.RemoteAdmin | CommandType.GameConsole };
+    private static readonly CommandType[] _validHandlerTypes = [CommandType.RemoteAdmin, CommandType.GameConsole, CommandType.RemoteAdmin | CommandType.GameConsole];
 
-    private static readonly string[] _existingCommandNames = { "help", "HelP", "bc", "cassie", "BC" };
+    private static readonly string[] _existingCommandNames = ["help", "HelP", "bc", "cassie", "BC"];
 
-    private static readonly string[] _commandsToRegister = { "wtf", "dotheflip", "weeee" };
+    private static readonly string[] _commandsToRegister = ["wtf", "dotheflip", "weeee"];
 
-    private static readonly ICommand[] _exampleCommands = { new BroadcastCommand(), new CassieCommand(), new HelpCommand(ClientCommandHandler.Create()) };
+    private static readonly ICommand[] _exampleCommands = [new BroadcastCommand(), new CassieCommand(), new HelpCommand(ClientCommandHandler.Create())];
 
     private static IEnumerable<object[]> AllHandlersXInvalidCommands => JoinArrays(_allHandlerTypes, _invalidCommandNames);
 
@@ -59,15 +58,13 @@ public class CommandsUtilsTests
     #region Helper Methods
     private static IEnumerable<ICommandHandler> GetExpectedCommandHandlers(CommandType handlerType) => handlerType switch
     {
-        CommandType.RemoteAdmin => new[] { CommandProcessor.RemoteAdminCommandHandler },
-        CommandType.RemoteAdmin | CommandType.Console => new[] { CommandProcessor.RemoteAdminCommandHandler },
-        CommandType.GameConsole => new[] { QueryProcessor.DotCommandHandler },
-        CommandType.GameConsole | CommandType.Console => new[] { QueryProcessor.DotCommandHandler },
-        CommandType.RemoteAdmin | CommandType.GameConsole => new ICommandHandler[] {
-            CommandProcessor.RemoteAdminCommandHandler, QueryProcessor.DotCommandHandler },
-        CommandType.RemoteAdmin | CommandType.GameConsole | CommandType.Console => new ICommandHandler[] {
-            CommandProcessor.RemoteAdminCommandHandler, QueryProcessor.DotCommandHandler },
-        _ => new ICommandHandler[0]
+        CommandType.RemoteAdmin => [CommandProcessor.RemoteAdminCommandHandler],
+        CommandType.RemoteAdmin | CommandType.Console => [CommandProcessor.RemoteAdminCommandHandler],
+        CommandType.GameConsole => [QueryProcessor.DotCommandHandler],
+        CommandType.GameConsole | CommandType.Console => [QueryProcessor.DotCommandHandler],
+        CommandType.RemoteAdmin | CommandType.GameConsole => [CommandProcessor.RemoteAdminCommandHandler, QueryProcessor.DotCommandHandler],
+        CommandType.RemoteAdmin | CommandType.GameConsole | CommandType.Console => [CommandProcessor.RemoteAdminCommandHandler, QueryProcessor.DotCommandHandler],
+        _ => []
     };
 
     private static CommandType GetCommandHandlerType(ICommandHandler handler) => handler switch

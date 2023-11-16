@@ -6,7 +6,7 @@
 		<OutputType>Library</OutputType>
 		<AssemblyName>SLCommandScript.FileScriptsLoader.UnitTests</AssemblyName>
 		<RootNamespace>SLCommandScript.FileScriptsLoader.UnitTests</RootNamespace>
-		<LangVersion>10</LangVersion>
+		<LangVersion>12</LangVersion>
 		<Configurations>Release</Configurations>
 		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>

@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
+﻿using FluentAssertions;
 using Moq;
-using SLCommandScript.FileScriptsLoader.Helpers;
+using NUnit.Framework;
 using SLCommandScript.FileScriptsLoader.Commands;
-using FluentAssertions;
+using SLCommandScript.FileScriptsLoader.Helpers;
 using System;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
@@ -11,19 +11,19 @@ namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 public class FileScriptCommandBaseTests
 {
     #region Error Flow Test Case Sources
-    private static string[][] _errorPaths = {
-        new[] { "xd", "Command 'xd' was not found\nat test.slcs:1" },
-        new[] { null, "Cannot read script from file 'test.slcs'" },
-        new[] { "[", "Directive body is invalid\nat test.slcs:1" }
-    };
+    private static readonly string[][] _errorPaths = [
+        ["xd", "Command 'xd' was not found\nat test.slcs:1"],
+        [null, "Cannot read script from file 'test.slcs'"],
+        ["[", "Directive body is invalid\nat test.slcs:1"]
+    ];
     #endregion
 
     #region Gold Flow Test Case Sources
-    private static string[] _goldPaths = {
+    private static readonly string[] _goldPaths = [
         string.Empty,
         "help",
         "#This is a comment"
-    };
+    ];
     #endregion
 
     #region Description Tests

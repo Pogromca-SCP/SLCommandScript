@@ -1,10 +1,10 @@
-﻿using NUnit.Framework;
-using SLCommandScript.Core.Language;
-using System;
+﻿using CommandSystem;
 using FluentAssertions;
 using Moq;
+using NUnit.Framework;
 using SLCommandScript.Core.Interfaces;
-using CommandSystem;
+using SLCommandScript.Core.Language;
+using System;
 using System.Collections.Generic;
 
 namespace SLCommandScript.Core.UnitTests.Language;
@@ -14,90 +14,90 @@ public class LexerTests
 {
     private const string BlankLine = "      ";
 
-    private static readonly int[] _argSizes = { 2, 3, 4 };
+    private static readonly int[] _argSizes = [2, 3, 4];
 
     #region Gold Flow Test Case Sources
-    private static readonly object[][] _testsData = {
-        new object[] { string.Empty, new[] { "TestEmpty" }, PlayerPermissions.KickingAndShortTermBanning, new Token[0], 0 },
+    private static readonly object[][] _testsData = [
+        [string.Empty, new[] { "TestEmpty" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[0], 0],
 
-        new object[] { BlankLine, new[] { "TestBlank" }, PlayerPermissions.KickingAndShortTermBanning, new Token[0], 1 },
+    [BlankLine, new[] { "TestBlank" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[0], 1],
 
-        new object[] { @"
+        [@"
 
-", new[] { "" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] {  }, 2 },
+", new[] { "" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] {  }, 2],
 
-        new object[] { @"
+        [@"
     cassie why am I here #What is the point of life?
     bc 5 I have no idea!
-", new[] { "TestBasicCommands" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "cassie", 2),
+", new[] { "TestBasicCommands" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "cassie", 2),
             new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2),
             new(TokenType.Text, "bc", 3), new(TokenType.Text, "5", 3), new(TokenType.Text, "I", 3), new(TokenType.Text, "have", 3),
-            new(TokenType.Text, "no", 3), new(TokenType.Text, "idea!", 3) }, 3 },
+            new(TokenType.Text, "no", 3), new(TokenType.Text, "idea!", 3) }, 3],
 
-        new object[] { @"
+        [@"
     bc 10 This is a very \
     long one boiiii
-", new[] { "TestLineBreak" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "bc", 2), new(TokenType.Text, "10", 2),
+", new[] { "TestLineBreak" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "bc", 2), new(TokenType.Text, "10", 2),
             new(TokenType.Text, "This", 2), new(TokenType.Text, "is", 2), new(TokenType.Text, "a", 2), new(TokenType.Text, "very", 2),
-            new(TokenType.Text, "long", 3), new(TokenType.Text, "one", 3), new(TokenType.Text, "boiiii", 3) }, 3 },
+            new(TokenType.Text, "long", 3), new(TokenType.Text, "one", 3), new(TokenType.Text, "boiiii", 3) }, 3],
 
-        new object[] { "\\\r\\", new[] { "TestLineBreakText" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "\\", 1),
-            new(TokenType.Text, "\\", 1) }, 1 },
+        ["\\\r\\", new[] { "TestLineBreakText" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "\\", 1),
+            new(TokenType.Text, "\\", 1) }, 1],
 
-        new object[] { "#\nhello", new[] { "TestLineOnCommentStart" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] {
-            new(TokenType.Text, "hello", 2) }, 2 },
+        ["#\nhello", new[] { "TestLineOnCommentStart" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] {
+            new(TokenType.Text, "hello", 2) }, 2],
 
-        new object[] { @"
+        [@"
     bc 10 Long comment #I am a storm \
     that is approaching \
     Provoking black clouds...
-", new[] { "TestLineBreakComment" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "bc", 2),
-            new(TokenType.Text, "10", 2), new(TokenType.Text, "Long", 2), new(TokenType.Text, "comment", 2) }, 4 },
+", new[] { "TestLineBreakComment" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "bc", 2),
+            new(TokenType.Text, "10", 2), new(TokenType.Text, "Long", 2), new(TokenType.Text, "comment", 2) }, 4],
 
-        new object[] { @"
+        [@"
     [ print If true elSe [ \
     loop foReAch human ] \
     ]
     [ print dELayBy 5 ]
-", new[] { "TestDirectiveAndKeywords" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.LeftSquare, "[", 2),
+", new[] { "TestDirectiveAndKeywords" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 2),
             new(TokenType.Text, "print", 2), new(TokenType.If, "If", 2), new(TokenType.Text, "true", 2), new(TokenType.Else, "elSe", 2),
             new(TokenType.LeftSquare, "[", 2), new(TokenType.Text, "loop", 3), new(TokenType.Foreach, "foReAch", 3), new(TokenType.Text, "human", 3),
             new(TokenType.RightSquare, "]", 3), new(TokenType.RightSquare, "]", 4), new(TokenType.LeftSquare, "[", 5), new(TokenType.Text, "print", 5),
-            new(TokenType.DelayBy, "dELayBy", 5), new(TokenType.Text, "5", 5), new(TokenType.RightSquare, "]", 5) }, 5 },
+            new(TokenType.DelayBy, "dELayBy", 5), new(TokenType.Text, "5", 5), new(TokenType.RightSquare, "]", 5) }, 5],
 
-        new object[] { @"
+        [@"
     print ski$()bidi bop$(name) $(no?)yes $(what?)
     prin$(t [hello t]here $(general) 23$(light)sabers
-", new[] { "TestVariables" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "print", 2),
+", new[] { "TestVariables" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "print", 2),
             new(TokenType.Text, "ski$()bidi", 2), new(TokenType.Variable, "bop$(name)", 2), new(TokenType.Variable, "$(no?)yes", 2),
             new(TokenType.Variable, "$(what?)", 2), new(TokenType.Text, "prin$(t", 3), new(TokenType.Text, "[hello", 3), new(TokenType.Text, "t]here", 3),
-            new(TokenType.Variable, "$(general)", 3), new(TokenType.Variable, "23$(light)sabers", 3) }, 3 },
+            new(TokenType.Variable, "$(general)", 3), new(TokenType.Variable, "23$(light)sabers", 3) }, 3],
 
-        new object[] { @"
+        [@"
     cassie why am I here # This is a comment \
     #? Console
     print I have no idea #? Console $(0)
     #?RemoteAdmin Hello \
     #? !wowlo!
-", new[] { "TestScopeGuards" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "cassie", 2),
+", new[] { "TestScopeGuards" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "cassie", 2),
             new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2),
             new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
             new(TokenType.Text, "idea", 4), new(TokenType.ScopeGuard, string.Empty, 4), new(TokenType.Text, "Console", 4),
             new(TokenType.ScopeGuard, string.Empty, 5), new(TokenType.Text, "RemoteAdmin", 5), new(TokenType.Text, "Hello", 5),
-            new(TokenType.Text, "wowlo", 6) }, 6 },
+            new(TokenType.Text, "wowlo", 6) }, 6],
 
-        new object[] { @"
+        [@"
     \cassie why am I here \# This is a comment \
     #? Console
     print \I \have no id\ea \[
-", new[] { "TestQuotation" }, PlayerPermissions.KickingAndShortTermBanning, new Token[] { new(TokenType.Text, "cassie", 2),
+", new[] { "TestQuotation" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "cassie", 2),
             new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2), new(TokenType.Text, "#", 2),
             new(TokenType.Text, "This", 2), new(TokenType.Text, "is", 2), new(TokenType.Text, "a", 2), new(TokenType.Text, "comment", 2),
             new(TokenType.ScopeGuard, string.Empty, 3), new(TokenType.Text, "Console", 3),
             new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
-            new(TokenType.Text, "id\\ea", 4), new(TokenType.Text, "[", 4) }, 4 },
+            new(TokenType.Text, "id\\ea", 4), new(TokenType.Text, "[", 4) }, 4],
 
-        new object[] { @"
+        [@"
     cassie why am I here # This is a comment \
     #! ServerConsoleCommands
     print \I have no idea #! \ServerC?..6onsoleCommands
@@ -109,53 +109,53 @@ public class LexerTests
     print Class d has micro p p #!
     print 1 ... #! \
     !92424..awwghow*(
-", new[] { "TestPermissionGuards" }, PlayerPermissions.Noclip | PlayerPermissions.Announcer, new Token[] { new(TokenType.Text, "cassie", 2),
+", new[] { "TestPermissionGuards" }, PlayerPermissions.Noclip | PlayerPermissions.Announcer, new Core.Language.Token[] { new(TokenType.Text, "cassie", 2),
             new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2),
             new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
             new(TokenType.Text, "idea", 4), new(TokenType.Text, "print", 9), new(TokenType.Text, "Hello", 9), new(TokenType.Text, "there", 9),
             new(TokenType.Text, "print", 10), new(TokenType.Text, "Class", 10), new(TokenType.Text, "d", 10), new(TokenType.Text, "has", 10),
             new(TokenType.Text, "micro", 10), new(TokenType.Text, "p", 10), new(TokenType.Text, "p", 10), new(TokenType.Text, "print", 11),
-            new(TokenType.Text, "1", 11), new(TokenType.Text, "...", 11) }, 12 },
+            new(TokenType.Text, "1", 11), new(TokenType.Text, "...", 11) }, 12],
 
-        new object[] { "$(2) $(00001) $(0)\n$(3) $(4) $(5)#Hello $(3)", new[] { "TestSimpleArgs", "happenned ?", "#What", BlankLine, "number 1 5",
-            string.Empty }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "#What", 1), new(TokenType.Text, "happenned", 1),
+        ["$(2) $(00001) $(0)\n$(3) $(4) $(5)#Hello $(3)", new[] { "TestSimpleArgs", "happenned ?", "#What", BlankLine, "number 1 5",
+            string.Empty }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Text, "#What", 1), new(TokenType.Text, "happenned", 1),
             new(TokenType.Text, "?", 1), new(TokenType.Text, "TestSimpleArgs", 1), new(TokenType.Text, "number", 2), new(TokenType.Text, "1", 2),
-            new(TokenType.Text, "5", 2) }, 2 },
+            new(TokenType.Text, "5", 2) }, 2],
 
-        new object[] { "$(15)", new[] { "TestBigNumArgs", null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-            " Hello $(test) " }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "Hello", 1), new(TokenType.Variable, "$(test)", 1) }, 1 },
+        ["$(15)", new[] { "TestBigNumArgs", null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+            " Hello $(test) " }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Text, "Hello", 1), new(TokenType.Variable, "$(test)", 1) }, 1],
 
-        new object[] { "$(1)", new[] { "TestInnerArgs", " Example\t$(1) \ninjection" }, PlayerPermissions.Noclip, new Token[] {
-            new(TokenType.Text, "Example", 1), new(TokenType.Variable, "$(1)", 1), new(TokenType.Text, "injection", 1) }, 1 },
+        ["$(1)", new[] { "TestInnerArgs", " Example\t$(1) \ninjection" }, PlayerPermissions.Noclip, new Core.Language.Token[] {
+            new(TokenType.Text, "Example", 1), new(TokenType.Variable, "$(1)", 1), new(TokenType.Text, "injection", 1) }, 1],
 
-        new object[] { @"
+        [@"
     $(1)    $(2)
     postfix$(0001)   postfix$(002)
     $(1)prefix  $(2)prefix
     su$(1)fix  su$(00002)fix
-", new[] { "TestNoTokensInjection", null, BlankLine }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "postfix", 3),
+", new[] { "TestNoTokensInjection", null, BlankLine }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Text, "postfix", 3),
             new(TokenType.Text, "postfix", 3), new(TokenType.Text, "prefix", 4),  new(TokenType.Text, "prefix", 4), new(TokenType.Text, "sufix", 5),
-            new(TokenType.Text, "su", 5), new(TokenType.Text, "fix", 5) }, 5 },
+            new(TokenType.Text, "su", 5), new(TokenType.Text, "fix", 5) }, 5],
 
-        new object[] { @"
+        [@"
     $(1)    $(2) $(3)  $(04)
     postfix$(0001)   postfix$(002) postfix$(3) postfix$(4)
     $(1)prefix  $(2)prefix $(3)prefix $(4)prefix
     su$(1)fix  su$(00002)fix su$(3)fix su$(4)fix
-", new[] { "TestOneTokenInjection", "1", " 1", "1 ", " 1 " }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "1", 2),
+", new[] { "TestOneTokenInjection", "1", " 1", "1 ", " 1 " }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Text, "1", 2),
             new(TokenType.Text, "1", 2), new(TokenType.Text, "1", 2), new(TokenType.Text, "1", 2), new(TokenType.Text, "postfix1", 3),
             new(TokenType.Text, "postfix", 3), new(TokenType.Text, "1", 3), new(TokenType.Text, "postfix1", 3), new(TokenType.Text, "postfix", 3),
             new(TokenType.Text, "1", 3), new(TokenType.Text, "1prefix", 4),  new(TokenType.Text, "1prefix", 4), new(TokenType.Text, "1", 4),
             new(TokenType.Text, "prefix", 4), new(TokenType.Text, "1", 4), new(TokenType.Text, "prefix", 4), new(TokenType.Text, "su1fix", 5),
             new(TokenType.Text, "su", 5), new(TokenType.Text, "1fix", 5), new(TokenType.Text, "su1", 5), new(TokenType.Text, "fix", 5),
-            new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5), new(TokenType.Text, "fix", 5) }, 5 },
+            new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5), new(TokenType.Text, "fix", 5) }, 5],
 
-        new object[] { @"
+        [@"
     $(1)    $(2) $(3)  $(04)
     postfix$(0001)   postfix$(002) postfix$(3) postfix$(4)
     $(1)prefix  $(2)prefix $(3)prefix $(4)prefix
     su$(1)fix  su$(00002)fix su$(3)fix su$(4)fix
-", new[] { "TestTwoTokensInjection", "1 2", " 1 2", "1 2 ", " 1 2 " }, PlayerPermissions.Noclip, new Token[] { new(TokenType.Text, "1", 2),
+", new[] { "TestTwoTokensInjection", "1 2", " 1 2", "1 2 ", " 1 2 " }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Text, "1", 2),
             new(TokenType.Text, "2", 2), new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2), new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2),
             new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2), new(TokenType.Text, "postfix1", 3), new(TokenType.Text, "2", 3),
             new(TokenType.Text, "postfix", 3), new(TokenType.Text, "1", 3), new(TokenType.Text, "2", 3), new(TokenType.Text, "postfix1", 3),
@@ -165,14 +165,14 @@ public class LexerTests
             new(TokenType.Text, "2", 4), new(TokenType.Text, "prefix", 4), new(TokenType.Text, "su1", 5), new(TokenType.Text, "2fix", 5),
             new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5), new(TokenType.Text, "2fix", 5), new(TokenType.Text, "su1", 5),
             new(TokenType.Text, "2", 5), new(TokenType.Text, "fix", 5), new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5),
-            new(TokenType.Text, "2", 5), new(TokenType.Text, "fix", 5) }, 5 },
+            new(TokenType.Text, "2", 5), new(TokenType.Text, "fix", 5) }, 5],
 
-        new object[] { @"
+        [@"
     $(1)    $(2) $(3)  $(04)
     postfix$(0001)   postfix$(002) postfix$(3) postfix$(4)
     $(1)prefix  $(2)prefix $(3)prefix $(4)prefix
     su$(1)fix  su$(00002)fix su$(3)fix su$(4)fix
-", new[] { "TestMultiTokensInjection", "1 2 (\n) 3", " 1 2 (\n) 3", "1 2 (\n) 3 ", " 1 2 (\n) 3 " }, PlayerPermissions.Noclip, new Token[] {
+", new[] { "TestMultiTokensInjection", "1 2 (\n) 3", " 1 2 (\n) 3", "1 2 (\n) 3 ", " 1 2 (\n) 3 " }, PlayerPermissions.Noclip, new Core.Language.Token[] {
             new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2), new(TokenType.Text, "(", 2), new(TokenType.Text, ")", 2), new(TokenType.Text, "3", 2),
             new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2), new(TokenType.Text, "(", 2), new(TokenType.Text, ")", 2), new(TokenType.Text, "3", 2),
             new(TokenType.Text, "1", 2), new(TokenType.Text, "2", 2), new(TokenType.Text, "(", 2), new(TokenType.Text, ")", 2), new(TokenType.Text, "3", 2),
@@ -193,11 +193,11 @@ public class LexerTests
             new(TokenType.Text, "3fix", 5), new(TokenType.Text, "su1", 5), new(TokenType.Text, "2", 5), new(TokenType.Text, "(", 5),
             new(TokenType.Text, ")", 5), new(TokenType.Text, "3", 5), new(TokenType.Text, "fix", 5), new(TokenType.Text, "su", 5), new(TokenType.Text, "1", 5),
             new(TokenType.Text, "2", 5), new(TokenType.Text, "(", 5), new(TokenType.Text, ")", 5), new(TokenType.Text, "3", 5), new(TokenType.Text, "fix", 5)
-        }, 5 }
-    };
+        }, 5]
+    ];
     #endregion
 
-    private static ArraySegment<string> EmptyArgs => new(new string[0], 0, 0);
+    private static ArraySegment<string> EmptyArgs => new([], 0, 0);
 
     #region Rent Tests
     [Test]
@@ -796,12 +796,12 @@ public class LexerTests
     }
 
     [TestCaseSource(nameof(_testsData))]
-    public void ScanNextLine_ShouldReturnProperTokens_WhenGoldFlow(string src, string[] args, PlayerPermissions perms, Token[] expectedTokens, int expectedLine)
+    public void ScanNextLine_ShouldReturnProperTokens_WhenGoldFlow(string src, string[] args, PlayerPermissions perms, Core.Language.Token[] expectedTokens, int expectedLine)
     {
         // Arrange
         var resolver = new LexerTestResolver(perms);
         var lexer = Lexer.Rent(src, new(args, 1, args.Length - 1), null, resolver);
-        var result = new List<Token>();
+        var result = new List<Core.Language.Token>();
 
         // Act
         while (!lexer.IsAtEnd)
@@ -817,19 +817,14 @@ public class LexerTests
         lexer.Line.Should().Be(expectedLine);
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeTrue();
-        result.Should().BeEquivalentTo(expectedTokens, options => options.ComparingByValue<Token>());
+        result.Should().BeEquivalentTo(expectedTokens, options => options.ComparingByValue<Core.Language.Token>());
     }
     #endregion
 }
 
-public class LexerTestResolver : IPermissionsResolver
+public class LexerTestResolver(PlayerPermissions permissions) : IPermissionsResolver
 {
-    public PlayerPermissions Permissions { get; }
-
-    public LexerTestResolver(PlayerPermissions permissions)
-    {
-        Permissions = permissions;
-    }
+    public PlayerPermissions Permissions { get; } = permissions;
 
     public bool CheckPermission(ICommandSender sender, string permission, out string message)
     {

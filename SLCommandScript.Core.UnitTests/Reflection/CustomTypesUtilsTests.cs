@@ -1,6 +1,6 @@
-﻿using NUnit.Framework;
+﻿using FluentAssertions;
+using NUnit.Framework;
 using SLCommandScript.Core.Reflection;
-using FluentAssertions;
 using System;
 
 namespace SLCommandScript.Core.UnitTests.Reflection;

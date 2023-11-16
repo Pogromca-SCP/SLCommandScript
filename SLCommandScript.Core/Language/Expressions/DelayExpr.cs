@@ -6,35 +6,28 @@ namespace SLCommandScript.Core.Language.Expressions;
 /// <summary>
 /// Represents a delay expression.
 /// </summary>
-public class DelayExpr : Expr
+/// <remarks>
+/// Creates new delay expression representation.
+/// </remarks>
+/// <param name="body">Expression to execute after the delay.</param>
+/// <param name="duration">Duration of the delay in milliseconds.</param>
+/// <param name="name">Optional name of the delayed operation.</param>
+public class DelayExpr(Expr body, int duration, string name) : Expr
 {
     /// <summary>
     /// Expression to execute after the delay.
     /// </summary>
-    public Expr Body { get; }
+    public Expr Body { get; } = body;
 
     /// <summary>
     /// Duration of the delay in milliseconds.
     /// </summary>
-    public int Duration { get; }
+    public int Duration { get; } = duration;
 
     /// <summary>
     /// Contains delay operation name.
     /// </summary>
-    public string Name { get; }
-
-    /// <summary>
-    /// Creates new delay expression representation.
-    /// </summary>
-    /// <param name="body">Expression to execute after the delay.</param>
-    /// <param name="duration">Duration of the delay in milliseconds.</param>
-    /// <param name="name">Optional name of the delayed operation.</param>
-    public DelayExpr(Expr body, int duration, string name)
-    {
-        Body = body;
-        Duration = duration;
-        Name = name;
-    }
+    public string Name { get; } = name;
 
     /// <summary>
     /// Accepts a visit from an expression visitor.

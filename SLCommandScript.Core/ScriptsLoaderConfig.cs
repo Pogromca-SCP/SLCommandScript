@@ -1,6 +1,6 @@
-﻿using System.ComponentModel;
-using PluginAPI.Enums;
+﻿using PluginAPI.Enums;
 using SLCommandScript.Core.Language;
+using System.ComponentModel;
 
 namespace SLCommandScript.Core;
 

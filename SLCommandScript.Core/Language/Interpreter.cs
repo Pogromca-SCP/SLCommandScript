@@ -1,11 +1,11 @@
-﻿using SLCommandScript.Core.Interfaces;
-using System.Collections.Generic;
+﻿using CommandSystem;
+using PluginAPI.Core;
+using SLCommandScript.Core.Interfaces;
+using SLCommandScript.Core.Language.Expressions;
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using PluginAPI.Core;
-using CommandSystem;
-using SLCommandScript.Core.Language.Expressions;
 
 namespace SLCommandScript.Core.Language;
 

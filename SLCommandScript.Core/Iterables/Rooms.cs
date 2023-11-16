@@ -1,9 +1,9 @@
-﻿using PluginAPI.Core.Zones;
-using System.Collections.Generic;
-using SLCommandScript.Core.Interfaces;
+﻿using FacilityZone = MapGeneration.FacilityZone;
 using PluginAPI.Core;
-using FacilityZone = MapGeneration.FacilityZone;
+using PluginAPI.Core.Zones;
+using SLCommandScript.Core.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SLCommandScript.Core.Iterables;
@@ -11,14 +11,9 @@ namespace SLCommandScript.Core.Iterables;
 /// <summary>
 /// Iterable wrapper for a list of rooms.
 /// </summary>
-public class RoomsIterable : IterableListBase<FacilityRoom>
+/// <param name="rooms">List of rooms to wrap.</param>
+public class RoomsIterable(IEnumerable<FacilityRoom> rooms) : IterableListBase<FacilityRoom>(rooms)
 {
-    /// <summary>
-    /// Creates new iterable wrapper for rooms list.
-    /// </summary>
-    /// <param name="rooms">List of rooms to wrap.</param>
-    public RoomsIterable(IEnumerable<FacilityRoom> rooms) : base(rooms) {}
-
     /// <summary>
     /// Loads properties from current room and inserts them into a dictionary.
     /// </summary>

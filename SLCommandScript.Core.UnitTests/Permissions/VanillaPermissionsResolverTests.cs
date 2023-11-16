@@ -1,19 +1,19 @@
-﻿using NUnit.Framework;
-using SLCommandScript.Core.Permissions;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Moq;
+using NUnit.Framework;
+using SLCommandScript.Core.Permissions;
 
 namespace SLCommandScript.Core.UnitTests.Permissions;
 
 [TestFixture]
 public class VanillaPermissionsResolverTests
 {
-    private static readonly string[] _invalidPermissionNames = { null, "", " ", " \t ", "  \t  \t\t" };
+    private static readonly string[] _invalidPermissionNames = [null, "", " ", " \t ", "  \t  \t\t"];
 
-    private static readonly string[] _validPermissionNames = { "Cooking", "Baking Bread", "Ligma" };
+    private static readonly string[] _validPermissionNames = ["Cooking", "Baking Bread", "Ligma"];
 
-    private static readonly PlayerPermissions[] _existingPermissions = { PlayerPermissions.Noclip, PlayerPermissions.Announcer,
-        PlayerPermissions.FacilityManagement, PlayerPermissions.ForceclassToSpectator, PlayerPermissions.ForceclassSelf };
+    private static readonly PlayerPermissions[] _existingPermissions = [PlayerPermissions.Noclip, PlayerPermissions.Announcer,
+        PlayerPermissions.FacilityManagement, PlayerPermissions.ForceclassToSpectator, PlayerPermissions.ForceclassSelf];
 
     private VanillaPermissionsResolver _resolver;
 

@@ -1,16 +1,15 @@
-﻿using NUnit.Framework;
-using FluentAssertions;
-using System.Linq;
-using System.Collections.Generic;
+﻿using FluentAssertions;
+using NUnit.Framework;
 using SLCommandScript.Core.Iterables;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SLCommandScript.Core.UnitTests.Iterables;
 
 [TestFixture]
 public class IterableListTests
 {
-    private static readonly string[][] _strings = { new string[] { null, null, null, null }, new[] { "example", null, "", "test" },
-        new[] { "  \t ", "Test", "test", "TEST" } };
+    private static readonly string[][] _strings = [[null, null, null, null], ["example", null, "", "test"], ["  \t ", "Test", "test", "TEST"]];
 
     #region Constructor Tests
     [Test]
@@ -95,10 +94,8 @@ public class IterableListTests
     #endregion
 }
 
-public class TestIterable : IterableListBase<string>
+public class TestIterable(IEnumerable<string> strings) : IterableListBase<string>(strings)
 {
-    public TestIterable(IEnumerable<string> strings) : base(strings) {}
-
     protected override void LoadVariables(IDictionary<string, string> targetVars, string str)
     {
         targetVars[str] = str;

@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
-using SLCommandScript.FileScriptsLoader.Commands;
+﻿using CommandSystem;
 using FluentAssertions;
 using Moq;
-using CommandSystem;
+using NUnit.Framework;
+using SLCommandScript.FileScriptsLoader.Commands;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 
@@ -44,7 +44,7 @@ public class FileScriptDirectoryCommandTests
         cmd.RegisterCommand(cmdMock.Object);
 
         // Act
-        var result = cmd.Execute(new(new[] { "test" }, 0, 1), null, out var message);
+        var result = cmd.Execute(new(["test"], 0, 1), null, out var message);
 
         // Assert
         result.Should().Be(isSuccess);

@@ -1,8 +1,7 @@
 ﻿using PluginAPI.Core.Doors;
-using System.Collections.Generic;
 using SLCommandScript.Core.Interfaces;
-using PluginAPI.Core;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SLCommandScript.Core.Iterables;
@@ -10,14 +9,9 @@ namespace SLCommandScript.Core.Iterables;
 /// <summary>
 /// Iterable wrapper for a list of doors.
 /// </summary>
-public class DoorsIterable : IterableListBase<FacilityDoor>
+/// <param name="door">List of doors to wrap.</param>
+public class DoorsIterable(IEnumerable<FacilityDoor> door) : IterableListBase<FacilityDoor>(door)
 {
-    /// <summary>
-    /// Creates new iterable wrapper for doors list.
-    /// </summary>
-    /// <param name="door">List of doors to wrap.</param>
-    public DoorsIterable(IEnumerable<FacilityDoor> door) : base(door) {}
-
     /// <summary>
     /// Loads properties from current door and inserts them into a dictionary.
     /// </summary>

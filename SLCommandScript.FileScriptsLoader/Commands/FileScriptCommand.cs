@@ -1,13 +1,14 @@
 ﻿using CommandSystem;
-using System.Linq;
 using System;
+using System.Linq;
 
 namespace SLCommandScript.FileScriptsLoader.Commands;
 
 /// <summary>
 /// Script command used to launch interpreted scripts.
 /// </summary>
-public class FileScriptCommand : FileScriptCommandBase, IUsageProvider, IHelpProvider
+/// <param name="file">Path to associated script.</param>
+public class FileScriptCommand(string file) : FileScriptCommandBase(file), IUsageProvider, IHelpProvider
 {
     /// <summary>
     /// Describes command arguments usage.
@@ -31,28 +32,17 @@ public class FileScriptCommand : FileScriptCommandBase, IUsageProvider, IHelpPro
     /// <summary>
     /// Contains expected amount of arguments.
     /// </summary>
-    public byte Arity { get; set; }
+    public byte Arity { get; set; } = 0;
 
     /// <summary>
     /// Text to display when help for command is requested.
     /// </summary>
-    public string Help { get; set; }
+    public string Help { get; set; } = null;
 
     /// <summary>
     /// Describes command arguments usage.
     /// </summary>
-    private string[] _usage;
-
-    /// <summary>
-    /// Initializes the command.
-    /// </summary>
-    /// <param name="file">Path to associated script.</param>
-    public FileScriptCommand(string file) : base(file)
-    {
-        Arity = 0;
-        Help = null;
-        _usage = null;
-    }
+    private string[] _usage = null;
 
     /// <summary>
     /// Generates message for help command.

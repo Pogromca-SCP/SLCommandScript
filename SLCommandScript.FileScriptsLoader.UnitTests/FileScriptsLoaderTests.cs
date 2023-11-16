@@ -1,16 +1,16 @@
-﻿using NUnit.Framework;
-using System;
-using PluginAPI.Loader.Features;
-using SLCommandScript.FileScriptsLoader.Helpers;
-using SLCommandScript.FileScriptsLoader.Commands;
+﻿using CommandSystem;
 using FluentAssertions;
-using SLCommandScript.Core;
-using SLCommandScript.Core.Permissions;
 using Moq;
-using PluginAPI.Enums;
+using NUnit.Framework;
 using PluginAPI.Core.Attributes;
+using PluginAPI.Enums;
+using PluginAPI.Loader.Features;
+using SLCommandScript.Core;
 using SLCommandScript.Core.Interfaces;
-using CommandSystem;
+using SLCommandScript.Core.Permissions;
+using SLCommandScript.FileScriptsLoader.Commands;
+using SLCommandScript.FileScriptsLoader.Helpers;
+using System;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests;
 
@@ -19,7 +19,7 @@ public class FileScriptsLoaderTests
 {
     private static readonly PluginDirectory _testDirectory = new("./");
 
-    private static readonly Type[] _emptyTypesArray = new Type[0];
+    private static readonly Type[] _emptyTypesArray = [];
 
     private static readonly Func<string, string, bool, IFileSystemWatcherHelper> _testWatcherFactory = (directory, filter, allowSubdirectories) => null;
 

@@ -1,5 +1,5 @@
-﻿using System;
-using PluginAPI.Core;
+﻿using PluginAPI.Core;
+using System;
 
 namespace SLCommandScript.Core.Interfaces;
 

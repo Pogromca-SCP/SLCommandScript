@@ -1,10 +1,10 @@
-﻿using System;
-using SLCommandScript.FileScriptsLoader.Commands;
-using System.Collections.Generic;
-using CommandSystem;
+﻿using CommandSystem;
 using PluginAPI.Enums;
-using SLCommandScript.FileScriptsLoader.Helpers;
 using SLCommandScript.Core.Commands;
+using SLCommandScript.FileScriptsLoader.Commands;
+using SLCommandScript.FileScriptsLoader.Helpers;
+using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace SLCommandScript.FileScriptsLoader.Loader;

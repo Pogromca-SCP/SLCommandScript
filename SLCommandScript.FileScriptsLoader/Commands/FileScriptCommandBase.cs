@@ -1,9 +1,9 @@
 ﻿using CommandSystem;
 using SLCommandScript.Core.Interfaces;
-using System.Collections.Concurrent;
 using SLCommandScript.Core.Language;
 using SLCommandScript.FileScriptsLoader.Helpers;
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 
 namespace SLCommandScript.FileScriptsLoader.Commands;
@@ -11,7 +11,8 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// <summary>
 /// Base class for script executing commands.
 /// </summary>
-public class FileScriptCommandBase : ICommand
+/// <param name="file">Path to associated script.</param>
+public class FileScriptCommandBase(string file) : ICommand
 {
     /// <summary>
     /// Default command description to use.
@@ -76,7 +77,7 @@ public class FileScriptCommandBase : ICommand
     /// <summary>
     /// Contains command name.
     /// </summary>
-    public string Command { get; }
+    public string Command { get; } = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(file);
 
     /// <summary>
     /// Defines command aliases.
@@ -91,29 +92,17 @@ public class FileScriptCommandBase : ICommand
     /// <summary>
     /// Holds full path to script file.
     /// </summary>
-    private readonly string _file;
+    private readonly string _file = file;
 
     /// <summary>
     /// Contains command description.
     /// </summary>
-    private string _desc;
+    private string _desc = DefaultDescription;
 
     /// <summary>
     /// Contains script calls counter.
     /// </summary>
-    private int _calls;
-
-    /// <summary>
-    /// Initializes the command.
-    /// </summary>
-    /// <param name="file">Path to associated script.</param>
-    public FileScriptCommandBase(string file)
-    {
-        Command = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(file);
-        _file = file;
-        _desc = DefaultDescription;
-        _calls = 0;
-    }
+    private int _calls = 0;
 
     /// <summary>
     /// Executes the command.

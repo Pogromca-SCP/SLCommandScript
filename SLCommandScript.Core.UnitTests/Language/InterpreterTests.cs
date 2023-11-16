@@ -1,20 +1,20 @@
-﻿using NUnit.Framework;
-using SLCommandScript.Core.Language;
+﻿using CommandSystem;
 using FluentAssertions;
 using Moq;
-using SLCommandScript.Core.Language.Expressions;
-using CommandSystem;
-using System;
-using System.Threading.Tasks;
+using NUnit.Framework;
 using SLCommandScript.Core.Interfaces;
+using SLCommandScript.Core.Language;
+using SLCommandScript.Core.Language.Expressions;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SLCommandScript.Core.UnitTests.Language;
 
 [TestFixture]
 public class InterpreterTests
 {
-    private static bool[] _booleanValues = { false, true };
+    private static readonly bool[] _booleanValues = [false, true];
 
     #region ConstructorTests
     [Test]
@@ -151,7 +151,7 @@ public class InterpreterTests
         var message = "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(new(new[] { "example", "args" }, 1, 1), null, out message)).Returns(false);
-        var expr = new CommandExpr(commandMock.Object, new[] { "example", "args" }, false);
+        var expr = new CommandExpr(commandMock.Object, ["example", "args"], false);
 
         // Act
         var result = interpreter.VisitCommandExpr(expr);
@@ -172,7 +172,7 @@ public class InterpreterTests
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), null, out message)).Returns(true);
-        var expr = new CommandExpr(commandMock.Object, new[] { "test" }, false);
+        var expr = new CommandExpr(commandMock.Object, ["test"], false);
 
         // Act
         var result = interpreter.VisitCommandExpr(expr);
@@ -226,7 +226,7 @@ public class InterpreterTests
         var message = success ? "Command succeeded" : "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), null, out message)).Returns(success);
-        var expr = new DelayExpr(new CommandExpr(commandMock.Object, new[] { "test" }, false), 0, null);
+        var expr = new DelayExpr(new CommandExpr(commandMock.Object, ["test"], false), 0, null);
 
         // Act
         var result = interpreter.VisitDelayExpr(expr);
@@ -248,7 +248,7 @@ public class InterpreterTests
         var message = success ? "Command succeeded" : "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), null, out message)).Returns(success);
-        var expr = new DelayExpr(new CommandExpr(commandMock.Object, new[] { "test" }, false), delay, null);
+        var expr = new DelayExpr(new CommandExpr(commandMock.Object, ["test"], false), delay, null);
 
         // Act
         var result = interpreter.VisitDelayExpr(expr);
@@ -347,7 +347,7 @@ public class InterpreterTests
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(new(new[] { "test", "args", "$(arg)" }, 1, 2), null, out message)).Returns(true);
-        var expr = new ForeachExpr(new CommandExpr(commandMock.Object, new[] { "test", "args", "$(arg)" }, false), new TestIterable());
+        var expr = new ForeachExpr(new CommandExpr(commandMock.Object, ["test", "args", "$(arg)"], false), new TestIterable());
 
         // Act
         var result = interpreter.VisitForeachExpr(expr);
@@ -366,7 +366,7 @@ public class InterpreterTests
         // Arrange
         var interpreter = new Interpreter(null);
 
-        var expr = new ForeachExpr(new CommandExpr(new ArgumentsInjectionTestCommand(), new[] { "$(test)", "$(i)", "$(index)", "$(I)", null, "$(wut?))$(wut?))" }, true),
+        var expr = new ForeachExpr(new CommandExpr(new ArgumentsInjectionTestCommand(), ["$(test)", "$(i)", "$(index)", "$(I)", null, "$(wut?))$(wut?))"], true),
             new TestIterable());
 
         // Act
@@ -436,8 +436,7 @@ public class InterpreterTests
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(true);
 
-        var expr = new IfExpr(new CommandExpr(null, null, false), new CommandExpr(commandMock.Object,
-            new[] { "condition" }, false), null);
+        var expr = new IfExpr(new CommandExpr(null, null, false), new CommandExpr(commandMock.Object, ["condition"], false), null);
 
         // Act
         var result = interpreter.VisitIfExpr(expr);
@@ -459,8 +458,8 @@ public class InterpreterTests
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(false);
 
-        var expr = new IfExpr(new ForeachExpr(null, null), new CommandExpr(commandMock.Object, new[] { "condition" }, false),
-            new CommandExpr(commandMock.Object, new[] { "else" }, false));
+        var expr = new IfExpr(new ForeachExpr(null, null), new CommandExpr(commandMock.Object, ["condition"], false),
+            new CommandExpr(commandMock.Object, ["else"], false));
 
         // Act
         var result = interpreter.VisitIfExpr(expr);
@@ -482,8 +481,7 @@ public class InterpreterTests
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(true);
 
-        var expr = new IfExpr(new CommandExpr(commandMock.Object, new[] { "then" }, false), new CommandExpr(commandMock.Object,
-            new[] { "condition" }, false), null);
+        var expr = new IfExpr(new CommandExpr(commandMock.Object, ["then"], false), new CommandExpr(commandMock.Object, ["condition"], false), null);
 
         // Act
         var result = interpreter.VisitIfExpr(expr);
@@ -505,8 +503,7 @@ public class InterpreterTests
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(false);
 
-        var expr = new IfExpr(new ForeachExpr(null, null), new CommandExpr(commandMock.Object,
-            new[] { "condition" }, false), null);
+        var expr = new IfExpr(new ForeachExpr(null, null), new CommandExpr(commandMock.Object, ["condition"], false), null);
 
         // Act
         var result = interpreter.VisitIfExpr(expr);
@@ -528,8 +525,7 @@ public class InterpreterTests
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(true);
 
-        var expr = new IfExpr(new ForeachExpr(null, null), new CommandExpr(null, null, false),
-            new CommandExpr(commandMock.Object, new[] { "else" }, false));
+        var expr = new IfExpr(new ForeachExpr(null, null), new CommandExpr(null, null, false), new CommandExpr(commandMock.Object, ["else"], false));
 
         // Act
         var result = interpreter.VisitIfExpr(expr);

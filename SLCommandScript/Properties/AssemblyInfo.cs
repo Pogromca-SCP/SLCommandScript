@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using SLCommandScript;
+﻿using SLCommandScript;
+using System.Reflection;
 
 [assembly: AssemblyTitle(Plugin.PluginName)]
 [assembly: AssemblyDescription(Plugin.PluginDescription)]

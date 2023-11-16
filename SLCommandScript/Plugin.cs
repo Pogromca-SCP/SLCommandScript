@@ -1,8 +1,8 @@
 ﻿using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
+using PluginAPI.Enums;
 using SLCommandScript.Core;
 using SLCommandScript.Core.Interfaces;
-using PluginAPI.Enums;
 using SLCommandScript.Core.Reflection;
 
 namespace SLCommandScript;

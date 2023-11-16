@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
+﻿using FluentAssertions;
 using Moq;
-using SLCommandScript.FileScriptsLoader.Helpers;
+using NUnit.Framework;
 using SLCommandScript.FileScriptsLoader.Commands;
-using FluentAssertions;
+using SLCommandScript.FileScriptsLoader.Helpers;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 
@@ -39,7 +39,7 @@ public class FileScriptCommandTests
         // Act
         var result = new FileScriptCommand(null)
         {
-            Usage = new string[0]
+            Usage = []
         };
 
         // Assert
@@ -58,7 +58,7 @@ public class FileScriptCommandTests
         // Act
         var result = new FileScriptCommand(null)
         {
-            Usage = new[] { "", "       ", null, "\t\t" }
+            Usage = ["", "       ", null, "\t\t"]
         };
 
         // Assert

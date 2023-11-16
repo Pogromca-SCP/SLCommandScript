@@ -1,5 +1,5 @@
-﻿using SLCommandScript.Core.Interfaces;
-using CommandSystem;
+﻿using CommandSystem;
+using SLCommandScript.Core.Interfaces;
 using System;
 
 namespace SLCommandScript.Core.Permissions;

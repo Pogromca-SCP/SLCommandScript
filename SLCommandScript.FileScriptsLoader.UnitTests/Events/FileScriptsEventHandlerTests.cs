@@ -1,22 +1,22 @@
-﻿using NUnit.Framework;
+﻿using CommandSystem;
+using Moq;
+using NUnit.Framework;
 using PluginAPI.Enums;
 using PluginAPI.Events;
 using SLCommandScript.FileScriptsLoader.Events;
-using System.Reflection;
-using Moq;
-using CommandSystem;
 using System;
+using System.Reflection;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Events;
 
 [TestFixture]
 public class FileScriptsEventHandlerTests
 {
-    private static readonly object[][] _testedEvents = {
-        new object[] { ServerEventType.MapGenerated, new MapGeneratedEvent() },
-        new object[] { ServerEventType.ConsoleCommand, new ConsoleCommandEvent(ServerConsole.Scs, "help", new string[0]) },
-        new object[] { ServerEventType.RoundStart, new RoundStartEvent() }
-    };
+    private static readonly object[][] _testedEvents = [
+        [ServerEventType.MapGenerated, new MapGeneratedEvent()],
+        [ServerEventType.ConsoleCommand, new ConsoleCommandEvent(ServerConsole.Scs, "help", [])],
+        [ServerEventType.RoundStart, new RoundStartEvent()]
+    ];
 
     #region HandleEvent Tests
     [TestCaseSource(nameof(_testedEvents))]
@@ -27,7 +27,7 @@ public class FileScriptsEventHandlerTests
         var method = handler.GetType().GetMethod($"On{type}", BindingFlags.Instance | BindingFlags.NonPublic);
 
         // Act
-        method.Invoke(handler, new object[] { args });
+        method.Invoke(handler, [args]);
     }
 
     [TestCaseSource(nameof(_testedEvents))]
@@ -42,7 +42,7 @@ public class FileScriptsEventHandlerTests
         var method = handler.GetType().GetMethod($"On{type}", BindingFlags.Instance | BindingFlags.NonPublic);
 
         // Act
-        method.Invoke(handler, new object[] { args });
+        method.Invoke(handler, [args]);
 
         // Assert
         cmdMock.VerifyAll();

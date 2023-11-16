@@ -1,14 +1,14 @@
-﻿using SLCommandScript.Core.Interfaces;
-using PluginAPI.Core;
-using SLCommandScript.FileScriptsLoader.Helpers;
-using System.Collections.Generic;
-using SLCommandScript.FileScriptsLoader.Loader;
-using SLCommandScript.Core;
-using SLCommandScript.FileScriptsLoader.Commands;
+﻿using PluginAPI.Core;
 using PluginAPI.Enums;
-using System;
+using SLCommandScript.Core;
+using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Permissions;
 using SLCommandScript.Core.Reflection;
+using SLCommandScript.FileScriptsLoader.Commands;
+using SLCommandScript.FileScriptsLoader.Helpers;
+using SLCommandScript.FileScriptsLoader.Loader;
+using System;
+using System.Collections.Generic;
 
 namespace SLCommandScript.FileScriptsLoader;
 
@@ -51,7 +51,7 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Contains all scripts directories monitors.
     /// </summary>
-    private readonly List<CommandsDirectory> _registeredDirectories = new();
+    private readonly List<CommandsDirectory> _registeredDirectories = [];
 
     /// <summary>
     /// Contains events directory monitor.
