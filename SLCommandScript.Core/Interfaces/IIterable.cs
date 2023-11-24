@@ -26,7 +26,7 @@ public interface IIterable
     void Randomize(int amount);
 
     /// <summary>
-    /// Resets iteration process and disables randomization.
+    /// Resets iteration process.
     /// </summary>
     void Reset();
 }

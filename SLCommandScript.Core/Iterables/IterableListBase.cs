@@ -27,9 +27,9 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
             return original;
         }
 
+        var rand = new Random();
         var result = new T[original.Length > amount ? amount : original.Length];
         amount = 0;
-        var rand = new Random();
 
         for (var i = original.Length - 1; i > 0 && amount < result.Length; --i)
         {
@@ -61,15 +61,15 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
 
             if (_objects is null)
             {
-                var src = _source()?.Where(o => o is not null) ?? Array.Empty<T>();
+                _objects = _source()?.Where(o => o is not null) ?? Array.Empty<T>();
 
                 if (_count > 0)
                 {
-                    src = Randomize(src, _count);
+                    _objects = Randomize(_objects, _count);
                 }
 
-                _objects = src.GetEnumerator();
-                _count = src.Count();
+                _enumerator = _objects.GetEnumerator();
+                _count = _objects.Count();
             }
 
             return _current >= _count;
@@ -84,7 +84,12 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
     /// <summary>
     /// Contains wrapped list of objects.
     /// </summary>
-    private IEnumerator<T> _objects = null;
+    private IEnumerable<T> _objects = null;
+
+    /// <summary>
+    /// Contains currently used iterator.
+    /// </summary>
+    private IEnumerator<T> _enumerator = null;
 
     /// <summary>
     /// Amount of contained elements.
@@ -108,11 +113,11 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
             return false;
         }
 
-        _objects.MoveNext();
+        _enumerator.MoveNext();
 
         if (targetVars is not null)
         {
-            LoadVariables(targetVars, _objects.Current);
+            LoadVariables(targetVars, _enumerator.Current);
         }
 
         ++_current;
@@ -126,14 +131,19 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
     public void Randomize(int amount)
     {
         _objects = null;
+        _enumerator = null;
         _count = amount;
         _current = 0;
     }
 
     /// <summary>
-    /// Resets iteration process and disables randomization.
+    /// Resets iteration process.
     /// </summary>
-    public void Reset() => Randomize(0);
+    public void Reset()
+    {
+        _enumerator = _objects?.GetEnumerator();
+        _current = 0;
+    }
 
     /// <summary>
     /// Loads properties from current object and inserts them into a dictionary.

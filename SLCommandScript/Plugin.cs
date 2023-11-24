@@ -12,9 +12,24 @@ namespace SLCommandScript;
 /// </summary>
 public class Plugin
 {
+    /// <summary>
+    /// Contains plugin name to display.
+    /// </summary>
     public const string PluginName = "SLCommandScript";
+
+    /// <summary>
+    /// Contains current plugin version.
+    /// </summary>
     public const string PluginVersion = "0.4.0";
+
+    /// <summary>
+    /// Contains plugin description.
+    /// </summary>
     public const string PluginDescription = "Simple, commands based scripting language.";
+
+    /// <summary>
+    /// Contains plugin author.
+    /// </summary>
     public const string PluginAuthor = "Adam Szerszenowicz";
 
     /// <summary>
