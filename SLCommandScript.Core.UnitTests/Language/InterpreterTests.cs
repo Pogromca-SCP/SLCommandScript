@@ -559,6 +559,8 @@ public class TestIterable : IIterable
         return true;
     }
 
+    public void Randomize(int amount) {}
+
     public void Reset()
     {
         _index = 1;

@@ -87,12 +87,12 @@ public class LexerTests
             new(TokenType.Text, "wowlo", 6) }, 6],
 
         [@"
-    \cassie why am I here \# This is a comment \
+    \cassie why am I here \if \# This is a comment \
     #? Console
     print \I \have no id\ea \[
 ", new[] { "TestQuotation" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "cassie", 2),
-            new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2), new(TokenType.Text, "#", 2),
-            new(TokenType.Text, "This", 2), new(TokenType.Text, "is", 2), new(TokenType.Text, "a", 2), new(TokenType.Text, "comment", 2),
+            new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2), new(TokenType.Text, "if", 2),
+            new(TokenType.Text, "#", 2), new(TokenType.Text, "This", 2), new(TokenType.Text, "is", 2), new(TokenType.Text, "a", 2), new(TokenType.Text, "comment", 2),
             new(TokenType.ScopeGuard, string.Empty, 3), new(TokenType.Text, "Console", 3),
             new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
             new(TokenType.Text, "id\\ea", 4), new(TokenType.Text, "[", 4) }, 4],
@@ -104,7 +104,8 @@ public class LexerTests
     print \This \should not appear
     #! Noclip! ?Announcer \
     #!ServerConsoleCommands
-    print This should not appear #! Noclip
+    print This should not appear #? Console
+    #! Noclip
     print Hello there #!Noclip Announcer
     print Class d has micro p p #!
     print 1 ... #! \
@@ -112,10 +113,10 @@ public class LexerTests
 ", new[] { "TestPermissionGuards" }, PlayerPermissions.Noclip | PlayerPermissions.Announcer, new Core.Language.Token[] { new(TokenType.Text, "cassie", 2),
             new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2),
             new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
-            new(TokenType.Text, "idea", 4), new(TokenType.Text, "print", 9), new(TokenType.Text, "Hello", 9), new(TokenType.Text, "there", 9),
-            new(TokenType.Text, "print", 10), new(TokenType.Text, "Class", 10), new(TokenType.Text, "d", 10), new(TokenType.Text, "has", 10),
-            new(TokenType.Text, "micro", 10), new(TokenType.Text, "p", 10), new(TokenType.Text, "p", 10), new(TokenType.Text, "print", 11),
-            new(TokenType.Text, "1", 11), new(TokenType.Text, "...", 11) }, 12],
+            new(TokenType.Text, "idea", 4), new(TokenType.ScopeGuard, null, 8), new(TokenType.Text, "Console", 8), new(TokenType.Text, "print", 10),
+            new(TokenType.Text, "Hello", 10), new(TokenType.Text, "there", 10), new(TokenType.Text, "print", 11), new(TokenType.Text, "Class", 11),
+            new(TokenType.Text, "d", 11), new(TokenType.Text, "has", 11), new(TokenType.Text, "micro", 11), new(TokenType.Text, "p", 11), new(TokenType.Text, "p", 11),
+            new(TokenType.Text, "print", 12), new(TokenType.Text, "1", 12), new(TokenType.Text, "...", 12) }, 13],
 
         ["$(2) $(00001) $(0)\n$(3) $(4) $(5)#Hello $(3)", new[] { "TestSimpleArgs", "happenned ?", "#What", BlankLine, "number 1 5",
             string.Empty }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Text, "#What", 1), new(TokenType.Text, "happenned", 1),

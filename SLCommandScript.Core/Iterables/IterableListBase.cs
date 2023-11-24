@@ -1,4 +1,5 @@
 ﻿using SLCommandScript.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,39 +9,92 @@ namespace SLCommandScript.Core.Iterables;
 /// Iterable wrapper for a list of objects.
 /// </summary>
 /// <typeparam name="T">Type of contained objects.</typeparam>
-public abstract class IterableListBase<T> : IIterable
+/// <param name="source">Source of objects to insert into wrapped list.</param>
+public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterable
 {
+    /// <summary>
+    /// Randomizes provided enumerable collection.
+    /// </summary>
+    /// <param name="data">Collection to randomize.</param>
+    /// <param name="amount">Amount of randomized elements to retrieve.</param>
+    /// <returns>Randomized elements.</returns>
+    private static IEnumerable<T> Randomize(IEnumerable<T> data, int amount)
+    {
+        var original = data.ToArray();
+
+        if (original.Length < 2)
+        {
+            return original;
+        }
+
+        var result = new T[original.Length > amount ? amount : original.Length];
+        amount = 0;
+        var rand = new Random();
+
+        for (var i = original.Length - 1; i > 0 && amount < result.Length; --i)
+        {
+            var key = rand.Next(i + 1);
+            result[amount] = original[key];
+            original[key] = original[i];
+            ++amount;
+        }
+
+        if (amount < result.Length)
+        {
+            result[amount] = original[0];
+        }
+
+        return result;
+    }
+
     /// <summary>
     /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
     /// </summary>
-    public bool IsAtEnd => _current >= _count;
+    public bool IsAtEnd
+    {
+        get
+        {
+            if (_source is null)
+            {
+                return true;
+            }
+
+            if (_objects is null)
+            {
+                var src = _source()?.Where(o => o is not null) ?? Array.Empty<T>();
+
+                if (_count > 0)
+                {
+                    src = Randomize(src, _count);
+                }
+
+                _objects = src.GetEnumerator();
+                _count = src.Count();
+            }
+
+            return _current >= _count;
+        }
+    }
+
+    /// <summary>
+    /// Source of iterated objects.
+    /// </summary>
+    private readonly Func<IEnumerable<T>> _source = source;
 
     /// <summary>
     /// Contains wrapped list of objects.
     /// </summary>
-    private readonly IEnumerator<T> _objects;
+    private IEnumerator<T> _objects = null;
 
     /// <summary>
     /// Amount of contained elements.
     /// </summary>
-    private readonly int _count;
+    private int _count = 0;
 
     /// <summary>
     /// Contains index of current object.
     /// </summary>
-    private int _current;
-
-    /// <summary>
-    /// Creates new iterable wrapper for a list.
-    /// </summary>
-    /// <param name="objects">Objects to insert into wrapped list.</param>
-    public IterableListBase(IEnumerable<T> objects)
-    {
-        var list = objects?.Where(o => o is not null);
-        _objects = list?.GetEnumerator();
-        _count = list?.Count() ?? 0;
-        _current = 0;
-    }
+    private int _current = 0;
 
     /// <summary>
     /// Performs next iteration step and loads new property values into provided dictionary.
@@ -66,13 +120,20 @@ public abstract class IterableListBase<T> : IIterable
     }
 
     /// <summary>
-    /// Resets iteration process.
+    /// Randomizes contained elements and limits their amount.
     /// </summary>
-    public void Reset()
+    /// <param name="amount">Amount of random elements to select from iterable object, zero or negative value will disable randomization.</param>
+    public void Randomize(int amount)
     {
-        _objects.Reset();
+        _objects = null;
+        _count = amount;
         _current = 0;
     }
+
+    /// <summary>
+    /// Resets iteration process and disables randomization.
+    /// </summary>
+    public void Reset() => Randomize(0);
 
     /// <summary>
     /// Loads properties from current object and inserts them into a dictionary.

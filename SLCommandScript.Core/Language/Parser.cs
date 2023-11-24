@@ -210,23 +210,17 @@ public class Parser
     /// <returns>Parsed directive expression or <see langword="null" /> if something went wrong.</returns>
     private Expr Directive()
     {
-        Expr body = null;
         var expr = ParseExpr(true);
+        var keyword = Advance();
 
-        if (Match(TokenType.If))
+        Expr body = keyword.Type switch
         {
-            body = If(expr);
-        }
-
-        if (Match(TokenType.Foreach))
-        {
-            body = Foreach(expr);
-        }
-
-        if (Match(TokenType.DelayBy))
-        {
-            body = Delay(expr);
-        }
+            TokenType.If => If(expr),
+            TokenType.Foreach => Foreach(expr),
+            TokenType.DelayBy => Delay(expr),
+            TokenType.ForRandom => ForRandom(expr),
+            _ => null
+        };
 
         if (body is null)
         {
@@ -353,6 +347,107 @@ public class Parser
             return null;
         }
 
+        var iter = GetIterable();
+
+        if (iter is null)
+        {
+            return null;
+        }
+
+        Advance();
+        return new(body, iter);
+    }
+
+    /// <summary>
+    /// Parses a for random expression.
+    /// </summary>
+    /// <param name="body">Expression to use as loop body.</param>
+    /// <returns>Parsed foreach expression or <see langword="null" /> if something went wrong.</returns>
+    private ForeachExpr ForRandom(Expr body)
+    {
+        if (body is null)
+        {
+            ErrorMessage += "\nin for random loop body expression";
+            return null;
+        }
+
+        var iter = GetIterable();
+
+        if (iter is null)
+        {
+            return null;
+        }
+
+        Advance();
+        var limit = 1;
+
+        if (Check(TokenType.Text))
+        {
+            limit = ParseNumber();
+
+            if (limit < 1)
+            {
+                if (limit == 0)
+                {
+                    ErrorMessage = "Limit of random elements must be greater than 0";
+                }
+
+                return null;
+            }
+
+            Advance();
+        }
+
+        iter.Randomize(limit);
+        return new(body, iter);
+    }
+
+    /// <summary>
+    /// Parses a delay expression.
+    /// </summary>
+    /// <param name="body">Expression to execute after the delay.</param>
+    /// <returns>Parsed delay expression or <see langword="null" /> if something went wrong.</returns>
+    private DelayExpr Delay(Expr body)
+    {
+        if (body is null)
+        {
+            ErrorMessage += "\nin delay body expression";
+            return null;
+        }
+
+        if (!Check(TokenType.Text))
+        {
+            ErrorMessage = "Delay duration is missing";
+            return null;
+        }
+
+        var duration = ParseNumber();
+
+        if (duration < 0)
+        {
+            return null;
+        }
+
+        Advance();
+        string name = null;
+
+        if (!IsAtEnd && _tokens[_current].Type > TokenType.ScopeGuard)
+        {
+            name = _tokens[_current].Value;
+            Advance();
+        }
+
+        return new(body, duration, name);
+    }
+    #endregion
+
+    #region Helper Methods
+    /// <summary>
+    /// Attempts to retrieve an iterable object from current token.
+    /// </summary>
+    /// <returns>Retrieved iterable object or <see langword="null" /> if something went wrong.</returns>
+    private IIterable GetIterable()
+    {
         if (IsAtEnd || _tokens[_current].Type < TokenType.Variable)
         {
             ErrorMessage = "Iterable object name is missing";
@@ -381,53 +476,30 @@ public class Parser
             return null;
         }
 
-        Advance();
-        return new(body, iter);
+        return iter;
     }
 
     /// <summary>
-    /// Parses a delay expression.
+    /// Attempts to parse a number from current token.
     /// </summary>
-    /// <param name="body">Expression to execute after the delay.</param>
-    /// <returns>Parsed delay expression or <see langword="null" /> if something went wrong.</returns>
-    private DelayExpr Delay(Expr body)
+    /// <returns>Parsed number or -1 if something went wrong.</returns>
+    private int ParseNumber()
     {
-        if (body is null)
-        {
-            ErrorMessage += "\nin delay body expression";
-            return null;
-        }
-
-        if (!Check(TokenType.Text))
-        {
-            ErrorMessage = "Delay duration is missing";
-            return null;
-        }
-
-        var duration = 0;
+        var result = 0;
 
         foreach (var ch in _tokens[_current].Value)
         {
             if (ch < '0' || ch > '9')
             {
-                ErrorMessage = $"'{_tokens[_current].Value}' is not a valid delay duration";
-                return null;
+                ErrorMessage = $"Expected '{_tokens[_current].Value}' to be a number";
+                return -1;
             }
 
-            duration *= 10;
-            duration += ch - '0';
+            result *= 10;
+            result += ch - '0';
         }
 
-        Advance();
-        string name = null;
-
-        if (!IsAtEnd && _tokens[_current].Type > TokenType.ScopeGuard)
-        {
-            name = _tokens[_current].Value;
-            Advance();
-        }
-
-        return new(body, duration, name);
+        return result;
     }
     #endregion
 }

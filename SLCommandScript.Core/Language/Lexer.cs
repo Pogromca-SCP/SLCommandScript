@@ -22,7 +22,8 @@ public class Lexer
         { "if", TokenType.If },
         { "else", TokenType.Else },
         { "foreach", TokenType.Foreach },
-        { "delayby", TokenType.DelayBy }
+        { "delayby", TokenType.DelayBy },
+        { "forrandom", TokenType.ForRandom }
     };
 
     /// <summary>
@@ -497,7 +498,7 @@ public class Lexer
             case '\n':
                 return !IsTopLevel;
             default:
-                Text();
+                Text(true);
                 break;
         }
 
@@ -580,7 +581,7 @@ public class Lexer
         }
         else
         {
-            Text();
+            Text(true);
         }
     }
 
@@ -591,7 +592,7 @@ public class Lexer
     {
         if (!IsTopLevel)
         {
-            Text();
+            Text(true);
             return;
         }
 
@@ -674,7 +675,7 @@ public class Lexer
         if (!IsWhiteSpace(Current))
         {
             ++_start;
-            Text();
+            Text(false);
             return;
         }
 
@@ -694,13 +695,14 @@ public class Lexer
             }
         }
 
-        Text();
+        Text(true);
     }
 
     /// <summary>
     /// Processes text based tokens.
     /// </summary>
-    private void Text()
+    /// <param name="enableKeywords">Whether or not the keywords are enabled.</param>
+    private void Text(bool enableKeywords)
     {
         if (_hasMissingPerms)
         {
@@ -728,7 +730,7 @@ public class Lexer
         }
         
         var text = GetTextWithPrefix(_current);
-        AddToken(type == TokenType.Text && _keywords.ContainsKey(text) ? _keywords[text] : type, text);
+        AddToken(enableKeywords && type == TokenType.Text && _keywords.ContainsKey(text) ? _keywords[text] : type, text);
     }
 
     /// <summary>

@@ -1,5 +1,5 @@
 # NOTE: The entire scripting language is NOT case sensitive!
-# NOTE: Symbols [, ] and # can be quoted with \ when they should be used as text
+# NOTE: Symbols [, ], # and keywords can be quoted with \ when they should be used as text
 
 script			-> line*
 line			-> expression? comment?  # Lines can be extended by ending them with \
@@ -14,10 +14,11 @@ inner_arg		-> variable | TEXT
 variable		-> \S* ("$(" TEXT ")" \S*)+
 
 directive		-> "[" directive_body "]"
-directive_body		-> foreach_loop | if_expr | delay_expr
+directive_body		-> foreach_loop | if_expr | delay_expr | forrandom_loop
 foreach_loop		-> inner_expression "foreach" TEXT  # Inner expression gets access to iterated objects properties through variables
 if_expr			-> expression "if" expression ("else" expression)?
 delay_expr		-> expression "delayby" NUMBER TEXT?
+forrandom_loop		-> inner_expression "forrandom" TEXT NUMBER?  # Inner expression gets access to iterated objects properties through variables
 
 comment			-> "#" comment_body
 comment_body		-> permissions_guard | scope_guard | .*

@@ -14,5 +14,6 @@ public enum TokenType : byte
     If,
     Else,
     Foreach,
-    DelayBy
+    DelayBy,
+    ForRandom
 }

@@ -14,71 +14,125 @@ public class ParserTests
 {
     #region Error Flow Test Case Sources
     private static readonly object[][] _errorPaths = [
-        [new Core.Language.Token[] { new(TokenType.ScopeGuard, null, 1), new(TokenType.Variable, "bc", 1) },
+        // #? $(bc)
+        [new Core.Language.Token[] { new(TokenType.ScopeGuard, null, 1), new(TokenType.Variable, "$(bc)", 1) },
             "An unexpected token remained after parsing (TokenType: Variable)"],
 
+        // #? RemoteAdmin Test Console
         [new Core.Language.Token[] { new(TokenType.ScopeGuard, null, 1), new(TokenType.Text, "RemoteAdmin", 1),
             new(TokenType.Text, "Test", 1), new(TokenType.Text, "Console", 1) }, "'Test' is not a valid scope name"],
 
+        // foreach RemoteAdmin Test
         [new Core.Language.Token[] { new(TokenType.Foreach, "foreach", 1), new(TokenType.Text, "RemoteAdmin", 1),
             new(TokenType.Text, "Test", 1) }, "Command 'foreach' was not found"],
 
+        // [ foreach RemoteAdmin Test ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "foreach", 1), new(TokenType.Text, "RemoteAdmin", 1),
             new(TokenType.Text, "Test", 1), new(TokenType.RightSquare, "]", 1) }, "Command 'foreach' was not found"],
 
+        // [ bc RemoteAdmin Test ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "RemoteAdmin", 1),
             new(TokenType.Text, "Test", 1), new(TokenType.RightSquare, "]", 1) }, "Directive body is invalid"],
 
-        [ new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "RemoteAdmin", 1),
+        // [ bc RemoteAdmin foreach test ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "RemoteAdmin", 1),
             new(TokenType.Foreach, "foreach", 1), new(TokenType.Text, "test", 1) }, "Missing closing square bracket for directive"],
 
+        // [ if ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1),  new(TokenType.If, "if", 1),
             new(TokenType.RightSquare, "]", 1) }, "Command 'if' was not found\nin if branch expression"],
 
+        // [ bc if ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.If, "if", 1),
             new(TokenType.RightSquare, "]", 1) }, "Command ']' was not found\nin if condition expression"],
 
+        // [ bc if
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.If, "if", 1) },
             "If condition expression is missing"],
 
+        // [ bc if bc else ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.If, "if", 1),
             new(TokenType.Text, "bc", 1), new(TokenType.Else, "else", 1), new(TokenType.RightSquare, "]", 1) },
             "Command ']' was not found\nin else branch expression"],
 
+        // [ bc if bc else
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.If, "if", 1),
             new(TokenType.Text, "bc", 1), new(TokenType.Else, "else", 1) }, "Else branch expression is missing"],
 
+        // [ foreach ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Foreach, "foreach", 1),
             new(TokenType.RightSquare, "]", 1) }, "Command 'foreach' was not found\nin foreach loop body expression"],
 
+        // [ bc foreach
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Foreach, "foreach", 1),
         }, "Iterable object name is missing"],
 
+        // [ bc foreach Human ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Foreach, "foreach", 1),
             new(TokenType.Text, "Human", 1), new(TokenType.RightSquare, "]", 1) },
             "'Human' is not a valid iterable object name"],
 
+        // [ bc foreach null ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Foreach, "foreach", 1),
             new(TokenType.Text, "null", 1), new(TokenType.RightSquare, "]", 1) },
             "Provider for 'null' iterable object is null"],
 
+        // [ bc foreach Bad ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Foreach, "foreach", 1),
             new(TokenType.Text, "Bad", 1), new(TokenType.RightSquare, "]", 1) },
             "Provider for 'Bad' iterable object returned null"],
 
+        // [ delayby ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.DelayBy, "delayby", 1),
             new(TokenType.RightSquare, "]", 1) }, "Command 'delayby' was not found\nin delay body expression" ],
 
+        // [ bc delayby ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.DelayBy, "delayby", 1),
             new(TokenType.RightSquare, "]", 1) }, "Delay duration is missing"],
 
+        // [ bc delayby text ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.DelayBy, "delayby", 1),
             new(TokenType.Text, "text", 1), new(TokenType.RightSquare, "]", 1) },
-            "'text' is not a valid delay duration"],
+            "Expected 'text' to be a number"],
 
+        // [ bc delayby 45b67a ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.DelayBy, "delayby", 1),
             new(TokenType.Text, "45b67a", 1), new(TokenType.RightSquare, "]", 1) },
-            "'45b67a' is not a valid delay duration"]
+            "Expected '45b67a' to be a number"],
+
+        // [ forrandom ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.ForRandom, "forrandom", 1),
+            new(TokenType.RightSquare, "]", 1) },
+            "Command 'forrandom' was not found\nin for random loop body expression"],
+
+        // [ bc forrandom
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.ForRandom, "forrandom", 1) },
+            "Iterable object name is missing"],
+
+        // [ bc forrandom Human ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Foreach, "foreach", 1),
+            new(TokenType.Text, "Human", 1), new(TokenType.RightSquare, "]", 1) },
+            "'Human' is not a valid iterable object name"],
+
+        // [ bc forrandom null ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.ForRandom, "forrandom", 1),
+            new(TokenType.Text, "null", 1), new(TokenType.RightSquare, "]", 1) },
+            "Provider for 'null' iterable object is null"],
+
+        // [ bc forrandom Bad ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.ForRandom, "forrandom", 1),
+            new(TokenType.Text, "Bad", 1), new(TokenType.RightSquare, "]", 1) },
+            "Provider for 'Bad' iterable object returned null"],
+
+        // [ bc forrandom Test 45b67a ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.ForRandom, "forrandom", 1),
+            new(TokenType.Text, "Test", 1), new(TokenType.Text, "45b67a", 1), new(TokenType.RightSquare, "]", 1) },
+            "Expected '45b67a' to be a number"],
+
+        // [ bc forrandom Test 0 ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.ForRandom, "forrandom", 1),
+            new(TokenType.Text, "Test", 1), new(TokenType.Text, "0", 1), new(TokenType.RightSquare, "]", 1) },
+            "Limit of random elements must be greater than 0"]
     ];
     #endregion
 
@@ -155,7 +209,21 @@ public class ParserTests
             new(TokenType.RightSquare, "]", 1), new(TokenType.DelayBy, "delayby", 1), new(TokenType.Text, "034", 1), new(TokenType.Text, "NamedOperation", 1),
             new(TokenType.RightSquare, "]", 1) }, new DelayExpr(new ForeachExpr(new CommandExpr(
                 new BroadcastCommand(), ["bc", "5", "Test"], false), new TestIterable()), 34, "NamedOperation"),
-            Parser.AllScopes]
+            Parser.AllScopes],
+
+        // [ bc 5 $(Test) forrandom test ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1),
+            new(TokenType.Variable, "$(Test)", 1), new(TokenType.ForRandom, "forrandom", 1), new(TokenType.Text, "test", 1), new(TokenType.RightSquare, "]", 1) },
+            new ForeachExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true), new TestIterable()),
+            Parser.AllScopes],
+
+        // [ [ bc 5 test if cassie hello ] forrandom test 6 ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1),
+            new(TokenType.Text, "5", 1), new(TokenType.Text, "test", 1), new(TokenType.If, "if", 1), new(TokenType.Text, "cassie", 1),
+            new(TokenType.Text, "hello", 1), new(TokenType.RightSquare, "]", 1), new(TokenType.ForRandom, "forrandom", 1), new(TokenType.Text, "test", 1),
+            new(TokenType.Text, "6", 1), new(TokenType.RightSquare, "]", 1) },
+            new ForeachExpr(new IfExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false), new CommandExpr(new CassieCommand(), ["cassie", "hello"], false),
+                null), new TestIterable()), Parser.AllScopes]
     ];
     #endregion
 

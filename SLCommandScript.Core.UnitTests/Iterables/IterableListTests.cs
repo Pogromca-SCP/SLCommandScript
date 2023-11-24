@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
 using SLCommandScript.Core.Iterables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,11 +10,11 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 [TestFixture]
 public class IterableListTests
 {
-    private static readonly string[][] _strings = [[null, null, null, null], ["example", null, "", "test"], ["  \t ", "Test", "test", "TEST"]];
+    private static readonly string[][] _strings = [null, [], [null, null, null, null], ["example", null, "", "test"], ["  \t ", "Test", "test", "TEST"]];
 
     #region Constructor Tests
     [Test]
-    public void IterableList_ShouldProperlyInitialize_WhenProvidedCollectionIsNull()
+    public void IterableList_ShouldProperlyInitialize_WhenProvidedDataSourceIsNull()
     {
         // Act
         var iterable = new TestIterable(null);
@@ -22,23 +23,38 @@ public class IterableListTests
         iterable.IsAtEnd.Should().BeTrue();
     }
 
+
     [TestCaseSource(nameof(_strings))]
-    public void IterableList_ShouldProperlyInitialize_WhenProvidedCollectionIsNotNull(string[] strings)
+    public void IterableList_ShouldProperlyInitialize_WhenProvidedDataSourceIsNotNull(string[] strings)
     {
         // Act
-        var iterable = new TestIterable(strings);
+        var iterable = new TestIterable(() => strings);
 
         // Assert
-        iterable.IsAtEnd.Should().Be(strings.Where(s => s is not null).IsEmpty());
+        iterable.IsAtEnd.Should().Be(strings is null || strings.Where(s => s is not null).IsEmpty());
     }
     #endregion
 
     #region LoadNext Tests
+    [Test]
+    public void LoadNext_ShouldProperlyIterate_WhenDataSourceIsNull()
+    {
+        // Arrange
+        var iterable = new TestIterable(null);
+
+        // Act
+        var result = iterable.LoadNext(null);
+
+        // Assert
+        result.Should().BeFalse();
+        iterable.IsAtEnd.Should().BeTrue();
+    }
+
     [TestCaseSource(nameof(_strings))]
     public void LoadNext_ShouldProperlyIterate_WhenProvidedDictionaryIsNull(string[] strings)
     {
         // Arrange
-        var iterable = new TestIterable(strings);
+        var iterable = new TestIterable(() => strings);
         var count = 0;
 
         // Act
@@ -49,15 +65,15 @@ public class IterableListTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
-        count.Should().Be(strings.Where(s => s is not null).Count());
+        count.Should().Be(strings is null ? 0 : strings.Where(s => s is not null).Count());
     }
 
     [TestCaseSource(nameof(_strings))]
     public void LoadNext_ShouldProperlySetVariables_WhenProvidedDictionaryIsNotNull(string[] strings)
     {
         // Arrange
-        var iterable = new TestIterable(strings);
-        var filteredStrings = strings.Where(s => s is not null);
+        var iterable = new TestIterable(() => strings);
+        var filteredStrings = strings?.Where(s => s is not null) ?? Array.Empty<string>();
         var variables = new Dictionary<string, string>();
         var count = 0;
 
@@ -78,23 +94,62 @@ public class IterableListTests
     }
     #endregion
 
-    #region Reset Tests
-    public void Reset_ShouldProperlyResetIterable(string[] strings)
+    #region Randomize Tests
+    [TestCaseSource(nameof(_strings))]
+    public void Reset_ShouldProperlyRandomizeElements(string[] strings)
     {
         // Arrange
-        var iterable = new TestIterable(strings);
+        var iterable = new TestIterable(() => strings);
+        var count = 0;
+        const int randAmount = 3;
+        var filteredStrings = strings?.Where(s => s is not null) ?? Array.Empty<string>();
+        var filteredCount = filteredStrings.Count();
+
+        // Act
+        iterable.Randomize(randAmount);
+
+        while (iterable.LoadNext(null))
+        {
+            ++count;
+        }
+
+        // Assert
+        iterable.IsAtEnd.Should().BeTrue();
+        count.Should().Be(filteredCount > randAmount ? randAmount : filteredCount);
+    }
+    #endregion
+
+    #region Reset Tests
+    [TestCaseSource(nameof(_strings))]
+    public void Reset_ShouldProperlyResetIterable_BeforeRunning(string[] strings)
+    {
+        // Arrange
+        var iterable = new TestIterable(() => strings);
+
+        // Act
+        iterable.Reset();
+
+        // Assert
+        iterable.IsAtEnd.Should().Be(strings is null || strings.Where(s => s is not null).IsEmpty());
+    }
+
+    [TestCaseSource(nameof(_strings))]
+    public void Reset_ShouldProperlyResetIterable_AfterRunning(string[] strings)
+    {
+        // Arrange
+        var iterable = new TestIterable(() => strings);
 
         // Act
         while (iterable.LoadNext(null)) {}
         iterable.Reset();
 
         // Assert
-        iterable.IsAtEnd.Should().Be(strings.Where(s => s is not null).IsEmpty());
+        iterable.IsAtEnd.Should().Be(strings is null || strings.Where(s => s is not null).IsEmpty());
     }
     #endregion
 }
 
-public class TestIterable(IEnumerable<string> strings) : IterableListBase<string>(strings)
+public class TestIterable(Func<IEnumerable<string>> strings) : IterableListBase<string>(strings)
 {
     protected override void LoadVariables(IDictionary<string, string> targetVars, string str)
     {
