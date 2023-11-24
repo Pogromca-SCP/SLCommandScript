@@ -1,4 +1,4 @@
-# ThanosCoinPlugin
+# SLCommandScript
 [![GitHub release](https://flat.badgen.net/github/release/Pogromca-SCP/SLCommandScript)](https://github.com/Pogromca-SCP/SLCommandScript/releases)
 [![GitHub license](https://flat.badgen.net/github/license/Pogromca-SCP/SLCommandScript)](https://github.com/Pogromca-SCP/SLCommandScript/blob/main/LICENSE)
 ![GitHub downloads](https://flat.badgen.net/github/assets-dl/Pogromca-SCP/SLCommandScript)
