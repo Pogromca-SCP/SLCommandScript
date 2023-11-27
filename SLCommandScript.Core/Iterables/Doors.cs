@@ -19,6 +19,7 @@ public class DoorsIterable(Func<IEnumerable<FacilityDoor>> door) : IterableListB
     /// <param name="door">Door to load properties from.</param>
     protected override void LoadVariables(IDictionary<string, string> targetVars, FacilityDoor door)
     {
+        targetVars["name"] = door.Name;
         targetVars["id"] = door.OriginalObject.NetworkDoorId.ToString();
         targetVars["lock"] = door.LockReason.ToString();
         targetVars["room"] = door.Room.Identifier.Name.ToString();
