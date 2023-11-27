@@ -11,7 +11,7 @@ inner_expression	-> directive | inner_command
 command			-> TEXT+
 inner_command		-> TEXT inner_arg*
 inner_arg		-> variable | TEXT
-variable		-> \S* ("$(" TEXT ")" \S*)+
+variable		-> \S* ("$(" "^"* TEXT ")" \S*)+
 
 directive		-> "[" directive_body "]"
 directive_body		-> foreach_loop | if_expr | delay_expr | forrandom_loop

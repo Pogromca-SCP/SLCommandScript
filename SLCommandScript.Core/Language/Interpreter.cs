@@ -14,6 +14,7 @@ namespace SLCommandScript.Core.Language;
 /// </summary>
 public class Interpreter : IExprVisitor<bool>
 {
+    #region Scope
     /// <summary>
     /// Represents variables scope.
     /// </summary>
@@ -36,11 +37,12 @@ public class Interpreter : IExprVisitor<bool>
             {
                 foreach (var ent in next)
                 {
-                    Add(ent.Key, ent.Value);
+                    Add($"^{ent.Key}", ent.Value);
                 }
             }
         }
     }
+    #endregion
 
     /// <summary>
     /// Contains regular expression for variables.

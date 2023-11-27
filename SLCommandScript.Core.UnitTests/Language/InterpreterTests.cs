@@ -377,6 +377,24 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
     }
+
+    [Test]
+    public void VisitForeachExpr_ShouldProperlyInjectArguments_InNestedExpression()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+
+        var expr = new ForeachExpr(new ForeachExpr(new ForeachExpr(new CommandExpr(new NestedArgumentsInjectionTestCommand(),
+            ["test", "$(i)", "$(^i)", "$(^^i)", "$(^^^i)"], true), new TestIterable()), new TestIterable()), new TestIterable());
+
+        // Act
+        var result = interpreter.VisitForeachExpr(expr);
+
+        // Assert
+        result.Should().BeTrue();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().BeNull();
+    }
     #endregion
 
     #region VisitIfExpr Tests
@@ -582,5 +600,23 @@ public class ArgumentsInjectionTestCommand : ICommand
         response = null;
         return firstArg == thirdArg && arguments.At(1).Equals("$(index)") && arguments.At(-1).Equals("$(test)") && arguments.At(3) is null &&
             arguments.At(4).Equals("hello)hello)");
+    }
+}
+
+public class NestedArgumentsInjectionTestCommand : ICommand
+{
+    public string Command => null;
+
+    public string[] Aliases => null;
+
+    public string Description => null;
+
+    public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+    {
+        var firstArg = int.Parse(arguments.At(0));
+        var secondArg = int.Parse(arguments.At(1));
+        var thirdArg = int.Parse(arguments.At(2));
+        response = null;
+        return firstArg > 0 && secondArg > 0 && thirdArg > 0 && arguments.At(3).Equals("$(^^^i)");
     }
 }
