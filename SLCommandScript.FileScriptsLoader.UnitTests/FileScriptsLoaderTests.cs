@@ -23,6 +23,18 @@ public class FileScriptsLoaderTests
 
     private static readonly Func<string, string, bool, IFileSystemWatcherHelper> _testWatcherFactory = (directory, filter, allowSubdirectories) => null;
 
+    [Test]
+    public void Properties_ShouldReturnProperData()
+    {
+        // Act
+        var loader = new FileScriptsLoader();
+
+        // Assert
+        loader.LoaderName.Should().Be(FileScriptsLoader.ProjectName);
+        loader.LoaderVersion.Should().Be(FileScriptsLoader.ProjectVersion);
+        loader.LoaderAuthor.Should().Be(FileScriptsLoader.ProjectAuthor);
+    }
+
     #region InitScriptsLoader Tests
     [Test]
     public void InitScriptsLoader_ShouldNotInitialize_WhenProvidedPluginObjectIsNull()

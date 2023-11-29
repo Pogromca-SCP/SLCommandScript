@@ -16,6 +16,31 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
     /// Randomizes provided enumerable collection.
     /// </summary>
     /// <param name="data">Collection to randomize.</param>
+    /// <returns>Randomized elements.</returns>
+    private static IEnumerable<T> Randomize(IEnumerable<T> data)
+    {
+        var array = data.ToArray();
+
+        if (array.Length < 2)
+        {
+            return array;
+        }
+
+        var rand = new Random();
+
+        for (var i = array.Length - 1; i > 0; --i)
+        {
+            var key = rand.Next(i + 1);
+            (array[key], array[i]) = (array[i], array[key]);
+        }
+
+        return array;
+    }
+
+    /// <summary>
+    /// Randomizes provided enumerable collection.
+    /// </summary>
+    /// <param name="data">Collection to randomize.</param>
     /// <param name="amount">Amount of randomized elements to retrieve.</param>
     /// <returns>Randomized elements.</returns>
     private static IEnumerable<T> Randomize(IEnumerable<T> data, int amount)
@@ -63,9 +88,9 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
             {
                 _objects = _source()?.Where(o => o is not null) ?? Array.Empty<T>();
 
-                if (_count > 0)
+                if (_count != 0)
                 {
-                    _objects = Randomize(_objects, _count);
+                    _objects = _count > 0 ? Randomize(_objects, _count) : Randomize(_objects);
                 }
 
                 _enumerator = _objects.GetEnumerator();
@@ -125,9 +150,14 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
     }
 
     /// <summary>
+    /// Randomizes contained elements.
+    /// </summary>
+    public void Randomize() => Randomize(-1);
+
+    /// <summary>
     /// Randomizes contained elements and limits their amount.
     /// </summary>
-    /// <param name="amount">Amount of random elements to select from iterable object, zero or negative value will disable randomization.</param>
+    /// <param name="amount">Amount of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
     public void Randomize(int amount)
     {
         _objects = null;

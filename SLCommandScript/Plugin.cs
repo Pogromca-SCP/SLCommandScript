@@ -1,8 +1,11 @@
 ﻿using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
+using SLCommandScript.Commands;
 using SLCommandScript.Core;
+using SLCommandScript.Core.Commands;
 using SLCommandScript.Core.Interfaces;
+using SLCommandScript.Core.Language;
 using SLCommandScript.Core.Reflection;
 
 namespace SLCommandScript;
@@ -20,7 +23,7 @@ public class Plugin
     /// <summary>
     /// Contains current plugin version.
     /// </summary>
-    public const string PluginVersion = "0.4.0";
+    public const string PluginVersion = "0.4.1";
 
     /// <summary>
     /// Contains plugin description.
@@ -67,6 +70,11 @@ public class Plugin
     private IScriptsLoader _scriptsLoader;
 
     /// <summary>
+    /// Stores a reference to helper commands.
+    /// </summary>
+    private HelperCommands _helperCommands;
+
+    /// <summary>
     /// Loads and initializes the plugin.
     /// </summary>
     [PluginPriority(LoadPriority.Lowest)]
@@ -98,6 +106,8 @@ public class Plugin
         PrintLog("Plugin unload started...");
         _scriptsLoader?.Dispose();
         _scriptsLoader = null;
+        UnregisterHelperCommands();
+        _helperCommands = null;
         ScriptsLoaderConfig = null;
         PluginConfig = null;
         PrintLog("Plugin is unloaded.");
@@ -109,6 +119,7 @@ public class Plugin
     private void Init()
     {
         _scriptsLoader?.Dispose();
+        UnregisterHelperCommands();
         var handler = PluginHandler.Get(this);
 
         if (handler is null)
@@ -120,6 +131,7 @@ public class Plugin
         handler.LoadConfig(this, nameof(PluginConfig));
         handler.LoadConfig(this, nameof(ScriptsLoaderConfig));
         _scriptsLoader = LoadScriptsLoader();
+        RegisterHelperCommands();
         _scriptsLoader?.InitScriptsLoader(this, handler, ScriptsLoaderConfig);
     }
 
@@ -145,5 +157,42 @@ public class Plugin
 
         PrintLog("Scripts loader loaded successfully.");
         return loader;
+    }
+
+    /// <summary>
+    /// Registers helper commands.
+    /// </summary>
+    private void RegisterHelperCommands()
+    {
+        if (!PluginConfig.EnableHelperCommands)
+        {
+            return;
+        }
+        
+        _helperCommands = new(_scriptsLoader);
+        var registered = CommandsUtils.RegisterCommand(Parser.AllScopes, _helperCommands);
+
+        if (registered != Parser.AllScopes)
+        {
+            PrintError($"Could not register helper commands for {Parser.AllScopes ^ (registered ?? 0)}");
+        }
+    }
+
+    /// <summary>
+    /// Unregisters helper commands.
+    /// </summary>
+    private void UnregisterHelperCommands()
+    {
+        if (_helperCommands is null)
+        {
+            return;
+        }
+
+        var unregistered = CommandsUtils.UnregisterCommand(Parser.AllScopes, _helperCommands);
+
+        if (unregistered != Parser.AllScopes)
+        {
+            PrintError($"Could not unregister helper commands from {Parser.AllScopes ^ (unregistered ?? 0)}");
+        }
     }
 }

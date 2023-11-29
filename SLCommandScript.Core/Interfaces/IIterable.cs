@@ -20,9 +20,14 @@ public interface IIterable
     bool LoadNext(IDictionary<string, string> targetVars);
 
     /// <summary>
+    /// Randomizes contained elements.
+    /// </summary>
+    void Randomize();
+
+    /// <summary>
     /// Randomizes contained elements and limits their amount.
     /// </summary>
-    /// <param name="amount">Amount of random elements to select from iterable object, zero or negative value will disable randomization.</param>
+    /// <param name="amount">Amount of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
     void Randomize(int amount);
 
     /// <summary>

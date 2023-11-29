@@ -30,6 +30,13 @@ public interface IExprVisitor<T>
     T VisitForeachExpr(ForeachExpr expr);
 
     /// <summary>
+    /// Visits a for else expression.
+    /// </summary>
+    /// <param name="expr">Expression to visit.</param>
+    /// <returns>Result value of the visit.</returns>
+    T VisitForElseExpr(ForElseExpr expr);
+
+    /// <summary>
     /// Visits an if expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>

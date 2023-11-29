@@ -23,6 +23,7 @@ Simple, commands based scripting language for SCP: Secret Laboratory.
 | Name                          | Type   | Default value                                                                          | Description                                                                    |
 | ----------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | scripts_loader_implementation | string | SLCommandScript.FileScriptsLoader.FileScriptsLoader, SLCommandScript.FileScriptsLoader | Scripts loader implementation to use, provided as a fully qualified type name. |
+| enable_helper_commands        | bool   | true                                                                                   | Tells whether or not helper commands should be registered in command handlers. |
 ### Scripts Loader Config
 | Name                         | Type                        | Default value                     | Description                                                                                                          |
 | ---------------------------- | --------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |

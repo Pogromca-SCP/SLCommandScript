@@ -16,7 +16,9 @@ public class InterpreterTests
 {
     private static readonly bool[] _booleanValues = [false, true];
 
-    #region ConstructorTests
+    private static readonly int[] _limits = [-1, 0, 4, 7, 10, 12];
+
+    #region Constructor Tests
     [Test]
     public void Interpreter_ShouldProperlyInitialize_WhenCommandSenderIsNull()
     {
@@ -397,6 +399,146 @@ public class InterpreterTests
     }
     #endregion
 
+    #region VisitForElseExpr Tests
+    [Test]
+    public void VisitForElseExpr_ShouldFail_WhenExpressionIsNull()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+
+        // Act
+        var result = interpreter.VisitForElseExpr(null);
+
+        // Assert
+        result.Should().BeFalse();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be("Provided forelse expression is null");
+    }
+
+    [Test]
+    public void VisitForElseExpr_ShouldFail_WhenPrimaryBodyIsNull()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var expr = new ForElseExpr(null, null, null, 0);
+
+        // Act
+        var result = interpreter.VisitForElseExpr(expr);
+
+        // Assert
+        result.Should().BeFalse();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be("Forelse primary expression body is null");
+    }
+
+    [Test]
+    public void VisitForElseExpr_ShouldFail_WhenIterableIsNull()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var expr = new ForElseExpr(new ForeachExpr(null, null), null, null, 0);
+
+        // Act
+        var result = interpreter.VisitForElseExpr(expr);
+
+        // Assert
+        result.Should().BeFalse();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be("Forelse expression iterable object is null");
+    }
+
+    [Test]
+    public void VisitForElseExpr_ShouldFail_WhenSecondaryBodyIsNull()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var expr = new ForElseExpr(new ForeachExpr(null, null), new TestIterable(), null, 0);
+
+        // Act
+        var result = interpreter.VisitForElseExpr(expr);
+
+        // Assert
+        result.Should().BeFalse();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be("Forelse secondary expression body is null");
+    }
+
+    [TestCaseSource(nameof(_booleanValues))]
+    public void VisitForElseExpr_ShouldFail_WhenIterationFails(bool testPrimary)
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var expr = new ForElseExpr(new ForeachExpr(null, null), new TestIterable(), new ForeachExpr(null, null), testPrimary ? TestIterable.MaxIterations : 0);
+
+        // Act
+        var result = interpreter.VisitForElseExpr(expr);
+
+        // Assert
+        result.Should().BeFalse();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be("Foreach expression body is null");
+    }
+
+    [TestCaseSource(nameof(_limits))]
+    public void VisitForElseExpr_ShouldSucceed_WhenGoldFlow(int limit)
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var message = "Command succeeded";
+        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
+        commandMock.Setup(x => x.Execute(new(new[] { "test", "args", "$(arg)" }, 1, 2), null, out message)).Returns(true);
+        var cmd = new CommandExpr(commandMock.Object, ["test", "args", "$(arg)"], false);
+        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, limit);
+
+        // Act
+        var result = interpreter.VisitForElseExpr(expr);
+
+        // Assert
+        result.Should().BeTrue();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().BeNull();
+        commandMock.VerifyAll();
+        commandMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(_limits))]
+    public void VisitForElseExpr_ShouldProperlyInjectArguments(int limit)
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var cmd = new CommandExpr(new ArgumentsInjectionTestCommand(), ["$(test)", "$(i)", "$(index)", "$(I)", null, "$(wut?))$(wut?))"], true);
+        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, limit);
+
+        // Act
+        var result = interpreter.VisitForElseExpr(expr);
+
+        // Assert
+        result.Should().BeTrue();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().BeNull();
+    }
+
+    [TestCaseSource(nameof(_limits))]
+    public void VisitForElseExpr_ShouldProperlyInjectArguments_InNestedExpression(int limit)
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+
+        var cmd = new ForeachExpr(new ForeachExpr(new CommandExpr(new NestedArgumentsInjectionTestCommand(), ["test", "$(i)", "$(^i)", "$(^^i)", "$(^^^i)"], true),
+            new TestIterable()), new TestIterable());
+
+        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, limit);
+
+        // Act
+        var result = interpreter.VisitForElseExpr(expr);
+
+        // Assert
+        result.Should().BeTrue();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().BeNull();
+    }
+    #endregion
+
     #region VisitIfExpr Tests
     [Test]
     public void VisitIfExpr_ShouldFail_WhenExpressionIsNull()
@@ -560,9 +702,11 @@ public class InterpreterTests
 
 public class TestIterable : IIterable
 {
+    public const int MaxIterations = 10;
+
     private int _index = 1;
 
-    public bool IsAtEnd => _index > 10;
+    public bool IsAtEnd => _index > MaxIterations;
 
     public bool LoadNext(IDictionary<string, string> targetVars)
     {
@@ -576,6 +720,8 @@ public class TestIterable : IIterable
         ++_index;
         return true;
     }
+
+    public void Randomize() {}
 
     public void Randomize(int amount) {}
 

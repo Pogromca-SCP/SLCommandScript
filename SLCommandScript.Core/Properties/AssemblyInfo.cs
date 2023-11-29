@@ -1,8 +1,9 @@
-﻿using System.Reflection;
+﻿using SLCommandScript.Core;
+using System.Reflection;
 
-[assembly: AssemblyTitle("SLCommandScript.Core")]
+[assembly: AssemblyTitle(Constants.ProjectName)]
 [assembly: AssemblyDescription("Core components library for SL Command Script.")]
 [assembly: AssemblyProduct("SLCommandScript")]
-[assembly: AssemblyCopyright("Copyright © 2023 Adam Szerszenowicz")]
-[assembly: AssemblyVersion("0.4.1")]
-[assembly: AssemblyFileVersion("0.4.1")]
+[assembly: AssemblyCopyright("Copyright © 2023 " + Constants.ProjectAuthor)]
+[assembly: AssemblyVersion(Constants.ProjectVersion)]
+[assembly: AssemblyFileVersion(Constants.ProjectVersion)]

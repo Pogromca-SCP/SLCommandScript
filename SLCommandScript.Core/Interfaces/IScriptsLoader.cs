@@ -9,6 +9,21 @@ namespace SLCommandScript.Core.Interfaces;
 public interface IScriptsLoader : IDisposable
 {
     /// <summary>
+    /// Contains loader name to display.
+    /// </summary>
+    string LoaderName { get; }
+
+    /// <summary>
+    /// Contains current loader version.
+    /// </summary>
+    string LoaderVersion { get; }
+
+    /// <summary>
+    /// Contains loader author.
+    /// </summary>
+    string LoaderAuthor { get; }
+
+    /// <summary>
     /// Initializes the scripts loader.
     /// </summary>
     /// <param name="plugin">Plugin object.</param>

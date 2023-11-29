@@ -10,7 +10,16 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 [TestFixture]
 public class IterableListTests
 {
+    #region Test Case Sources
     private static readonly string[][] _strings = [null, [], [null, null, null, null], ["example", null, "", "test"], ["  \t ", "Test", "test", "TEST"]];
+
+    private static readonly int[] _sizes = [-1, 0, 1, 2, 3];
+
+    private static IEnumerable<object[]> StringsXSizes => JoinArrays(_strings, _sizes);
+
+    private static IEnumerable<object[]> JoinArrays<TFirst, TSecond>(TFirst[] first, TSecond[] second) =>
+        first.SelectMany(f => second.Select(s => new object[] { f, s }));
+    #endregion
 
     #region Constructor Tests
     [Test]
@@ -101,7 +110,28 @@ public class IterableListTests
         // Arrange
         var iterable = new TestIterable(() => strings);
         var count = 0;
-        const int randAmount = 3;
+        var filteredStrings = strings?.Where(s => s is not null) ?? Array.Empty<string>();
+        var filteredCount = filteredStrings.Count();
+
+        // Act
+        iterable.Randomize();
+
+        while (iterable.LoadNext(null))
+        {
+            ++count;
+        }
+
+        // Assert
+        iterable.IsAtEnd.Should().BeTrue();
+        count.Should().Be(filteredCount);
+    }
+
+    [TestCaseSource(nameof(StringsXSizes))]
+    public void Reset_ShouldProperlyRandomizeElements(string[] strings, int randAmount)
+    {
+        // Arrange
+        var iterable = new TestIterable(() => strings);
+        var count = 0;
         var filteredStrings = strings?.Where(s => s is not null) ?? Array.Empty<string>();
         var filteredCount = filteredStrings.Count();
 
@@ -115,7 +145,7 @@ public class IterableListTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
-        count.Should().Be(filteredCount > randAmount ? randAmount : filteredCount);
+        count.Should().Be(filteredCount > randAmount && randAmount > 0 ? randAmount : filteredCount);
     }
     #endregion
 

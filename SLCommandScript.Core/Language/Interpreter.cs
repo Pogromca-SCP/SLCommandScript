@@ -29,15 +29,16 @@ public class Interpreter : IExprVisitor<bool>
         /// Creates new variables scope.
         /// </summary>
         /// <param name="next">Higher variables scope to copy values from.</param>
-        public Scope(Scope next) : base(StringComparer.OrdinalIgnoreCase)
+        /// <param name="saveParent">Whether or not the scope should remember its parent.</param>
+        public Scope(Scope next, bool saveParent) : base(StringComparer.OrdinalIgnoreCase)
         {
-            Next = next;
+            Next = saveParent ? next : null;
 
             if (next is not null)
             {
                 foreach (var ent in next)
                 {
-                    Add($"^{ent.Key}", ent.Value);
+                    Add(saveParent ? $"^{ent.Key}" : ent.Key, ent.Value);
                 }
             }
         }
@@ -100,12 +101,7 @@ public class Interpreter : IExprVisitor<bool>
     private Interpreter(Interpreter src)
     {
         Reset(src.Sender);
-        _variables = src._variables is null ? null : new(src._variables);
-
-        if (_variables is not null)
-        {
-            _variables.Next = null;
-        }
+        _variables = src._variables is null ? null : new(src._variables, false);
     }
 
     /// <summary>
@@ -211,11 +207,62 @@ public class Interpreter : IExprVisitor<bool>
             return false;
         }
 
-        _variables = new(_variables);
+        _variables = new(_variables, true);
 
         while (expr.Iterable.LoadNext(_variables))
         {
             var result = expr.Body.Accept(this);
+
+            if (!result)
+            {
+                _variables = _variables.Next;
+                return false;
+            }
+        }
+
+        _variables = _variables.Next;
+        ErrorMessage = null;
+        return true;
+    }
+
+    /// <summary>
+    /// Visits a for else expression.
+    /// </summary>
+    /// <param name="expr">Expression to visit.</param>
+    /// <returns>Result value of the visit.</returns>
+    public bool VisitForElseExpr(ForElseExpr expr)
+    {
+        if (expr is null)
+        {
+            ErrorMessage = "Provided forelse expression is null";
+            return false;
+        }
+
+        if (expr.Then is null)
+        {
+            ErrorMessage = "Forelse primary expression body is null";
+            return false;
+        }
+
+        if (expr.Iterable is null)
+        {
+            ErrorMessage = "Forelse expression iterable object is null";
+            return false;
+        }
+
+        if (expr.Else is null)
+        {
+            ErrorMessage = "Forelse secondary expression body is null";
+            return false;
+        }
+
+        _variables = new(_variables, true);
+        var count = 0;
+
+        while (expr.Iterable.LoadNext(_variables))
+        {
+            var result = count < expr.Limit ? expr.Then.Accept(this) : expr.Else.Accept(this);
+            ++count;
 
             if (!result)
             {

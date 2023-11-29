@@ -362,8 +362,8 @@ public class Parser
     /// Parses a for random expression.
     /// </summary>
     /// <param name="body">Expression to use as loop body.</param>
-    /// <returns>Parsed foreach expression or <see langword="null" /> if something went wrong.</returns>
-    private ForeachExpr ForRandom(Expr body)
+    /// <returns>Parsed expression or <see langword="null" /> if something went wrong.</returns>
+    private Expr ForRandom(Expr body)
     {
         if (body is null)
         {
@@ -398,8 +398,22 @@ public class Parser
             Advance();
         }
 
-        iter.Randomize(limit);
-        return new(body, iter);
+        if (!Match(TokenType.Else))
+        {
+            iter.Randomize(limit);
+            return new ForeachExpr(body, iter);
+        }
+        
+        var els = ParseExpr(true);
+        
+        if (els is null)
+        {
+            ErrorMessage = ErrorMessage is null ? "For random loop else expression is missing" : $"{ErrorMessage}\nin for random loop else expression";
+            return null;
+        }
+
+        iter.Randomize();
+        return new ForElseExpr(body, iter, els, limit);
     }
 
     /// <summary>

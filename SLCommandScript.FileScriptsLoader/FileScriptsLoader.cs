@@ -18,6 +18,21 @@ namespace SLCommandScript.FileScriptsLoader;
 public class FileScriptsLoader : IScriptsLoader
 {
     /// <summary>
+    /// Contains project name to display.
+    /// </summary>
+    public const string ProjectName = "SLCommandScript.FileScriptsLoader";
+
+    /// <summary>
+    /// Contains current project version.
+    /// </summary>
+    public const string ProjectVersion = "0.4.1";
+
+    /// <summary>
+    /// Contains project author.
+    /// </summary>
+    public const string ProjectAuthor = "Adam Szerszenowicz";
+
+    /// <summary>
     /// Prefix string to use in logs.
     /// </summary>
     private const string LoaderPrefix = "FileScriptsLoader: ";
@@ -47,6 +62,21 @@ public class FileScriptsLoader : IScriptsLoader
     /// <param name="includeSubdirectories">Whether or not subdirectories should be monitored.</param>
     /// <returns>Newly created file watcher.</returns>
     private static FileSystemWatcherHelper CreateWatcher(string path, string filter, bool includeSubdirectories) => new(path, filter, includeSubdirectories);
+
+    /// <summary>
+    /// Contains loader name to display.
+    /// </summary>
+    public string LoaderName => ProjectName;
+
+    /// <summary>
+    /// Contains current loader version.
+    /// </summary>
+    public string LoaderVersion => ProjectVersion;
+
+    /// <summary>
+    /// Contains loader author.
+    /// </summary>
+    public string LoaderAuthor => ProjectAuthor;
 
     /// <summary>
     /// Contains all scripts directories monitors.
