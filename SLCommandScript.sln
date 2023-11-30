@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLCommandScript.FileScripts
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLCommandScript.FileScriptsLoader.UnitTests", "SLCommandScript.FileScriptsLoader.UnitTests\SLCommandScript.FileScriptsLoader.UnitTests.csproj", "{3CCF8168-B38F-4435-8D4B-86A1463D28E6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLCommandScript.UnitTests", "SLCommandScript.UnitTests\SLCommandScript.UnitTests.csproj", "{4E15510B-EA42-43BA-AD44-471DB9E649C9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{3CCF8168-B38F-4435-8D4B-86A1463D28E6}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{3CCF8168-B38F-4435-8D4B-86A1463D28E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CCF8168-B38F-4435-8D4B-86A1463D28E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E15510B-EA42-43BA-AD44-471DB9E649C9}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{4E15510B-EA42-43BA-AD44-471DB9E649C9}.Debug|Any CPU.Build.0 = Release|Any CPU
+		{4E15510B-EA42-43BA-AD44-471DB9E649C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E15510B-EA42-43BA-AD44-471DB9E649C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

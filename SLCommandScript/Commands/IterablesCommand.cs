@@ -9,7 +9,7 @@ namespace SLCommandScript.Commands;
 /// <summary>
 /// Helper command for iterables discovery.
 /// </summary>
-public class IterablesCommand : ICommand, IUsageProvider
+public class IterablesCommand : ICommand
 {
     /// <summary>
     /// Attempts to retrieve available variables from iterable object.
@@ -43,6 +43,13 @@ public class IterablesCommand : ICommand, IUsageProvider
 
         var vars = new Dictionary<string, string>();
         iterable.LoadNext(vars);
+
+        if (vars.Count < 1)
+        {
+            response = $"No variables available in '{iterableName}'. Perhaps it did not contain any elements";
+            return false;
+        }
+
         var sb = StringBuilderPool.Shared.Rent($"Variables available in '{iterableName}':\n");
 
         foreach (var key in vars.Keys)
@@ -67,12 +74,7 @@ public class IterablesCommand : ICommand, IUsageProvider
     /// <summary>
     /// Contains command description.
     /// </summary>
-    public string Description { get; } = "Helper command for iterables discovery.";
-
-    /// <summary>
-    /// Defines command usage prompts.
-    /// </summary>
-    public string[] Usage { get; } = ["Iterable Name (Optional)"];
+    public string Description { get; } = "Helper command for iterables discovery. Provide iterable name to check available variables.";
 
     /// <summary>
     /// Executes the command.

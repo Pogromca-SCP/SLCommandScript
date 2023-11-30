@@ -83,7 +83,7 @@ public class IterableListTests
         // Arrange
         var iterable = new TestIterable(() => strings);
         var filteredStrings = strings?.Where(s => s is not null) ?? Array.Empty<string>();
-        var variables = new Dictionary<string, string>();
+        var variables = new TestVariablesCollector();
         var count = 0;
 
         // Act
@@ -95,28 +95,25 @@ public class IterableListTests
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
         count.Should().Be(filteredStrings.Count());
-
-        foreach (var str in filteredStrings)
-        {
-            variables[str].Should().Be(str);
-        }
+        variables.GetArray().Should().Equal(filteredStrings);
     }
     #endregion
 
     #region Randomize Tests
     [TestCaseSource(nameof(_strings))]
-    public void Reset_ShouldProperlyRandomizeElements(string[] strings)
+    public void Randomize_ShouldProperlyRandomizeElements(string[] strings)
     {
         // Arrange
         var iterable = new TestIterable(() => strings);
         var count = 0;
         var filteredStrings = strings?.Where(s => s is not null) ?? Array.Empty<string>();
         var filteredCount = filteredStrings.Count();
+        var variables = new TestVariablesCollector();
 
         // Act
         iterable.Randomize();
 
-        while (iterable.LoadNext(null))
+        while (iterable.LoadNext(variables))
         {
             ++count;
         }
@@ -124,10 +121,11 @@ public class IterableListTests
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
         count.Should().Be(filteredCount);
+        variables.GetArray().Should().BeEquivalentTo(filteredStrings);
     }
 
     [TestCaseSource(nameof(StringsXSizes))]
-    public void Reset_ShouldProperlyRandomizeElements(string[] strings, int randAmount)
+    public void Randomize_ShouldProperlyRandomizeElements(string[] strings, int randAmount)
     {
         // Arrange
         var iterable = new TestIterable(() => strings);

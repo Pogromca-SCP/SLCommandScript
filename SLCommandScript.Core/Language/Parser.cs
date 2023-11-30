@@ -1,4 +1,6 @@
-﻿using NorthwoodLib.Pools;
+﻿using CustomPlayerEffects;
+using NorthwoodLib.Pools;
+using PlayerRoles;
 using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.Core.Interfaces;
@@ -52,7 +54,11 @@ public class Parser
         { "locked_door", DoorIterablesProvider.AllLockedDoors },
         { "unlocked_door", DoorIterablesProvider.AllUnlockedDoors },
         { "opened_door", DoorIterablesProvider.AllOpenedDoors },
-        { "closed_door", DoorIterablesProvider.AllClosedDoors }
+        { "closed_door", DoorIterablesProvider.AllClosedDoors },
+
+        // Enums
+        { "role", EnumIterable<RoleTypeId>.Get },
+        { "item", EnumIterable<ItemType>.Get }
     };
     #endregion
 

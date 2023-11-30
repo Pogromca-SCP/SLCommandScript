@@ -17,7 +17,7 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
     /// </summary>
     /// <param name="data">Collection to randomize.</param>
     /// <returns>Randomized elements.</returns>
-    private static IEnumerable<T> Randomize(IEnumerable<T> data)
+    private static T[] Randomize(IEnumerable<T> data)
     {
         var array = data.ToArray();
 
@@ -43,7 +43,7 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
     /// <param name="data">Collection to randomize.</param>
     /// <param name="amount">Amount of randomized elements to retrieve.</param>
     /// <returns>Randomized elements.</returns>
-    private static IEnumerable<T> Randomize(IEnumerable<T> data, int amount)
+    private static T[] Randomize(IEnumerable<T> data, int amount)
     {
         var original = data.ToArray();
 
@@ -117,7 +117,7 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
     private IEnumerator<T> _enumerator = null;
 
     /// <summary>
-    /// Amount of contained elements.
+    /// Amount of contained elements. Used for randomization limit before objects initialization.
     /// </summary>
     private int _count = 0;
 

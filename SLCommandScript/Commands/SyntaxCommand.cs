@@ -8,7 +8,7 @@ namespace SLCommandScript.Commands;
 /// <summary>
 /// Helper command with syntax examples.
 /// </summary>
-public class SyntaxCommand : ICommand, IUsageProvider
+public class SyntaxCommand : ICommand
 {
     /// <summary>
     /// Contains command name.
@@ -23,19 +23,21 @@ public class SyntaxCommand : ICommand, IUsageProvider
     /// <summary>
     /// Contains command description.
     /// </summary>
-    public string Description { get; } = "Helper command with syntax examples.";
-
-    /// <summary>
-    /// Defines command usage prompts.
-    /// </summary>
-    public string[] Usage { get; } = ["Expression Name (Optional)"];
+    public string Description { get; } = "Helper command with syntax examples. Provide expression name to view syntax examples.";
 
     /// <summary>
     /// Contains syntax tips.
     /// </summary>
     public Dictionary<string, string> Tips { get; } = new(StringComparer.OrdinalIgnoreCase)
     {
-        { "if", "If expression:\n[ <expression> if <expression> ]\n[ <expression> if <expression> else <expression> ]" }
+        { "perm", "Permissions guard:\n#! <permission_names...>" },
+        { "scope", "Scope guard:\n#? <scope_names...>" },
+        { "cmd", "Command expression:\n<command_name> <arguments...>" },
+        { "if", "If expression:\n[ <expression> if <expression> ]\n[ <expression> if <expression> else <expression> ]" },
+        { "foreach", "Foreach expression:\n[ <expression> foreach <iterable_name> ]" },
+        { "delay", "Delay expression:\n[ <expression> delayby <time_in_ms> ]\n[ <expression> delayby <time_in_ms> <name_to_use_for_error_log> ]" },
+        { "forrandom", "Forrandom expression:\n[ <expression> forrandom <iterable_name> ]\n[ <expression> forrandom <iterable_name> <number_limit> ]\n"
+            + "[ <expression> forrandom <iterable_name> else <expression> ]\n[ <expression> forrandom <iterable_name> <number_limit> else <expression> ]" }
     };
 
     /// <summary>
