@@ -69,7 +69,7 @@ public class IterablesCommand : ICommand
     /// <summary>
     /// Defines command aliases.
     /// </summary>
-    public string[] Aliases { get; } = ["iter", "for"];
+    public string[] Aliases { get; } = ["iter"];
 
     /// <summary>
     /// Contains command description.

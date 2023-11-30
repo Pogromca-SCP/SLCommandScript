@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace SLCommandScript.Commands;
 
 /// <summary>
-/// Helper command with syntax examples.
+/// Helper command with syntax rules.
 /// </summary>
 public class SyntaxCommand : ICommand
 {
@@ -18,26 +18,26 @@ public class SyntaxCommand : ICommand
     /// <summary>
     /// Defines command aliases.
     /// </summary>
-    public string[] Aliases { get; } = ["tip"];
+    public string[] Aliases => null;
 
     /// <summary>
     /// Contains command description.
     /// </summary>
-    public string Description { get; } = "Helper command with syntax examples. Provide expression name to view syntax examples.";
+    public string Description { get; } = "Helper command with syntax rules. Provide expression/guard name to view its syntax rules.";
 
     /// <summary>
-    /// Contains syntax tips.
+    /// Contains syntax rules.
     /// </summary>
-    public Dictionary<string, string> Tips { get; } = new(StringComparer.OrdinalIgnoreCase)
+    public Dictionary<string, string> Rules { get; } = new(StringComparer.OrdinalIgnoreCase)
     {
-        { "perm", "Permissions guard:\n#! <permission_names...>" },
-        { "scope", "Scope guard:\n#? <scope_names...>" },
+        { "perm", "Permissions guard:\n#! <permission_names...>\n(guards cannot be placed inside expressions)" },
+        { "scope", "Scope guard:\n#? <scope_names...>\n(guards cannot be placed inside expressions)" },
         { "cmd", "Command expression:\n<command_name> <arguments...>" },
         { "if", "If expression:\n[ <expression> if <expression> ]\n[ <expression> if <expression> else <expression> ]" },
         { "foreach", "Foreach expression:\n[ <expression> foreach <iterable_name> ]" },
         { "delay", "Delay expression:\n[ <expression> delayby <time_in_ms> ]\n[ <expression> delayby <time_in_ms> <name_to_use_for_error_log> ]" },
-        { "forrandom", "Forrandom expression:\n[ <expression> forrandom <iterable_name> ]\n[ <expression> forrandom <iterable_name> <number_limit> ]\n"
-            + "[ <expression> forrandom <iterable_name> else <expression> ]\n[ <expression> forrandom <iterable_name> <number_limit> else <expression> ]" }
+        { "forrandom", "Forrandom expression:\n[ <expression> forrandom <iterable_name> ]\n[ <expression> forrandom <iterable_name> <limit_number> ]\n"
+            + "[ <expression> forrandom <iterable_name> else <expression> ]\n[ <expression> forrandom <iterable_name> <limit_number> else <expression> ]" }
     };
 
     /// <summary>
@@ -53,19 +53,19 @@ public class SyntaxCommand : ICommand
         {
             var key = arguments.At(0);
 
-            if (!Tips.ContainsKey(key))
+            if (!Rules.ContainsKey(key))
             {
-                response = $"No syntax tips found for '{key}'";
+                response = $"No syntax rules found for '{key}'";
                 return false;
             }
 
-            response = Tips[key];
+            response = Rules[key];
             return true;
         }
 
-        var sb = StringBuilderPool.Shared.Rent("Available expression tips:\n");
+        var sb = StringBuilderPool.Shared.Rent("Available expression/guard types:\n");
 
-        foreach (var name in Tips.Keys)
+        foreach (var name in Rules.Keys)
         {
             sb.AppendLine(name);
         }

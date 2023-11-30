@@ -13,16 +13,16 @@ public class SyntaxCommandTests
     {
         // Arrange
         var command = new SyntaxCommand();
-        command.Tips.Clear();
-        command.Tips["test"] = null;
-        command.Tips["xd"] = null;
+        command.Rules.Clear();
+        command.Rules["test"] = null;
+        command.Rules["xd"] = null;
 
         // Act
         var result = command.Execute(new(), null, out var response);
 
         // Assert
         result.Should().BeTrue();
-        response.Should().Be($"Available expression tips:\ntest\r\nxd\r\n");
+        response.Should().Be($"Available expression/guard types:\ntest\r\nxd\r\n");
     }
 
     [Test]
@@ -30,14 +30,14 @@ public class SyntaxCommandTests
     {
         // Arrange
         var command = new SyntaxCommand();
-        command.Tips.Clear();
+        command.Rules.Clear();
 
         // Act
         var result = command.Execute(new(["xd"], 0, 1), null, out var response);
 
         // Assert
         result.Should().BeFalse();
-        response.Should().Be("No syntax tips found for 'xd'");
+        response.Should().Be("No syntax rules found for 'xd'");
     }
 
     [Test]
@@ -45,15 +45,15 @@ public class SyntaxCommandTests
     {
         // Arrange
         var command = new SyntaxCommand();
-        command.Tips.Clear();
-        command.Tips["test"] = "Example text";
+        command.Rules.Clear();
+        command.Rules["test"] = "Example text";
 
         // Act
         var result = command.Execute(new(["test"], 0, 1), null, out var response);
 
         // Assert
         result.Should().BeTrue();
-        response.Should().Be(command.Tips["test"]);
+        response.Should().Be(command.Rules["test"]);
     }
     #endregion
 }
