@@ -1,6 +1,7 @@
 ﻿using SLCommandScript.Core.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SLCommandScript.Core.Iterables;
 
@@ -8,13 +9,20 @@ namespace SLCommandScript.Core.Iterables;
 /// Iterable wrapper for enum values.
 /// </summary>
 /// <typeparam name="T">Type of contained enum values.</typeparam>
-public class EnumIterable<T> : IIterable where T : Enum
+/// <param name="enableNone">Whether or not the None values should be included in iteration.</param>
+public class EnumIterable<T>(bool enableNone) : IIterable where T : Enum
 {
     /// <summary>
     /// Retrieves iterable object for specific enum type.
     /// </summary>
     /// <returns>Iterable object for specific enum.</returns>
-    public static EnumIterable<T> Get() => new();
+    public static EnumIterable<T> Get() => new(false);
+
+    /// <summary>
+    /// Retrieves iterable object for specific enum type with None values included.
+    /// </summary>
+    /// <returns>Iterable object for specific enum.</returns>
+    public static EnumIterable<T> GetWithNone() => new(true);
 
     /// <summary>
     /// Randomizes provided array.
@@ -83,6 +91,11 @@ public class EnumIterable<T> : IIterable where T : Enum
             {
                 _values = (T[]) typeof(T).GetEnumValues();
 
+                if (!_enableNone)
+                {
+                    _values = _values.Where(v => !v.ToString().Equals("None")).ToArray();
+                }
+
                 if (_current != 0)
                 {
                     _values = _current > 0 ? Randomize(_values, _current) : Randomize(_values);
@@ -94,6 +107,11 @@ public class EnumIterable<T> : IIterable where T : Enum
             return _current >= _values.Length;
         }
     }
+
+    /// <summary>
+    /// Tells whether or not the None values should be included in iteration.
+    /// </summary>
+    private readonly bool _enableNone = enableNone;
 
     /// <summary>
     /// Contains wrapped array of enum values.

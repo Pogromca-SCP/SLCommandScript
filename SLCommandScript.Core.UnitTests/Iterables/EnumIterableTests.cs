@@ -11,6 +11,8 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 public class EnumIterableTests
 {
     #region Statis Utilities
+    private static readonly bool[] _boolValues = [false, true];
+
     private static readonly int[] _sizes = [-1, 0, 1, 2, 3];
 
     private static readonly string[] _values = ((FullEnum[]) typeof(FullEnum).GetEnumValues()).Select(v => v.ToString("D")).ToArray();
@@ -26,25 +28,34 @@ public class EnumIterableTests
         // Assert
         iterable.Should().NotBeNull();
     }
+
+    [Test]
+    public void GetWithNone_ShouldProperlyReturnIterableObject()
+    {
+        // Act
+        var iterable = EnumIterable<EmptyEnum>.GetWithNone();
+
+        // Assert
+        iterable.Should().NotBeNull();
+    }
     #endregion
 
     #region Constructor Tests
-    [Test]
-    public void EnumIterable_ShouldProperlyInitialize_WhenProvidedEnumTypeHasNoValues()
+    [TestCaseSource(nameof(_boolValues))]
+    public void EnumIterable_ShouldProperlyInitialize_WhenProvidedEnumTypeHasNoValues(bool enableNone)
     {
         // Act
-        var iterable = new EnumIterable<EmptyEnum>();
+        var iterable = new EnumIterable<EmptyEnum>(enableNone);
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
     }
 
-
-    [Test]
-    public void EnumIterable_ShouldProperlyInitialize_WhenProvidedEnumTypeHasValues()
+    [TestCaseSource(nameof(_boolValues))]
+    public void EnumIterable_ShouldProperlyInitialize_WhenProvidedEnumTypeHasValues(bool enableNone)
     {
         // Act
-        var iterable = new EnumIterable<FullEnum>();
+        var iterable = new EnumIterable<FullEnum>(enableNone);
 
         // Assert
         iterable.IsAtEnd.Should().BeFalse();
@@ -52,11 +63,11 @@ public class EnumIterableTests
     #endregion
 
     #region LoadNext Tests
-    [Test]
-    public void LoadNext_ShouldProperlyIterate_WhenEnumTypeHasNoValues()
+    [TestCaseSource(nameof(_boolValues))]
+    public void LoadNext_ShouldProperlyIterate_WhenEnumTypeHasNoValues(bool enableNone)
     {
         // Arrange
-        var iterable = new EnumIterable<EmptyEnum>();
+        var iterable = new EnumIterable<EmptyEnum>(enableNone);
 
         // Act
         var result = iterable.LoadNext(null);
@@ -66,11 +77,11 @@ public class EnumIterableTests
         iterable.IsAtEnd.Should().BeTrue();
     }
 
-    [Test]
-    public void LoadNext_ShouldProperlyIterate_WhenProvidedDictionaryIsNull()
+    [TestCaseSource(nameof(_boolValues))]
+    public void LoadNext_ShouldProperlyIterate_WhenProvidedDictionaryIsNull(bool enableNone)
     {
         // Arrange
-        var iterable = new EnumIterable<FullEnum>();
+        var iterable = new EnumIterable<FullEnum>(enableNone);
         var count = 0;
 
         // Act
@@ -81,14 +92,14 @@ public class EnumIterableTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
-        count.Should().Be(5);
+        count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
     }
 
-    [Test]
-    public void LoadNext_ShouldProperlySetVariables_WhenProvidedDictionaryIsNotNull()
+    [TestCaseSource(nameof(_boolValues))]
+    public void LoadNext_ShouldProperlySetVariables_WhenProvidedDictionaryIsNotNull(bool enableNone)
     {
         // Arrange
-        var iterable = new EnumIterable<FullEnum>();
+        var iterable = new EnumIterable<FullEnum>(enableNone);
         var variables = new TestVariablesCollector();
         var count = 0;
 
@@ -100,17 +111,17 @@ public class EnumIterableTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
-        count.Should().Be(5);
-        variables.GetArray().Should().Equal(_values);
+        count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
+        variables.GetArray().Should().Equal(enableNone ? _values : _values.Where(v => !v.Equals(FullEnum.None.ToString("D"))));
     }
     #endregion
 
     #region Randomize Tests
-    [Test]
-    public void Randomize_ShouldProperlyRandomizeElements()
+    [TestCaseSource(nameof(_boolValues))]
+    public void Randomize_ShouldProperlyRandomizeElements(bool enableNone)
     {
         // Arrange
-        var iterable = new EnumIterable<FullEnum>();
+        var iterable = new EnumIterable<FullEnum>(enableNone);
         var variables = new TestVariablesCollector();
         var count = 0;
 
@@ -124,15 +135,15 @@ public class EnumIterableTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
-        count.Should().Be(5);
-        variables.GetArray().Should().BeEquivalentTo(_values);
+        count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
+        variables.GetArray().Should().BeEquivalentTo(enableNone ? _values : _values.Where(v => !v.Equals(FullEnum.None.ToString("D"))));
     }
 
     [TestCaseSource(nameof(_sizes))]
     public void Randomize_ShouldProperlyRandomizeElements(int randAmount)
     {
         // Arrange
-        var iterable = new EnumIterable<FullEnum>();
+        var iterable = new EnumIterable<FullEnum>(true);
         var count = 0;
 
         // Act
@@ -145,16 +156,16 @@ public class EnumIterableTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
-        count.Should().Be(5 > randAmount && randAmount > 0 ? randAmount : 5);
+        count.Should().Be(_values.Length > randAmount && randAmount > 0 ? randAmount : _values.Length);
     }
     #endregion
 
     #region Reset Tests
-    [Test]
-    public void Reset_ShouldProperlyResetIterable_BeforeRunning()
+    [TestCaseSource(nameof(_boolValues))]
+    public void Reset_ShouldProperlyResetIterable_BeforeRunning(bool enableNone)
     {
         // Arrange
-        var iterable = new EnumIterable<FullEnum>();
+        var iterable = new EnumIterable<FullEnum>(enableNone);
 
         // Act
         iterable.Reset();
@@ -163,11 +174,11 @@ public class EnumIterableTests
         iterable.IsAtEnd.Should().BeFalse();
     }
 
-    [Test]
-    public void Reset_ShouldProperlyResetIterable_AfterRunning()
+    [TestCaseSource(nameof(_boolValues))]
+    public void Reset_ShouldProperlyResetIterable_AfterRunning(bool enableNone)
     {
         // Arrange
-        var iterable = new EnumIterable<FullEnum>();
+        var iterable = new EnumIterable<FullEnum>(enableNone);
 
         // Act
         while (iterable.LoadNext(null)) {}
@@ -184,6 +195,7 @@ public enum EmptyEnum : byte {}
 public enum FullEnum : sbyte
 {
     First = -1,
+    None,
     Second,
     Third,
     Fourth,
