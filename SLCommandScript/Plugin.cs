@@ -23,7 +23,7 @@ public class Plugin
     /// <summary>
     /// Contains current plugin version.
     /// </summary>
-    public const string PluginVersion = "0.4.1";
+    public const string PluginVersion = "0.4.2";
 
     /// <summary>
     /// Contains plugin description.

@@ -78,7 +78,7 @@ public class HelperCommands : ParentCommand, IUsageProvider
         var isConsole = sender is ServerConsoleSender;
         var sb = StringBuilderPool.Shared.Rent("Current SLCommandScript environment state:\n");
         sb.AppendLine(MakeInfoLine(isConsole, Plugin.PluginName, Plugin.PluginVersion, Plugin.PluginAuthor));
-        sb.AppendLine(MakeInfoLine(isConsole, Constants.ProjectName, Constants.ProjectVersion, Constants.ProjectAuthor));
+        sb.AppendLine(MakeInfoLine(isConsole, Constants.Name, Constants.Version, Constants.Author));
         sb.Append(_loader is null ? "No Scripts Loader currently in use" : MakeInfoLine(isConsole, _loader.LoaderName, _loader.LoaderVersion, _loader.LoaderAuthor));
         response = StringBuilderPool.Shared.ToStringReturn(sb);
         return true;

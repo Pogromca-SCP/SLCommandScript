@@ -13,10 +13,25 @@ public static class Constants
     /// <summary>
     /// Contains current project version.
     /// </summary>
-    public const string ProjectVersion = "0.4.3";
+    public const string ProjectVersion = "0.4.4";
 
     /// <summary>
     /// Contains project author.
     /// </summary>
     public const string ProjectAuthor = "Adam Szerszenowicz";
+
+    /// <summary>
+    /// Retrieves project name to display.
+    /// </summary>
+    public static string Name => ProjectName;
+
+    /// <summary>
+    /// Retrieves current project version.
+    /// </summary>
+    public static string Version => ProjectVersion;
+
+    /// <summary>
+    /// Retrieves project author.
+    /// </summary>
+    public static string Author => ProjectAuthor;
 }

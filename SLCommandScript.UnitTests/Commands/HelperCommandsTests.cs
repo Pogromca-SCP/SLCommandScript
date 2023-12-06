@@ -36,8 +36,8 @@ public class HelperCommandsTests
         result.Should().BeTrue();
 
         response.Should().Be($"Current SLCommandScript environment state:\n{Plugin.PluginName} <color=#808080ff>v{Plugin.PluginVersion}</color> " +
-            $"<color=orange>@{Plugin.PluginAuthor}</color>\r\n{Constants.ProjectName} <color=#808080ff>v{Constants.ProjectVersion}</color> " +
-            $"<color=orange>@{Constants.ProjectAuthor}</color>\r\nNo Scripts Loader currently in use");
+            $"<color=orange>@{Plugin.PluginAuthor}</color>\r\n{Constants.Name} <color=#808080ff>v{Constants.Version}</color> " +
+            $"<color=orange>@{Constants.Author}</color>\r\nNo Scripts Loader currently in use");
 
         senderMock.VerifyAll();
         senderMock.VerifyNoOtherCalls();
@@ -57,7 +57,7 @@ public class HelperCommandsTests
         result.Should().BeTrue();
 
         response.Should().Be($"Current SLCommandScript environment state:\n{Plugin.PluginName} v{Plugin.PluginVersion} @{Plugin.PluginAuthor}\r\n" +
-            $"{Constants.ProjectName} v{Constants.ProjectVersion} @{Constants.ProjectAuthor}\r\nNo Scripts Loader currently in use");
+            $"{Constants.Name} v{Constants.Version} @{Constants.Author}\r\nNo Scripts Loader currently in use");
 
         senderMock.VerifyAll();
         senderMock.VerifyNoOtherCalls();
@@ -81,8 +81,8 @@ public class HelperCommandsTests
         result.Should().BeTrue();
 
         response.Should().Be($"Current SLCommandScript environment state:\n{Plugin.PluginName} <color=#808080ff>v{Plugin.PluginVersion}</color> " +
-            $"<color=orange>@{Plugin.PluginAuthor}</color>\r\n{Constants.ProjectName} <color=#808080ff>v{Constants.ProjectVersion}</color> " +
-            $"<color=orange>@{Constants.ProjectAuthor}</color>\r\ntest <color=#808080ff>v1.0.0</color> " +
+            $"<color=orange>@{Plugin.PluginAuthor}</color>\r\n{Constants.Name} <color=#808080ff>v{Constants.Version}</color> " +
+            $"<color=orange>@{Constants.Author}</color>\r\ntest <color=#808080ff>v1.0.0</color> " +
             "<color=orange>@unknown</color>");
 
         senderMock.VerifyAll();
@@ -109,7 +109,7 @@ public class HelperCommandsTests
         result.Should().BeTrue();
 
         response.Should().Be($"Current SLCommandScript environment state:\n{Plugin.PluginName} v{Plugin.PluginVersion} @{Plugin.PluginAuthor}\r\n" +
-            $"{Constants.ProjectName} v{Constants.ProjectVersion} @{Constants.ProjectAuthor}\r\ntest v1.0.0 @unknown");
+            $"{Constants.Name} v{Constants.Version} @{Constants.Author}\r\ntest v1.0.0 @unknown");
 
         senderMock.VerifyAll();
         senderMock.VerifyNoOtherCalls();
