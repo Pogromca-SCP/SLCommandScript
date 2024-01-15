@@ -1,5 +1,4 @@
-﻿using CustomPlayerEffects;
-using NorthwoodLib.Pools;
+﻿using NorthwoodLib.Pools;
 using PlayerRoles;
 using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
