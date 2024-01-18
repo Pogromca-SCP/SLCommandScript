@@ -16,6 +16,8 @@ public class LexerTests
 
     private static readonly int[] _argSizes = [2, 3, 4];
 
+    private static readonly char[] _testCharacters = [' ', '\t', '4', '\0', 'x', 'A', '#', '[', '?'];
+
     #region Gold Flow Test Case Sources
     private static readonly object[][] _testsData = [
         [string.Empty, new[] { "TestEmpty" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[0], 0],
@@ -48,7 +50,7 @@ public class LexerTests
             new(TokenType.Text, "hello", 2) }, 2],
 
         [@"
-    bc 10 Long comment #I am a storm \
+    bc 10 Long comment#I am a storm \
     that is approaching \
     Provoking black clouds...
 ", new[] { "TestLineBreakComment" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "bc", 2),
@@ -66,17 +68,18 @@ public class LexerTests
             new(TokenType.DelayBy, "dELayBy", 5), new(TokenType.Text, "5", 5), new(TokenType.RightSquare, "]", 5) }, 5],
 
         [@"
-    print ski$()bidi bop$(name) $(no?)yes $(what?)
-    prin$(t [hello t]here $(general) 23$(light)sabers
+    print ski$()bidi bop$(name) $(no#?)yes $(what?)
+    prin$(t [hello the]re $(general) 23$(light)sabers
 ", new[] { "TestVariables" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "print", 2),
-            new(TokenType.Text, "ski$()bidi", 2), new(TokenType.Variable, "bop$(name)", 2), new(TokenType.Variable, "$(no?)yes", 2),
-            new(TokenType.Variable, "$(what?)", 2), new(TokenType.Text, "prin$(t", 3), new(TokenType.Text, "[hello", 3), new(TokenType.Text, "t]here", 3),
-            new(TokenType.Variable, "$(general)", 3), new(TokenType.Variable, "23$(light)sabers", 3) }, 3],
+            new(TokenType.Text, "ski$()bidi", 2), new(TokenType.Variable, "bop$(name)", 2), new(TokenType.Variable, "$(no#?)yes", 2),
+            new(TokenType.Variable, "$(what?)", 2), new(TokenType.Text, "prin$(t", 3), new(TokenType.LeftSquare, "[", 3), new(TokenType.Text, "hello", 3),
+            new(TokenType.Text, "the", 3), new(TokenType.RightSquare, "]", 3), new(TokenType.Text, "re", 3), new(TokenType.Variable, "$(general)", 3),
+            new(TokenType.Variable, "23$(light)sabers", 3) }, 3],
 
         [@"
     cassie why am I here # This is a comment \
     #? Console
-    print I have no idea #? Console $(0)
+    print I have no idea#? Console $(0)
     #?RemoteAdmin Hello \
     #? !wowlo!
 ", new[] { "TestScopeGuards" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "cassie", 2),
@@ -87,15 +90,16 @@ public class LexerTests
             new(TokenType.Text, "#?", 6), new(TokenType.Text, "!wowlo!", 6) }, 6],
 
         [@"
-    \cassie why am I here \if \# This is a comment \
+    \cassie why am I here \if\# This is a comment \
     #? Console
-    print \I \have no id\ea \[
+    print \I \have no id\ea \[ #! bruh
+    this sh\#ould \#not appea\#r#? test?
 ", new[] { "TestQuotation" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "cassie", 2),
-            new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2), new(TokenType.Text, "if", 2),
-            new(TokenType.Text, "#", 2), new(TokenType.Text, "This", 2), new(TokenType.Text, "is", 2), new(TokenType.Text, "a", 2), new(TokenType.Text, "comment", 2),
+            new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2), new(TokenType.Text, "if#", 2),
+            new(TokenType.Text, "This", 2), new(TokenType.Text, "is", 2), new(TokenType.Text, "a", 2), new(TokenType.Text, "comment", 2),
             new(TokenType.ScopeGuard, string.Empty, 3), new(TokenType.Text, "Console", 3),
             new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
-            new(TokenType.Text, "id\\ea", 4), new(TokenType.Text, "[", 4) }, 4],
+            new(TokenType.Text, "id\\ea", 4), new(TokenType.Text, "[", 4), new(TokenType.ScopeGuard, string.Empty, 5), new(TokenType.Text, "test?", 5) }, 5],
 
         [@"
     cassie why am I here # This is a comment \
@@ -104,10 +108,10 @@ public class LexerTests
     print \This \should not appear
     #! Noclip! ?Announcer \
     #!ServerConsoleCommands
-    print This should not appear #? Console
+    print This should not appear#? Console
     #! Noclip
     print Hello there #!Noclip Announcer
-    print Class d has micro p p #!
+    print Class d has micro p p#!
     print 1 ... #! \
     !92424..awwghow*(
 ", new[] { "TestPermissionGuards" }, PlayerPermissions.Noclip | PlayerPermissions.Announcer, new Core.Language.Token[] { new(TokenType.Text, "cassie", 2),
@@ -819,6 +823,54 @@ public class LexerTests
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeTrue();
         result.Should().BeEquivalentTo(expectedTokens, options => options.ComparingByValue<Core.Language.Token>());
+    }
+    #endregion
+
+    #region StaticChecks Tests
+    [TestCaseSource(nameof(_testCharacters))]
+    public void IsWhiteSpace_ShouldProperlyDetectWhiteSpace(char ch)
+    {
+        // Act
+        var result = Lexer.IsWhiteSpace(ch);
+
+        // Assert
+        result.Should().Be(char.IsWhiteSpace(ch) || ch == '\0');
+    }
+
+    [TestCaseSource(nameof(_testCharacters))]
+    public void IsDigit_ShouldProperlyDetectDigit(char ch)
+    {
+        // Act
+        var result = Lexer.IsDigit(ch);
+
+        // Assert
+        result.Should().Be(ch >= '0' && ch <= '9');
+    }
+
+    [TestCaseSource(nameof(_testCharacters))]
+    public void IsSpecialCharacter_ShouldProperlyDetectSpecialCharacter(char ch)
+    {
+        // Act
+        var result = Lexer.IsSpecialCharacter(ch);
+
+        // Assert
+        result.Should().Be(ch == '[' || ch == ']' || ch == '#');
+    }
+
+    [TestCase("", false)]
+    [TestCase(null, false)]
+    [TestCase("xd", false)]
+    [TestCase("    ", false)]
+    [TestCase("if", true)]
+    [TestCase("FOreach", true)]
+    [TestCase("|", false)]
+    public void IsKeyword_ShouldProperlyDetectKeyword(string str, bool expectedResult)
+    {
+        // Act
+        var result = Lexer.IsKeyword(str);
+
+        // Assert
+        result.Should().Be(expectedResult);
     }
     #endregion
 }

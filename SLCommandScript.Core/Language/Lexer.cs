@@ -37,6 +37,34 @@ public class Lexer
     private static readonly ConcurrentQueue<Lexer> _argumentLexers = new();
 
     /// <summary>
+    /// Checks if provided character is a whitespace.
+    /// </summary>
+    /// <param name="ch">Character to check.</param>
+    /// <returns><see langword="true" /> if character is a whitespace, <see langword="false" /> otherwise.</returns>
+    public static bool IsWhiteSpace(char ch) => char.IsWhiteSpace(ch) || ch == '\0';
+
+    /// <summary>
+    /// Checks if provided character is a digit.
+    /// </summary>
+    /// <param name="ch">Character to check.</param>
+    /// <returns><see langword="true" /> if character is a digit, <see langword="false" /> otherwise.</returns>
+    public static bool IsDigit(char ch) => ch >= '0' && ch <= '9';
+
+    /// <summary>
+    /// Checks if provided character is a special character.
+    /// </summary>
+    /// <param name="ch">Character to check.</param>
+    /// <returns><see langword="true" /> if character is a special character, <see langword="false" /> otherwise.</returns>
+    public static bool IsSpecialCharacter(char ch) => ch == '[' || ch == ']' || ch == '#';
+
+    /// <summary>
+    /// Checks if provided string is a keyword.
+    /// </summary>
+    /// <param name="str">String to check.</param>
+    /// <returns><see langword="true" /> if string is a keyword, <see langword="false" /> otherwise.</returns>
+    public static bool IsKeyword(string str) => str is not null && _keywords.ContainsKey(str);
+
+    /// <summary>
     /// Rents a top level lexer instance.
     /// </summary>
     /// <param name="source">Source code to tokenize.</param>
@@ -96,20 +124,6 @@ public class Lexer
         result.Reset(source);
         return result;
     }
-
-    /// <summary>
-    /// Checks if provided character is a whitespace.
-    /// </summary>
-    /// <param name="ch">Character to check.</param>
-    /// <returns><see langword="true" /> if character is a whitespace, <see langword="false" /> otherwise.</returns>
-    private static bool IsWhiteSpace(char ch) => char.IsWhiteSpace(ch) || ch == '\0';
-
-    /// <summary>
-    /// Checks if provided character is a digit.
-    /// </summary>
-    /// <param name="ch">Character to check.</param>
-    /// <returns><see langword="true" /> if character is a digit, <see langword="false" /> otherwise.</returns>
-    private static bool IsDigit(char ch) => ch >= '0' && ch <= '9';
     #endregion
 
     #region Fields and Properties
@@ -567,13 +581,13 @@ public class Lexer
     /// <param name="type">Type of token to use.</param>
     private void Directive(TokenType type)
     {
-        if (IsWhiteSpace(Current) && !_hasMissingPerms)
+        if (_hasMissingPerms)
         {
-            AddToken(type);
+            SkipUntilGuard();
         }
         else
         {
-            Text(true);
+            AddToken(type);
         }
     }
 
@@ -632,6 +646,11 @@ public class Lexer
     {
         if (!IsWhiteSpace(Current))
         {
+            if (IsSpecialCharacter(Source[_current]))
+            {
+                ++_current;
+            }
+
             ++_start;
             Text(false);
             return;
@@ -664,17 +683,23 @@ public class Lexer
     {
         if (_hasMissingPerms)
         {
-            Skip();
+            SkipUntilGuard();
             return;
         }
 
         var type = TokenType.Text;
         
-        while (!IsWhiteSpace(Current))
+        while (!IsWhiteSpace(Current) && !IsSpecialCharacter(Source[_current]))
         {
             if (Source[_current - 1] == '$' && Match('(') && !Match(')'))
             {
                 type = Argument(_current - 2, type == TokenType.Variable);
+            }
+            else if (Source[_current] == '\\' && _current + 1 < Source.Length && IsSpecialCharacter(Source[_current + 1]))
+            {
+                _prefix = GetTextWithPrefix(_current);
+                _start = ++_current;
+                ++_current;
             }
             else
             {
@@ -696,10 +721,11 @@ public class Lexer
     /// </summary>
     private void Skip()
     {
-        while (!IsWhiteSpace(Current))
+        do
         {
             ++_current;
         }
+        while (!IsWhiteSpace(Current));
     }
 
     /// <summary>
@@ -707,12 +733,7 @@ public class Lexer
     /// </summary>
     private void Identifier()
     {
-        do
-        {
-            ++_current;
-        }
-        while (!IsWhiteSpace(Current));
-
+        Skip();
         AddToken(TokenType.Text);
     }
 
@@ -721,16 +742,23 @@ public class Lexer
     /// </summary>
     private void Permission()
     {
-        do
-        {
-            ++_current;
-        }
-        while (!IsWhiteSpace(Current));
+        Skip();
 
         if (!_hasMissingPerms)
         {
             _hasMissingPerms = !PermissionsResolver.CheckPermission(Sender, Source.Substring(_start, _current - _start), out var message);
             ErrorMessage = message;
+        }
+    }
+
+    /// <summary>
+    /// Skips current token until a comment start is found.
+    /// </summary>
+    private void SkipUntilGuard()
+    {
+        while (!IsWhiteSpace(Current) && (Source[_current] != '#' || Source[_current - 1] == '\\'))
+        {
+            ++_current;
         }
     }
     #endregion
