@@ -863,7 +863,7 @@ public class LexerTests
     [TestCase("    ", false)]
     [TestCase("if", true)]
     [TestCase("FOreach", true)]
-    [TestCase("|", false)]
+    [TestCase("|", true)]
     public void IsKeyword_ShouldProperlyDetectKeyword(string str, bool expectedResult)
     {
         // Act

@@ -1,6 +1,6 @@
 ﻿using CommandSystem;
+using SLCommandScript.Core;
 using SLCommandScript.Core.Interfaces;
-using SLCommandScript.Core.Language;
 using SLCommandScript.FileScriptsLoader.Helpers;
 using System;
 using System.Collections.Concurrent;
@@ -33,46 +33,6 @@ public class FileScriptCommandBase(string file) : ICommand
     /// Contains currently loaded scripts.
     /// </summary>
     private static readonly ConcurrentDictionary<FileScriptCommandBase, string> _loadedScripts = new();
-
-    /// <summary>
-    /// Setups an interpretation process for the script.
-    /// </summary>
-    /// <param name="lexer">Lexer used for tokenization.</param>
-    /// <returns>Error message if something goes wrong, <see langword="null" /> otherwise.</returns>
-    private static string Interpret(Lexer lexer)
-    {
-        var parser = new Parser();
-        var interpreter = new Interpreter(lexer.Sender);
-
-        while (!lexer.IsAtEnd)
-        {
-            var tokens = lexer.ScanNextLine();
-
-            if (lexer.ErrorMessage is not null)
-            {
-                return lexer.ErrorMessage;
-            }
-
-            var expr = parser.Parse(tokens);
-
-            if (parser.ErrorMessage is not null)
-            {
-                return parser.ErrorMessage;
-            }
-
-            if (expr is not null)
-            {
-                var result = expr.Accept(interpreter);
-
-                if (!result)
-                {
-                    return interpreter.ErrorMessage;
-                }
-            }
-        }
-
-        return null;
-    }
 
     /// <summary>
     /// Contains command name.
@@ -129,10 +89,7 @@ public class FileScriptCommandBase(string file) : ICommand
             return false;
         }
 
-        var lexer = Lexer.Rent(src, arguments, sender, PermissionsResolver);
-        response = Interpret(lexer);
-        var line = lexer.Line;
-        Lexer.Return(lexer);
+        (response, var line) = ScriptUtils.Execute(src, arguments, sender, PermissionsResolver);
 
         if (Interlocked.Decrement(ref _calls) < 1)
         {

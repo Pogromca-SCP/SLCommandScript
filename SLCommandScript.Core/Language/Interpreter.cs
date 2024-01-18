@@ -319,6 +319,37 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <summary>
+    /// Visits a sequence expression.
+    /// </summary>
+    /// <param name="expr">Expression to visit.</param>
+    /// <returns>Result value of the visit.</returns>
+    public bool VisitSequenceExpr(SequenceExpr expr)
+    {
+        if (expr is null)
+        {
+            ErrorMessage = "Provided sequence expression is null";
+            return false;
+        }
+
+        if (expr.Body is null)
+        {
+            ErrorMessage = "Sequence expression body is null";
+            return false;
+        }
+
+        foreach (var exp in expr.Body)
+        {
+            if (exp is not null && !exp.Accept(this))
+            {
+                return false;
+            }
+        }
+
+        ErrorMessage = null;
+        return true;
+    }
+
+    /// <summary>
     /// Injects appropriate values in place of variables.
     /// </summary>
     /// <param name="args">Original arguments values.</param>

@@ -23,7 +23,8 @@ public class Lexer
         { "else", TokenType.Else },
         { "foreach", TokenType.Foreach },
         { "delayby", TokenType.DelayBy },
-        { "forrandom", TokenType.ForRandom }
+        { "forrandom", TokenType.ForRandom },
+        { "|", TokenType.Sequence }
     };
 
     /// <summary>

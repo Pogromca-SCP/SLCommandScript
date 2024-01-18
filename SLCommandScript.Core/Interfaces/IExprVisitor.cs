@@ -42,4 +42,11 @@ public interface IExprVisitor<T>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
     T VisitIfExpr(IfExpr expr);
+
+    /// <summary>
+    /// Visits a sequence expression.
+    /// </summary>
+    /// <param name="expr">Expression to visit.</param>
+    /// <returns>Result value of the visit.</returns>
+    T VisitSequenceExpr(SequenceExpr expr);
 }

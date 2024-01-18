@@ -37,7 +37,8 @@ public class SyntaxCommand : ICommand
         { "foreach", "Foreach expression:\n[ <expression> foreach <iterable_name> ]" },
         { "delay", "Delay expression:\n[ <expression> delayby <time_in_ms> ]\n[ <expression> delayby <time_in_ms> <name_to_use_for_error_log> ]" },
         { "forrandom", "Forrandom expression:\n[ <expression> forrandom <iterable_name> ]\n[ <expression> forrandom <iterable_name> <limit_number> ]\n"
-            + "[ <expression> forrandom <iterable_name> else <expression> ]\n[ <expression> forrandom <iterable_name> <limit_number> else <expression> ]" }
+            + "[ <expression> forrandom <iterable_name> else <expression> ]\n[ <expression> forrandom <iterable_name> <limit_number> else <expression> ]" },
+        { "seq", "Sequence expression:\n[ <expressions_separated_with_|...> ]" }
     };
 
     /// <summary>

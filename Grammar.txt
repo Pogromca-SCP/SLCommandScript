@@ -6,19 +6,18 @@ line			-> expression? comment?  # Lines can be extended by ending them with \
 
 expression		-> directive | command  # Expression contents can be modified with script arguments
 script_arg		-> "$(" NUMBER ")"
-inner_expression	-> directive | inner_command
 
-command			-> TEXT+
-inner_command		-> TEXT inner_arg*
-inner_arg		-> variable | TEXT
+command			-> TEXT argument*
+argument		-> variable | TEXT
 variable		-> \S* ("$(" "^"* TEXT ")" \S*)+
 
 directive		-> "[" directive_body "]"
-directive_body		-> foreach_loop | if_expr | delay_expr | forrandom_loop
-foreach_loop		-> inner_expression "foreach" TEXT  # Inner expression gets access to iterated objects properties through variables
+directive_body		-> foreach_loop | if_expr | delay_expr | forrandom_loop | sequence
+foreach_loop		-> expression "foreach" TEXT  # Inner expression gets access to iterated objects properties through variables
 if_expr			-> expression "if" expression ("else" expression)?
 delay_expr		-> expression "delayby" NUMBER TEXT?
-forrandom_loop		-> inner_expression "forrandom" TEXT NUMBER? ("else" inner_expression)?  # Inner expressions get access to iterated objects properties through variables
+forrandom_loop		-> expression "forrandom" TEXT NUMBER? ("else" expression)?  # Inner expressions get access to iterated objects properties through variables
+sequence		-> expression ("|" expression)+
 
 comment			-> "#" comment_body
 comment_body		-> permissions_guard | scope_guard | .*

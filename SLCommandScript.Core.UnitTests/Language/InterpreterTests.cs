@@ -698,6 +698,92 @@ public class InterpreterTests
         commandMock.VerifyNoOtherCalls();
     }
     #endregion
+
+    #region VisitSequenceExpr Tests
+    [Test]
+    public void VisitSequenceExpr_ShouldFail_WhenExpressionIsNull()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+
+        // Act
+        var result = interpreter.VisitSequenceExpr(null);
+
+        // Assert
+        result.Should().BeFalse();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be("Provided sequence expression is null");
+    }
+
+    [Test]
+    public void VisitSequenceExpr_ShouldFail_WhenBodyIsNull()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var expr = new SequenceExpr(null);
+
+        // Act
+        var result = interpreter.VisitSequenceExpr(expr);
+
+        // Assert
+        result.Should().BeFalse();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be("Sequence expression body is null");
+    }
+
+    [Test]
+    public void VisitSequenceExpr_ShouldFail_WhenInnerExpressionFails()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var expr = new SequenceExpr([null, null, new IfExpr(new ForeachExpr(null, null), null, null)]);
+
+        // Act
+        var result = interpreter.VisitSequenceExpr(expr);
+
+        // Assert
+        result.Should().BeFalse();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be("If expression condition is null");
+    }
+
+    [Test]
+    public void VisitSequenceExpr_ShouldSucceed_WhenSequenceIsEmpty()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var expr = new SequenceExpr([]);
+
+        // Act
+        var result = interpreter.VisitSequenceExpr(expr);
+
+        // Assert
+        result.Should().BeTrue();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().BeNull();
+    }
+
+    [Test]
+    public void VisitSequenceExpr_ShouldSucceed_WhenEveryExpressionSucceeds()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var message = "Command succeeded";
+        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
+        commandMock.Setup(x => x.Execute(new(new[] {"condition" }, 1, 0), null, out message)).Returns(true);
+        var expr = new SequenceExpr([new CommandExpr(commandMock.Object, ["condition"], false), null, new SequenceExpr([])]);
+
+        // Act
+        var result = interpreter.VisitSequenceExpr(expr);
+
+        // Assert
+        result.Should().BeTrue();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().BeNull();
+        commandMock.VerifyAll();
+        commandMock.VerifyNoOtherCalls();
+    }
+    #endregion
 }
 
 public class TestIterable : IIterable

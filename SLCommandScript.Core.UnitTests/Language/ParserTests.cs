@@ -142,6 +142,18 @@ public class ParserTests
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.ForRandom, "forrandom", 1),
             new(TokenType.Text, "Test", 1), new(TokenType.Else, "else", 1), new(TokenType.RightSquare, "]", 1) },
             "Command ']' was not found\nin for random loop else expression"],
+
+        // [ | ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Sequence, "|", 1), new(TokenType.RightSquare, "]", 1) },
+            "Command '|' was not found\nin sequence expression 1"],
+
+        // [ bc |
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Sequence, "|", 1) },
+            "Sequence expression 2 is missing"],
+
+        // [ bc | ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Sequence, "|", 1),
+            new(TokenType.RightSquare, "]", 1) }, "Command ']' was not found\nin sequence expression 2"]
     ];
     #endregion
 
@@ -248,7 +260,25 @@ public class ParserTests
             new(TokenType.Text, "6", 1), new(TokenType.Else, "else", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "3", 1), new(TokenType.Text, "hello", 1),
             new(TokenType.RightSquare, "]", 1) }, new ForElseExpr(new IfExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false),
                 new CommandExpr(new CassieCommand(), ["cassie", "hello"], false), null), new TestIterable(), new CommandExpr(new BroadcastCommand(), ["bc", "3", "hello"],
-                    false), 6), Parser.AllScopes]
+                    false), 6), Parser.AllScopes],
+
+        // [ [ bc | bc ] foreach test ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1),
+            new(TokenType.Sequence, "|", 1), new(TokenType.Text, "bc", 1), new(TokenType.RightSquare, "]", 1), new(TokenType.Foreach, "foreach", 1),
+            new(TokenType.Text, "test", 1), new(TokenType.RightSquare, "]", 1) },
+            new ForeachExpr(new SequenceExpr([new CommandExpr(new BroadcastCommand(), ["bc"], false), new CommandExpr(new BroadcastCommand(), ["bc"], false)]),
+                new TestIterable()),
+            Parser.AllScopes],
+
+        // [ [ bc | bc | bc | bc ] | bc ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1),
+            new(TokenType.Sequence, "|", 1), new(TokenType.Text, "bc", 1), new(TokenType.Sequence, "|", 1), new(TokenType.Text, "bc", 1),
+            new(TokenType.Sequence, "|", 1), new(TokenType.Text, "bc", 1), new(TokenType.RightSquare, "]", 1), new(TokenType.Sequence, "|", 1),
+            new(TokenType.Text, "bc", 1), new(TokenType.RightSquare, "]", 1) },
+            new SequenceExpr([new SequenceExpr([new CommandExpr(new BroadcastCommand(), ["bc"], false), new CommandExpr(new BroadcastCommand(), ["bc"], false),
+                new CommandExpr(new BroadcastCommand(), ["bc"], false), new CommandExpr(new BroadcastCommand(), ["bc"], false)]),
+                new CommandExpr(new BroadcastCommand(), ["bc"], false)]),
+            Parser.AllScopes]
     ];
     #endregion
 

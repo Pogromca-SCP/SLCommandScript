@@ -86,6 +86,11 @@ public class Parser
     /// Contains current token index.
     /// </summary>
     private int _current;
+
+    /// <summary>
+    /// Contains current scope depth level.
+    /// </summary>
+    private int _depth;
     #endregion
 
     #region State Management
@@ -105,7 +110,8 @@ public class Parser
         ErrorMessage = null;
         _tokens = tokens;
         _current = 0;
-        var expr = ParseExpr(false);
+        _depth = 0;
+        var expr = ParseExpr();
 
         if (ErrorMessage is not null)
         {
@@ -181,9 +187,8 @@ public class Parser
     /// <summary>
     /// Parses a single expression.
     /// </summary>
-    /// <param name="isInner">Whether or not this expression is inside another expression.</param>
     /// <returns>Parsed expression or <see langword="null" /> if nothing could be parsed.</returns>
-    private Expr ParseExpr(bool isInner)
+    private Expr ParseExpr()
     {
         if (Match(TokenType.LeftSquare))
         {
@@ -192,7 +197,7 @@ public class Parser
 
         if (CheckNot(TokenType.ScopeGuard))
         {
-            return Command(isInner);
+            return Command();
         }
 
         return null;
@@ -215,7 +220,8 @@ public class Parser
     /// <returns>Parsed directive expression or <see langword="null" /> if something went wrong.</returns>
     private Expr Directive()
     {
-        var expr = ParseExpr(true);
+        ++_depth;
+        var expr = ParseExpr();
         var keyword = Advance();
 
         Expr body = keyword.Type switch
@@ -224,8 +230,11 @@ public class Parser
             TokenType.Foreach => Foreach(expr),
             TokenType.DelayBy => Delay(expr),
             TokenType.ForRandom => ForRandom(expr),
+            TokenType.Sequence => Sequence(expr),
             _ => null
         };
+
+        --_depth;
 
         if (body is null)
         {
@@ -245,9 +254,8 @@ public class Parser
     /// <summary>
     /// Parses a command expression.
     /// </summary>
-    /// <param name="isInner">Whether or not this expression is inside another expression.</param>
     /// <returns>Parsed command expression or <see langword="null" /> if something went wrong.</returns>
-    private CommandExpr Command(bool isInner)
+    private CommandExpr Command()
     {
         var cmd = CommandsUtils.GetCommand(Scope, _tokens[_current].Value);
 
@@ -262,9 +270,9 @@ public class Parser
         args.Add(_tokens[_current].Value);
         ++_current;
 
-        while (CheckNot(TokenType.ScopeGuard) && (!isInner || (_tokens[_current].Type != TokenType.RightSquare && _tokens[_current].Type < TokenType.If)))
+        while (CheckNot(TokenType.ScopeGuard) && (_depth < 1 || (_tokens[_current].Type != TokenType.RightSquare && _tokens[_current].Type < TokenType.If)))
         {
-            hasVars = hasVars || (isInner && _tokens[_current].Type == TokenType.Variable);
+            hasVars = hasVars || (_depth > 0 && _tokens[_current].Type == TokenType.Variable);
             args.Add(_tokens[_current].Value);
             ++_current;
         }
@@ -311,7 +319,7 @@ public class Parser
             return null;
         }
 
-        var condition = ParseExpr(true);
+        var condition = ParseExpr();
 
         if (condition is null)
         {
@@ -323,7 +331,7 @@ public class Parser
 
         if (Match(TokenType.Else))
         {
-            els = ParseExpr(true);
+            els = ParseExpr();
 
             if (els is null)
             {
@@ -405,7 +413,7 @@ public class Parser
             return new ForeachExpr(body, iter);
         }
         
-        var els = ParseExpr(true);
+        var els = ParseExpr();
         
         if (els is null)
         {
@@ -453,6 +461,40 @@ public class Parser
         }
 
         return new(body, duration, name);
+    }
+
+    /// <summary>
+    /// Parses a sequence expression.
+    /// </summary>
+    /// <param name="initial">First expression to execute in the sequence.</param>
+    /// <returns>Parsed sequence expression or <see langword="null" /> if something went wrong.</returns>
+    private SequenceExpr Sequence(Expr initial)
+    {
+        if (initial is null)
+        {
+            ErrorMessage += "\nin sequence expression 1";
+            return null;
+        }
+
+        var body = new List<Expr>()
+        {
+            initial
+        };
+
+        do
+        {
+            var expr = ParseExpr();
+            body.Add(expr);
+
+            if (expr is null)
+            {
+                ErrorMessage = ErrorMessage is null ? $"Sequence expression {body.Count} is missing" : $"{ErrorMessage}\nin sequence expression {body.Count}";
+                return null;
+            }
+        }
+        while (Match(TokenType.Sequence));
+
+        return new(body);
     }
     #endregion
 
