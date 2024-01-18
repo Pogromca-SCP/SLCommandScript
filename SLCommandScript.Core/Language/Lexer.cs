@@ -71,7 +71,6 @@ public class Lexer
                 lexer.Arguments = new();
                 lexer.Sender = null;
                 lexer.PermissionsResolver = null;
-                lexer.ClearArguments();
                 lexer._prefix = string.Empty;
                 _topLevelLexers.Enqueue(lexer);
             }
@@ -103,14 +102,7 @@ public class Lexer
     /// </summary>
     /// <param name="ch">Character to check.</param>
     /// <returns><see langword="true" /> if character is a whitespace, <see langword="false" /> otherwise.</returns>
-    private static bool IsWhiteSpace(char ch) => ch == '\0' || char.IsWhiteSpace(ch);
-
-    /// <summary>
-    /// Checks if provided character is an alpha char.
-    /// </summary>
-    /// <param name="ch">Character to check.</param>
-    /// <returns><see langword="true" /> if character is alpha, <see langword="false" /> otherwise.</returns>
-    private static bool IsAlpha(char ch) => (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+    private static bool IsWhiteSpace(char ch) => char.IsWhiteSpace(ch) || ch == '\0';
 
     /// <summary>
     /// Checks if provided character is a digit.
@@ -177,7 +169,7 @@ public class Lexer
     /// <summary>
     /// Tells whether or not the current character is not a line extension.
     /// </summary>
-    private bool IsNotLineExtend => _current + 1 < Source.Length && Source[_current + 1] != '\n' && Source[_current + 1] != '\r';
+    private bool IsNotLineExtend => Source[_current] != '\\' || (_current + 1 < Source.Length && Source[_current + 1] != '\n' && Source[_current + 1] != '\r');
 
     /// <summary>
     /// <see langword="true" /> if its top level tokenizer, <see langword="false" /> otherwise.
@@ -232,7 +224,7 @@ public class Lexer
         Sender = null;
         PermissionsResolver = null;
         _tokens = [];
-        _argLexers = isTopLevel ? new() : null;
+        _argLexers = isTopLevel ? [] : null;
     }
 
     /// <summary>
@@ -596,62 +588,28 @@ public class Lexer
             return;
         }
 
-        var skip = true;
+        var action = Skip;
 
         if (Match('!'))
         {
-            PermissionsGuard();
-            return;
+            _hasMissingPerms = false;
+            action = Permission;
         }
         else if (Match('?'))
         {
             AddToken(TokenType.ScopeGuard, null);
-            skip = false;
+            action = Identifier;
         }
 
         while (!IsAtEnd && CanRead)
         {
-            if (Source[_current] == '\n')
-            {
-                ++Line;
-            }
-
-            if (skip || !IsAlpha(Source[_current]))
-            {
-                Advance();
-            }
-            else
+            if (!IsWhiteSpace(Source[_current]) && IsNotLineExtend)
             {
                 _start = _current;
-                Identifier();
-            }
-        }
-    }
+                action();
 
-    /// <summary>
-    /// Processes permissions guards.
-    /// </summary>
-    private void PermissionsGuard()
-    {
-        _hasMissingPerms = false;
-
-        while (!IsAtEnd && CanRead)
-        {
-            if (!_hasMissingPerms && !IsWhiteSpace(Source[_current]) && (Source[_current] != '\\' || IsNotLineExtend))
-            {
-                _start = _current;
-
-                do
+                if (ErrorMessage is not null)
                 {
-                    Advance();
-                }
-                while (!IsWhiteSpace(Current));
-
-                _hasMissingPerms = !PermissionsResolver.CheckPermission(Sender, Source.Substring(_start, _current - _start), out var message);
-
-                if (message is not null)
-                {
-                    ErrorMessage = message;
                     return;
                 }
             }
@@ -662,7 +620,7 @@ public class Lexer
                     ++Line;
                 }
 
-                Advance();
+                ++_current;
             }
         }
     }
@@ -720,7 +678,7 @@ public class Lexer
             }
             else
             {
-                Advance();
+                ++_current;
             }
 
             if (ErrorMessage is not null || type == TokenType.None)
@@ -734,26 +692,45 @@ public class Lexer
     }
 
     /// <summary>
-    /// Processes identifiers.
-    /// </summary>
-    private void Identifier()
-    {
-        while (IsAlpha(Current))
-        {
-            Advance();
-        }
-
-        AddToken(TokenType.Text);
-    }
-
-    /// <summary>
     /// Skips current token.
     /// </summary>
     private void Skip()
     {
         while (!IsWhiteSpace(Current))
         {
-            Advance();
+            ++_current;
+        }
+    }
+
+    /// <summary>
+    /// Processes current token as an identifier.
+    /// </summary>
+    private void Identifier()
+    {
+        do
+        {
+            ++_current;
+        }
+        while (!IsWhiteSpace(Current));
+
+        AddToken(TokenType.Text);
+    }
+
+    /// <summary>
+    /// Processes current token as a permission.
+    /// </summary>
+    private void Permission()
+    {
+        do
+        {
+            ++_current;
+        }
+        while (!IsWhiteSpace(Current));
+
+        if (!_hasMissingPerms)
+        {
+            _hasMissingPerms = !PermissionsResolver.CheckPermission(Sender, Source.Substring(_start, _current - _start), out var message);
+            ErrorMessage = message;
         }
     }
     #endregion
@@ -775,7 +752,7 @@ public class Lexer
             {
                 argNum *= 10;
                 argNum += Source[_current] - '0';
-                Advance();
+                ++_current;
             }
 
             if (Match(')'))
@@ -786,7 +763,7 @@ public class Lexer
 
         while (!IsWhiteSpace(Current) && Source[_current] != ')')
         {
-            Advance();
+            ++_current;
         }
 
         if (Match(')'))

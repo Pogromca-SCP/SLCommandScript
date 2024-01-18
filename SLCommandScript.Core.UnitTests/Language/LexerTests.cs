@@ -82,9 +82,9 @@ public class LexerTests
 ", new[] { "TestScopeGuards" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "cassie", 2),
             new(TokenType.Text, "why", 2), new(TokenType.Text, "am", 2), new(TokenType.Text, "I", 2), new(TokenType.Text, "here", 2),
             new(TokenType.Text, "print", 4), new(TokenType.Text, "I", 4), new(TokenType.Text, "have", 4), new(TokenType.Text, "no", 4),
-            new(TokenType.Text, "idea", 4), new(TokenType.ScopeGuard, string.Empty, 4), new(TokenType.Text, "Console", 4),
+            new(TokenType.Text, "idea", 4), new(TokenType.ScopeGuard, string.Empty, 4), new(TokenType.Text, "Console", 4), new(TokenType.Text, "$(0)", 4),
             new(TokenType.ScopeGuard, string.Empty, 5), new(TokenType.Text, "RemoteAdmin", 5), new(TokenType.Text, "Hello", 5),
-            new(TokenType.Text, "wowlo", 6) }, 6],
+            new(TokenType.Text, "#?", 6), new(TokenType.Text, "!wowlo!", 6) }, 6],
 
         [@"
     \cassie why am I here \if \# This is a comment \

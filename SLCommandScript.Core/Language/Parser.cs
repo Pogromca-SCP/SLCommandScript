@@ -141,7 +141,7 @@ public class Parser
     {
         if (Check(type))
         {
-            Advance();
+            ++_current;
             return true;
         }
 
@@ -260,17 +260,13 @@ public class Parser
         var args = ListPool<string>.Shared.Rent();
         var hasVars = false;
         args.Add(_tokens[_current].Value);
-        Advance();
+        ++_current;
 
         while (CheckNot(TokenType.ScopeGuard) && (!isInner || (_tokens[_current].Type != TokenType.RightSquare && _tokens[_current].Type < TokenType.If)))
         {
-            if (_tokens[_current].Type == TokenType.Variable && isInner && !hasVars)
-            {
-                hasVars = true;
-            }
-
+            hasVars = hasVars || (isInner && _tokens[_current].Type == TokenType.Variable);
             args.Add(_tokens[_current].Value);
-            Advance();
+            ++_current;
         }
 
         var argsArr = args.ToArray();
@@ -296,7 +292,7 @@ public class Parser
             }
 
             scope |= result;
-            Advance();
+            ++_current;
         }
 
         Scope = scope == 0 ? AllScopes : scope;
@@ -359,7 +355,7 @@ public class Parser
             return null;
         }
 
-        Advance();
+        ++_current;
         return new(body, iter);
     }
 
@@ -383,7 +379,7 @@ public class Parser
             return null;
         }
 
-        Advance();
+        ++_current;
         var limit = 1;
 
         if (Check(TokenType.Text))
@@ -400,7 +396,7 @@ public class Parser
                 return null;
             }
 
-            Advance();
+            ++_current;
         }
 
         if (!Match(TokenType.Else))
@@ -447,13 +443,13 @@ public class Parser
             return null;
         }
 
-        Advance();
+        ++_current;
         string name = null;
 
         if (!IsAtEnd && _tokens[_current].Type > TokenType.ScopeGuard)
         {
             name = _tokens[_current].Value;
-            Advance();
+            ++_current;
         }
 
         return new(body, duration, name);

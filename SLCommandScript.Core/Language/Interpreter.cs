@@ -147,8 +147,8 @@ public class Interpreter : IExprVisitor<bool>
             return false;
         }
 
-        var args = expr.HasVariables && expr.Arguments.Length > 1 ? InjectArguments(expr.Arguments) : expr.Arguments;
-        var result = expr.Cmd.Execute(new ArraySegment<string>(args, 1, args.Length - 1), Sender, out var message);
+        var args = _variables is not null && expr.HasVariables && expr.Arguments.Length > 1 ? InjectArguments(expr.Arguments) : expr.Arguments;
+        var result = expr.Cmd.Execute(new(args, 1, args.Length - 1), Sender, out var message);
         ErrorMessage = result ? null : message;
         return result;
     }
@@ -325,11 +325,6 @@ public class Interpreter : IExprVisitor<bool>
     /// <returns>Arguments with injected variables values.</returns>
     private string[] InjectArguments(string[] args)
     {
-        if (_variables is null)
-        {
-            return args;
-        }
-
         var results = new string[args.Length];
         results[0] = args[0];
 
