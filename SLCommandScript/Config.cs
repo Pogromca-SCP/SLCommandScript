@@ -14,8 +14,8 @@ public class Config
     public string ScriptsLoaderImplementation { get; set; } = "SLCommandScript.FileScriptsLoader.FileScriptsLoader, SLCommandScript.FileScriptsLoader";
 
     /// <summary>
-    /// Tells whether or not helper commands should be registered in command handlers.
+    /// Tells whether or not helper commands should be registered in consoles.
     /// </summary>
-    [Description("Tells whether or not helper commands should be registered in command handlers")]
+    [Description("Tells whether or not helper commands should be registered in consoles")]
     public bool EnableHelperCommands { get; set; } = true;
 }

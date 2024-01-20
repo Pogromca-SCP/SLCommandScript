@@ -77,11 +77,11 @@ public class IterablesCommandTests
     }
 
     [Test]
-    public void Execute_ShouldFail_WhenIterationFailsToLoadVariables()
+    public void Execute_ShouldFail_WhenIterationFailsToLoadElements()
     {
         // Arrange
         Parser.Iterables.Clear();
-        Parser.Iterables[TestIterable] = () => new TestIterable(true);
+        Parser.Iterables[TestIterable] = () => new TestIterable(true, false);
         var command = new IterablesCommand();
 
         // Act
@@ -89,7 +89,23 @@ public class IterablesCommandTests
 
         // Assert
         result.Should().BeFalse();
-        response.Should().Be($"No variables available in '{TestIterable}'. Perhaps it did not contain any elements");
+        response.Should().Be($"'{TestIterable}' has no elements");
+    }
+
+    [Test]
+    public void Execute_ShouldSucceed_WhenIterableHasNoVariables()
+    {
+        // Arrange
+        Parser.Iterables.Clear();
+        Parser.Iterables[TestIterable] = () => new TestIterable(false, false);
+        var command = new IterablesCommand();
+
+        // Act
+        var result = command.Execute(new([TestIterable], 0, 1), null, out var response);
+
+        // Assert
+        result.Should().BeTrue();
+        response.Should().Be($"No variables available in '{TestIterable}'");
     }
 
     [Test]
@@ -97,7 +113,7 @@ public class IterablesCommandTests
     {
         // Arrange
         Parser.Iterables.Clear();
-        Parser.Iterables[TestIterable] = () => new TestIterable(false);
+        Parser.Iterables[TestIterable] = () => new TestIterable(false, true);
         var command = new IterablesCommand();
 
         // Act
@@ -110,13 +126,15 @@ public class IterablesCommandTests
     #endregion
 }
 
-public class TestIterable(bool isAtEnd) : IIterable
+public class TestIterable(bool isAtEnd, bool addVars) : IIterable
 {
     public bool IsAtEnd { get; } = isAtEnd;
 
+    public bool AddVars { get; } = addVars;
+
     public bool LoadNext(IDictionary<string, string> targetVars)
     {
-        if (!IsAtEnd)
+        if (!IsAtEnd && AddVars)
         {
             targetVars["test"] = "test";
         }

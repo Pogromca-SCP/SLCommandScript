@@ -620,7 +620,6 @@ public class Lexer
         {
             if (!IsWhiteSpace(Source[_current]) && IsNotLineExtend)
             {
-                _start = _current;
                 action();
 
                 if (ErrorMessage is not null)
@@ -734,6 +733,7 @@ public class Lexer
     /// </summary>
     private void Identifier()
     {
+        _start = _current;
         Skip();
         AddToken(TokenType.Text);
     }
@@ -743,6 +743,7 @@ public class Lexer
     /// </summary>
     private void Permission()
     {
+        _start = _current;
         Skip();
 
         if (!_hasMissingPerms)

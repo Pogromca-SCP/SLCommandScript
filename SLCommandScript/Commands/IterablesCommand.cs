@@ -41,24 +41,42 @@ public class IterablesCommand : ICommand
             return false;
         }
 
+        if (iterable.IsAtEnd)
+        {
+            response = $"'{iterableName}' has no elements";
+            return false;
+        }
+
         var vars = new Dictionary<string, string>();
         iterable.LoadNext(vars);
 
         if (vars.Count < 1)
         {
-            response = $"No variables available in '{iterableName}'. Perhaps it did not contain any elements";
-            return false;
+            response = $"No variables available in '{iterableName}'";
+            return true;
         }
 
-        var sb = StringBuilderPool.Shared.Rent($"Variables available in '{iterableName}':\n");
+        response = GetDictionaryKeys(vars, $"Variables available in '{iterableName}':\n");
+        return true;
+    }
 
-        foreach (var key in vars.Keys)
+    /// <summary>
+    /// Retrieves dictionary keys as a human readable list.
+    /// </summary>
+    /// <typeparam name="T">Type of dictionary values.</typeparam>
+    /// <param name="dictionary">Dictionary to get keys from.</param>
+    /// <param name="initialText">Text to use at the beggining of the list.</param>
+    /// <returns>Dictionary keys in a list.</returns>
+    private static string GetDictionaryKeys<T>(IDictionary<string, T> dictionary, string initialText)
+    {
+        var sb = StringBuilderPool.Shared.Rent(initialText);
+
+        foreach (var key in dictionary.Keys)
         {
             sb.AppendLine(key);
         }
 
-        response = StringBuilderPool.Shared.ToStringReturn(sb);
-        return true;
+        return StringBuilderPool.Shared.ToStringReturn(sb);
     }
 
     /// <summary>
@@ -90,14 +108,7 @@ public class IterablesCommand : ICommand
             return GetVariables(arguments.At(0), out response);
         }
 
-        var sb = StringBuilderPool.Shared.Rent("Currently available iterables:\n");
-
-        foreach (var iterableName in Parser.Iterables.Keys)
-        {
-            sb.AppendLine(iterableName);
-        }
-
-        response = StringBuilderPool.Shared.ToStringReturn(sb);
+        response = GetDictionaryKeys(Parser.Iterables, "Currently available iterables:\n");
         return true;
     }
 }

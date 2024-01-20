@@ -23,7 +23,7 @@ public class Plugin
     /// <summary>
     /// Contains current plugin version.
     /// </summary>
-    public const string PluginVersion = "0.4.3";
+    public const string PluginVersion = "0.5.0";
 
     /// <summary>
     /// Contains plugin description.
@@ -55,13 +55,13 @@ public class Plugin
     /// <summary>
     /// Stores plugin configuration.
     /// </summary>
-    [PluginConfig("pluginConfig")]
+    [PluginConfig("pluginConfig.yml")]
     public Config PluginConfig;
 
     /// <summary>
     /// Stores scripts loader configuration.
     /// </summary>
-    [PluginConfig("scriptsLoaderConfig")]
+    [PluginConfig("scriptsLoaderConfig.yml")]
     public ScriptsLoaderConfig ScriptsLoaderConfig;
 
     /// <summary>
