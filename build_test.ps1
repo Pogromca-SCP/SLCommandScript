@@ -37,7 +37,8 @@ dotnet restore
 dotnet build --no-restore --configuration Release
 
 if ($runTests -and $initialTestRuns -gt 0) {
-    $workspacePath/init_tests.ps1
+    $script = "$workspacePath/init_tests.ps1"
+    & $script
 }
 
 if ($runTests) {
