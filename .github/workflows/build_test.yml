@@ -1,4 +1,9 @@
-name: Build SLCommand Script
+name: Test workflow
+
+on:
+  issues:
+    types:
+      - opened
 
 jobs:
   build:
