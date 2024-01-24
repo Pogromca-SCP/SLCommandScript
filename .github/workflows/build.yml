@@ -1,11 +1,10 @@
 name: Build SLCommand Script
 
 on:
-  workflow_dispatch
-  #push:
-    #branches: ["main"]
-  #pull_request:
-    #branches: ["main"]
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   build:
@@ -23,3 +22,4 @@ jobs:
       with:
         pluginName: SLCommandScript
         refsVariable: SL_REFERENCES
+        dependencies: SLCommandScript.Core,SLCommandScript.FileScriptsLoader
