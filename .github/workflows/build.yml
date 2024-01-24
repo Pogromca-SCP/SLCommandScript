@@ -22,4 +22,4 @@ jobs:
       with:
         pluginName: SLCommandScript
         refsVariable: SL_REFERENCES
-        dependencies: SLCommandScript.Core,SLCommandScript.FileScriptsLoader
+        #dependencies: SLCommandScript.Core,SLCommandScript.FileScriptsLoader
