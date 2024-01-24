@@ -1,14 +1,11 @@
 name: Build SLCommand Script
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
-
-env:
-  DEPOT_DOWNLOADER_VERSION: 2.5.0
-  SL_REFERENCES: D:/a/SLCScript/SCPSL_REFERENCES/SCPSL_Data/Managed
+  workflow_dispatch
+  #push:
+    #branches: ["main"]
+  #pull_request:
+    #branches: ["main"]
 
 jobs:
   build:
@@ -21,43 +18,9 @@ jobs:
       with:
         dotnet-version: 8.0.x
         
-    - name: Download depot downloader
-      shell: pwsh
-      run: |
-        New-Item -ItemType Directory -Force -Path D:/a/SLCScript
-        New-Item -ItemType Directory -Force -Path D:/a/SLCScript/DepotDownloader
-        Invoke-WebRequest -Uri "https://github.com/SteamRE/DepotDownloader/releases/download/DepotDownloader_${{ env.DEPOT_DOWNLOADER_VERSION }}/depotdownloader-${{ env.DEPOT_DOWNLOADER_VERSION }}.zip" -OutFile "D:/a/SLCScript/depotdownloader.zip"
-        Expand-Archive -Path D:/a/SLCScript/depotdownloader.zip -PassThru -DestinationPath D:/a/SLCScript/DepotDownloader
-        
-    - name: Download SCP:SL references
-      shell: pwsh
-      run: |
-        New-Item -ItemType Directory -Force -Path D:/a/SLCScript/SCPSL_REFERENCES
-        Start-Process -NoNewWindow -Wait -FilePath "D:/a/SLCScript/DepotDownloader/DepotDownloader.exe" -WorkingDirectory "D:/a/SLCScript/DepotDownloader" -ArgumentList '-app 996560','-dir D:/a/SLCScript/SCPSL_REFERENCES'
-        
-    - name: Restore NuGet packages
-      run: dotnet restore
-      
-    - name: Build project
-      run: dotnet build --no-restore --configuration Release
-      
-    - name: Prepare for tests
-      shell: pwsh
-      run: |
-        ${{ github.workspace }}/init_tests.ps1
-      
-    - name: Run unit tests
-      run: dotnet test --no-build --verbosity normal
-      
-    - name: Prepare artifacts
-      shell: pwsh
-      run: |
-        New-Item -ItemType Directory -Force -Path ${{ github.workspace }}/Artifacts
-        Copy-Item ${{ github.workspace }}/SLCommandScript/bin/Release/net48/SLCommandScript.dll -Destination ${{ github.workspace }}/Artifacts
-        Compress-Archive ${{ github.workspace }}/SLCommandScript.Core/bin/Release/net48/SLCommandScript.Core.dll, ${{ github.workspace }}/SLCommandScript.FileScriptsLoader/bin/Release/net48/SLCommandScript.FileScriptsLoader.dll -DestinationPath ${{ github.workspace }}/Artifacts/dependencies.zip
-        
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with: 
-        name: SLCommand Script
-        path: ${{ github.workspace }}/Artifacts
+    - name: Build, test and upload artifacts
+      uses: Pogromca-SCP/build-nwapi-plugin
+      with:
+        pluginName: SLCommandScript
+        refsVariable: SL_REFERENCES
+        dependencies SLCommandScript.Core,SLCommandScript.FileScriptsLoader
