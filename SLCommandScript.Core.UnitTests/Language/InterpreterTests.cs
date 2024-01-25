@@ -267,7 +267,7 @@ public class InterpreterTests
         }
         catch (Exception)
         {
-            await Task.Delay(delay * 2);
+            await Task.Delay(delay * 2).ConfigureAwait(false);
             commandMock.VerifyAll();
             commandMock.VerifyNoOtherCalls();
             return;

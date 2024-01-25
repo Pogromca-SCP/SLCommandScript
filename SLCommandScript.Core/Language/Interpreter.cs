@@ -55,9 +55,10 @@ public class Interpreter : IExprVisitor<bool>
     /// </summary>
     /// <param name="interp">Interpreter instance to use.</param>
     /// <param name="expr">Expression to execute.</param>
-    private static async void ExecuteDelayExprAsync(Interpreter interp, DelayExpr expr)
+    /// <returns>Task representing async operation.</returns>
+    private static async Task ExecuteDelayExprAsync(Interpreter interp, DelayExpr expr)
     {
-        await Task.Delay(expr.Duration);
+        await Task.Delay(expr.Duration).ConfigureAwait(false);
         var result = expr.Body.Accept(interp);
 
         if (!result)
@@ -177,7 +178,7 @@ public class Interpreter : IExprVisitor<bool>
             return expr.Body.Accept(this);
         }
 
-        ExecuteDelayExprAsync(new(this), expr);
+        _ = ExecuteDelayExprAsync(new(this), expr);
         ErrorMessage = null;
         return true;
     }
