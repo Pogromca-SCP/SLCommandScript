@@ -20,6 +20,7 @@ jobs:
     - name: Build, test and upload artifacts
       uses: Pogromca-SCP/build-nwapi-plugin@v1
       with:
-        pluginName: SLCommandScript
-        refsVariable: SL_REFERENCES
+        plugin-name: SLCommandScript
+        refs-variable: SL_REFERENCES
         dependencies: SLCommandScript.Core,SLCommandScript.FileScriptsLoader
+        includes: CHANGELOG.md
