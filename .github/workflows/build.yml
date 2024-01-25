@@ -22,5 +22,4 @@ jobs:
       with:
         plugin-name: SLCommandScript
         refs-variable: SL_REFERENCES
-        includes: README.md
         dependencies: SLCommandScript.Core,SLCommandScript.FileScriptsLoader
