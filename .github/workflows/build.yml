@@ -22,5 +22,5 @@ jobs:
       with:
         plugin-name: SLCommandScript
         refs-variable: SL_REFERENCES
-        dependencies: SLCommandScript.Core,SLCommandScript.FileScriptsLoader
         includes: CHANGELOG.md
+        #dependencies: SLCommandScript.Core,SLCommandScript.FileScriptsLoader
