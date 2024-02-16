@@ -85,6 +85,22 @@ public class CommandsUtilsTests
 
         return result;
     }
+
+    private static Mock<ICommand> MockCommand() => new(MockBehavior.Strict);
+
+    private static Mock<ICommand> MockCommand(string name)
+    {
+        var mock = MockCommand();
+        mock.Setup(x => x.Command).Returns(name);
+        return mock;
+    }
+
+    private static Mock<ICommand> MockCommand(string name, string[] aliases)
+    {
+        var mock = MockCommand(name);
+        mock.Setup(x => x.Aliases).Returns(aliases);
+        return mock;
+    }
     #endregion
 
     #region GetCommandHandlers Tests
@@ -117,8 +133,7 @@ public class CommandsUtilsTests
     public void IsCommandInvalid_ShouldReturnTrue_WhenCommandHasInvalidName(string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
+        var commandMock = MockCommand(commandName);
 
         // Act
         var result = CommandsUtils.IsCommandInvalid(commandMock.Object);
@@ -133,9 +148,7 @@ public class CommandsUtilsTests
     public void IsCommandInvalid_ShouldReturnTrue_WhenCommandHasInvalidAlias(string[] aliases)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(MockCommandName);
-        commandMock.Setup(x => x.Aliases).Returns(aliases);
+        var commandMock = MockCommand(MockCommandName, aliases);
 
         // Act
         var result = CommandsUtils.IsCommandInvalid(commandMock.Object);
@@ -150,9 +163,7 @@ public class CommandsUtilsTests
     public void IsCommandInvalid_ShouldReturnFalse_WhenCommandIsValid(string[] aliases)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(MockCommandName);
-        commandMock.Setup(x => x.Aliases).Returns(aliases);
+        var commandMock = MockCommand(MockCommandName, aliases);
 
         // Act
         var result = CommandsUtils.IsCommandInvalid(commandMock.Object);
@@ -223,8 +234,7 @@ public class CommandsUtilsTests
     public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
+        var commandMock = MockCommand(commandName);
 
         // Act
         var result = CommandsUtils.IsCommandRegistered(handlerType, commandMock.Object);
@@ -239,9 +249,7 @@ public class CommandsUtilsTests
     public void IsCommandRegistered_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(MockCommandName);
-        commandMock.Setup(x => x.Aliases).Returns(aliases);
+        var commandMock = MockCommand(MockCommandName, aliases);
 
         // Act
         var result = CommandsUtils.IsCommandRegistered(handlerType, commandMock.Object);
@@ -256,9 +264,7 @@ public class CommandsUtilsTests
     public void IsCommandRegistered_ShouldReturnZero_WhenCommandHandlerIsNotFound(string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
-        commandMock.Setup(x => x.Aliases).Returns((string[]) null);
+        var commandMock = MockCommand(commandName, null);
 
         // Act
         var result = CommandsUtils.IsCommandRegistered(InvalidCommandType, commandMock.Object);
@@ -287,7 +293,7 @@ public class CommandsUtilsTests
     public void IsCommandRegistered_ShouldReturnNull_WhenCommandHandlerIsNull()
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
+        var commandMock = MockCommand();
 
         // Act
         var result = CommandsUtils.IsCommandRegistered(null, commandMock.Object);
@@ -310,8 +316,7 @@ public class CommandsUtilsTests
     public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
+        var commandMock = MockCommand(commandName);
 
         // Act
         var result = CommandsUtils.IsCommandRegistered(ClientCommandHandler.Create(), commandMock.Object);
@@ -326,9 +331,7 @@ public class CommandsUtilsTests
     public void IsCommandRegistered_ShouldReturnNull_WhenCommandHasInvalidAlias(string[] aliases)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(MockCommandName);
-        commandMock.Setup(x => x.Aliases).Returns(aliases);
+        var commandMock = MockCommand(MockCommandName, aliases);
 
         // Act
         var result = CommandsUtils.IsCommandRegistered(ClientCommandHandler.Create(), commandMock.Object);
@@ -369,8 +372,7 @@ public class CommandsUtilsTests
     public void RegisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
+        var commandMock = MockCommand(commandName);
 
         // Act
         var result = CommandsUtils.RegisterCommand(handlerType, commandMock.Object);
@@ -385,9 +387,7 @@ public class CommandsUtilsTests
     public void RegisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(MockCommandName);
-        commandMock.Setup(x => x.Aliases).Returns(aliases);
+        var commandMock = MockCommand(MockCommandName, aliases);
 
         // Act
         var result = CommandsUtils.RegisterCommand(handlerType, commandMock.Object);
@@ -402,9 +402,7 @@ public class CommandsUtilsTests
     public void RegisterCommand_ShouldReturnZero_WhenCommandHandlerIsNotFound(string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
-        commandMock.Setup(x => x.Aliases).Returns((string[]) null);
+        var commandMock = MockCommand(commandName, null);
 
         // Act
         var result = CommandsUtils.RegisterCommand(InvalidCommandType, commandMock.Object);
@@ -419,9 +417,7 @@ public class CommandsUtilsTests
     public void RegisterCommand_ShouldProperlyRegister_WhenGoldFlow(CommandType handlerType, string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
-        commandMock.Setup(x => x.Aliases).Returns((string[]) null);
+        var commandMock = MockCommand(commandName, null);
         var handlers = GetExpectedCommandHandlers(handlerType);
         var expectedResult = JoinCommandTypes(handlers.Where(h => !h.TryGetCommand(commandName, out _)).Select(GetCommandHandlerType));
 
@@ -439,7 +435,7 @@ public class CommandsUtilsTests
     public void RegisterCommand_ShouldReturnNull_WhenCommandHandlerIsNull()
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
+        var commandMock = MockCommand();
 
         // Act
         var result = CommandsUtils.RegisterCommand(null, commandMock.Object);
@@ -462,8 +458,7 @@ public class CommandsUtilsTests
     public void RegisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
+        var commandMock = MockCommand(commandName);
 
         // Act
         var result = CommandsUtils.RegisterCommand(ClientCommandHandler.Create(), commandMock.Object);
@@ -478,9 +473,7 @@ public class CommandsUtilsTests
     public void RegisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(string[] aliases)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(MockCommandName);
-        commandMock.Setup(x => x.Aliases).Returns(aliases);
+        var commandMock = MockCommand(MockCommandName, aliases);
 
         // Act
         var result = CommandsUtils.RegisterCommand(ClientCommandHandler.Create(), commandMock.Object);
@@ -522,8 +515,7 @@ public class CommandsUtilsTests
     public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
+        var commandMock = MockCommand(commandName);
 
         // Act
         var result = CommandsUtils.UnregisterCommand(handlerType, commandMock.Object);
@@ -538,9 +530,7 @@ public class CommandsUtilsTests
     public void UnregisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(MockCommandName);
-        commandMock.Setup(x => x.Aliases).Returns(aliases);
+        var commandMock = MockCommand(MockCommandName, aliases);
 
         // Act
         var result = CommandsUtils.UnregisterCommand(handlerType, commandMock.Object);
@@ -555,9 +545,7 @@ public class CommandsUtilsTests
     public void UnregisterCommand_ShouldReturnZero_WhenCommandHandlerIsNotFound(string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
-        commandMock.Setup(x => x.Aliases).Returns((string[]) null);
+        var commandMock = MockCommand(commandName, null);
 
         // Act
         var result = CommandsUtils.UnregisterCommand(InvalidCommandType, commandMock.Object);
@@ -572,9 +560,7 @@ public class CommandsUtilsTests
     public void UnregisterCommand_ShouldProperlyUnregister_WhenGoldFlow(CommandType handlerType, string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
-        commandMock.Setup(x => x.Aliases).Returns((string[]) null);
+        var commandMock = MockCommand(commandName, null);
         var handlers = GetExpectedCommandHandlers(handlerType);
         var expectedResult = JoinCommandTypes(handlers.Where(h => h.TryGetCommand(commandName, out _)).Select(GetCommandHandlerType));
 
@@ -592,7 +578,7 @@ public class CommandsUtilsTests
     public void UnegisterCommand_ShouldReturnNull_WhenCommandHandlerIsNull()
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
+        var commandMock = MockCommand();
 
         // Act
         var result = CommandsUtils.UnregisterCommand(null, commandMock.Object);
@@ -615,8 +601,7 @@ public class CommandsUtilsTests
     public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(string commandName)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(commandName);
+        var commandMock = MockCommand(commandName);
 
         // Act
         var result = CommandsUtils.UnregisterCommand(ClientCommandHandler.Create(), commandMock.Object);
@@ -631,9 +616,7 @@ public class CommandsUtilsTests
     public void UnregisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(string[] aliases)
     {
         // Arrange
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Command).Returns(MockCommandName);
-        commandMock.Setup(x => x.Aliases).Returns(aliases);
+        var commandMock = MockCommand(MockCommandName, aliases);
 
         // Act
         var result = CommandsUtils.UnregisterCommand(ClientCommandHandler.Create(), commandMock.Object);

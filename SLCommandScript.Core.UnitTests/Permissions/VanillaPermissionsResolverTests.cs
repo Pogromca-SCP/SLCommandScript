@@ -17,6 +17,18 @@ public class VanillaPermissionsResolverTests
 
     private VanillaPermissionsResolver _resolver;
 
+    #region Helper Methods
+    private static Mock<CommandSender> GetSenderMock() => new(MockBehavior.Strict);
+
+    private static Mock<CommandSender> GetSenderMock(ulong perms)
+    {
+        var mock = GetSenderMock();
+        mock.Setup(x => x.FullPermissions).Returns(false);
+        mock.Setup(x => x.Permissions).Returns(perms);
+        return mock;
+    }
+    #endregion
+
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
@@ -39,7 +51,7 @@ public class VanillaPermissionsResolverTests
     public void CheckPermission_ShouldFail_WhenPermissionNameIsInvalid(string perm)
     {
         // Arrange
-        var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
+        var senderMock = GetSenderMock();
 
         // Act
         var result = _resolver.CheckPermission(senderMock.Object, perm, out var message);
@@ -55,7 +67,7 @@ public class VanillaPermissionsResolverTests
     public void CheckPermission_ShouldFail_WhenPermissionDoesNotExist(string perm)
     {
         // Arrange
-        var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
+        var senderMock = GetSenderMock();
 
         // Act
         var result = _resolver.CheckPermission(senderMock.Object, perm, out var message);
@@ -72,9 +84,7 @@ public class VanillaPermissionsResolverTests
     public void CheckPermission_ShouldReturnFalse_WhenSenderDoesNotHavePermission(PlayerPermissions perm)
     {
         // Arrange
-        var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
-        senderMock.Setup(x => x.FullPermissions).Returns(false);
-        senderMock.Setup(x => x.Permissions).Returns(0);
+        var senderMock = GetSenderMock(0);
 
         // Act
         var result = _resolver.CheckPermission(senderMock.Object, perm.ToString(), out var message);
@@ -91,9 +101,7 @@ public class VanillaPermissionsResolverTests
     public void CheckPermission_ShouldReturnTrue_WhenSenderHasPermission(PlayerPermissions perm)
     {
         // Arrange
-        var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
-        senderMock.Setup(x => x.FullPermissions).Returns(false);
-        senderMock.Setup(x => x.Permissions).Returns((ulong) perm);
+        var senderMock = GetSenderMock((ulong) perm);
 
         // Act
         var result = _resolver.CheckPermission(senderMock.Object, perm.ToString(), out var message);

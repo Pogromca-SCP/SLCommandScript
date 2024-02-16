@@ -10,7 +10,7 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 [TestFixture]
 public class EnumIterableTests
 {
-    #region Statis Utilities
+    #region Static Utilities
     private static readonly bool[] _boolValues = [false, true];
 
     private static readonly int[] _sizes = [-1, 0, 1, 2, 3];
