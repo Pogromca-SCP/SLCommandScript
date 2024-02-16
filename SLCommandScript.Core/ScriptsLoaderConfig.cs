@@ -1,5 +1,5 @@
 ﻿using PluginAPI.Enums;
-using SLCommandScript.Core.Language;
+using SLCommandScript.Core.Commands;
 using System.ComponentModel;
 
 namespace SLCommandScript.Core;
@@ -25,7 +25,7 @@ public class ScriptsLoaderConfig
     /// Defines allowed script command types (Console, GameConsole or RemoteAdmin), set to 0 to disable all script commands.
     /// </summary>
     [Description("Defines allowed script command types (Console, GameConsole or RemoteAdmin), set to 0 to disable all script commands")]
-    public CommandType AllowedScriptCommandTypes { get; set; } = Parser.AllScopes;
+    public CommandType AllowedScriptCommandTypes { get; set; } = CommandsUtils.AllScopes;
 
     /// <summary>
     /// Defines a maximum amount of concurrent executions a single script can have, use it to set max recursion depth.

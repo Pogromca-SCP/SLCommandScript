@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using SLCommandScript.Commands;
 using SLCommandScript.Core.Interfaces;
+using SLCommandScript.Core.Iterables;
 using SLCommandScript.Core.Language;
 using System.Collections.Generic;
 
@@ -17,8 +18,8 @@ public class IterablesCommandTests
     public void Execute_ShouldSucceed_WhenNoArgumentsArePassed()
     {
         // Arrange
-        Parser.Iterables.Clear();
-        Parser.Iterables[TestIterable] = null;
+        IterablesUtils.Providers.Clear();
+        IterablesUtils.Providers[TestIterable] = null;
         var command = new IterablesCommand();
 
         // Act
@@ -33,7 +34,7 @@ public class IterablesCommandTests
     public void Execute_ShouldFail_WhenIterableDoesNotExist()
     {
         // Arrange
-        Parser.Iterables.Clear();
+        IterablesUtils.Providers.Clear();
         var command = new IterablesCommand();
 
         // Act
@@ -48,8 +49,8 @@ public class IterablesCommandTests
     public void Execute_ShouldFail_WhenIterableIsNull()
     {
         // Arrange
-        Parser.Iterables.Clear();
-        Parser.Iterables[TestIterable] = null;
+        IterablesUtils.Providers.Clear();
+        IterablesUtils.Providers[TestIterable] = null;
         var command = new IterablesCommand();
 
         // Act
@@ -64,8 +65,8 @@ public class IterablesCommandTests
     public void Execute_ShouldFail_WhenIterableReturnsNull()
     {
         // Arrange
-        Parser.Iterables.Clear();
-        Parser.Iterables[TestIterable] = () => null;
+        IterablesUtils.Providers.Clear();
+        IterablesUtils.Providers[TestIterable] = () => null;
         var command = new IterablesCommand();
 
         // Act
@@ -80,8 +81,8 @@ public class IterablesCommandTests
     public void Execute_ShouldFail_WhenIterationFailsToLoadElements()
     {
         // Arrange
-        Parser.Iterables.Clear();
-        Parser.Iterables[TestIterable] = () => new TestIterable(true, false);
+        IterablesUtils.Providers.Clear();
+        IterablesUtils.Providers[TestIterable] = () => new TestIterable(true, false);
         var command = new IterablesCommand();
 
         // Act
@@ -96,8 +97,8 @@ public class IterablesCommandTests
     public void Execute_ShouldSucceed_WhenIterableHasNoVariables()
     {
         // Arrange
-        Parser.Iterables.Clear();
-        Parser.Iterables[TestIterable] = () => new TestIterable(false, false);
+        IterablesUtils.Providers.Clear();
+        IterablesUtils.Providers[TestIterable] = () => new TestIterable(false, false);
         var command = new IterablesCommand();
 
         // Act
@@ -112,8 +113,8 @@ public class IterablesCommandTests
     public void Execute_ShouldSucceed_WhenGoldFlow()
     {
         // Arrange
-        Parser.Iterables.Clear();
-        Parser.Iterables[TestIterable] = () => new TestIterable(false, true);
+        IterablesUtils.Providers.Clear();
+        IterablesUtils.Providers[TestIterable] = () => new TestIterable(false, true);
         var command = new IterablesCommand();
 
         // Act

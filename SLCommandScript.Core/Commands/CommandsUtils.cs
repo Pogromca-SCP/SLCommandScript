@@ -13,6 +13,11 @@ namespace SLCommandScript.Core.Commands;
 public static class CommandsUtils
 {
     /// <summary>
+    /// Defines an universal scope value.
+    /// </summary>
+    public const CommandType AllScopes = CommandType.RemoteAdmin | CommandType.Console | CommandType.GameConsole;
+
+    /// <summary>
     /// Defines command handlers hierarchy for command searches.
     /// </summary>
     private static readonly CommandType[] _handlersHierarchy = [CommandType.RemoteAdmin, CommandType.Console, CommandType.GameConsole];

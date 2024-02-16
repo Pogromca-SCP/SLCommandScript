@@ -5,7 +5,6 @@ using SLCommandScript.Commands;
 using SLCommandScript.Core;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.Core.Interfaces;
-using SLCommandScript.Core.Language;
 using SLCommandScript.Core.Reflection;
 
 namespace SLCommandScript;
@@ -23,7 +22,7 @@ public class Plugin
     /// <summary>
     /// Contains current plugin version.
     /// </summary>
-    public const string PluginVersion = "0.5.0";
+    public const string PluginVersion = "0.6.0";
 
     /// <summary>
     /// Contains plugin description.
@@ -170,11 +169,11 @@ public class Plugin
         }
         
         _helperCommands = new(_scriptsLoader);
-        var registered = CommandsUtils.RegisterCommand(Parser.AllScopes, _helperCommands);
+        var registered = CommandsUtils.RegisterCommand(CommandsUtils.AllScopes, _helperCommands);
 
-        if (registered != Parser.AllScopes)
+        if (registered != CommandsUtils.AllScopes)
         {
-            PrintError($"Could not register helper commands for {Parser.AllScopes ^ (registered ?? 0)}");
+            PrintError($"Could not register helper commands for {CommandsUtils.AllScopes ^ (registered ?? 0)}");
         }
     }
 
@@ -188,11 +187,11 @@ public class Plugin
             return;
         }
 
-        var unregistered = CommandsUtils.UnregisterCommand(Parser.AllScopes, _helperCommands);
+        var unregistered = CommandsUtils.UnregisterCommand(CommandsUtils.AllScopes, _helperCommands);
 
-        if (unregistered != Parser.AllScopes)
+        if (unregistered != CommandsUtils.AllScopes)
         {
-            PrintError($"Could not unregister helper commands from {Parser.AllScopes ^ (unregistered ?? 0)}");
+            PrintError($"Could not unregister helper commands from {CommandsUtils.AllScopes ^ (unregistered ?? 0)}");
         }
     }
 }

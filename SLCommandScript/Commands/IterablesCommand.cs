@@ -1,6 +1,6 @@
 ﻿using CommandSystem;
 using NorthwoodLib.Pools;
-using SLCommandScript.Core.Language;
+using SLCommandScript.Core.Iterables;
 using System;
 using System.Collections.Generic;
 
@@ -19,13 +19,13 @@ public class IterablesCommand : ICommand
     /// <returns><see langword="true"/> if attempt finished successfully, <see langword="false"/> otherwise.</returns>
     private static bool GetVariables(string iterableName, out string response)
     {
-        if (!Parser.Iterables.ContainsKey(iterableName))
+        if (!IterablesUtils.Providers.ContainsKey(iterableName))
         {
             response = $"'{iterableName}' was not found in available iterables";
             return false;
         }
 
-        var source = Parser.Iterables[iterableName];
+        var source = IterablesUtils.Providers[iterableName];
 
         if (source is null)
         {
@@ -108,7 +108,7 @@ public class IterablesCommand : ICommand
             return GetVariables(arguments.At(0), out response);
         }
 
-        response = GetDictionaryKeys(Parser.Iterables, "Currently available iterables:\n");
+        response = GetDictionaryKeys(IterablesUtils.Providers, "Currently available iterables:\n");
         return true;
     }
 }

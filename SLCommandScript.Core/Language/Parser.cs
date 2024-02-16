@@ -1,5 +1,4 @@
 ﻿using NorthwoodLib.Pools;
-using PlayerRoles;
 using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.Core.Interfaces;
@@ -15,52 +14,6 @@ namespace SLCommandScript.Core.Language;
 /// </summary>
 public class Parser
 {
-    /// <summary>
-    /// Defines an universal scope value.
-    /// </summary>
-    public const CommandType AllScopes = CommandType.RemoteAdmin | CommandType.Console | CommandType.GameConsole;
-
-    #region Iterables
-    /// <summary>
-    /// Contains iterable objects providers used in foreach expressions.
-    /// </summary>
-    public static Dictionary<string, Func<IIterable>> Iterables { get; } = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // Players
-        { "player", PlayerIterablesProvider.AllPlayers },
-        { "classd", PlayerIterablesProvider.AllClassDs },
-        { "scientist", PlayerIterablesProvider.AllScientists },
-        { "mtf", PlayerIterablesProvider.AllMTFs },
-        { "chaos", PlayerIterablesProvider.AllChaos },
-        { "scp", PlayerIterablesProvider.AllSCPs },
-        { "human", PlayerIterablesProvider.AllHumans },
-        { "tutorial", PlayerIterablesProvider.AllTutorials },
-        { "spectator", PlayerIterablesProvider.AllSpectators },
-        { "alive_player", PlayerIterablesProvider.AllAlive },
-        { "disarmed_player", PlayerIterablesProvider.AllDisarmed },
-
-        // Rooms
-        { "room", RoomIterablesProvider.AllRooms },
-        { "lcz_room", RoomIterablesProvider.AllLightRooms },
-        { "hcz_room", RoomIterablesProvider.AllHeavyRooms },
-        { "ez_room", RoomIterablesProvider.AllEntranceRooms },
-        { "surface_room", RoomIterablesProvider.AllSurfaceRooms },
-
-        // Doors
-        { "door", DoorIterablesProvider.AllDoors },
-        { "breakable_door", DoorIterablesProvider.AllBreakableDoors },
-        { "gate", DoorIterablesProvider.AllGates },
-        { "locked_door", DoorIterablesProvider.AllLockedDoors },
-        { "unlocked_door", DoorIterablesProvider.AllUnlockedDoors },
-        { "opened_door", DoorIterablesProvider.AllOpenedDoors },
-        { "closed_door", DoorIterablesProvider.AllClosedDoors },
-
-        // Enums
-        { "role", EnumIterable<RoleTypeId>.Get },
-        { "item", EnumIterable<ItemType>.Get }
-    };
-    #endregion
-
     #region Fields and Properties
     /// <summary>
     /// Contains current error message.
@@ -70,7 +23,7 @@ public class Parser
     /// <summary>
     /// Contains current commands scope.
     /// </summary>
-    public CommandType Scope { get; set; } = AllScopes;
+    public CommandType Scope { get; set; } = CommandsUtils.AllScopes;
 
     /// <summary>
     /// <see langword="true" /> if tokens end was reached, <see langword="false" /> otherwise.
@@ -303,7 +256,7 @@ public class Parser
             ++_current;
         }
 
-        Scope = scope == 0 ? AllScopes : scope;
+        Scope = scope == 0 ? CommandsUtils.AllScopes : scope;
     }
 
     /// <summary>
@@ -511,13 +464,13 @@ public class Parser
             return null;
         }
 
-        if (!Iterables.ContainsKey(_tokens[_current].Value))
+        if (!IterablesUtils.Providers.ContainsKey(_tokens[_current].Value))
         {
             ErrorMessage = $"'{_tokens[_current].Value}' is not a valid iterable object name";
             return null;
         }
 
-        var provider = Iterables[_tokens[_current].Value];
+        var provider = IterablesUtils.Providers[_tokens[_current].Value];
 
         if (provider is null)
         {
