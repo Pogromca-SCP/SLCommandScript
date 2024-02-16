@@ -2,6 +2,7 @@
 using SLCommandScript.Core.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SLCommandScript.Core.Iterables;
 
@@ -10,6 +11,7 @@ namespace SLCommandScript.Core.Iterables;
 /// </summary>
 public static class IterablesUtils
 {
+    #region Providers
     /// <summary>
     /// Contains iterable objects providers.
     /// </summary>
@@ -48,4 +50,85 @@ public static class IterablesUtils
         { "role", EnumIterable<RoleTypeId>.Get },
         { "item", EnumIterable<ItemType>.Get }
     };
+    #endregion
+
+    /// <summary>
+    /// Used for random numbers generation.
+    /// </summary>
+    private static readonly Random _random = new();
+
+    /// <summary>
+    /// Shuffles elements in provided enumerable collection.
+    /// </summary>
+    /// <typeparam name="T">Type of elements contained in collection.</typeparam>
+    /// <param name="data">Collection to shuffle.</param>
+    /// <returns>Shuffled array if at least 2 elements were found.</returns>
+    public static T[] Shuffle<T>(IEnumerable<T> data) => Shuffle(data?.ToArray());
+
+    /// <summary>
+    /// Shuffles and retrieves specific amount of elements from provided collection.
+    /// </summary>
+    /// <typeparam name="T">Type of elements contained in collection.</typeparam>
+    /// <param name="data">Collection to shuffle.</param>
+    /// <param name="amount">Amount of elements to retrieve. Takes effect only when smaller than elements count.</param>
+    /// <returns>Shuffled array if at least 2 elements were found.</returns>
+    public static T[] Shuffle<T>(IEnumerable<T> data, int amount) => Shuffle(data?.ToArray(), amount);
+
+    /// <summary>
+    /// Shuffles elements in provided array.
+    /// </summary>
+    /// <typeparam name="T">Type of elements contained in array.</typeparam>
+    /// <param name="array">Array to shuffle. This array is modified.</param>
+    /// <returns>Shuffled original array if at least 2 elements were found.</returns>
+    public static T[] Shuffle<T>(T[] array) => array is null || array.Length < 2 ? array : ShuffleArray(array);
+
+    /// <summary>
+    /// Shuffles and retrieves specific amount of elements from provided array.
+    /// </summary>
+    /// <typeparam name="T">Type of elements contained in array.</typeparam>
+    /// <param name="array">Array to shuffle. This array is modified.</param>
+    /// <param name="amount">Amount of elements to retrieve. Takes effect only when smaller than array length.</param>
+    /// <returns>New shuffled array or original array if less than 2 elements were found.</returns>
+    public static T[] Shuffle<T>(T[] array, int amount)
+    {
+        if (array is null || array.Length < 2)
+        {
+            return array;
+        }
+
+        if (amount >= array.Length)
+        {
+            return ShuffleArray(array);
+        }
+
+        var result = new T[amount];
+        amount = 0;
+
+        for (var i = array.Length - 1; amount < result.Length; --i)
+        {
+            var key = _random.Next(i + 1);
+            result[amount] = array[key];
+            array[key] = array[i];
+            ++amount;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Shuffles elements in provided array.
+    /// </summary>
+    /// <typeparam name="T">Type of elements contained in array.</typeparam>
+    /// <param name="array">Array to shuffle. This array is modified.</param>
+    /// <returns>Shuffled original array.</returns>
+    private static T[] ShuffleArray<T>(T[] array)
+    {
+        for (var i = array.Length - 1; i > 0; --i)
+        {
+            var key = _random.Next(i + 1);
+            (array[key], array[i]) = (array[i], array[key]);
+        }
+
+        return array;
+    }
 }

@@ -25,62 +25,6 @@ public class EnumIterable<T>(bool enableNone) : IIterable where T : Enum
     public static EnumIterable<T> GetWithNone() => new(true);
 
     /// <summary>
-    /// Randomizes provided array.
-    /// </summary>
-    /// <param name="data">Array to randomize.</param>
-    /// <returns>Randomized elements.</returns>
-    private static T[] Randomize(T[] data)
-    {
-        if (data.Length < 2)
-        {
-            return data;
-        }
-
-        var rand = new Random();
-
-        for (var i = data.Length - 1; i > 0; --i)
-        {
-            var key = rand.Next(i + 1);
-            (data[key], data[i]) = (data[i], data[key]);
-        }
-
-        return data;
-    }
-
-    /// <summary>
-    /// Randomizes provided array.
-    /// </summary>
-    /// <param name="data">Array to randomize.</param>
-    /// <param name="amount">Amount of randomized elements to retrieve.</param>
-    /// <returns>Randomized elements.</returns>
-    private static T[] Randomize(T[] data, int amount)
-    {
-        if (data.Length < 2)
-        {
-            return data;
-        }
-
-        var rand = new Random();
-        var result = new T[data.Length > amount ? amount : data.Length];
-        amount = 0;
-
-        for (var i = data.Length - 1; i > 0 && amount < result.Length; --i)
-        {
-            var key = rand.Next(i + 1);
-            result[amount] = data[key];
-            data[key] = data[i];
-            ++amount;
-        }
-
-        if (amount < result.Length)
-        {
-            result[amount] = data[0];
-        }
-
-        return result;
-    }
-
-    /// <summary>
     /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
     /// </summary>
     public bool IsAtEnd
@@ -98,7 +42,7 @@ public class EnumIterable<T>(bool enableNone) : IIterable where T : Enum
 
                 if (_current != 0)
                 {
-                    _values = _current > 0 ? Randomize(_values, _current) : Randomize(_values);
+                    _values = _current > 0 ? IterablesUtils.Shuffle(_values, _current) : IterablesUtils.Shuffle(_values);
                 }
 
                 _current = 0;

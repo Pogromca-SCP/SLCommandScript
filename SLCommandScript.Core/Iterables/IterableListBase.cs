@@ -13,66 +13,6 @@ namespace SLCommandScript.Core.Iterables;
 public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterable
 {
     /// <summary>
-    /// Randomizes provided enumerable collection.
-    /// </summary>
-    /// <param name="data">Collection to randomize.</param>
-    /// <returns>Randomized elements.</returns>
-    private static T[] Randomize(IEnumerable<T> data)
-    {
-        var array = data.ToArray();
-
-        if (array.Length < 2)
-        {
-            return array;
-        }
-
-        var rand = new Random();
-
-        for (var i = array.Length - 1; i > 0; --i)
-        {
-            var key = rand.Next(i + 1);
-            (array[key], array[i]) = (array[i], array[key]);
-        }
-
-        return array;
-    }
-
-    /// <summary>
-    /// Randomizes provided enumerable collection.
-    /// </summary>
-    /// <param name="data">Collection to randomize.</param>
-    /// <param name="amount">Amount of randomized elements to retrieve.</param>
-    /// <returns>Randomized elements.</returns>
-    private static T[] Randomize(IEnumerable<T> data, int amount)
-    {
-        var original = data.ToArray();
-
-        if (original.Length < 2)
-        {
-            return original;
-        }
-
-        var rand = new Random();
-        var result = new T[original.Length > amount ? amount : original.Length];
-        amount = 0;
-
-        for (var i = original.Length - 1; i > 0 && amount < result.Length; --i)
-        {
-            var key = rand.Next(i + 1);
-            result[amount] = original[key];
-            original[key] = original[i];
-            ++amount;
-        }
-
-        if (amount < result.Length)
-        {
-            result[amount] = original[0];
-        }
-
-        return result;
-    }
-
-    /// <summary>
     /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
     /// </summary>
     public bool IsAtEnd
@@ -90,7 +30,7 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
 
                 if (_count != 0)
                 {
-                    _objects = _count > 0 ? Randomize(_objects, _count) : Randomize(_objects);
+                    _objects = _count > 0 ? IterablesUtils.Shuffle(_objects, _count) : IterablesUtils.Shuffle(_objects);
                 }
 
                 _enumerator = _objects.GetEnumerator();
