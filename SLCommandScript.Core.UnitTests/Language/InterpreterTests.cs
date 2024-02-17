@@ -655,7 +655,7 @@ public class InterpreterTests
     }
 
     [Test]
-    public void VisitIfdExpr_ShouldSucceed_WhenElseBranchIsNull()
+    public void VisitIfExpr_ShouldSucceed_WhenElseBranchIsNull()
     {
         // Arrange
         var interpreter = new Interpreter(null);
@@ -677,7 +677,7 @@ public class InterpreterTests
     }
 
     [Test]
-    public void VisitIfdExpr_ShouldSucceed_WhenElseBranchSucceeds()
+    public void VisitIfExpr_ShouldSucceed_WhenElseBranchSucceeds()
     {
         // Arrange
         var interpreter = new Interpreter(null);

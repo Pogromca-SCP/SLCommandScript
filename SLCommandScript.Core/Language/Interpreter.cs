@@ -150,7 +150,12 @@ public class Interpreter : IExprVisitor<bool>
 
         var args = _variables is not null && expr.HasVariables && expr.Arguments.Length > 1 ? InjectArguments(expr.Arguments) : expr.Arguments;
         var result = expr.Cmd.Execute(new(args, 1, args.Length - 1), Sender, out var message);
-        ErrorMessage = result ? null : message;
+        
+        if (!result)
+        {
+            ErrorMessage = message;
+        }
+
         return result;
     }
 
@@ -179,7 +184,6 @@ public class Interpreter : IExprVisitor<bool>
         }
 
         _ = ExecuteDelayExprAsync(new(this), expr);
-        ErrorMessage = null;
         return true;
     }
 
@@ -222,7 +226,6 @@ public class Interpreter : IExprVisitor<bool>
         }
 
         _variables = _variables.Next;
-        ErrorMessage = null;
         return true;
     }
 
@@ -273,7 +276,6 @@ public class Interpreter : IExprVisitor<bool>
         }
 
         _variables = _variables.Next;
-        ErrorMessage = null;
         return true;
     }
 
@@ -303,6 +305,7 @@ public class Interpreter : IExprVisitor<bool>
         }
 
         var cond = expr.Condition.Accept(this);
+        ErrorMessage = null;
 
         if (cond)
         {
@@ -314,7 +317,6 @@ public class Interpreter : IExprVisitor<bool>
         }
         else
         {
-            ErrorMessage = null;
             return true;
         }
     }
@@ -346,7 +348,6 @@ public class Interpreter : IExprVisitor<bool>
             }
         }
 
-        ErrorMessage = null;
         return true;
     }
 
