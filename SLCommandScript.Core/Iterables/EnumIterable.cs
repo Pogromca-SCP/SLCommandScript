@@ -43,9 +43,8 @@ public class EnumIterable<T>(bool enableNone) : IIterable where T : Enum
                 if (_current != 0)
                 {
                     _values = _current > 0 ? IterablesUtils.Shuffle(_values, _current) : IterablesUtils.Shuffle(_values);
+                    _current = 0;
                 }
-
-                _current = 0;
             }
 
             return _current >= _values.Length;
