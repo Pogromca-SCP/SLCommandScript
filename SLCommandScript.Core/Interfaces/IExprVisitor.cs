@@ -5,48 +5,48 @@ namespace SLCommandScript.Core.Interfaces;
 /// <summary>
 /// Interface to implement in order to create an expressions visitor.
 /// </summary>
-/// <typeparam name="T">Type used for visit results.</typeparam>
-public interface IExprVisitor<T>
+/// <typeparam name="TResult">Type used for visit results.</typeparam>
+public interface IExprVisitor<out TResult>
 {
     /// <summary>
     /// Visits a command expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    T VisitCommandExpr(CommandExpr expr);
+    TResult VisitCommandExpr(CommandExpr expr);
 
     /// <summary>
     /// Visits a delay expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    T VisitDelayExpr(DelayExpr expr);
+    TResult VisitDelayExpr(DelayExpr expr);
 
     /// <summary>
     /// Visits a foreach expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    T VisitForeachExpr(ForeachExpr expr);
+    TResult VisitForeachExpr(ForeachExpr expr);
 
     /// <summary>
     /// Visits a for else expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    T VisitForElseExpr(ForElseExpr expr);
+    TResult VisitForElseExpr(ForElseExpr expr);
 
     /// <summary>
     /// Visits an if expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    T VisitIfExpr(IfExpr expr);
+    TResult VisitIfExpr(IfExpr expr);
 
     /// <summary>
     /// Visits a sequence expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    T VisitSequenceExpr(SequenceExpr expr);
+    TResult VisitSequenceExpr(SequenceExpr expr);
 }

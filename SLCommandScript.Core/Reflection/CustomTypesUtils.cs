@@ -10,11 +10,11 @@ public static class CustomTypesUtils
     /// <summary>
     /// Loads custom type and creates its new instance.
     /// </summary>
-    /// <typeparam name="T">Type to cast new instance into.</typeparam>
+    /// <typeparam name="TResult">Type to cast new instance into.</typeparam>
     /// <param name="typeName">Name of custom type to find.</param>
     /// <param name="message">Message to return on error.</param>
     /// <returns>New custom type instance or <see langword="default" /> value of an error has occured.</returns>
-    public static T MakeCustomTypeInstance<T>(string typeName, out string message)
+    public static TResult MakeCustomTypeInstance<TResult>(string typeName, out string message)
     {
         var customType = GetCustomType(typeName, out message);
 
@@ -23,28 +23,28 @@ public static class CustomTypesUtils
             return default;
         }
 
-        if (!typeof(T).IsAssignableFrom(customType))
+        if (!typeof(TResult).IsAssignableFrom(customType))
         {
             message = $"Custom type '{customType.Name}' is not derived from desired type";
             return default;
         }
 
-        return ActivateCustomInstance<T>(customType, out message);
+        return ActivateCustomInstance<TResult>(customType, out message);
     }
 
     /// <summary>
     /// Activates an instance of a custom type.
     /// </summary>
-    /// <typeparam name="T">Type to cast new instance into.</typeparam>
+    /// <typeparam name="TResult">Type to cast new instance into.</typeparam>
     /// <param name="customType">Custom type to instantiate.</param>
     /// <param name="message">Message to return on error.</param>
     /// <returns>New custom type instance or <see langword="default" /> value of an error has occured.</returns>
-    private static T ActivateCustomInstance<T>(Type customType, out string message)
+    private static TResult ActivateCustomInstance<TResult>(Type customType, out string message)
     {
         try
         {
             message = null;
-            return (T) Activator.CreateInstance(customType);
+            return (TResult) Activator.CreateInstance(customType);
         }
         catch (Exception ex)
         {

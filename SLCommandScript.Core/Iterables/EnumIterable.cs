@@ -8,21 +8,21 @@ namespace SLCommandScript.Core.Iterables;
 /// <summary>
 /// Iterable wrapper for enum values.
 /// </summary>
-/// <typeparam name="T">Type of contained enum values.</typeparam>
+/// <typeparam name="TEnum">Type of contained enum values.</typeparam>
 /// <param name="enableNone">Whether or not the None values should be included in iteration.</param>
-public class EnumIterable<T>(bool enableNone) : IIterable where T : Enum
+public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
 {
     /// <summary>
     /// Retrieves iterable object for specific enum type.
     /// </summary>
     /// <returns>Iterable object for specific enum.</returns>
-    public static EnumIterable<T> Get() => new(false);
+    public static EnumIterable<TEnum> Get() => new(false);
 
     /// <summary>
     /// Retrieves iterable object for specific enum type with None values included.
     /// </summary>
     /// <returns>Iterable object for specific enum.</returns>
-    public static EnumIterable<T> GetWithNone() => new(true);
+    public static EnumIterable<TEnum> GetWithNone() => new(true);
 
     /// <summary>
     /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
@@ -33,7 +33,7 @@ public class EnumIterable<T>(bool enableNone) : IIterable where T : Enum
         {
             if (_values is null)
             {
-                _values = (T[]) typeof(T).GetEnumValues();
+                _values = (TEnum[]) typeof(TEnum).GetEnumValues();
 
                 if (!_enableNone)
                 {
@@ -59,7 +59,7 @@ public class EnumIterable<T>(bool enableNone) : IIterable where T : Enum
     /// <summary>
     /// Contains wrapped array of enum values.
     /// </summary>
-    private T[] _values = null;
+    private TEnum[] _values = null;
 
     /// <summary>
     /// Contains index of current object. Used for randomization limit before values initialization.

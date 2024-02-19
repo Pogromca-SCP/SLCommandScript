@@ -8,9 +8,9 @@ namespace SLCommandScript.Core.Iterables;
 /// <summary>
 /// Iterable wrapper for a list of objects.
 /// </summary>
-/// <typeparam name="T">Type of contained objects.</typeparam>
+/// <typeparam name="TItem">Type of contained objects.</typeparam>
 /// <param name="source">Source of objects to insert into wrapped list.</param>
-public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterable
+public abstract class IterableListBase<TItem>(Func<IEnumerable<TItem>> source) : IIterable
 {
     /// <summary>
     /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
@@ -26,7 +26,7 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
 
             if (_objects is null)
             {
-                _objects = _source()?.Where(o => o is not null) ?? Array.Empty<T>();
+                _objects = _source()?.Where(o => o is not null) ?? Array.Empty<TItem>();
 
                 if (_count != 0)
                 {
@@ -44,17 +44,17 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
     /// <summary>
     /// Source of iterated objects.
     /// </summary>
-    private readonly Func<IEnumerable<T>> _source = source;
+    private readonly Func<IEnumerable<TItem>> _source = source;
 
     /// <summary>
     /// Contains wrapped list of objects.
     /// </summary>
-    private IEnumerable<T> _objects = null;
+    private IEnumerable<TItem> _objects = null;
 
     /// <summary>
     /// Contains currently used iterator.
     /// </summary>
-    private IEnumerator<T> _enumerator = null;
+    private IEnumerator<TItem> _enumerator = null;
 
     /// <summary>
     /// Amount of contained elements. Used for randomization limit before objects initialization.
@@ -120,5 +120,5 @@ public abstract class IterableListBase<T>(Func<IEnumerable<T>> source) : IIterab
     /// </summary>
     /// <param name="targetVars">Dictionary to insert properties into.</param>
     /// <param name="obj">Object to load properties from.</param>
-    protected abstract void LoadVariables(IDictionary<string, string> targetVars, T obj);
+    protected abstract void LoadVariables(IDictionary<string, string> targetVars, TItem obj);
 }

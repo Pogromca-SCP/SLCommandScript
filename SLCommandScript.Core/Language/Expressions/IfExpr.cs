@@ -29,9 +29,9 @@ public class IfExpr(Expr then, Expr condition, Expr els) : Expr
     /// <summary>
     /// Accepts a visit from an expression visitor.
     /// </summary>
-    /// <typeparam name="T">Type used for visit result.</typeparam>
+    /// <typeparam name="TResult">Type used for visit result.</typeparam>
     /// <param name="visitor">Visitor to accept.</param>
     /// <exception cref="NullReferenceException">When provided visitor is <see langword="null" />.</exception>
     /// <returns>Result of accepted visit.</returns>
-    public override T Accept<T>(IExprVisitor<T> visitor) => visitor.VisitIfExpr(this);
+    public override TResult Accept<TResult>(IExprVisitor<TResult> visitor) => visitor.VisitIfExpr(this);
 }
