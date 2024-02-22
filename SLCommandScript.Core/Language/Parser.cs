@@ -180,6 +180,7 @@ public class Parser
         Expr body = keyword.Type switch
         {
             TokenType.If => If(expr),
+            TokenType.Else => Else(expr),
             TokenType.Foreach => Foreach(expr),
             TokenType.DelayBy => Delay(expr),
             TokenType.ForRandom => ForRandom(expr),
@@ -294,6 +295,30 @@ public class Parser
         }
 
         return new(expr, condition, els);
+    }
+
+    /// <summary>
+    /// Parses an if expression without then branch.
+    /// </summary>
+    /// <param name="expr">Expression to use as condition expression.</param>
+    /// <returns>Parsed if expression or <see langword="null" /> if something went wrong.</returns>
+    private IfExpr Else(Expr expr)
+    {
+        if (expr is null)
+        {
+            ErrorMessage += "\nin if condition expression";
+            return null;
+        }
+
+        var els = ParseExpr();
+
+        if (els is null)
+        {
+            ErrorMessage = ErrorMessage is null ? "Else branch expression is missing" : $"{ErrorMessage}\nin else branch expression";
+            return null;
+        }
+
+        return new(null, expr, els);
     }
 
     /// <summary>

@@ -292,15 +292,15 @@ public class Interpreter : IExprVisitor<bool>
             return false;
         }
 
-        if (expr.Then is null)
-        {
-            ErrorMessage = "If expression then branch is null";
-            return false;
-        }
-
         if (expr.Condition is null)
         {
             ErrorMessage = "If expression condition is null";
+            return false;
+        }
+
+        if (expr.Then is null && expr.Else is null)
+        {
+            ErrorMessage = "If expression branches are null";
             return false;
         }
 
@@ -309,15 +309,11 @@ public class Interpreter : IExprVisitor<bool>
 
         if (cond)
         {
-            return expr.Then.Accept(this);
-        }
-        else if (expr.Else is not null)
-        {
-            return expr.Else.Accept(this);
+            return expr.Then is null || expr.Then.Accept(this);
         }
         else
         {
-            return true;
+            return expr.Else is null || expr.Else.Accept(this);
         }
     }
 

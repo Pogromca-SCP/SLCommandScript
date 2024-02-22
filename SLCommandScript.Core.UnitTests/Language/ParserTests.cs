@@ -61,6 +61,20 @@ public class ParserTests
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.If, "if", 1),
             new(TokenType.Text, "bc", 1), new(TokenType.Else, "else", 1) }, "Else branch expression is missing"],
 
+        // [ else ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1),  new(TokenType.Else, "else", 1),
+            new(TokenType.RightSquare, "]", 1) },
+            "Command 'else' was not found\nin if condition expression"],
+
+        // [ bc else ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Else, "else", 1),
+            new(TokenType.RightSquare, "]", 1) },
+            "Command ']' was not found\nin else branch expression"],
+
+        // [ bc else
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Else, "else", 1) },
+            "Else branch expression is missing"],
+
         // [ foreach ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Foreach, "foreach", 1),
             new(TokenType.RightSquare, "]", 1) }, "Command 'foreach' was not found\nin foreach loop body expression"],
@@ -195,6 +209,14 @@ public class ParserTests
                 new BroadcastCommand(), ["bc", "5", "Test"], false),
                 new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true),
                 new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false)), CommandsUtils.AllScopes],
+
+        // [ bc 5 $(Test) else bc 5 Test ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1),
+            new(TokenType.Variable, "$(Test)", 1), new(TokenType.Else, "else", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1),
+            new(TokenType.Text, "Test", 1), new(TokenType.RightSquare, "]", 1) },
+            new IfExpr(null, new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true),
+                new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false)),
+            CommandsUtils.AllScopes],
 
         // [ bc 5 $(Test) foreach test ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1),

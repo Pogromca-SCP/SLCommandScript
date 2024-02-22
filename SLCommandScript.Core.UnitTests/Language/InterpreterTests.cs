@@ -556,22 +556,6 @@ public class InterpreterTests
     }
 
     [Test]
-    public void VisitIfExpr_ShouldFail_WhenThenBranchIsNull()
-    {
-        // Arrange
-        var interpreter = new Interpreter(null);
-        var expr = new IfExpr(null, null, null);
-
-        // Act
-        var result = interpreter.VisitIfExpr(expr);
-
-        // Assert
-        result.Should().BeFalse();
-        interpreter.Sender.Should().BeNull();
-        interpreter.ErrorMessage.Should().Be("If expression then branch is null");
-    }
-
-    [Test]
     public void VisitIfExpr_ShouldFail_WhenConditionIsNull()
     {
         // Arrange
@@ -585,6 +569,23 @@ public class InterpreterTests
         result.Should().BeFalse();
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().Be("If expression condition is null");
+    }
+
+    [Test]
+    public void VisitIfExpr_ShouldFail_WhenBothBranchesAreNull()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+
+        var expr = new IfExpr(null, new CommandExpr(null, [], false), null);
+
+        // Act
+        var result = interpreter.VisitIfExpr(expr);
+
+        // Assert
+        result.Should().BeFalse();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().Be("If expression branches are null");
     }
 
     [Test]
@@ -628,6 +629,28 @@ public class InterpreterTests
         result.Should().BeFalse();
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().Be(message);
+        commandMock.VerifyAll();
+        commandMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void VisitIfExpr_ShouldSucceed_WhenThenBranchIsNull()
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var message = "Command succeeded";
+        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(true);
+
+        var expr = new IfExpr(null, new CommandExpr(commandMock.Object, ["condition"], false), new ForeachExpr(null, null));
+
+        // Act
+        var result = interpreter.VisitIfExpr(expr);
+
+        // Assert
+        result.Should().BeTrue();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
         commandMock.VerifyNoOtherCalls();
     }
