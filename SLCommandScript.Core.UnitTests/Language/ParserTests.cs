@@ -150,6 +150,16 @@ public class ParserTests
             new(TokenType.Text, "Test", 1), new(TokenType.Text, "0", 1), new(TokenType.RightSquare, "]", 1) },
             "Limit of random elements must be greater than 0"],
 
+        // [ bc forrandom Test 45b% ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.ForRandom, "forrandom", 1),
+            new(TokenType.Text, "Test", 1), new(TokenType.Text, "45b%", 1), new(TokenType.RightSquare, "]", 1) },
+            "Expected '45b%' to be a percentage"],
+
+        // [ bc forrandom Test 0% ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.ForRandom, "forrandom", 1),
+            new(TokenType.Text, "Test", 1), new(TokenType.Text, "0%", 1), new(TokenType.RightSquare, "]", 1) },
+            "Limit of random elements must be greater than 0"],
+
         // [ bc forrandom Test else
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.ForRandom, "forrandom", 1),
             new(TokenType.Text, "Test", 1), new(TokenType.Else, "else", 1) }, "For random loop else expression is missing"],
@@ -270,12 +280,20 @@ public class ParserTests
             new ForeachExpr(new IfExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false), new CommandExpr(new CassieCommand(), ["cassie", "hello"], false),
                 null), new TestIterable()), CommandsUtils.AllScopes],
 
+        // [ [ bc 5 test if cassie hello ] forrandom test 60% ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1),
+            new(TokenType.Text, "5", 1), new(TokenType.Text, "test", 1), new(TokenType.If, "if", 1), new(TokenType.Text, "cassie", 1),
+            new(TokenType.Text, "hello", 1), new(TokenType.RightSquare, "]", 1), new(TokenType.ForRandom, "forrandom", 1), new(TokenType.Text, "test", 1),
+            new(TokenType.Text, "60%", 1), new(TokenType.RightSquare, "]", 1) },
+            new ForeachExpr(new IfExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false), new CommandExpr(new CassieCommand(), ["cassie", "hello"], false),
+                null), new TestIterable()), CommandsUtils.AllScopes],
+
         // [ bc 5 $(Test) forrandom test else bc 3 hello ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "5", 1),
             new(TokenType.Variable, "$(Test)", 1), new(TokenType.ForRandom, "forrandom", 1), new(TokenType.Text, "test", 1), new(TokenType.Else, "else", 1),
             new(TokenType.Text, "bc", 1), new(TokenType.Text, "3", 1), new(TokenType.Text, "hello", 1), new(TokenType.RightSquare, "]", 1) },
             new ForElseExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true), new TestIterable(), new CommandExpr(new BroadcastCommand(),
-                ["bc", "3", "hello"], false), 1), CommandsUtils.AllScopes],
+                ["bc", "3", "hello"], false), new(1)), CommandsUtils.AllScopes],
 
         // [ [ bc 5 test if cassie hello ] forrandom test 6 else bc 3 hello ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1),
@@ -284,7 +302,17 @@ public class ParserTests
             new(TokenType.Text, "6", 1), new(TokenType.Else, "else", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "3", 1), new(TokenType.Text, "hello", 1),
             new(TokenType.RightSquare, "]", 1) }, new ForElseExpr(new IfExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false),
                 new CommandExpr(new CassieCommand(), ["cassie", "hello"], false), null), new TestIterable(), new CommandExpr(new BroadcastCommand(), ["bc", "3", "hello"],
-                    false), 6), CommandsUtils.AllScopes],
+                    false), new(6)), CommandsUtils.AllScopes],
+
+        // [ [ bc 5 test if cassie hello ] forrandom test 60% else bc 3 hello ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1),
+            new(TokenType.Text, "5", 1), new(TokenType.Text, "test", 1), new(TokenType.If, "if", 1), new(TokenType.Text, "cassie", 1),
+            new(TokenType.Text, "hello", 1), new(TokenType.RightSquare, "]", 1), new(TokenType.ForRandom, "forrandom", 1), new(TokenType.Text, "test", 1),
+            new(TokenType.Text, "60%", 1), new(TokenType.Else, "else", 1), new(TokenType.Text, "bc", 1), new(TokenType.Text, "3", 1), new(TokenType.Text, "hello", 1),
+            new(TokenType.RightSquare, "]", 1) },
+            new ForElseExpr(new IfExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false),
+                new CommandExpr(new CassieCommand(), ["cassie", "hello"], false), null), new TestIterable(), new CommandExpr(new BroadcastCommand(), ["bc", "3", "hello"],
+                    false), new(0.6f)), CommandsUtils.AllScopes],
 
         // [ [ bc | bc ] foreach test ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "[", 1), new(TokenType.LeftSquare, "[", 1), new(TokenType.Text, "bc", 1),

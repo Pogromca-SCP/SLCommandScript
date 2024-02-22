@@ -16,7 +16,7 @@ directive_body		-> foreach_loop | if_expr | delay_expr | forrandom_loop | sequen
 foreach_loop		-> expression "foreach" TEXT  # Inner expression gets access to iterated objects properties through variables
 if_expr			-> (expression "if")? expression ("else" expression)?
 delay_expr		-> expression "delayby" NUMBER TEXT?
-forrandom_loop		-> expression "forrandom" TEXT NUMBER? ("else" expression)?  # Inner expressions get access to iterated objects properties through variables
+forrandom_loop		-> expression "forrandom" TEXT (NUMBER "%"?)? ("else" expression)?  # Inner expressions get access to iterated objects properties through variables
 sequence		-> expression ("|" expression)+
 
 comment			-> "#" comment_body

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SLCommandScript.Core.Iterables;
+using System.Collections.Generic;
 
 namespace SLCommandScript.Core.Interfaces;
 
@@ -11,6 +12,11 @@ public interface IIterable
     /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
     /// </summary>
     bool IsAtEnd { get; }
+
+    /// <summary>
+    /// Current amount of elements.
+    /// </summary>
+    int Count { get; }
 
     /// <summary>
     /// Performs next iteration step and loads new property values into provided dictionary.
@@ -29,6 +35,18 @@ public interface IIterable
     /// </summary>
     /// <param name="amount">Amount of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
     void Randomize(int amount);
+
+    /// <summary>
+    /// Randomizes contained elements and limits their amount.
+    /// </summary>
+    /// <param name="amount">Percentage of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    void Randomize(float amount);
+
+    /// <summary>
+    /// Randomizes contained elements and limits their amount.
+    /// </summary>
+    /// <param name="settings">Settings to use for randomization, negative values disable the limit, zero disables randomization.</param>
+    void Randomize(RandomSettings settings);
 
     /// <summary>
     /// Resets iteration process.

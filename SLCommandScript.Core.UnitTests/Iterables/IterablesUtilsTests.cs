@@ -63,7 +63,7 @@ public class IterablesUtilsTests
         var copy = CopyArray(array);
 
         // Act
-        var result = IterablesUtils.Shuffle(array, 0);
+        var result = IterablesUtils.Shuffle(array, 1);
 
         // Assert
         result.Should().BeSameAs(array);
@@ -100,6 +100,31 @@ public class IterablesUtilsTests
         // Assert
         result.Should().NotBeSameAs(array);
         result.Should().HaveCount(expectedSize);
+        result.Should().OnlyContain(x => copy.Contains(x));
+    }
+
+    [TestCaseSource(nameof(_validArrays))]
+    public void Shuffle_ShouldReturnEmptyArray_WhenAmountIsSmallerThanOne(int[] array)
+    {
+        // Act
+        var result = IterablesUtils.Shuffle(array, 0);
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    [TestCaseSource(nameof(_validArrays))]
+    public void Shuffle_ShouldMakeNewArray_WhenAmountIsPercent(int[] array)
+    {
+        // Arrange
+        var copy = CopyArray(array);
+
+        // Act
+        var result = IterablesUtils.Shuffle(array, 0.5f);
+
+        // Assert
+        result.Should().NotBeSameAs(array);
+        result.Should().HaveCount((int) (array.Length * 0.5f));
         result.Should().OnlyContain(x => copy.Contains(x));
     }
     #endregion

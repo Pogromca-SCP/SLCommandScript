@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SLCommandScript.Core.Iterables;
+namespace SLCommandScript.Core.Iterables.GameObjects;
 
 /// <summary>
 /// Iterable wrapper for a list of rooms.

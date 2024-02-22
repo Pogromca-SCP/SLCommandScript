@@ -15,6 +15,8 @@ public class EnumIterableTests
 
     private static readonly int[] _sizes = [-1, 0, 1, 2, 3];
 
+    private static readonly float[] _percentages = [-1.0f, 0.0f, 0.25f, 0.1f, 0.5f, 2.5f];
+
     private static readonly string[] _values = ((FullEnum[]) typeof(FullEnum).GetEnumValues()).Select(v => v.ToString("D")).ToArray();
     #endregion
 
@@ -48,7 +50,9 @@ public class EnumIterableTests
         var iterable = new EnumIterable<EmptyEnum>(enableNone);
 
         // Assert
+        iterable.Count.Should().Be(0);
         iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(0);
     }
 
     [TestCaseSource(nameof(_boolValues))]
@@ -58,7 +62,9 @@ public class EnumIterableTests
         var iterable = new EnumIterable<FullEnum>(enableNone);
 
         // Assert
+        iterable.Count.Should().Be(0);
         iterable.IsAtEnd.Should().BeFalse();
+        iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
     }
     #endregion
 
@@ -75,6 +81,7 @@ public class EnumIterableTests
         // Assert
         result.Should().BeFalse();
         iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(0);
     }
 
     [TestCaseSource(nameof(_boolValues))]
@@ -92,6 +99,7 @@ public class EnumIterableTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
         count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
     }
 
@@ -111,6 +119,7 @@ public class EnumIterableTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
         count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
         variables.GetArray().Should().Equal(enableNone ? _values : _values.Where(v => !v.Equals(FullEnum.None.ToString("D"))));
     }
@@ -135,6 +144,7 @@ public class EnumIterableTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
         count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
         variables.GetArray().Should().BeEquivalentTo(enableNone ? _values : _values.Where(v => !v.Equals(FullEnum.None.ToString("D"))));
     }
@@ -156,7 +166,30 @@ public class EnumIterableTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(_values.Length > randAmount && randAmount > 0 ? randAmount : _values.Length);
         count.Should().Be(_values.Length > randAmount && randAmount > 0 ? randAmount : _values.Length);
+    }
+
+    [TestCaseSource(nameof(_percentages))]
+    public void Randomize_ShouldProperlyRandomizeElementsByPercentage(float percentage)
+    {
+        // Arrange
+        var randAmount = (int) (_values.Length * percentage);
+        var iterable = new EnumIterable<FullEnum>(true);
+        var count = 0;
+
+        // Act
+        iterable.Randomize(percentage);
+
+        while (iterable.LoadNext(null))
+        {
+            ++count;
+        }
+
+        // Assert
+        iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(_values.Length > randAmount && percentage > 0.0f ? randAmount : _values.Length);
+        count.Should().Be(_values.Length > randAmount && percentage > 0.0f ? randAmount : _values.Length);
     }
     #endregion
 
@@ -172,6 +205,7 @@ public class EnumIterableTests
 
         // Assert
         iterable.IsAtEnd.Should().BeFalse();
+        iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
     }
 
     [TestCaseSource(nameof(_boolValues))]
@@ -186,6 +220,7 @@ public class EnumIterableTests
 
         // Assert
         iterable.IsAtEnd.Should().BeFalse();
+        iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
     }
     #endregion
 }

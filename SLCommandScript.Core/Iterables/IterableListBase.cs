@@ -28,18 +28,31 @@ public abstract class IterableListBase<TItem>(Func<IEnumerable<TItem>> source) :
             {
                 _objects = _source()?.Where(o => o is not null) ?? Array.Empty<TItem>();
 
-                if (_count != 0)
+                if (!_randomSettings.IsEmpty)
                 {
-                    _objects = _count > 0 ? IterablesUtils.Shuffle(_objects, _count) : IterablesUtils.Shuffle(_objects);
+                    if (_randomSettings.IsPrecise)
+                    {
+                        _objects = _randomSettings.Amount > 0 ? IterablesUtils.Shuffle(_objects, _randomSettings.Amount) : IterablesUtils.Shuffle(_objects);
+                    }
+                    else
+                    {
+                        _objects = _randomSettings.Percent > 0.0f ? IterablesUtils.Shuffle(_objects, _randomSettings.Percent) : IterablesUtils.Shuffle(_objects);
+                    }
                 }
 
                 _enumerator = _objects.GetEnumerator();
-                _count = _objects.Count();
+                Count = _objects.Count();
+                _current = 0;
             }
 
-            return _current >= _count;
+            return _current >= Count;
         }
     }
+
+    /// <summary>
+    /// Current amount of elements.
+    /// </summary>
+    public int Count { get; private set; } = 0;
 
     /// <summary>
     /// Source of iterated objects.
@@ -57,9 +70,9 @@ public abstract class IterableListBase<TItem>(Func<IEnumerable<TItem>> source) :
     private IEnumerator<TItem> _enumerator = null;
 
     /// <summary>
-    /// Amount of contained elements. Used for randomization limit before objects initialization.
+    /// Random settings used for randomization.
     /// </summary>
-    private int _count = 0;
+    private RandomSettings _randomSettings = new();
 
     /// <summary>
     /// Contains index of current object.
@@ -92,18 +105,30 @@ public abstract class IterableListBase<TItem>(Func<IEnumerable<TItem>> source) :
     /// <summary>
     /// Randomizes contained elements.
     /// </summary>
-    public void Randomize() => Randomize(-1);
+    public void Randomize() => Randomize(new RandomSettings(-1));
 
     /// <summary>
     /// Randomizes contained elements and limits their amount.
     /// </summary>
     /// <param name="amount">Amount of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
-    public void Randomize(int amount)
+    public void Randomize(int amount) => Randomize(new RandomSettings(amount));
+
+    /// <summary>
+    /// Randomizes contained elements and limits their amount.
+    /// </summary>
+    /// <param name="amount">Percentage of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    public void Randomize(float amount) => Randomize(new RandomSettings(amount));
+
+    /// <summary>
+    /// Randomizes contained elements and limits their amount.
+    /// </summary>
+    /// <param name="settings">Settings to use for randomization, negative values disable the limit, zero disables randomization.</param>
+    public void Randomize(RandomSettings settings)
     {
+        Count = 0;
         _objects = null;
         _enumerator = null;
-        _count = amount;
-        _current = 0;
+        _randomSettings = settings;
     }
 
     /// <summary>

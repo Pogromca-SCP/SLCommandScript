@@ -366,15 +366,15 @@ public class Parser
         }
 
         ++_current;
-        var limit = 1;
+        var limit = new RandomSettings(1);
 
         if (Check(TokenType.Text))
         {
-            limit = ParseNumber();
+            limit = _tokens[_current].Value.Length > 0 && _tokens[_current].Value[_tokens[_current].Value.Length - 1] == '%' ? new(ParsePercent()) : new(ParseNumber());
 
-            if (limit < 1)
+            if (!limit.IsValid)
             {
-                if (limit == 0)
+                if (limit.IsEmpty)
                 {
                     ErrorMessage = "Limit of random elements must be greater than 0";
                 }
@@ -512,6 +512,32 @@ public class Parser
         }
 
         return iter;
+    }
+
+    /// <summary>
+    /// Attempts to parse a percent from current token.
+    /// </summary>
+    /// <returns>Parsed percent or -1 if something went wrong.</returns>
+    private float ParsePercent()
+    {
+        var result = 0;
+        var end = _tokens[_current].Value.Length - 1;
+
+        for (var i = 0; i < end; ++i)
+        {
+            var ch = _tokens[_current].Value[i];
+
+            if (ch < '0' || ch > '9')
+            {
+                ErrorMessage = $"Expected '{_tokens[_current].Value}' to be a percentage";
+                return -1;
+            }
+
+            result *= 10;
+            result += ch - '0';
+        }
+
+        return result / 100.0f;
     }
 
     /// <summary>

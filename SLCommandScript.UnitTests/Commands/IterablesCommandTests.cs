@@ -3,7 +3,6 @@ using NUnit.Framework;
 using SLCommandScript.Commands;
 using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Iterables;
-using SLCommandScript.Core.Language;
 using System.Collections.Generic;
 
 namespace SLCommandScript.UnitTests.Commands;
@@ -131,6 +130,8 @@ public class TestIterable(bool isAtEnd, bool addVars) : IIterable
 {
     public bool IsAtEnd { get; } = isAtEnd;
 
+    public int Count => 0;
+
     public bool AddVars { get; } = addVars;
 
     public bool LoadNext(IDictionary<string, string> targetVars)
@@ -146,6 +147,10 @@ public class TestIterable(bool isAtEnd, bool addVars) : IIterable
     public void Randomize() {}
 
     public void Randomize(int amount) {}
+
+    public void Randomize(float amount) {}
+
+    public void Randomize(RandomSettings settings) {}
 
     public void Reset() {}
 }

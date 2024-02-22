@@ -1,5 +1,6 @@
 ﻿using PlayerRoles;
 using SLCommandScript.Core.Interfaces;
+using SLCommandScript.Core.Iterables.GameObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,6 +76,15 @@ public static class IterablesUtils
     public static TItem[] Shuffle<TItem>(IEnumerable<TItem> data, int amount) => Shuffle(data?.ToArray(), amount);
 
     /// <summary>
+    /// Shuffles and retrieves specific amount of elements from provided collection.
+    /// </summary>
+    /// <typeparam name="TItem">Type of elements contained in collection.</typeparam>
+    /// <param name="data">Collection to shuffle.</param>
+    /// <param name="amount">Percent amount of elements to retrieve.</param>
+    /// <returns>Shuffled array if at least 2 elements were found.</returns>
+    public static TItem[] Shuffle<TItem>(IEnumerable<TItem> data, float amount) => Shuffle(data?.ToArray(), amount);
+
+    /// <summary>
     /// Shuffles elements in provided array.
     /// </summary>
     /// <typeparam name="TItem">Type of elements contained in array.</typeparam>
@@ -91,6 +101,11 @@ public static class IterablesUtils
     /// <returns>New shuffled array or original array if less than 2 elements were found.</returns>
     public static TItem[] Shuffle<TItem>(TItem[] array, int amount)
     {
+        if (amount < 1)
+        {
+            return [];
+        }
+
         if (array is null || array.Length < 2)
         {
             return array;
@@ -114,6 +129,15 @@ public static class IterablesUtils
 
         return result;
     }
+
+    /// <summary>
+    /// Shuffles and retrieves specific amount of elements from provided array.
+    /// </summary>
+    /// <typeparam name="TItem">Type of elements contained in array.</typeparam>
+    /// <param name="array">Array to shuffle. This array is modified.</param>
+    /// <param name="amount">Percent amount of elements to retrieve.</param>
+    /// <returns>New shuffled array or original array if less than 2 elements were found.</returns>
+    public static TItem[] Shuffle<TItem>(TItem[] array, float amount) => Shuffle(array, array is null ? 1 : (int) (array.Length * amount));
 
     /// <summary>
     /// Shuffles elements in provided array.

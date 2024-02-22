@@ -15,7 +15,11 @@ public class IterableListTests
 
     private static readonly int[] _sizes = [-1, 0, 1, 2, 3];
 
+    private static readonly float[] _percentages = [-1.0f, 0.0f, 0.25f, 0.1f, 0.5f, 2.5f];
+
     private static IEnumerable<object[]> StringsXSizes => JoinArrays(_strings, _sizes);
+
+    private static IEnumerable<object[]> StringsXPercentages => JoinArrays(_strings, _percentages);
 
     private static IEnumerable<object[]> JoinArrays<TFirst, TSecond>(TFirst[] first, TSecond[] second) =>
         first.SelectMany(f => second.Select(s => new object[] { f, s }));
@@ -30,17 +34,22 @@ public class IterableListTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(0);
     }
 
 
     [TestCaseSource(nameof(_strings))]
     public void IterableList_ShouldProperlyInitialize_WhenProvidedDataSourceIsNotNull(string[] strings)
     {
+        // Arrange
+        var filtered = strings?.Where(s => s is not null);
+
         // Act
         var iterable = new TestIterable(() => strings);
 
         // Assert
-        iterable.IsAtEnd.Should().Be(strings is null || strings.Where(s => s is not null).IsEmpty());
+        iterable.IsAtEnd.Should().Be(filtered is null || filtered.IsEmpty());
+        iterable.Count.Should().Be(filtered?.Count() ?? 0);
     }
     #endregion
 
@@ -57,12 +66,14 @@ public class IterableListTests
         // Assert
         result.Should().BeFalse();
         iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(0);
     }
 
     [TestCaseSource(nameof(_strings))]
     public void LoadNext_ShouldProperlyIterate_WhenProvidedDictionaryIsNull(string[] strings)
     {
         // Arrange
+        var filteredCount = strings?.Where(s => s is not null).Count() ?? 0;
         var iterable = new TestIterable(() => strings);
         var count = 0;
 
@@ -74,7 +85,8 @@ public class IterableListTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
-        count.Should().Be(strings is null ? 0 : strings.Where(s => s is not null).Count());
+        iterable.Count.Should().Be(filteredCount);
+        count.Should().Be(filteredCount);
     }
 
     [TestCaseSource(nameof(_strings))]
@@ -94,6 +106,7 @@ public class IterableListTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(filteredStrings.Count());
         count.Should().Be(filteredStrings.Count());
         variables.GetArray().Should().Equal(filteredStrings);
     }
@@ -120,6 +133,7 @@ public class IterableListTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(filteredCount);
         count.Should().Be(filteredCount);
         variables.GetArray().Should().BeEquivalentTo(filteredStrings);
     }
@@ -143,7 +157,32 @@ public class IterableListTests
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(filteredCount > randAmount && randAmount > 0 ? randAmount : filteredCount);
         count.Should().Be(filteredCount > randAmount && randAmount > 0 ? randAmount : filteredCount);
+    }
+
+    [TestCaseSource(nameof(StringsXPercentages))]
+    public void Randomize_ShouldProperlyRandomizeElementsByPercentage(string[] strings, float percentage)
+    {
+        // Arrange
+        var iterable = new TestIterable(() => strings);
+        var count = 0;
+        var filteredStrings = strings?.Where(s => s is not null) ?? Array.Empty<string>();
+        var filteredCount = filteredStrings.Count();
+        var randAmount = (int) (filteredCount * percentage);
+
+        // Act
+        iterable.Randomize(percentage);
+
+        while (iterable.LoadNext(null))
+        {
+            ++count;
+        }
+
+        // Assert
+        iterable.IsAtEnd.Should().BeTrue();
+        iterable.Count.Should().Be(filteredCount > randAmount && percentage > 0.0f ? randAmount : filteredCount);
+        count.Should().Be(filteredCount > randAmount && percentage > 0.0f ? randAmount : filteredCount);
     }
     #endregion
 
@@ -152,19 +191,22 @@ public class IterableListTests
     public void Reset_ShouldProperlyResetIterable_BeforeRunning(string[] strings)
     {
         // Arrange
+        var filtered = strings?.Where(s => s is not null) ?? Array.Empty<string>();
         var iterable = new TestIterable(() => strings);
 
         // Act
         iterable.Reset();
 
         // Assert
-        iterable.IsAtEnd.Should().Be(strings is null || strings.Where(s => s is not null).IsEmpty());
+        iterable.IsAtEnd.Should().Be(filtered.IsEmpty());
+        iterable.Count.Should().Be(filtered.Count());
     }
 
     [TestCaseSource(nameof(_strings))]
     public void Reset_ShouldProperlyResetIterable_AfterRunning(string[] strings)
     {
         // Arrange
+        var filtered = strings?.Where(s => s is not null) ?? Array.Empty<string>();
         var iterable = new TestIterable(() => strings);
 
         // Act
@@ -172,7 +214,8 @@ public class IterableListTests
         iterable.Reset();
 
         // Assert
-        iterable.IsAtEnd.Should().Be(strings is null || strings.Where(s => s is not null).IsEmpty());
+        iterable.IsAtEnd.Should().Be(filtered.IsEmpty());
+        iterable.Count.Should().Be(filtered.Count());
     }
     #endregion
 }

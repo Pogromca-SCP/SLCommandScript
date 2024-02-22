@@ -40,16 +40,28 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
                     _values = _values.Where(v => !v.ToString().Equals("None")).ToArray();
                 }
 
-                if (_current != 0)
+                if (!_randomSettings.IsEmpty)
                 {
-                    _values = _current > 0 ? IterablesUtils.Shuffle(_values, _current) : IterablesUtils.Shuffle(_values);
-                    _current = 0;
+                    if (_randomSettings.IsPrecise)
+                    {
+                        _values = _randomSettings.Amount > 0 ? IterablesUtils.Shuffle(_values, _randomSettings.Amount) : IterablesUtils.Shuffle(_values);
+                    }
+                    else
+                    {
+                        _values = _randomSettings.Percent > 0.0f ? IterablesUtils.Shuffle(_values, _randomSettings.Percent) : IterablesUtils.Shuffle(_values);
+                    }
                 }
+                _current = 0;
             }
 
             return _current >= _values.Length;
         }
     }
+
+    /// <summary>
+    /// Current amount of elements.
+    /// </summary>
+    public int Count => _values is null ? 0 : _values.Length;
 
     /// <summary>
     /// Tells whether or not the None values should be included in iteration.
@@ -62,7 +74,12 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     private TEnum[] _values = null;
 
     /// <summary>
-    /// Contains index of current object. Used for randomization limit before values initialization.
+    /// Random settings used for randomization.
+    /// </summary>
+    private RandomSettings _randomSettings = new();
+
+    /// <summary>
+    /// Contains index of current object.
     /// </summary>
     private int _current = 0;
 
@@ -90,16 +107,28 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     /// <summary>
     /// Randomizes contained elements.
     /// </summary>
-    public void Randomize() => Randomize(-1);
+    public void Randomize() => Randomize(new RandomSettings(-1));
 
     /// <summary>
     /// Randomizes contained elements and limits their amount.
     /// </summary>
     /// <param name="amount">Amount of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
-    public void Randomize(int amount)
+    public void Randomize(int amount) => Randomize(new RandomSettings(amount));
+
+    /// <summary>
+    /// Randomizes contained elements and limits their amount.
+    /// </summary>
+    /// <param name="amount">Percentage of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    public void Randomize(float amount) => Randomize(new RandomSettings(amount));
+
+    /// <summary>
+    /// Randomizes contained elements and limits their amount.
+    /// </summary>
+    /// <param name="settings">Settings to use for randomization, negative values disable the limit, zero disables randomization.</param>
+    public void Randomize(RandomSettings settings)
     {
         _values = null;
-        _current = amount;
+        _randomSettings = settings;
     }
 
     /// <summary>

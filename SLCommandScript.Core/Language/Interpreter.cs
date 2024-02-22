@@ -262,10 +262,12 @@ public class Interpreter : IExprVisitor<bool>
 
         _variables = new(_variables, true);
         var count = 0;
+        int? limit = null;
 
         while (expr.Iterable.LoadNext(_variables))
         {
-            var result = count < expr.Limit ? expr.Then.Accept(this) : expr.Else.Accept(this);
+            limit ??= expr.Limit.IsPrecise ? expr.Limit.Amount : (int) (expr.Limit.Percent * expr.Iterable.Count);
+            var result = count < limit ? expr.Then.Accept(this) : expr.Else.Accept(this);
             ++count;
 
             if (!result)

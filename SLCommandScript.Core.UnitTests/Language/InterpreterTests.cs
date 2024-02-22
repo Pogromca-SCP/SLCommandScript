@@ -3,6 +3,7 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using SLCommandScript.Core.Interfaces;
+using SLCommandScript.Core.Iterables;
 using SLCommandScript.Core.Language;
 using SLCommandScript.Core.Language.Expressions;
 using System;
@@ -17,6 +18,8 @@ public class InterpreterTests
     private static readonly bool[] _booleanValues = [false, true];
 
     private static readonly int[] _limits = [-1, 0, 4, 7, 10, 12];
+
+    private static readonly float[] _percentages = [-1.0f, 0.0f, 0.25f, 0.1f, 0.5f, 2.5f];
 
     #region Constructor Tests
     [Test]
@@ -420,7 +423,7 @@ public class InterpreterTests
     {
         // Arrange
         var interpreter = new Interpreter(null);
-        var expr = new ForElseExpr(null, null, null, 0);
+        var expr = new ForElseExpr(null, null, null, new());
 
         // Act
         var result = interpreter.VisitForElseExpr(expr);
@@ -436,7 +439,7 @@ public class InterpreterTests
     {
         // Arrange
         var interpreter = new Interpreter(null);
-        var expr = new ForElseExpr(new ForeachExpr(null, null), null, null, 0);
+        var expr = new ForElseExpr(new ForeachExpr(null, null), null, null, new());
 
         // Act
         var result = interpreter.VisitForElseExpr(expr);
@@ -452,7 +455,7 @@ public class InterpreterTests
     {
         // Arrange
         var interpreter = new Interpreter(null);
-        var expr = new ForElseExpr(new ForeachExpr(null, null), new TestIterable(), null, 0);
+        var expr = new ForElseExpr(new ForeachExpr(null, null), new TestIterable(), null, new());
 
         // Act
         var result = interpreter.VisitForElseExpr(expr);
@@ -468,7 +471,7 @@ public class InterpreterTests
     {
         // Arrange
         var interpreter = new Interpreter(null);
-        var expr = new ForElseExpr(new ForeachExpr(null, null), new TestIterable(), new ForeachExpr(null, null), testPrimary ? TestIterable.MaxIterations : 0);
+        var expr = new ForElseExpr(new ForeachExpr(null, null), new TestIterable(), new ForeachExpr(null, null), new(testPrimary ? TestIterable.MaxIterations : 0));
 
         // Act
         var result = interpreter.VisitForElseExpr(expr);
@@ -488,7 +491,29 @@ public class InterpreterTests
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
         commandMock.Setup(x => x.Execute(new(new[] { "test", "args", "$(arg)" }, 1, 2), null, out message)).Returns(true);
         var cmd = new CommandExpr(commandMock.Object, ["test", "args", "$(arg)"], false);
-        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, limit);
+        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, new(limit));
+
+        // Act
+        var result = interpreter.VisitForElseExpr(expr);
+
+        // Assert
+        result.Should().BeTrue();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().BeNull();
+        commandMock.VerifyAll();
+        commandMock.VerifyNoOtherCalls();
+    }
+
+    [TestCaseSource(nameof(_percentages))]
+    public void VisitForElseExpr_ShouldProperlyWorkWithPercent_WhenGoldFlow(float limit)
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var message = "Command succeeded";
+        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
+        commandMock.Setup(x => x.Execute(new(new[] { "test", "args", "$(arg)" }, 1, 2), null, out message)).Returns(true);
+        var cmd = new CommandExpr(commandMock.Object, ["test", "args", "$(arg)"], false);
+        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, new(limit));
 
         // Act
         var result = interpreter.VisitForElseExpr(expr);
@@ -507,7 +532,7 @@ public class InterpreterTests
         // Arrange
         var interpreter = new Interpreter(null);
         var cmd = new CommandExpr(new ArgumentsInjectionTestCommand(), ["$(test)", "$(i)", "$(index)", "$(I)", null, "$(wut?))$(wut?))"], true);
-        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, limit);
+        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, new(limit));
 
         // Act
         var result = interpreter.VisitForElseExpr(expr);
@@ -527,7 +552,7 @@ public class InterpreterTests
         var cmd = new ForeachExpr(new ForeachExpr(new CommandExpr(new NestedArgumentsInjectionTestCommand(), ["test", "$(i)", "$(^i)", "$(^^i)", "$(^^^i)"], true),
             new TestIterable()), new TestIterable());
 
-        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, limit);
+        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, new(limit));
 
         // Act
         var result = interpreter.VisitForElseExpr(expr);
@@ -817,6 +842,8 @@ public class TestIterable : IIterable
 
     public bool IsAtEnd => _index > MaxIterations;
 
+    public int Count => MaxIterations;
+
     public bool LoadNext(IDictionary<string, string> targetVars)
     {
         if (IsAtEnd)
@@ -830,9 +857,13 @@ public class TestIterable : IIterable
         return true;
     }
 
-    public void Randomize() {}
+    public void Randomize() { }
 
-    public void Randomize(int amount) {}
+    public void Randomize(int amount) { }
+
+    public void Randomize(float amount) { }
+
+    public void Randomize(RandomSettings settings) {}
 
     public void Reset()
     {

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SLCommandScript.Core.Iterables;
+namespace SLCommandScript.Core.Iterables.GameObjects;
 
 /// <summary>
 /// Iterable wrapper for a list of players.
@@ -24,7 +24,7 @@ public class PlayersIterable(Func<IEnumerable<Player>> players) : IterableListBa
         targetVars["id"] = player.PlayerId.ToString();
         targetVars["team"] = player.Team.ToString();
         targetVars["role"] = player.RoleName;
-        targetVars["roleid"] = ((sbyte) player.Role).ToString();
+        targetVars["roleid"] = ((sbyte)player.Role).ToString();
     }
 }
 
