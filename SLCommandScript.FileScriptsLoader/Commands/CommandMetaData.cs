@@ -21,7 +21,7 @@ public class CommandMetaData : IJsonSerializable
     public byte Arity { get; set; } = 0;
 
     /// <summary>
-    /// Text to display when help for command is requested.
+    /// Contains permission names required to run the command.
     /// </summary>
-    public string Help { get; set; } = null;
+    public string[] RequiredPerms { get; set; } = null;
 }

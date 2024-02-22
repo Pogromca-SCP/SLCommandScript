@@ -39,7 +39,7 @@ public class CommandsDirectory : IDisposable
         cmd.Description = data.Description;
         cmd.Usage = data.Usage;
         cmd.Arity = data.Arity;
-        cmd.Help = data.Help;
+        cmd.RequiredPermissions = data.RequiredPerms;
     }
 
     /// <summary>

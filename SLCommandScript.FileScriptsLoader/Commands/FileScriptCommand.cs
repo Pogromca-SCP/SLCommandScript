@@ -1,4 +1,5 @@
 ﻿using CommandSystem;
+using SLCommandScript.Core.Permissions;
 using System;
 using System.Linq;
 
@@ -8,7 +9,7 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// Script command used to launch interpreted scripts.
 /// </summary>
 /// <param name="file">Path to associated script.</param>
-public class FileScriptCommand(string file) : FileScriptCommandBase(file), IUsageProvider, IHelpProvider
+public class FileScriptCommand(string file) : FileScriptCommandBase(file), IUsageProvider
 {
     /// <summary>
     /// Describes command arguments usage.
@@ -35,21 +36,14 @@ public class FileScriptCommand(string file) : FileScriptCommandBase(file), IUsag
     public byte Arity { get; set; } = 0;
 
     /// <summary>
-    /// Text to display when help for command is requested.
+    /// Contains permission names required to run the command.
     /// </summary>
-    public string Help { get; set; } = null;
+    public string[] RequiredPermissions { get; set; } = null;
 
     /// <summary>
     /// Describes command arguments usage.
     /// </summary>
     private string[] _usage = null;
-
-    /// <summary>
-    /// Generates message for help command.
-    /// </summary>
-    /// <param name="arguments">Arguments provided by sender.</param>
-    /// <returns>Generated help message.</returns>
-    public string GetHelp(ArraySegment<string> arguments) => string.IsNullOrWhiteSpace(Help) ? Description : Help;
 
     /// <summary>
     /// Executes the command.
@@ -60,6 +54,20 @@ public class FileScriptCommand(string file) : FileScriptCommandBase(file), IUsag
     /// <returns><see langword="true" /> if command executed successfully, <see langword="false" /> otherwise.</returns>
     public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
+        if (RequiredPermissions is not null && RequiredPermissions.Length > 0)
+        {
+            var resolver = PermissionsResolver ?? new VanillaPermissionsResolver();
+
+            foreach (var perm in RequiredPermissions)
+            {
+                if (!resolver.CheckPermission(sender, perm, out _))
+                {
+                    response = $"Missing permission: '{perm}'. Access denied";
+                    return false;
+                }
+            }
+        }
+
         if (arguments.Count < Arity)
         {
             response = $"Missing argument: script expected {Arity} arguments, but sender provided {arguments.Count}";

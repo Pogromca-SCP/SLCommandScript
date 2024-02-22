@@ -619,7 +619,7 @@ public class CommandsDirectoryTests
         cmd.Description.Should().Be(FileScriptCommandBase.DefaultDescription);
         cmd.Usage.Should().BeNull();
         cmd.Arity.Should().Be(0);
-        cmd.Help.Should().BeNull();
+        cmd.RequiredPermissions.Should().BeNull();
         watcherMock.VerifyAll();
         watcherMock.VerifyNoOtherCalls();
         fileSystemMock.VerifyAll();
@@ -652,7 +652,7 @@ public class CommandsDirectoryTests
         cmd.Description.Should().Be(FileScriptCommandBase.DefaultDescription);
         cmd.Usage.Should().BeNull();
         cmd.Arity.Should().Be(0);
-        cmd.Help.Should().BeNull();
+        cmd.RequiredPermissions.Should().BeNull();
         watcherMock.VerifyAll();
         watcherMock.VerifyNoOtherCalls();
         fileSystemMock.VerifyAll();
@@ -668,7 +668,7 @@ public class CommandsDirectoryTests
             Description = "example",
             Usage = ["Hello", "there"],
             Arity = 4,
-            Help = "HEEEEELP!!!"
+            RequiredPerms = ["Noclip"]
         };
 
         var fileSystemMock = MakeFilesHelper([], [], []);
@@ -692,7 +692,7 @@ public class CommandsDirectoryTests
         cmd.Description.Should().Be(newData.Description);
         cmd.Usage.Should().BeEquivalentTo(newData.Usage);
         cmd.Arity.Should().Be(newData.Arity);
-        cmd.Help.Should().Be(newData.Help);
+        cmd.RequiredPermissions.Should().BeEquivalentTo(newData.RequiredPerms);
         watcherMock.VerifyAll();
         watcherMock.VerifyNoOtherCalls();
         fileSystemMock.VerifyAll();
@@ -708,7 +708,7 @@ public class CommandsDirectoryTests
             Description = "example2",
             Usage = ["Sequel"],
             Arity = 9,
-            Help = "AAAAAA!!!"
+            RequiredPerms = ["Noclip"]
         };
 
         var fileSystemMock = MakeFilesHelper([], [], []);
@@ -733,7 +733,7 @@ public class CommandsDirectoryTests
         cmd.Description.Should().Be(newData.Description);
         cmd.Usage.Should().BeEquivalentTo(newData.Usage);
         cmd.Arity.Should().Be(newData.Arity);
-        cmd.Help.Should().Be(newData.Help);
+        cmd.RequiredPermissions.Should().BeEquivalentTo(newData.RequiredPerms);
         watcherMock.VerifyAll();
         watcherMock.VerifyNoOtherCalls();
         fileSystemMock.VerifyAll();
@@ -891,7 +891,7 @@ public class CommandsDirectoryTests
         cmd.Description.Should().Be(FileScriptCommandBase.DefaultDescription);
         cmd.Usage.Should().BeNull();
         cmd.Arity.Should().Be(0);
-        cmd.Help.Should().BeNull();
+        cmd.RequiredPermissions.Should().BeNull();
         watcherMock.VerifyAll();
         watcherMock.VerifyNoOtherCalls();
         fileSystemMock.VerifyAll();
@@ -923,7 +923,7 @@ public class CommandsDirectoryTests
         cmd.Description.Should().Be(FileScriptCommandBase.DefaultDescription);
         cmd.Usage.Should().BeNull();
         cmd.Arity.Should().Be(0);
-        cmd.Help.Should().BeNull();
+        cmd.RequiredPermissions.Should().BeNull();
         watcherMock.VerifyAll();
         watcherMock.VerifyNoOtherCalls();
         fileSystemMock.VerifyAll();
@@ -939,7 +939,7 @@ public class CommandsDirectoryTests
             Description = "example",
             Usage = ["Hello", "there"],
             Arity = 4,
-            Help = "HEEEEELP!!!"
+            RequiredPerms = ["Noclip"]
         };
 
         var fileSystemMock = MakeFilesHelper([], [], []);
@@ -962,7 +962,7 @@ public class CommandsDirectoryTests
         cmd.Description.Should().Be(newData.Description);
         cmd.Usage.Should().BeEquivalentTo(newData.Usage);
         cmd.Arity.Should().Be(newData.Arity);
-        cmd.Help.Should().Be(newData.Help);
+        cmd.RequiredPermissions.Should().BeEquivalentTo(newData.RequiredPerms);
         watcherMock.VerifyAll();
         watcherMock.VerifyNoOtherCalls();
         fileSystemMock.VerifyAll();
@@ -978,7 +978,7 @@ public class CommandsDirectoryTests
             Description = "example2",
             Usage = ["Sequel"],
             Arity = 9,
-            Help = "AAAAAA!!!"
+            RequiredPerms = ["ServerConsoleCommands"]
         };
 
         var fileSystemMock = MakeFilesHelper([], [], []);
@@ -1002,7 +1002,7 @@ public class CommandsDirectoryTests
         cmd.Description.Should().Be(newData.Description);
         cmd.Usage.Should().BeEquivalentTo(newData.Usage);
         cmd.Arity.Should().Be(newData.Arity);
-        cmd.Help.Should().Be(newData.Help);
+        cmd.RequiredPermissions.Should().BeEquivalentTo(newData.RequiredPerms);
         watcherMock.VerifyAll();
         watcherMock.VerifyNoOtherCalls();
         fileSystemMock.VerifyAll();

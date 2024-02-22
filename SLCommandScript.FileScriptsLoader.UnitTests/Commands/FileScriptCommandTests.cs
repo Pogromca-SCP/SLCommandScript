@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using SLCommandScript.Core.Interfaces;
 using SLCommandScript.FileScriptsLoader.Commands;
 using SLCommandScript.FileScriptsLoader.Helpers;
 
@@ -88,73 +89,35 @@ public class FileScriptCommandTests
     }
     #endregion
 
-    #region GetHelp Tests
-    [Test]
-    public void GetHelp_ShouldReturnDescription_WhenHelpIsNull()
-    {
-        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-
-        var cmd = new FileScriptCommand(null)
-        {
-            Help = null
-        };
-
-        // Act
-        var result = cmd.GetHelp(new());
-
-        // Assert
-        result.Should().Be(FileScriptCommandBase.DefaultDescription);
-        fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
-    }
-
-    [Test]
-    public void GetHelp_ShouldReturnDescription_WhenHelpIsBlank()
-    {
-        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-
-        var cmd = new FileScriptCommand(null)
-        {
-            Help = "      "
-        };
-
-        // Act
-        var result = cmd.GetHelp(new());
-
-        // Assert
-        result.Should().Be(FileScriptCommandBase.DefaultDescription);
-        fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
-    }
-
-    [Test]
-    public void GetHelp_ShouldReturnHelp_WhenHelpIsValid()
-    {
-        const string help = "I don't know what I'm supposed to do.";
-        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-
-        var cmd = new FileScriptCommand(null)
-        {
-            Help = help
-        };
-
-        // Act
-        var result = cmd.GetHelp(new());
-
-        // Assert
-        result.Should().Be(help);
-        fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
-    }
-    #endregion
-
     #region Execute Tests
+    [Test]
+    public void Execute_ShouldFail_WhenSenderIsMissingRequiredPermission()
+    {
+        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
+        var message = "bottom text";
+        resolverMock.Setup(x => x.CheckPermission(null, "Noclip", out message)).Returns(false);
+        FileScriptCommandBase.PermissionsResolver = resolverMock.Object;
+
+        var cmd = new FileScriptCommand(null)
+        {
+            RequiredPermissions = ["Noclip"]
+        };
+
+        // Act
+        var result = cmd.Execute(new(), null, out message);
+
+        // Assert
+        result.Should().BeFalse();
+        message.Should().Be("Missing permission: 'Noclip'. Access denied");
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+        resolverMock.VerifyAll();
+        resolverMock.VerifyNoOtherCalls();
+    }
+
     [Test]
     public void Execute_ShouldFail_WhenNotEnoughArgumentsAreProvided()
     {
