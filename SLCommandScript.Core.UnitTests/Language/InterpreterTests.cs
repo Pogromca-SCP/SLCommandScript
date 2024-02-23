@@ -543,8 +543,45 @@ public class InterpreterTests
         interpreter.ErrorMessage.Should().BeNull();
     }
 
+    [TestCaseSource(nameof(_percentages))]
+    public void VisitForElseExpr_ShouldProperlyInjectArguments(float limit)
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+        var cmd = new CommandExpr(new ArgumentsInjectionTestCommand(), ["$(test)", "$(i)", "$(index)", "$(I)", null, "$(wut?))$(wut?))"], true);
+        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, new(limit));
+
+        // Act
+        var result = interpreter.VisitForElseExpr(expr);
+
+        // Assert
+        result.Should().BeTrue();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().BeNull();
+    }
+
     [TestCaseSource(nameof(_limits))]
     public void VisitForElseExpr_ShouldProperlyInjectArguments_InNestedExpression(int limit)
+    {
+        // Arrange
+        var interpreter = new Interpreter(null);
+
+        var cmd = new ForeachExpr(new ForeachExpr(new CommandExpr(new NestedArgumentsInjectionTestCommand(), ["test", "$(i)", "$(^i)", "$(^^i)", "$(^^^i)"], true),
+            new TestIterable()), new TestIterable());
+
+        var expr = new ForElseExpr(cmd, new TestIterable(), cmd, new(limit));
+
+        // Act
+        var result = interpreter.VisitForElseExpr(expr);
+
+        // Assert
+        result.Should().BeTrue();
+        interpreter.Sender.Should().BeNull();
+        interpreter.ErrorMessage.Should().BeNull();
+    }
+
+    [TestCaseSource(nameof(_percentages))]
+    public void VisitForElseExpr_ShouldProperlyInjectArguments_InNestedExpression(float limit)
     {
         // Arrange
         var interpreter = new Interpreter(null);

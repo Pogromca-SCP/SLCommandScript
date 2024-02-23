@@ -521,11 +521,12 @@ public class Parser
     private float ParsePercent()
     {
         var result = 0;
-        var end = _tokens[_current].Value.Length - 1;
+        var token = _tokens[_current].Value;
+        var end = token.Length - 1;
 
         for (var i = 0; i < end; ++i)
         {
-            var ch = _tokens[_current].Value[i];
+            var ch = token[i];
 
             if (ch < '0' || ch > '9')
             {
