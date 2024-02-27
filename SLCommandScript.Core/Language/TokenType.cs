@@ -11,6 +11,8 @@ public enum TokenType : byte
     ScopeGuard,
     Variable,
     Text,
+    Number,
+    Percentage,
     If,
     Else,
     Foreach,

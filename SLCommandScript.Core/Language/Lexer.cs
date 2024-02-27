@@ -42,7 +42,7 @@ public class Lexer
     /// </summary>
     /// <param name="ch">Character to check.</param>
     /// <returns><see langword="true" /> if character is a whitespace, <see langword="false" /> otherwise.</returns>
-    public static bool IsWhiteSpace(char ch) => char.IsWhiteSpace(ch) || ch == '\0';
+    public static bool IsWhiteSpace(char ch) => ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r' || ch == '\0';
 
     /// <summary>
     /// Checks if provided character is a digit.
@@ -498,6 +498,18 @@ public class Lexer
             case '\\':
                 LineExtend();
                 break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                Number(ch);
+                break;
             case ' ':
             case '\r':
             case '\t':
@@ -522,14 +534,16 @@ public class Lexer
     /// Adds new token to tokens list using current token as value.
     /// </summary>
     /// <param name="type">Type of token to add.</param>
-    private void AddToken(TokenType type) => AddToken(type, Source.Substring(_start, _current - _start));
+    /// <param name="value">Numeric token value to assign.</param>
+    private void AddToken(TokenType type, int value = 0) => AddToken(type, Source.Substring(_start, _current - _start), value);
 
     /// <summary>
     /// Adds new token to tokens list using specific value.
     /// </summary>
     /// <param name="type">Type of token to add.</param>
     /// <param name="text">Token value to assign.</param>
-    private void AddToken(TokenType type, string text) => _tokens.Add(new(type, text, Line));
+    /// <param name="value">Numeric token value to assign.</param>
+    private void AddToken(TokenType type, string text, int value = 0) => _tokens.Add(new(type, text, value));
 
     /// <summary>
     /// Merges current token with prefix if it exists.
@@ -612,7 +626,7 @@ public class Lexer
         }
         else if (Match('?'))
         {
-            AddToken(TokenType.ScopeGuard, null);
+            AddToken(TokenType.ScopeGuard);
             action = Identifier;
         }
 
@@ -670,6 +684,38 @@ public class Lexer
             {
                 --_current;
             }
+        }
+
+        Text(true);
+    }
+
+    /// <summary>
+    /// Processes numeric tokens.
+    /// </summary>
+    /// <param name="ch">Initial digit character.</param>
+    private void Number(char ch)
+    {
+        if (_hasMissingPerms)
+        {
+            SkipUntilGuard();
+            return;
+        }
+
+        var value = ch - '0';
+
+        while (IsDigit(Current))
+        {
+            value *= 10;
+            value += Source[_current] - '0';
+            ++_current;
+        }
+
+        var isPercentage = Match('%');
+
+        if (IsWhiteSpace(Current))
+        {
+            AddToken(isPercentage ? TokenType.Percentage : TokenType.Number, value);
+            return;
         }
 
         Text(true);
@@ -939,7 +985,7 @@ public class Lexer
 
         if (isEnd)
         {
-            AddToken(token.Type, token.Value);
+            AddToken(token.Type, token.Value, token.NumericValue);
             return TokenType.None;
         }
 
@@ -964,7 +1010,7 @@ public class Lexer
             if (IsWhiteSpace(lexer.Source[0]))
             {
                 AddToken(isVarText ? TokenType.Variable : TokenType.Text, GetTextWithPrefix(startedAt));
-                AddToken(token.Type, token.Value);
+                AddToken(token.Type, token.Value, token.NumericValue);
             }
             else
             {
@@ -974,14 +1020,14 @@ public class Lexer
         }
         else
         {
-            AddToken(token.Type, token.Value);
+            AddToken(token.Type, token.Value, token.NumericValue);
         }
 
         var lastToken = lexer._tokens[1];
 
         if (IsWhiteSpace(Current) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]))
         {
-            AddToken(lastToken.Type, lastToken.Value);
+            AddToken(lastToken.Type, lastToken.Value, lastToken.NumericValue);
             return TokenType.None;
         }
 
@@ -1024,7 +1070,7 @@ public class Lexer
 
         foreach (var token in tokens)
         {
-            AddToken(token.Type, token.Value);
+            AddToken(token.Type, token.Value, token.NumericValue);
         }
 
         if (isEnd)

@@ -11,7 +11,7 @@ public class ScriptUtilsTests
     private static readonly string[][] _errorPaths = [
         ["xd", "Command 'xd' was not found"],
         ["[ bc if bc", "Missing closing square bracket for directive"],
-        ["[", "Directive body is invalid"]
+        ["[", "No directive keywords were used"]
     ];
     #endregion
 

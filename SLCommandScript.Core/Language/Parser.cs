@@ -192,7 +192,7 @@ public class Parser
 
         if (body is null)
         {
-            ErrorMessage ??= "Directive body is invalid";
+            ErrorMessage ??= "No directive keywords were used";
             return null;
         }
 
@@ -368,17 +368,13 @@ public class Parser
         ++_current;
         var limit = new RandomSettings(1);
 
-        if (Check(TokenType.Text))
+        if (!IsAtEnd && (_tokens[_current].Type == TokenType.Number || _tokens[_current].Type == TokenType.Percentage))
         {
-            limit = _tokens[_current].Value.Length > 0 && _tokens[_current].Value[_tokens[_current].Value.Length - 1] == '%' ? new(ParsePercent()) : new(ParseNumber());
+            limit = _tokens[_current].Type == TokenType.Percentage ? new(_tokens[_current].NumericValue / 100.0f) : new(_tokens[_current].NumericValue);
 
             if (!limit.IsValid)
             {
-                if (limit.IsEmpty)
-                {
-                    ErrorMessage = "Limit of random elements must be greater than 0";
-                }
-
+                ErrorMessage = "Limit of random elements must be greater than 0";
                 return null;
             }
 
@@ -416,19 +412,13 @@ public class Parser
             return null;
         }
 
-        if (!Check(TokenType.Text))
+        if (!Check(TokenType.Number))
         {
-            ErrorMessage = "Delay duration is missing";
+            ErrorMessage = "Delay duration is missing or is not a number";
             return null;
         }
 
-        var duration = ParseNumber();
-
-        if (duration < 0)
-        {
-            return null;
-        }
-
+        var duration = _tokens[_current].NumericValue;
         ++_current;
         string name = null;
 
@@ -512,56 +502,6 @@ public class Parser
         }
 
         return iter;
-    }
-
-    /// <summary>
-    /// Attempts to parse a percent from current token.
-    /// </summary>
-    /// <returns>Parsed percent or -1 if something went wrong.</returns>
-    private float ParsePercent()
-    {
-        var result = 0;
-        var token = _tokens[_current].Value;
-        var end = token.Length - 1;
-
-        for (var i = 0; i < end; ++i)
-        {
-            var ch = token[i];
-
-            if (ch < '0' || ch > '9')
-            {
-                ErrorMessage = $"Expected '{_tokens[_current].Value}' to be a percentage";
-                return -1;
-            }
-
-            result *= 10;
-            result += ch - '0';
-        }
-
-        return result / 100.0f;
-    }
-
-    /// <summary>
-    /// Attempts to parse a number from current token.
-    /// </summary>
-    /// <returns>Parsed number or -1 if something went wrong.</returns>
-    private int ParseNumber()
-    {
-        var result = 0;
-
-        foreach (var ch in _tokens[_current].Value)
-        {
-            if (ch < '0' || ch > '9')
-            {
-                ErrorMessage = $"Expected '{_tokens[_current].Value}' to be a number";
-                return -1;
-            }
-
-            result *= 10;
-            result += ch - '0';
-        }
-
-        return result;
     }
     #endregion
 }

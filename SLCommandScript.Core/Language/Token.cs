@@ -5,8 +5,8 @@
 /// </summary>
 /// <param name="type">Token type to set.</param>
 /// <param name="value">Value related to this token.</param>
-/// <param name="line">Line number where the token was found.</param>
-public readonly struct Token(TokenType type, string value, int line)
+/// <param name="numeric">Numeric value related to this token.</param>
+public readonly struct Token(TokenType type, string value, int numeric = 0)
 {
     /// <summary>
     /// Contains type of the token.
@@ -19,18 +19,12 @@ public readonly struct Token(TokenType type, string value, int line)
     public string Value { get; } = value ?? string.Empty;
 
     /// <summary>
-    /// Contains line number where the token is located.
+    /// Contains a numeric value assigned to this token.
     /// </summary>
-    public int Line { get; } = line;
+    public int NumericValue { get; } = numeric;
 
     /// <summary>
     /// Creates new token structure.
     /// </summary>
     public Token() : this(TokenType.None, null, 0) {}
-
-    /// <summary>
-    /// Converts this token into a human readable string.
-    /// </summary>
-    /// <returns>Human readable representation of this token.</returns>
-    public override string ToString() => $"{Type} '{Value}' at line {Line}";
 }
