@@ -37,17 +37,17 @@ public class LexerTests
             new(TokenType.Text, "no"), new(TokenType.Text, "idea!") }, 3],
 
         [@"
-    512 00035 0003% 324% 7%74 78ad78
+    512 00035 0003% 324% 7%74 78ad78 23%%
 ", new[] { "TestNumbers" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Number, "512", 512),
             new(TokenType.Number, "00035", 35), new(TokenType.Percentage, "0003%", 3), new(TokenType.Percentage, "324%", 324), new(TokenType.Text, "7%74"),
-            new(TokenType.Text, "78ad78") }, 2],
+            new(TokenType.Text, "78ad78"), new(TokenType.Text, "23%%") }, 2],
 
         [@"
     bc 10 This is a very \
-    long one boiiii
+    long one boiiii \\ \  
 ", new[] { "TestLineBreak" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "10", 10),
             new(TokenType.Text, "This"), new(TokenType.Text, "is"), new(TokenType.Text, "a"), new(TokenType.Text, "very"),
-            new(TokenType.Text, "long"), new(TokenType.Text, "one"), new(TokenType.Text, "boiiii") }, 3],
+            new(TokenType.Text, "long"), new(TokenType.Text, "one"), new(TokenType.Text, "boiiii"), new(TokenType.Text, "\\") }, 3],
 
         ["\\\r\\", new[] { "TestLineBreakText" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "\\"),
             new(TokenType.Text, "\\") }, 1],
@@ -204,7 +204,149 @@ public class LexerTests
             new(TokenType.Text, "3fix"), new(TokenType.Text, "su1"), new(TokenType.Number, "2", 2), new(TokenType.Text, "("),
             new(TokenType.Text, ")"), new(TokenType.Number, "3", 3), new(TokenType.Text, "fix"), new(TokenType.Text, "su"), new(TokenType.Number, "1", 1),
             new(TokenType.Number, "2", 2), new(TokenType.Text, "("), new(TokenType.Text, ")"), new(TokenType.Number, "3", 3), new(TokenType.Text, "fix")
-        }, 5]
+        }, 5],
+
+        [@"
+    12$(1)3 75$(1) $(1)34
+    12$(1)3% 2$(1)% 75$(1) $(1)34%
+", new[] { "TestNoTokensNumberInjection", BlankLine }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Number, "123", 123),
+            new(TokenType.Number, "75", 75), new(TokenType.Number, "34", 34),  new(TokenType.Percentage, "123%", 123), new(TokenType.Percentage, "2%", 2),
+            new(TokenType.Number, "75", 75), new(TokenType.Percentage, "34%", 34) }, 3],
+
+         [@"
+    $(1)34 $(1)34% $(1)% $(2)%
+", new[] { "TestTextInjectionBeforeNumber", "hello", "2" }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Text, "hello34"),
+            new(TokenType.Text, "hello34%"), new(TokenType.Text, "hello%"),  new(TokenType.Percentage, "2%", 2) }, 2],
+
+        [@"
+    12$(1)3 12$(2)3 12$(3)3 12$(4)3 12$(5)3 12$(6)3 12$(7)3 12$(8)3
+    12$(1)3% 12$(2)3% 12$(3)3% 12$(4)3% 12$(5)3% 12$(6)3% 12$(7)3% 12$(8)3%
+    2$(1)% 2$(2)% 2$(3)% 2$(4)% 2$(5)% 2$(6)% 2$(7)% 2$(8)%
+    75$(1) 75$(2) 75$(3) 75$(4) 75$(5) 75$(6) 75$(7) 75$(8)
+    $(1)34 $(2)34 $(3)34 $(4)34 $(5)34 $(6)34 $(7)34 $(8)34
+    $(1)34% $(2)34% $(3)34% $(4)34% $(5)34% $(6)34% $(7)34% $(8)34%
+", new[] { "TestOneTokenNumberInjection", "1", " 1", "1 ", " 1 ", "1%", " 1%", "1% ", " 1% " }, PlayerPermissions.Noclip, new Core.Language.Token[] {
+            new(TokenType.Number, "1213", 1213), new(TokenType.Number, "12", 12), new(TokenType.Number, "13", 13), new(TokenType.Number, "121", 121),
+            new(TokenType.Number, "3", 3), new(TokenType.Number, "12", 12), new(TokenType.Number, "1", 1), new(TokenType.Number, "3", 3),
+            new(TokenType.Text, "121%3"), new(TokenType.Number, "12", 12), new(TokenType.Text, "1%3"), new(TokenType.Percentage, "121%", 121),
+            new(TokenType.Number, "3", 3), new(TokenType.Number, "12", 12), new(TokenType.Percentage, "1%", 1), new(TokenType.Number, "3", 3),
+            new(TokenType.Percentage, "1213%", 1213), new(TokenType.Number, "12", 12), new(TokenType.Percentage, "13%", 13), new(TokenType.Number, "121", 121),
+            new(TokenType.Percentage, "3%", 3), new(TokenType.Number, "12", 12), new(TokenType.Number, "1", 1), new(TokenType.Percentage, "3%", 3),
+            new(TokenType.Text, "121%3%"), new(TokenType.Number, "12", 12), new(TokenType.Text, "1%3%"), new(TokenType.Percentage, "121%", 121),
+            new(TokenType.Percentage, "3%", 3), new(TokenType.Number, "12", 12), new(TokenType.Percentage, "1%", 1), new(TokenType.Percentage, "3%", 3),
+            new(TokenType.Percentage, "21%", 21), new(TokenType.Number, "2", 2), new(TokenType.Percentage, "1%", 1), new(TokenType.Number, "21", 21),
+            new(TokenType.Text, "%"), new(TokenType.Number, "2", 2), new(TokenType.Number, "1", 1), new(TokenType.Text, "%"),
+            new(TokenType.Text, "21%%"), new(TokenType.Number, "2", 2), new(TokenType.Text, "1%%"), new(TokenType.Percentage, "21%", 21),
+            new(TokenType.Text, "%"), new(TokenType.Number, "2", 2), new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "%"),
+            new(TokenType.Number, "751", 751), new(TokenType.Number, "75", 75), new(TokenType.Number, "1", 1), new(TokenType.Number, "751", 751),
+            new(TokenType.Number, "75", 75), new(TokenType.Number, "1", 1),
+            new(TokenType.Percentage, "751%", 751), new(TokenType.Number, "75", 75), new(TokenType.Percentage, "1%", 1), new(TokenType.Percentage, "751%", 751),
+            new(TokenType.Number, "75", 75), new(TokenType.Percentage, "1%", 1),
+            new(TokenType.Number, "134", 134), new(TokenType.Number, "134", 134), new(TokenType.Number, "1", 1),
+            new(TokenType.Number, "34", 34), new(TokenType.Number, "1", 1), new(TokenType.Number, "34", 34),
+            new(TokenType.Text, "1%34"), new(TokenType.Text, "1%34"), new(TokenType.Percentage, "1%", 1),
+            new(TokenType.Number, "34", 34), new(TokenType.Percentage, "1%", 1), new(TokenType.Number, "34", 34),
+            new(TokenType.Percentage, "134%", 134), new(TokenType.Percentage, "134%", 134), new(TokenType.Number, "1", 1),
+            new(TokenType.Percentage, "34%", 34), new(TokenType.Number, "1", 1), new(TokenType.Percentage, "34%", 34),
+            new(TokenType.Text, "1%34%"), new(TokenType.Text, "1%34%"), new(TokenType.Percentage, "1%", 1),
+            new(TokenType.Percentage, "34%", 34), new(TokenType.Percentage, "1%", 1), new(TokenType.Percentage, "34%", 34) }, 7],
+
+        [@"
+    12$(1)3 12$(2)3 12$(3)3 12$(4)3 12$(5)3 12$(6)3 12$(7)3 12$(8)3
+    12$(1)3% 12$(2)3% 12$(3)3% 12$(4)3% 12$(5)3% 12$(6)3% 12$(7)3% 12$(8)3%
+    2$(1)% 2$(2)% 2$(3)% 2$(4)% 2$(5)% 2$(6)% 2$(7)% 2$(8)%
+    75$(1) 75$(2) 75$(3) 75$(4) 75$(5) 75$(6) 75$(7) 75$(8)
+    $(1)34 $(2)34 $(3)34 $(4)34 $(5)34 $(6)34 $(7)34 $(8)34
+    $(1)34% $(2)34% $(3)34% $(4)34% $(5)34% $(6)34% $(7)34% $(8)34%
+", new[] { "TestTwoTokensNumberInjection", "1 2", " 1 2", "1 2 ", " 1 2 ", "1% 2%", " 1% 2%", "1% 2% ", " 1% 2% " }, PlayerPermissions.Noclip, new Core.Language.Token[] {
+            new(TokenType.Number, "121", 121), new(TokenType.Number, "23", 23), new(TokenType.Number, "12", 12), new(TokenType.Number, "1", 1),
+            new(TokenType.Number, "23", 23), new(TokenType.Number, "121", 121), new(TokenType.Number, "2", 2), new(TokenType.Number, "3", 3),
+            new(TokenType.Number, "12", 12), new(TokenType.Number, "1", 1), new(TokenType.Number, "2", 2), new(TokenType.Number, "3", 3),
+            new(TokenType.Percentage, "121%", 121), new(TokenType.Text, "2%3"), new(TokenType.Number, "12", 12), new(TokenType.Percentage, "1%", 1),
+            new(TokenType.Text, "2%3"), new(TokenType.Percentage, "121%", 121), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "3", 3),
+            new(TokenType.Number, "12", 12), new(TokenType.Percentage, "1%", 1), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "3", 3),
+            new(TokenType.Number, "121", 121), new(TokenType.Percentage, "23%", 23), new(TokenType.Number, "12", 12), new(TokenType.Number, "1", 1),
+            new(TokenType.Percentage, "23%", 23), new(TokenType.Number, "121", 121), new(TokenType.Number, "2", 2), new(TokenType.Percentage, "3%", 3),
+            new(TokenType.Number, "12", 12), new(TokenType.Number, "1", 1), new(TokenType.Number, "2", 2), new(TokenType.Percentage, "3%", 3),
+            new(TokenType.Percentage, "121%", 121), new(TokenType.Text, "2%3%"), new(TokenType.Number, "12", 12), new(TokenType.Percentage, "1%", 1),
+            new(TokenType.Text, "2%3%"), new(TokenType.Percentage, "121%", 121), new(TokenType.Percentage, "2%", 2), new(TokenType.Percentage, "3%", 3),
+            new(TokenType.Number, "12", 12), new(TokenType.Percentage, "1%", 1), new(TokenType.Percentage, "2%", 2), new(TokenType.Percentage, "3%", 3),
+            new(TokenType.Number, "21", 21), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "2", 2), new(TokenType.Number, "1", 1),
+            new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "21", 21), new(TokenType.Number, "2", 2), new(TokenType.Text, "%"), new(TokenType.Number, "2", 2),
+            new(TokenType.Number, "1", 1), new(TokenType.Number, "2", 2), new(TokenType.Text, "%"),
+            new(TokenType.Percentage, "21%", 21), new(TokenType.Text, "2%%"), new(TokenType.Number, "2", 2), new(TokenType.Percentage, "1%", 1),
+            new(TokenType.Text, "2%%"), new(TokenType.Percentage, "21%", 21), new(TokenType.Percentage, "2%", 2), new(TokenType.Text, "%"),
+            new(TokenType.Number, "2", 2), new(TokenType.Percentage, "1%", 1), new(TokenType.Percentage, "2%", 2), new(TokenType.Text, "%"),
+            new(TokenType.Number, "751", 751), new(TokenType.Number, "2", 2), new(TokenType.Number, "75", 75), new(TokenType.Number, "1", 1),
+            new(TokenType.Number, "2", 2), new(TokenType.Number, "751", 751), new(TokenType.Number, "2", 2), new(TokenType.Number, "75", 75),
+            new(TokenType.Number, "1", 1), new(TokenType.Number, "2", 2), new(TokenType.Percentage, "751%", 751), new(TokenType.Percentage, "2%", 2),
+            new(TokenType.Number, "75", 75), new(TokenType.Percentage, "1%", 1),
+            new(TokenType.Percentage, "2%", 2), new(TokenType.Percentage, "751%", 751), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "75", 75),
+            new(TokenType.Percentage, "1%", 1), new(TokenType.Percentage, "2%", 2),
+            new(TokenType.Number, "1", 1), new(TokenType.Number, "234", 234), new(TokenType.Number, "1", 1), new(TokenType.Number, "234", 234),
+            new(TokenType.Number, "1", 1), new(TokenType.Number, "2", 2), new(TokenType.Number, "34", 34), new(TokenType.Number, "1", 1), new(TokenType.Number, "2", 2),
+            new(TokenType.Number, "34", 34), new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "2%34"), new(TokenType.Percentage, "1%", 1),
+            new(TokenType.Text, "2%34"), new(TokenType.Percentage, "1%", 1), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "34", 34),
+            new(TokenType.Percentage, "1%", 1), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "34", 34),
+            new(TokenType.Number, "1", 1), new(TokenType.Percentage, "234%", 234), new(TokenType.Number, "1", 1), new(TokenType.Percentage, "234%", 234),
+            new(TokenType.Number, "1", 1), new(TokenType.Number, "2", 2), new(TokenType.Percentage, "34%", 34), new(TokenType.Number, "1", 1),
+            new(TokenType.Number, "2", 2), new(TokenType.Percentage, "34%", 34),
+            new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "2%34%"), new(TokenType.Percentage, "1%", 1),  new(TokenType.Text, "2%34%"),
+            new(TokenType.Percentage, "1%", 1), new(TokenType.Percentage, "2%", 2), new(TokenType.Percentage, "34%", 34), new(TokenType.Percentage, "1%", 1),
+            new(TokenType.Percentage, "2%", 2), new(TokenType.Percentage, "34%", 34) }, 7],
+
+        [@"
+    12$(1)3 12$(2)3 12$(3)3 12$(4)3 12$(5)3 12$(6)3 12$(7)3 12$(8)3
+    12$(1)3% 12$(2)3% 12$(3)3% 12$(4)3% 12$(5)3% 12$(6)3% 12$(7)3% 12$(8)3%
+    2$(1)% 2$(2)% 2$(3)% 2$(4)% 2$(5)% 2$(6)% 2$(7)% 2$(8)%
+    75$(1) 75$(2) 75$(3) 75$(4) 75$(5) 75$(6) 75$(7) 75$(8)
+    $(1)34 $(2)34 $(3)34 $(4)34 $(5)34 $(6)34 $(7)34 $(8)34
+    $(1)34% $(2)34% $(3)34% $(4)34% $(5)34% $(6)34% $(7)34% $(8)34%
+", new[] { "TestMultiTokensNumberInjection", "1 X 2", " 1 X 2", "1 X 2 ", " 1 X 2 ", "1% X 2%", " 1% X 2%", "1% X 2% ", " 1% X 2% " }, PlayerPermissions.Noclip,
+        new Core.Language.Token[] {
+            new(TokenType.Number, "121", 121), new(TokenType.Text, "X"), new(TokenType.Number, "23", 23), new(TokenType.Number, "12", 12),
+            new(TokenType.Number, "1", 1), new(TokenType.Text, "X"), new(TokenType.Number, "23", 23), new(TokenType.Number, "121", 121), new(TokenType.Text, "X"),
+            new(TokenType.Number, "2", 2), new(TokenType.Number, "3", 3), new(TokenType.Number, "12", 12), new(TokenType.Number, "1", 1), new(TokenType.Text, "X"),
+            new(TokenType.Number, "2", 2), new(TokenType.Number, "3", 3),
+            new(TokenType.Percentage, "121%", 121), new(TokenType.Text, "X"), new(TokenType.Text, "2%3"), new(TokenType.Number, "12", 12),
+            new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"), new(TokenType.Text, "2%3"), new(TokenType.Percentage, "121%", 121), new(TokenType.Text, "X"),
+            new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "3", 3), new(TokenType.Number, "12", 12), new(TokenType.Percentage, "1%", 1),
+            new(TokenType.Text, "X"), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "3", 3),
+            new(TokenType.Number, "121", 121), new(TokenType.Text, "X"), new(TokenType.Percentage, "23%", 23), new(TokenType.Number, "12", 12),
+            new(TokenType.Number, "1", 1), new(TokenType.Text, "X"), new(TokenType.Percentage, "23%", 23), new(TokenType.Number, "121", 121), new(TokenType.Text, "X"),
+            new(TokenType.Number, "2", 2), new(TokenType.Percentage, "3%", 3), new(TokenType.Number, "12", 12), new(TokenType.Number, "1", 1), new(TokenType.Text, "X"),
+            new(TokenType.Number, "2", 2), new(TokenType.Percentage, "3%", 3), new(TokenType.Percentage, "121%", 121), new(TokenType.Text, "X"),
+            new(TokenType.Text, "2%3%"), new(TokenType.Number, "12", 12), new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"), new(TokenType.Text, "2%3%"),
+            new(TokenType.Percentage, "121%", 121), new(TokenType.Text, "X"), new(TokenType.Percentage, "2%", 2), new(TokenType.Percentage, "3%", 3),
+            new(TokenType.Number, "12", 12), new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"), new(TokenType.Percentage, "2%", 2),
+            new(TokenType.Percentage, "3%", 3),
+            new(TokenType.Number, "21", 21), new(TokenType.Text, "X"), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "2", 2), new(TokenType.Number, "1", 1),
+            new(TokenType.Text, "X"), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "21", 21), new(TokenType.Text, "X"), new(TokenType.Number, "2", 2),
+            new(TokenType.Text, "%"), new(TokenType.Number, "2", 2), new(TokenType.Number, "1", 1), new(TokenType.Text, "X"), new(TokenType.Number, "2", 2),
+            new(TokenType.Text, "%"), new(TokenType.Percentage, "21%", 21), new(TokenType.Text, "X"), new(TokenType.Text, "2%%"), new(TokenType.Number, "2", 2),
+            new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"), new(TokenType.Text, "2%%"), new(TokenType.Percentage, "21%", 21), new(TokenType.Text, "X"),
+            new(TokenType.Percentage, "2%", 2), new(TokenType.Text, "%"), new(TokenType.Number, "2", 2), new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"),
+            new(TokenType.Percentage, "2%", 2), new(TokenType.Text, "%"),
+            new(TokenType.Number, "751", 751), new(TokenType.Text, "X"), new(TokenType.Number, "2", 2), new(TokenType.Number, "75", 75), new(TokenType.Number, "1", 1),
+            new(TokenType.Text, "X"), new(TokenType.Number, "2", 2), new(TokenType.Number, "751", 751), new(TokenType.Text, "X"), new(TokenType.Number, "2", 2),
+            new(TokenType.Number, "75", 75), new(TokenType.Number, "1", 1), new(TokenType.Text, "X"), new(TokenType.Number, "2", 2),
+            new(TokenType.Percentage, "751%", 751), new(TokenType.Text, "X"), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "75", 75),
+            new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"), new(TokenType.Percentage, "2%", 2), new(TokenType.Percentage, "751%", 751),
+            new(TokenType.Text, "X"), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "75", 75), new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"),
+            new(TokenType.Percentage, "2%", 2),
+            new(TokenType.Number, "1", 1), new(TokenType.Text, "X"), new(TokenType.Number, "234", 234), new(TokenType.Number, "1", 1), new(TokenType.Text, "X"),
+            new(TokenType.Number, "234", 234), new(TokenType.Number, "1", 1), new(TokenType.Text, "X"), new(TokenType.Number, "2", 2), new(TokenType.Number, "34", 34),
+            new(TokenType.Number, "1", 1), new(TokenType.Text, "X"), new(TokenType.Number, "2", 2),  new(TokenType.Number, "34", 34), new(TokenType.Percentage, "1%", 1),
+            new(TokenType.Text, "X"), new(TokenType.Text, "2%34"), new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"), new(TokenType.Text, "2%34"),
+            new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "34", 34),
+            new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"), new(TokenType.Percentage, "2%", 2), new(TokenType.Number, "34", 34),
+            new(TokenType.Number, "1", 1), new(TokenType.Text, "X"), new(TokenType.Percentage, "234%", 234), new(TokenType.Number, "1", 1), new(TokenType.Text, "X"),
+            new(TokenType.Percentage, "234%", 234), new(TokenType.Number, "1", 1), new(TokenType.Text, "X"), new(TokenType.Number, "2", 2),
+            new(TokenType.Percentage, "34%", 34), new(TokenType.Number, "1", 1), new(TokenType.Text, "X"), new(TokenType.Number, "2", 2),
+            new(TokenType.Percentage, "34%", 34), new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"), new(TokenType.Text, "2%34%"),
+            new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"), new(TokenType.Text, "2%34%"), new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"),
+            new(TokenType.Percentage, "2%", 2), new(TokenType.Percentage, "34%", 34), new(TokenType.Percentage, "1%", 1), new(TokenType.Text, "X"),
+            new(TokenType.Percentage, "2%", 2), new(TokenType.Percentage, "34%", 34) }, 7]
     ];
     #endregion
 
