@@ -49,8 +49,7 @@ public class LexerTests
             new(TokenType.Text, "This"), new(TokenType.Text, "is"), new(TokenType.Text, "a"), new(TokenType.Text, "very"),
             new(TokenType.Text, "long"), new(TokenType.Text, "one"), new(TokenType.Text, "boiiii"), new(TokenType.Text, "\\") }, 3],
 
-        ["\\\r\\", new[] { "TestLineBreakText" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "\\"),
-            new(TokenType.Text, "\\") }, 1],
+        ["\\\r\\", new[] { "TestLineBreakText" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[0], 1],
 
         ["#\nhello", new[] { "TestLineOnCommentStart" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] {
             new(TokenType.Text, "hello") }, 2],
@@ -98,14 +97,14 @@ public class LexerTests
         [@"
     \cassie why am I here \if\# This is a comment \
     #? Console
-    print \I \have no id\ea \[ #! bruh
+    print \I \have no id\ea \23 \[ #! bruh
     this sh\#ould \#not appea\#r#? test?
 ", new[] { "TestQuotation" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "cassie"),
             new(TokenType.Text, "why"), new(TokenType.Text, "am"), new(TokenType.Text, "I"), new(TokenType.Text, "here"), new(TokenType.Text, "if#"),
             new(TokenType.Text, "This"), new(TokenType.Text, "is"), new(TokenType.Text, "a"), new(TokenType.Text, "comment"),
             new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "Console"),
             new(TokenType.Text, "print"), new(TokenType.Text, "I"), new(TokenType.Text, "have"), new(TokenType.Text, "no"),
-            new(TokenType.Text, "id\\ea"), new(TokenType.Text, "["), new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "test?") }, 5],
+            new(TokenType.Text, "id\\ea"), new(TokenType.Text, "23"), new(TokenType.Text, "["), new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "test?") }, 5],
 
         [@"
     cassie why am I here # This is a comment \
@@ -209,14 +208,25 @@ public class LexerTests
         [@"
     12$(1)3 75$(1) $(1)34
     12$(1)3% 2$(1)% 75$(1) $(1)34%
-", new[] { "TestNoTokensNumberInjection", BlankLine }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Number, "123", 123),
+    12$(2)3 75$(2) $(2)34
+    12$(2)3% 2$(2)% 75$(2) $(2)34%
+", new[] { "TestNoTokensNumberInjection", null, BlankLine }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Number, "123", 123),
             new(TokenType.Number, "75", 75), new(TokenType.Number, "34", 34),  new(TokenType.Percentage, "123%", 123), new(TokenType.Percentage, "2%", 2),
-            new(TokenType.Number, "75", 75), new(TokenType.Percentage, "34%", 34) }, 3],
+            new(TokenType.Number, "75", 75), new(TokenType.Percentage, "34%", 34),
+            new(TokenType.Number, "12", 12), new(TokenType.Number, "3", 3), new(TokenType.Number, "75", 75), new(TokenType.Number, "34", 34),
+            new(TokenType.Number, "12", 12), new(TokenType.Percentage, "3%", 3), new(TokenType.Number, "2%", 2), new(TokenType.Text, "%"),
+            new(TokenType.Number, "75", 75), new(TokenType.Percentage, "34%", 34)}, 5],
 
          [@"
     $(1)34 $(1)34% $(1)% $(2)%
 ", new[] { "TestTextInjectionBeforeNumber", "hello", "2" }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Text, "hello34"),
             new(TokenType.Text, "hello34%"), new(TokenType.Text, "hello%"),  new(TokenType.Percentage, "2%", 2) }, 2],
+
+        [@"
+    12$(1)3 75$(1) $(1)34 $(1)
+", new[] { "TestDirectiveInjection", "[", }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Number, "12", 12), new(TokenType.LeftSquare, "["),
+            new(TokenType.Number, "3", 3), new(TokenType.Number, "75", 75), new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["),
+            new(TokenType.Number, "34", 34), new(TokenType.LeftSquare, "[") }, 2],
 
         [@"
     12$(1)3 12$(2)3 12$(3)3 12$(4)3 12$(5)3 12$(6)3 12$(7)3 12$(8)3
