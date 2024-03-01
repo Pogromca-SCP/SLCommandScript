@@ -125,6 +125,40 @@ public class Lexer
         result.Reset(source);
         return result;
     }
+
+    /// <summary>
+    /// Checks if provided token type is atomic.
+    /// </summary>
+    /// <param name="type">Token type to check.</param>
+    /// <returns><see langword="true" /> if token type is atomic, <see langword="false" /> otherwise.</returns>
+    private static bool IsAtomic(TokenType type) => type == TokenType.LeftSquare || type == TokenType.RightSquare;
+
+    /// <summary>
+    /// Merges numeric values.
+    /// </summary>
+    /// <param name="currentValue">Current numeric value.</param>
+    /// <param name="tokenType">Merged token type.</param>
+    /// <param name="nextToken">Token to merge.</param>
+    /// <returns>Merged numeric value.</returns>
+    private static int MergeNumbers(int currentValue, TokenType tokenType, Token nextToken) => tokenType switch
+    {
+        TokenType.Number => nextToken.Value.Length * 10 * currentValue + nextToken.NumericValue,
+        TokenType.Percentage => nextToken.Value.Length > 0 ? (nextToken.Value.Length - 1) * 10 * currentValue + nextToken.NumericValue : currentValue,
+        _ => 0
+    };
+
+    /// <summary>
+    /// Merges token types.
+    /// </summary>
+    /// <param name="tokenType">Current token type.</param>
+    /// <param name="nextToken">Token to merge.</param>
+    /// <returns>Merged token type.</returns>
+    private static TokenType MergeTypes(TokenType tokenType, Token nextToken) => tokenType switch
+    {
+        TokenType.Number => nextToken.Value.Length == 1 && nextToken.Value[0] == '%' ? TokenType.Percentage : nextToken.Type,
+        TokenType.Variable => TokenType.Variable,
+        _ => nextToken.Type == TokenType.Variable ? TokenType.Variable : TokenType.Text
+    };
     #endregion
 
     #region Fields and Properties
@@ -225,6 +259,11 @@ public class Lexer
     /// Contains a prefix to use in arguments merging.
     /// </summary>
     private string _prefix;
+
+    /// <summary>
+    /// Contains current numeric value.
+    /// </summary>
+    private int _numericValue;
     #endregion
 
     #region State Management
@@ -277,6 +316,7 @@ public class Lexer
         _current = 0;
         ErrorMessage = null;
         _prefix = string.Empty;
+        _numericValue = 0;
     }
 
     /// <summary>
@@ -498,18 +538,6 @@ public class Lexer
             case '\\':
                 LineExtend();
                 break;
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                Number(ch);
-                break;
             case ' ':
             case '\r':
             case '\t':
@@ -534,8 +562,7 @@ public class Lexer
     /// Adds new token to tokens list using current token as value.
     /// </summary>
     /// <param name="type">Type of token to add.</param>
-    /// <param name="value">Numeric token value to assign.</param>
-    private void AddToken(TokenType type, int value = 0) => AddToken(type, Source.Substring(_start, _current - _start), value);
+    private void AddToken(TokenType type) => AddToken(type, Source.Substring(_start, _current - _start));
 
     /// <summary>
     /// Adds new token to tokens list using specific value.
@@ -613,7 +640,7 @@ public class Lexer
     {
         if (!IsTopLevel)
         {
-            Text(true);
+            Text(false);
             return;
         }
 
@@ -672,53 +699,13 @@ public class Lexer
 
         if (IsTopLevel)
         {
-            var matched = Match('\r');
+            Match('\r');
 
             if (Match('\n'))
             {
                 ++Line;
-                return;
-            }
-
-            if (matched)
-            {
-                --_current;
             }
         }
-
-        Text(true);
-    }
-
-    /// <summary>
-    /// Processes numeric tokens.
-    /// </summary>
-    /// <param name="ch">Initial digit character.</param>
-    private void Number(char ch)
-    {
-        if (_hasMissingPerms)
-        {
-            SkipUntilGuard();
-            return;
-        }
-
-        var value = ch - '0';
-
-        while (IsDigit(Current))
-        {
-            value *= 10;
-            value += Source[_current] - '0';
-            ++_current;
-        }
-
-        var isPercentage = Match('%');
-
-        if (IsWhiteSpace(Current))
-        {
-            AddToken(isPercentage ? TokenType.Percentage : TokenType.Number, value);
-            return;
-        }
-
-        Text(true);
     }
 
     /// <summary>
@@ -733,33 +720,31 @@ public class Lexer
             return;
         }
 
-        var type = TokenType.Text;
+        if (enableKeywords)
+        {
+            --_current;
+        }
+
+        var type = _start == _current && IsDigit(Current) ? TokenType.Number : TokenType.Text;
         
         while (!IsWhiteSpace(Current) && !IsSpecialCharacter(Source[_current]))
         {
-            if (Source[_current - 1] == '$' && Match('(') && !Match(')'))
+            type = type switch
             {
-                type = Argument(_current - 2, type == TokenType.Variable);
-            }
-            else if (Source[_current] == '\\' && _current + 1 < Source.Length && IsSpecialCharacter(Source[_current + 1]))
-            {
-                _prefix = GetTextWithPrefix(_current);
-                _start = ++_current;
-                ++_current;
-            }
-            else
-            {
-                ++_current;
-            }
+                TokenType.Number => ProcessNumeric(true),
+                TokenType.Percentage => ProcessNumeric(false),
+                _ => ProcessText(type)
+            };
 
             if (ErrorMessage is not null || type == TokenType.None)
             {
                 return;
             }
         }
-        
+
         var text = GetTextWithPrefix(_current);
-        AddToken(enableKeywords && type == TokenType.Text && _keywords.ContainsKey(text) ? _keywords[text] : type, text);
+        AddToken(enableKeywords && type == TokenType.Text && _keywords.ContainsKey(text) ? _keywords[text] : type, text, _numericValue);
+        _numericValue = 0;
     }
 
     /// <summary>
@@ -809,6 +794,94 @@ public class Lexer
             ++_current;
         }
     }
+
+    /// <summary>
+    /// Processes numeric value.
+    /// </summary>
+    /// <param name="isPureNumber">Whether or not the value is a pure number.</param>
+    /// <returns>Token type after processing.</returns>
+    private TokenType ProcessNumeric(bool isPureNumber)
+    {
+        if (isPureNumber && IsDigit(Source[_current]))
+        {
+            _numericValue *= 10;
+            _numericValue += Source[_current] - '0';
+            ++_current;
+            return TokenType.Number;
+        }
+
+        ++_current;
+
+        switch (Source[_current - 1])
+        {
+            case '$':
+                if (Match('(') && !Match(')'))
+                {
+                    var type = Argument(_current - 2, isPureNumber ? TokenType.Number : TokenType.Percentage);
+
+                    if (type != TokenType.Number && type != TokenType.Percentage)
+                    {
+                        _numericValue = 0;
+                    }
+
+                    return type;
+                }
+
+                _numericValue = 0;
+                return TokenType.Text;
+            case '\\':
+                if (IsSpecialCharacter(Current))
+                {
+                    _prefix = GetTextWithPrefix(_current - 1);
+                    _start = _current++;
+                }
+
+                _numericValue = 0;
+                return TokenType.Text;
+            case '%':
+                if (isPureNumber)
+                {
+                    return TokenType.Percentage;
+                }
+
+                _numericValue = 0;
+                return TokenType.Text;
+            default:
+                _numericValue = 0;
+                return TokenType.Text;
+        }
+    }
+
+    /// <summary>
+    /// Processes text value.
+    /// </summary>
+    /// <param name="type">Current token type.</param>
+    /// <returns>Token type after processing.</returns>
+    private TokenType ProcessText(TokenType type)
+    {
+        ++_current;
+
+        switch (Source[_current - 1])
+        {
+            case '$':
+                if (Match('(') && !Match(')'))
+                {
+                    return Argument(_current - 2, type);
+                }
+
+                return type;
+            case '\\':
+                if (IsSpecialCharacter(Current))
+                {
+                    _prefix = GetTextWithPrefix(_current - 1);
+                    _start = _current++;
+                }
+
+                return type;
+            default:
+                return type;
+        }
+    }
     #endregion
 
     #region Arguments Processing
@@ -816,9 +889,9 @@ public class Lexer
     /// Processes a potential variable.
     /// </summary>
     /// <param name="startedAt">Start index of processed variable.</param>
-    /// <param name="isVarText">Whether or not current token contains other variables.</param>
+    /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType Argument(int startedAt, bool isVarText)
+    private TokenType Argument(int startedAt, TokenType type)
     {
         if (IsTopLevel)
         {
@@ -833,7 +906,7 @@ public class Lexer
 
             if (Match(')'))
             {
-                return ProcessArgument(argNum, startedAt, isVarText);
+                return ProcessArgument(argNum, startedAt, type);
             }
         }
 
@@ -847,7 +920,7 @@ public class Lexer
             return TokenType.Variable;
         }
 
-        return isVarText ? TokenType.Variable : TokenType.Text;
+        return type == TokenType.Variable ? TokenType.Variable : TokenType.Text;
     }
 
     /// <summary>
@@ -855,20 +928,20 @@ public class Lexer
     /// </summary>
     /// <param name="argNum">Number of processed argument.</param>
     /// <param name="startedAt">Start index of processed variable.</param>
-    /// <param name="isVarText">Whether or not current token contains other variables.</param>
+    /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType ProcessArgument(int argNum, int startedAt, bool isVarText)
+    private TokenType ProcessArgument(int argNum, int startedAt, TokenType type)
     {
         ValidateArgs(argNum);
 
         if (ErrorMessage is not null)
         {
-            return TokenType.Text;
+            return TokenType.None;
         }
 
         if (_argLexers.ContainsKey(argNum))
         {
-            return InjectArg(_argLexers[argNum], startedAt, isVarText);
+            return InjectArg(_argLexers[argNum], startedAt, type);
         }
 
         var lexer = Rent(_arguments.Array[_arguments.Offset + argNum - 1]);
@@ -878,10 +951,10 @@ public class Lexer
         if (lexer.ErrorMessage is not null)
         {
             ErrorMessage = $"{lexer.ErrorMessage}\nat $({argNum})";
-            return TokenType.Text;
+            return TokenType.None;
         }
 
-        return InjectArg(lexer, startedAt, isVarText);
+        return InjectArg(lexer, startedAt, type);
     }
 
     /// <summary>
@@ -913,14 +986,14 @@ public class Lexer
     /// </summary>
     /// <param name="lexer">Lexer of argument to inject.</param>
     /// <param name="startedAt">Start index of processed variable.</param>
-    /// <param name="isVarText">Whether or not current token contains other variables.</param>
+    /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType InjectArg(Lexer lexer, int startedAt, bool isVarText) => lexer._tokens.Count switch
+    private TokenType InjectArg(Lexer lexer, int startedAt, TokenType type) => lexer._tokens.Count switch
     {
-        0 => InjectNoTokensArg(lexer.Source.Length < 1, startedAt, isVarText),
-        1 => Inject1TokenArg(lexer, startedAt, isVarText),
-        2 => Inject2TokensArg(lexer, startedAt, isVarText),
-        _ => InjectNTokensArg(lexer, startedAt, isVarText)
+        0 => InjectNoTokensArg(lexer.Source.Length < 1, startedAt, type),
+        1 => Inject1TokenArg(lexer, startedAt, type),
+        2 => Inject2TokensArg(lexer, startedAt, type),
+        _ => InjectNTokensArg(lexer, startedAt, type)
     };
     #endregion
 
@@ -930,9 +1003,9 @@ public class Lexer
     /// </summary>
     /// <param name="isEmpty">Whether or not the argument is empty.</param>
     /// <param name="startedAt">Start index of processed variable.</param>
-    /// <param name="isVarText">Whether or not current token contains other variables.</param>
+    /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType InjectNoTokensArg(bool isEmpty, int startedAt, bool isVarText)
+    private TokenType InjectNoTokensArg(bool isEmpty, int startedAt, TokenType type)
     {
         if (_start == startedAt)
         {
@@ -943,10 +1016,10 @@ public class Lexer
         {
             _prefix = GetTextWithPrefix(startedAt);
             _start = _current;
-            return isVarText ? TokenType.Variable : TokenType.Text;
+            return type;
         }
 
-        AddToken(isVarText ? TokenType.Variable : TokenType.Text, GetTextWithPrefix(startedAt));
+        AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
         return TokenType.None;
     }
 
@@ -955,31 +1028,32 @@ public class Lexer
     /// </summary>
     /// <param name="lexer">Lexer of argument to inject.</param>
     /// <param name="startedAt">Start index of processed variable.</param>
-    /// <param name="isVarText">Whether or not current token contains other variables.</param>
+    /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType Inject1TokenArg(Lexer lexer, int startedAt, bool isVarText)
+    private TokenType Inject1TokenArg(Lexer lexer, int startedAt, TokenType type)
     {
         var token = lexer._tokens[0];
-        var isEnd = IsWhiteSpace(Current) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]);
+        var isEnd = IsWhiteSpace(Current) || IsAtomic(token.Type) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]);
 
         if (_start != startedAt)
         {
-            var type = isVarText || token.Type == TokenType.Variable ? TokenType.Variable : TokenType.Text;
-
-            if (IsWhiteSpace(lexer.Source[0]))
+            if (IsWhiteSpace(lexer.Source[0]) || IsAtomic(token.Type))
             {
-                AddToken(isVarText ? TokenType.Variable : TokenType.Text, GetTextWithPrefix(startedAt));
+                AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
             }
             else if (isEnd)
             {
-                AddToken(type, GetTextWithPrefix(startedAt) + token.Value);
+                var newType = MergeTypes(type, token);
+                AddToken(newType, GetTextWithPrefix(startedAt) + token.Value, MergeNumbers(_numericValue, newType, token));
                 return TokenType.None;
             }
             else
             {
+                var newType = MergeTypes(type, token);
                 _prefix = GetTextWithPrefix(startedAt) + token.Value;
+                _numericValue = MergeNumbers(_numericValue, newType, token);
                 _start = _current;
-                return type;
+                return newType;
             }
         }
 
@@ -990,8 +1064,9 @@ public class Lexer
         }
 
         _prefix = token.Value;
+        _numericValue = token.NumericValue;
         _start = _current;
-        return token.Type == TokenType.Variable ? TokenType.Variable : TokenType.Text;
+        return token.Type;
     }
 
     /// <summary>
@@ -999,23 +1074,23 @@ public class Lexer
     /// </summary>
     /// <param name="lexer">Lexer of argument to inject.</param>
     /// <param name="startedAt">Start index of processed variable.</param>
-    /// <param name="isVarText">Whether or not current token contains other variables.</param>
+    /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType Inject2TokensArg(Lexer lexer, int startedAt, bool isVarText)
+    private TokenType Inject2TokensArg(Lexer lexer, int startedAt, TokenType type)
     {
         var token = lexer._tokens[0];
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(lexer.Source[0]))
+            if (IsWhiteSpace(lexer.Source[0]) || IsAtomic(token.Type))
             {
-                AddToken(isVarText ? TokenType.Variable : TokenType.Text, GetTextWithPrefix(startedAt));
+                AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
                 AddToken(token.Type, token.Value, token.NumericValue);
             }
             else
             {
-                var type = isVarText || token.Type == TokenType.Variable ? TokenType.Variable : TokenType.Text;
-                AddToken(type, GetTextWithPrefix(startedAt) + token.Value);
+                var newType = MergeTypes(type, token);
+                AddToken(newType, GetTextWithPrefix(startedAt) + token.Value, MergeNumbers(_numericValue, newType, token));
             }
         }
         else
@@ -1025,15 +1100,16 @@ public class Lexer
 
         var lastToken = lexer._tokens[1];
 
-        if (IsWhiteSpace(Current) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]))
+        if (IsWhiteSpace(Current) || IsAtomic(lastToken.Type) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]))
         {
             AddToken(lastToken.Type, lastToken.Value, lastToken.NumericValue);
             return TokenType.None;
         }
 
         _prefix = lastToken.Value;
+        _numericValue = lastToken.NumericValue;
         _start = _current;
-        return lastToken.Type == TokenType.Variable ? TokenType.Variable : TokenType.Text;
+        return lastToken.Type;
     }
 
     /// <summary>
@@ -1041,12 +1117,12 @@ public class Lexer
     /// </summary>
     /// <param name="lexer">Lexer of argument to inject.</param>
     /// <param name="startedAt">Start index of processed variable.</param>
-    /// <param name="isVarText">Whether or not current token contains other variables.</param>
+    /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType InjectNTokensArg(Lexer lexer, int startedAt, bool isVarText)
+    private TokenType InjectNTokensArg(Lexer lexer, int startedAt, TokenType type)
     {
         IEnumerable<Token> tokens = lexer._tokens;
-        var isEnd = IsWhiteSpace(Current) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]);
+        var isEnd = IsWhiteSpace(Current) || IsAtomic(lexer._tokens[lexer._tokens.Count - 1].Type) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]);
 
         if (!isEnd)
         {
@@ -1055,15 +1131,15 @@ public class Lexer
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(lexer.Source[0]))
+            if (IsWhiteSpace(lexer.Source[0]) || IsAtomic(lexer._tokens[0].Type))
             {
-                AddToken(isVarText ? TokenType.Variable : TokenType.Text, GetTextWithPrefix(startedAt));
+                AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
             }
             else
             {
                 var token = lexer._tokens[0];
-                var type = isVarText || token.Type == TokenType.Variable ? TokenType.Variable : TokenType.Text;
-                AddToken(type, GetTextWithPrefix(startedAt) + token.Value);
+                var newType = MergeTypes(type, token);
+                AddToken(newType, GetTextWithPrefix(startedAt) + token.Value, MergeNumbers(_numericValue, newType, token));
                 tokens = tokens.Skip(1);
             }
         }
@@ -1080,8 +1156,9 @@ public class Lexer
 
         var lastToken = lexer._tokens[lexer._tokens.Count - 1];
         _prefix = lastToken.Value;
+        _numericValue = lastToken.NumericValue;
         _start = _current;
-        return lastToken.Type == TokenType.Variable ? TokenType.Variable : TokenType.Text;
+        return lastToken.Type;
     }
     #endregion
 }

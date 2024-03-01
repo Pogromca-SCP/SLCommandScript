@@ -104,7 +104,7 @@ public class LexerTests
             new(TokenType.Text, "This"), new(TokenType.Text, "is"), new(TokenType.Text, "a"), new(TokenType.Text, "comment"),
             new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "Console"),
             new(TokenType.Text, "print"), new(TokenType.Text, "I"), new(TokenType.Text, "have"), new(TokenType.Text, "no"),
-            new(TokenType.Text, "id\\ea"), new(TokenType.Text, "23"), new(TokenType.Text, "["), new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "test?") }, 5],
+            new(TokenType.Text, "id\\ea"), new(TokenType.Number, "23", 23), new(TokenType.Text, "["), new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "test?") }, 5],
 
         [@"
     cassie why am I here # This is a comment \
@@ -214,7 +214,7 @@ public class LexerTests
             new(TokenType.Number, "75", 75), new(TokenType.Number, "34", 34),  new(TokenType.Percentage, "123%", 123), new(TokenType.Percentage, "2%", 2),
             new(TokenType.Number, "75", 75), new(TokenType.Percentage, "34%", 34),
             new(TokenType.Number, "12", 12), new(TokenType.Number, "3", 3), new(TokenType.Number, "75", 75), new(TokenType.Number, "34", 34),
-            new(TokenType.Number, "12", 12), new(TokenType.Percentage, "3%", 3), new(TokenType.Number, "2%", 2), new(TokenType.Text, "%"),
+            new(TokenType.Number, "12", 12), new(TokenType.Percentage, "3%", 3), new(TokenType.Number, "2", 2), new(TokenType.Text, "%"),
             new(TokenType.Number, "75", 75), new(TokenType.Percentage, "34%", 34)}, 5],
 
          [@"
