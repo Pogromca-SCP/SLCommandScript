@@ -10,7 +10,8 @@ namespace SLCommandScript.Core.Iterables;
 /// </summary>
 /// <typeparam name="TItem">Type of contained objects.</typeparam>
 /// <param name="source">Source of objects to insert into wrapped list.</param>
-public abstract class IterableListBase<TItem>(Func<IEnumerable<TItem>> source) : IIterable
+/// <param name="mapper">Variable mapper to use to load variables.</param>
+public class IterableList<TItem>(Func<IEnumerable<TItem>> source, Action<IDictionary<string, string>, TItem> mapper) : IIterable
 {
     /// <summary>
     /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
@@ -26,7 +27,7 @@ public abstract class IterableListBase<TItem>(Func<IEnumerable<TItem>> source) :
 
             if (_objects is null)
             {
-                _objects = _source()?.Where(o => o is not null) ?? Array.Empty<TItem>();
+                _objects = _source() ?? [];
 
                 if (!_randomSettings.IsEmpty)
                 {
@@ -58,6 +59,11 @@ public abstract class IterableListBase<TItem>(Func<IEnumerable<TItem>> source) :
     /// Source of iterated objects.
     /// </summary>
     private readonly Func<IEnumerable<TItem>> _source = source;
+
+    /// <summary>
+    /// Variable mapper used for loading variables.
+    /// </summary>
+    private readonly Action<IDictionary<string, string>, TItem> _mapper = mapper;
 
     /// <summary>
     /// Contains wrapped list of objects.
@@ -93,9 +99,9 @@ public abstract class IterableListBase<TItem>(Func<IEnumerable<TItem>> source) :
 
         _enumerator.MoveNext();
 
-        if (targetVars is not null)
+        if (_mapper is not null && targetVars is not null)
         {
-            LoadVariables(targetVars, _enumerator.Current);
+            _mapper(targetVars, _enumerator.Current);
         }
 
         ++_current;
@@ -139,11 +145,4 @@ public abstract class IterableListBase<TItem>(Func<IEnumerable<TItem>> source) :
         _enumerator = _objects?.GetEnumerator();
         _current = 0;
     }
-
-    /// <summary>
-    /// Loads properties from current object and inserts them into a dictionary.
-    /// </summary>
-    /// <param name="targetVars">Dictionary to insert properties into.</param>
-    /// <param name="obj">Object to load properties from.</param>
-    protected abstract void LoadVariables(IDictionary<string, string> targetVars, TItem obj);
 }

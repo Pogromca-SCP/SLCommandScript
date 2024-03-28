@@ -1,6 +1,6 @@
 ﻿using PlayerRoles;
 using SLCommandScript.Core.Interfaces;
-using SLCommandScript.Core.Iterables.GameObjects;
+using SLCommandScript.Core.Iterables.Providers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
