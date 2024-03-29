@@ -1,5 +1,6 @@
 ﻿using PluginAPI.Core.Doors;
 using SLCommandScript.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -57,7 +58,8 @@ public static class DoorIterablesProvider
     /// </summary>
     /// <param name="targetVars">Dictionary to insert properties into.</param>
     /// <param name="player">Door to load properties from.</param>
-    private static void LoadVariables(IDictionary<string, string> targetVars, FacilityDoor door)
+    /// <exception cref="NullReferenceException">When provided object is <see langword="null"/>.</exception>
+    public static void LoadVariables(IDictionary<string, string> targetVars, FacilityDoor door)
     {
         targetVars["name"] = door.Name;
         targetVars["id"] = door.OriginalObject.NetworkDoorId.ToString();

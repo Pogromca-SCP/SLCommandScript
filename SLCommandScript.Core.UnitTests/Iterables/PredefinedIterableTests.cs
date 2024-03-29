@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using SLCommandScript.Core.Iterables;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SLCommandScript.Core.UnitTests.Iterables;
 
@@ -14,24 +13,11 @@ public class PredefinedIterableTests
         target[item] = item;
     }
 
-    #region Test Case Sources
     private static readonly string[][] _strings = [null, [], [null, null, null, null], ["example", null, "", "test"], ["  \t ", "Test", "test", "TEST"]];
-
-    private static readonly int[] _sizes = [-1, 0, 1, 2, 3];
-
-    private static readonly float[] _percentages = [-1.0f, 0.0f, 0.25f, 0.1f, 0.5f, 2.5f];
-
-    private static IEnumerable<object[]> StringsXSizes => JoinArrays(_strings, _sizes);
-
-    private static IEnumerable<object[]> StringsXPercentages => JoinArrays(_strings, _percentages);
-
-    private static IEnumerable<object[]> JoinArrays<TFirst, TSecond>(TFirst[] first, TSecond[] second) =>
-        first.SelectMany(f => second.Select(s => new object[] { f, s }));
-    #endregion
 
     #region Constructor Tests
     [Test]
-    public void IterableList_ShouldProperlyInitialize_WhenProvidedDataSourceIsNull()
+    public void PredefinedIterable_ShouldProperlyInitialize_WhenProvidedDataSourceIsNull()
     {
         // Act
         var iterable = new PredefinedIterable<string>(null, null);
@@ -43,7 +29,7 @@ public class PredefinedIterableTests
 
 
     [TestCaseSource(nameof(_strings))]
-    public void IterableList_ShouldProperlyInitialize_WhenProvidedDataSourceIsNotNull(string[] strings)
+    public void PredefinedIterable_ShouldProperlyInitialize_WhenProvidedDataSourceIsNotNull(string[] strings)
     {
         // Act
         var iterable = new PredefinedIterable<string>(strings, null);

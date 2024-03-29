@@ -2,6 +2,7 @@
 using PluginAPI.Core;
 using PluginAPI.Core.Zones;
 using SLCommandScript.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -51,7 +52,8 @@ public static class RoomIterablesProvider
     /// </summary>
     /// <param name="targetVars">Dictionary to insert properties into.</param>
     /// <param name="room">Room to load properties from.</param>
-    private static void LoadVariables(IDictionary<string, string> targetVars, FacilityRoom room)
+    /// <exception cref="NullReferenceException">When provided object is <see langword="null"/>.</exception>
+    public static void LoadVariables(IDictionary<string, string> targetVars, FacilityRoom room)
     {
         targetVars["id"] = room.Identifier.Name.ToString();
         targetVars["zone"] = room.Zone.ZoneType.ToString();

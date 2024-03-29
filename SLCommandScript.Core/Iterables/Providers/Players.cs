@@ -1,6 +1,7 @@
 ﻿using PlayerRoles;
 using PluginAPI.Core;
 using SLCommandScript.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -82,7 +83,8 @@ public static class PlayerIterablesProvider
     /// </summary>
     /// <param name="targetVars">Dictionary to insert properties into.</param>
     /// <param name="player">Player to load properties from.</param>
-    private static void LoadVariables(IDictionary<string, string> targetVars, Player player)
+    /// <exception cref="NullReferenceException">When provided object is <see langword="null"/>.</exception>
+    public static void LoadVariables(IDictionary<string, string> targetVars, Player player)
     {
         targetVars["name"] = player.DisplayNickname;
         targetVars["id"] = player.PlayerId.ToString();
