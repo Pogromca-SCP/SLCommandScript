@@ -22,7 +22,7 @@ public class Plugin
     /// <summary>
     /// Contains current plugin version.
     /// </summary>
-    public const string PluginVersion = "0.6.0";
+    public const string PluginVersion = "0.7.0";
 
     /// <summary>
     /// Contains plugin description.
@@ -163,17 +163,17 @@ public class Plugin
     /// </summary>
     private void RegisterHelperCommands()
     {
-        if (!PluginConfig.EnableHelperCommands)
+        if (!PluginConfig.EnableHelperCommands || ScriptsLoaderConfig.AllowedScriptCommandTypes == 0)
         {
             return;
         }
         
         _helperCommands = new(_scriptsLoader);
-        var registered = CommandsUtils.RegisterCommand(CommandsUtils.AllScopes, _helperCommands);
+        var registered = CommandsUtils.RegisterCommand(ScriptsLoaderConfig.AllowedScriptCommandTypes, _helperCommands);
 
-        if (registered != CommandsUtils.AllScopes)
+        if (registered != ScriptsLoaderConfig.AllowedScriptCommandTypes)
         {
-            PrintError($"Could not register helper commands for {CommandsUtils.AllScopes ^ (registered ?? 0)}");
+            PrintError($"Could not register helper commands for {ScriptsLoaderConfig.AllowedScriptCommandTypes ^ (registered ?? 0)}");
         }
     }
 
@@ -187,11 +187,11 @@ public class Plugin
             return;
         }
 
-        var unregistered = CommandsUtils.UnregisterCommand(CommandsUtils.AllScopes, _helperCommands);
+        var unregistered = CommandsUtils.UnregisterCommand(ScriptsLoaderConfig.AllowedScriptCommandTypes, _helperCommands);
 
-        if (unregistered != CommandsUtils.AllScopes)
+        if (unregistered != ScriptsLoaderConfig.AllowedScriptCommandTypes)
         {
-            PrintError($"Could not unregister helper commands from {CommandsUtils.AllScopes ^ (unregistered ?? 0)}");
+            PrintError($"Could not unregister helper commands from {ScriptsLoaderConfig.AllowedScriptCommandTypes ^ (unregistered ?? 0)}");
         }
     }
 }

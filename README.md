@@ -36,7 +36,7 @@ This plugin was created using [official Northwood Plugin API](https://github.com
 | script_executions_limit      | int                         | 10                                | Defines a maximum amount of concurrent executions a single script can have, use it to set max recursion depth.       |
 
 ## Commands
-Commands from this plugin can be accessed from any console if `enable_helper_commands` config property is set to `true`.
+Commands from this plugin can be accessed from any console inluded in `allowed_script_command_types` if `enable_helper_commands` config property is set to `true`.
 | Command                              | Usage                        | Aliases | Description                                                                                                    |
 | ------------------------------------ | ---------------------------- | ------- | -------------------------------------------------------------------------------------------------------------- |
 | slcshelper <a name="slcshelper"></a> | [iterables/syntax] [Args...] |         | Provides helper subcommands for SLCommandScript. Displays environment info if no valid subcommand is selected. |
