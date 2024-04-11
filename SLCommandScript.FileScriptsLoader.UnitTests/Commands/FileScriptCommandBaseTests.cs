@@ -10,6 +10,8 @@ namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 [TestFixture]
 public class FileScriptCommandBaseTests
 {
+    private const string TestPath = "test.slcs";
+
     #region Error Flow Test Case Sources
     private static readonly string[][] _errorPaths = [
         ["xd", "Command 'xd' was not found\nat test.slcs:1"],
@@ -36,7 +38,7 @@ public class FileScriptCommandBaseTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new FileScriptCommandBase(null)
+        var result = new FileScriptCommandBase(null, null)
         {
             Description = null
         };
@@ -56,7 +58,7 @@ public class FileScriptCommandBaseTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new FileScriptCommandBase(null)
+        var result = new FileScriptCommandBase(null, null)
         {
             Description = "     "
         };
@@ -77,7 +79,7 @@ public class FileScriptCommandBaseTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new FileScriptCommandBase(null)
+        var result = new FileScriptCommandBase(null, null)
         {
             Description = newDesc
         };
@@ -99,7 +101,7 @@ public class FileScriptCommandBaseTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var action = () => new FileScriptCommandBase(null);
+        var action = () => new FileScriptCommandBase(null, null);
 
         // Assert
         action.Should().Throw<Exception>();
@@ -117,12 +119,14 @@ public class FileScriptCommandBaseTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new FileScriptCommandBase(null);
+        var result = new FileScriptCommandBase(null, null);
 
         // Assert
         result.Command.Should().Be(testName);
         result.Aliases.Should().BeNull();
         result.Description.Should().Be(FileScriptCommandBase.DefaultDescription);
+        result.Location.Should().BeNull();
+        result.Path.Should().BeNull();
         fileSystemMock.VerifyAll();
         fileSystemMock.VerifyNoOtherCalls();
     }
@@ -137,7 +141,7 @@ public class FileScriptCommandBaseTests
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
-        var cmd = new FileScriptCommandBase(null);
+        var cmd = new FileScriptCommandBase(null, null);
 
         // Act
         var result = cmd.Execute(new(), null, out var message);
@@ -154,11 +158,11 @@ public class FileScriptCommandBaseTests
     {
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        fileSystemMock.Setup(x => x.ReadFile(null)).Throws(new Exception());
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(TestPath)).Returns("test");
+        fileSystemMock.Setup(x => x.ReadFile(TestPath)).Throws(new Exception());
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 1;
-        var cmd = new FileScriptCommandBase(null);
+        var cmd = new FileScriptCommandBase(null, TestPath);
 
         // Act
         var result = cmd.Execute(new(), null, out var message);
@@ -175,11 +179,11 @@ public class FileScriptCommandBaseTests
     {
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        fileSystemMock.Setup(x => x.ReadFile(null)).Returns(src);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(TestPath)).Returns("test");
+        fileSystemMock.Setup(x => x.ReadFile(TestPath)).Returns(src);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 1;
-        var cmd = new FileScriptCommandBase(null);
+        var cmd = new FileScriptCommandBase(null, TestPath);
 
         // Act
         var result = cmd.Execute(new(), null, out var message);
@@ -196,11 +200,11 @@ public class FileScriptCommandBaseTests
     {
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        fileSystemMock.Setup(x => x.ReadFile(null)).Returns(src);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(TestPath)).Returns("test");
+        fileSystemMock.Setup(x => x.ReadFile(TestPath)).Returns(src);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 1;
-        var cmd = new FileScriptCommandBase(null);
+        var cmd = new FileScriptCommandBase(null, TestPath);
 
         // Act
         var result = cmd.Execute(new(), null, out var message);

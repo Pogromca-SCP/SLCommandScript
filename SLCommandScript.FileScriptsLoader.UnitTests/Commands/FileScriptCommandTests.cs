@@ -19,7 +19,7 @@ public class FileScriptCommandTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new FileScriptCommand(null)
+        var result = new FileScriptCommand(null, null)
         {
             Usage = null
         };
@@ -38,7 +38,7 @@ public class FileScriptCommandTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new FileScriptCommand(null)
+        var result = new FileScriptCommand(null, null)
         {
             Usage = []
         };
@@ -57,7 +57,7 @@ public class FileScriptCommandTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new FileScriptCommand(null)
+        var result = new FileScriptCommand(null, null)
         {
             Usage = ["", "       ", null, "\t\t"]
         };
@@ -77,7 +77,7 @@ public class FileScriptCommandTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new FileScriptCommand(null)
+        var result = new FileScriptCommand(null, null)
         {
             Usage = usage
         };
@@ -91,17 +91,45 @@ public class FileScriptCommandTests
 
     #region Execute Tests
     [Test]
-    public void Execute_ShouldFail_WhenSenderIsMissingRequiredPermission()
+    public void Execute_ShouldFail_WhenPermissionCheckFails()
     {
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
         var message = "bottom text";
+        resolverMock.Setup(x => x.CheckPermission(null, "Noclip", out message)).Returns(true);
+        FileScriptCommandBase.PermissionsResolver = resolverMock.Object;
+
+        var cmd = new FileScriptCommand(null, null)
+        {
+            RequiredPermissions = ["Noclip"]
+        };
+
+        // Act
+        var result = cmd.Execute(new(), null, out message);
+
+        // Assert
+        result.Should().BeFalse();
+        message.Should().Be("bottom text");
+        fileSystemMock.VerifyAll();
+        fileSystemMock.VerifyNoOtherCalls();
+        resolverMock.VerifyAll();
+        resolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void Execute_ShouldFail_WhenSenderIsMissingRequiredPermission()
+    {
+        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
+        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
+        var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
+        string message = null;
         resolverMock.Setup(x => x.CheckPermission(null, "Noclip", out message)).Returns(false);
         FileScriptCommandBase.PermissionsResolver = resolverMock.Object;
 
-        var cmd = new FileScriptCommand(null)
+        var cmd = new FileScriptCommand(null, null)
         {
             RequiredPermissions = ["Noclip"]
         };
@@ -125,7 +153,7 @@ public class FileScriptCommandTests
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
-        var cmd = new FileScriptCommand(null)
+        var cmd = new FileScriptCommand(null, null)
         {
             Arity = 1
         };
@@ -146,10 +174,10 @@ public class FileScriptCommandTests
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        fileSystemMock.Setup(x => x.ReadFile(null)).Returns(string.Empty);
+        fileSystemMock.Setup(x => x.ReadFile(string.Empty)).Returns(string.Empty);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 1;
-        var cmd = new FileScriptCommand(null);
+        var cmd = new FileScriptCommand(null, null);
 
         // Act
         var result = cmd.Execute(new(), null, out var message);

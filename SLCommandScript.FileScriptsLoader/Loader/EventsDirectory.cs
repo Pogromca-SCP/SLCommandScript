@@ -102,12 +102,20 @@ public class EventsDirectory : IDisposable
     }
 
     /// <summary>
+    /// Processes and formats directory path.
+    /// </summary>
+    /// <param name="path">Path to process.</param>
+    /// <returns>Processed path.</returns>
+    private string ProcessDirectoryPath(string path) =>
+        path.Length > Watcher.Directory.Length ? path.Substring(Watcher.Directory.Length).Replace('\\', '/') : string.Empty;
+
+    /// <summary>
     /// Registers an event.
     /// </summary>
     /// <param name="scriptFile">Event script file to register.</param>
     private void RegisterEvent(string scriptFile)
     {
-        var cmd = new FileScriptCommandBase(scriptFile);
+        var cmd = new FileScriptCommandBase(Watcher.Directory, ProcessDirectoryPath(scriptFile));
         var name = cmd.Command;
 
         if (name.Length > EventHandlerPrefix.Length && name.StartsWith(EventHandlerPrefix, StringComparison.OrdinalIgnoreCase))

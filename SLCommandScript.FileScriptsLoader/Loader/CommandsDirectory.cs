@@ -120,7 +120,7 @@ public class CommandsDirectory : IDisposable
     /// <param name="path">Path to process.</param>
     /// <returns>Processed path.</returns>
     private string ProcessDirectoryPath(string path) =>
-        path.Length > Watcher.Directory.Length ? path.Substring(Watcher.Directory.Length).Replace('\\', '/').TrimStart('/') : string.Empty;
+        path.Length > Watcher.Directory.Length ? path.Substring(Watcher.Directory.Length).Replace('\\', '/') : string.Empty;
 
     /// <summary>
     /// Loads initial files and directories.
@@ -139,7 +139,7 @@ public class CommandsDirectory : IDisposable
 
         foreach (var path in HelpersProvider.FileSystemHelper.EnumerateFiles(Watcher.Directory, EventsDirectory.ScriptFilesFilter, SearchOption.AllDirectories))
         {
-            RegisterCommand(path, new FileScriptCommand(path));
+            RegisterCommand(path, new FileScriptCommand(Watcher.Directory, ProcessDirectoryPath(path)));
         }
 
         foreach (var path in HelpersProvider.FileSystemHelper.EnumerateFiles(Watcher.Directory, DescriptionFilesFilter, SearchOption.AllDirectories))
@@ -170,7 +170,7 @@ public class CommandsDirectory : IDisposable
 
         if (ext.Equals(ScriptFileExtension, StringComparison.OrdinalIgnoreCase))
         {
-            RegisterCommand(path, new FileScriptCommand(path));
+            RegisterCommand(path, new FileScriptCommand(Watcher.Directory, ProcessDirectoryPath(path)));
             return;
         }
 
@@ -311,9 +311,8 @@ public class CommandsDirectory : IDisposable
         var hasParent = CheckParent(dir);
         var name = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(path);
         var displayName = dir.Length > 0 ? $"{dir}/{name}" : name;
-        var cmd = GetCommand(hasParent, dir, name) as FileScriptCommand;
 
-        if (cmd is null)
+        if (GetCommand(hasParent, dir, name) is not FileScriptCommand cmd)
         {
             FileScriptsLoader.PrintError($"Could not update description for command '{displayName}' in {HandlerType}.");
             return false;

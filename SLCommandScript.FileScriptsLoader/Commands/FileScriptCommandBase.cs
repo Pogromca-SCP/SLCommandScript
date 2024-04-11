@@ -11,8 +11,7 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// <summary>
 /// Base class for script executing commands.
 /// </summary>
-/// <param name="file">Path to associated script.</param>
-public class FileScriptCommandBase(string file) : ICommand
+public class FileScriptCommandBase : ICommand
 {
     /// <summary>
     /// Default command description to use.
@@ -37,7 +36,7 @@ public class FileScriptCommandBase(string file) : ICommand
     /// <summary>
     /// Contains command name.
     /// </summary>
-    public string Command { get; } = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(file);
+    public string Command { get; }
 
     /// <summary>
     /// Defines command aliases.
@@ -50,19 +49,39 @@ public class FileScriptCommandBase(string file) : ICommand
     public string Description { get => _desc; set => _desc = string.IsNullOrWhiteSpace(value) ? DefaultDescription : value; }
 
     /// <summary>
-    /// Holds full path to script file.
+    /// Root location where the shortened file path starts from.
     /// </summary>
-    private readonly string _file = file;
+    public string Location { get; }
+
+    /// <summary>
+    /// Contains shortened file path.
+    /// </summary>
+    public string Path { get; }
 
     /// <summary>
     /// Contains command description.
     /// </summary>
-    private string _desc = DefaultDescription;
+    private string _desc;
 
     /// <summary>
     /// Contains script calls counter.
     /// </summary>
-    private int _calls = 0;
+    private int _calls;
+
+    /// <summary>
+    /// Initializes the command.
+    /// </summary>
+    /// <param name="location">Root location where the used path starts from.</param>
+    /// <param name="path">Path to use.</param>
+    public FileScriptCommandBase(string location, string path)
+    {
+        Location = location;
+        Path = path;
+        var index = path?.LastIndexOf('/') ?? -1;
+        Command = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(index < 0 ? path : path.Substring(index + 1));
+        _desc = DefaultDescription;
+        _calls = 0;
+    }
 
     /// <summary>
     /// Executes the command.
@@ -85,7 +104,7 @@ public class FileScriptCommandBase(string file) : ICommand
         if (src is null)
         {
             Interlocked.Decrement(ref _calls);
-            response = $"Cannot read script from file '{Command}.slcs'";
+            response = $"Cannot read script from file '{Path}'";
             return false;
         }
 
@@ -111,7 +130,7 @@ public class FileScriptCommandBase(string file) : ICommand
         {
             try
             {
-                src = HelpersProvider.FileSystemHelper.ReadFile(_file);
+                src = HelpersProvider.FileSystemHelper.ReadFile($"{Location}{Path}");
             }
             catch (Exception)
             {

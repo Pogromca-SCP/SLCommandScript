@@ -114,10 +114,10 @@ public class EventsDirectoryTests
     {
         // Arrange
         var watcherMock = MakeWatcherMock();
-        var fileSystemMock = MakeFilesHelper(["panabe", "xd", "bad"]);
+        var fileSystemMock = MakeFilesHelper([$"{_testDirectory}\\panabe", $"{_testDirectory}\\xd", "bad"]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension("panabe")).Returns(ServerEventType.ItemSpawned.ToString());
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension("xd")).Returns(ServerEventType.MapGenerated.ToString());
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension("bad")).Returns(string.Empty);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(string.Empty)).Returns(string.Empty);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
@@ -196,10 +196,10 @@ public class EventsDirectoryTests
         // Arrange
         var watcherMock = MakeWatcherMock();
         watcherMock.Setup(x => x.Dispose());
-        var fileSystemMock = MakeFilesHelper(["panabe", "xd", "bad"]);
+        var fileSystemMock = MakeFilesHelper([$"{_testDirectory}\\panabe", $"{_testDirectory}\\xd", "bad"]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension("panabe")).Returns(ServerEventType.ItemSpawned.ToString());
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension("xd")).Returns(ServerEventType.MapGenerated.ToString());
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension("bad")).Returns(string.Empty);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(string.Empty)).Returns(string.Empty);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         var dir = new EventsDirectory(_plugin, watcherMock.Object);
 
@@ -224,7 +224,7 @@ public class EventsDirectoryTests
         // Arrange
         var watcherMock = MakeWatcherMock();
         var fileSystemMock = MakeFilesHelper([]);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         var dir = new EventsDirectory(null, watcherMock.Object);
 
@@ -245,7 +245,7 @@ public class EventsDirectoryTests
         // Arrange
         var watcherMock = MakeWatcherMock();
         var fileSystemMock = MakeFilesHelper([]);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         var dir = new EventsDirectory(null, watcherMock.Object);
 
@@ -267,7 +267,7 @@ public class EventsDirectoryTests
         // Arrange
         var watcherMock = MakeWatcherMock();
         var fileSystemMock = MakeFilesHelper([]);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         var dir = new EventsDirectory(null, watcherMock.Object);
         dir.Handler.EventScripts.Add(key, null);
@@ -361,6 +361,7 @@ public class EventsDirectoryTests
         var watcherMock = MakeWatcherMock();
         var fileSystemMock = MakeFilesHelper([]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         var dir = new EventsDirectory(null, watcherMock.Object);
         dir.Handler.EventScripts.Add(key, null);
@@ -384,6 +385,7 @@ public class EventsDirectoryTests
         var watcherMock = MakeWatcherMock();
         var fileSystemMock = MakeFilesHelper([]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         var dir = new EventsDirectory(null, watcherMock.Object);
         dir.Handler.EventScripts.Add(key, null);
@@ -407,7 +409,7 @@ public class EventsDirectoryTests
         var watcherMock = MakeWatcherMock();
         var fileSystemMock = MakeFilesHelper([]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\XD{name}")).Returns(string.Empty);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"XD{name}")).Returns(string.Empty);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         var dir = new EventsDirectory(null, watcherMock.Object);
         dir.Handler.EventScripts.Add(key, null);
@@ -429,7 +431,7 @@ public class EventsDirectoryTests
         // Arrange
         var watcherMock = MakeWatcherMock();
         var fileSystemMock = MakeFilesHelper([]);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\XD{name}")).Returns(string.Empty);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         var dir = new EventsDirectory(null, watcherMock.Object);

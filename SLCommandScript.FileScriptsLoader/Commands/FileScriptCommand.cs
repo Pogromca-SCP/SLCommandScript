@@ -8,8 +8,9 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// <summary>
 /// Script command used to launch interpreted scripts.
 /// </summary>
-/// <param name="file">Path to associated script.</param>
-public class FileScriptCommand(string file) : FileScriptCommandBase(file), IUsageProvider
+/// <param name="location">Root location where the used path starts from.</param>
+/// <param name="path">Path to associated script.</param>
+public class FileScriptCommand(string location, string path) : FileScriptCommandBase(location, path), IUsageProvider
 {
     /// <summary>
     /// Describes command arguments usage.
@@ -60,7 +61,14 @@ public class FileScriptCommand(string file) : FileScriptCommandBase(file), IUsag
 
             foreach (var perm in RequiredPermissions)
             {
-                if (!resolver.CheckPermission(sender, perm, out _))
+                var hasPerm = resolver.CheckPermission(sender, perm, out response);
+
+                if (response is not null)
+                {
+                    return false;
+                }
+
+                if (!hasPerm)
                 {
                     response = $"Missing permission: '{perm}'. Access denied";
                     return false;
