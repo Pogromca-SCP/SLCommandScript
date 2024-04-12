@@ -58,7 +58,7 @@ public class Interpreter : IExprVisitor<bool>
     /// <returns>Task representing async operation.</returns>
     private static async Task ExecuteDelayExprAsync(Interpreter interp, DelayExpr expr)
     {
-        await Task.Delay(expr.Duration).ConfigureAwait(false);
+        await Task.Delay(expr.Duration);
         var result = expr.Body.Accept(interp);
 
         if (!result)
