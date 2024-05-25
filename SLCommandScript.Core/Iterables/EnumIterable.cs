@@ -24,9 +24,7 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     /// <returns>Iterable object for specific enum.</returns>
     public static EnumIterable<TEnum> GetWithNone() => new(true);
 
-    /// <summary>
-    /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
-    /// </summary>
+    /// <inheritdoc />
     public bool IsAtEnd
     {
         get
@@ -58,9 +56,7 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
         }
     }
 
-    /// <summary>
-    /// Current amount of elements.
-    /// </summary>
+    /// <inheritdoc />
     public int Count => _values is null ? 0 : _values.Length;
 
     /// <summary>
@@ -83,11 +79,7 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     /// </summary>
     private int _current = 0;
 
-    /// <summary>
-    /// Performs next iteration step and loads new property values into provided dictionary.
-    /// </summary>
-    /// <param name="targetVars">Dictionary to insert properties into.</param>
-    /// <returns><see langword="true" /> if the iteration can continue, <see langword="false" /> otherwise.</returns>
+    /// <inheritdoc />
     public bool LoadNext(IDictionary<string, string> targetVars)
     {
         if (IsAtEnd)
@@ -104,36 +96,23 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
         return true;
     }
 
-    /// <summary>
-    /// Randomizes contained elements.
-    /// </summary>
+    /// <inheritdoc />
     public void Randomize() => Randomize(new RandomSettings(-1));
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="amount">Amount of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(int amount) => Randomize(new RandomSettings(amount));
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="amount">Percentage of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(float amount) => Randomize(new RandomSettings(amount));
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="settings">Settings to use for randomization, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(RandomSettings settings)
     {
         _values = null;
         _randomSettings = settings;
     }
 
-    /// <summary>
-    /// Resets iteration process.
-    /// </summary>
+    /// <inheritdoc />
     public void Reset()
     {
         if (_values is not null)

@@ -63,19 +63,13 @@ public class FileScriptsLoader : IScriptsLoader
     /// <returns>Newly created file watcher.</returns>
     private static FileSystemWatcherHelper CreateWatcher(string path, string filter, bool includeSubdirectories) => new(path, filter, includeSubdirectories);
 
-    /// <summary>
-    /// Contains loader name to display.
-    /// </summary>
+    /// <inheritdoc />
     public string LoaderName => ProjectName;
 
-    /// <summary>
-    /// Contains current loader version.
-    /// </summary>
+    /// <inheritdoc />
     public string LoaderVersion => ProjectVersion;
 
-    /// <summary>
-    /// Contains loader author.
-    /// </summary>
+    /// <inheritdoc />
     public string LoaderAuthor => ProjectAuthor;
 
     /// <summary>
@@ -88,12 +82,7 @@ public class FileScriptsLoader : IScriptsLoader
     /// </summary>
     private EventsDirectory _eventsDirectory;
 
-    /// <summary>
-    /// Initializes scripts loader and loads the scripts.
-    /// </summary>
-    /// <param name="plugin">Plugin object.</param>
-    /// <param name="handler">Plugin handler object.</param>
-    /// <param name="loaderConfig">Scripts loader configuration to use.</param>
+    /// <inheritdoc />
     public void InitScriptsLoader(object plugin, PluginHandler handler, ScriptsLoaderConfig loaderConfig)
     {
         if (plugin is null)
@@ -133,9 +122,7 @@ public class FileScriptsLoader : IScriptsLoader
     /// </summary>
     ~FileScriptsLoader() => PerformCleanup();
 
-    /// <summary>
-    /// Releases resources.
-    /// </summary>
+    /// <inheritdoc />
     public void Dispose()
     {
         PerformCleanup();

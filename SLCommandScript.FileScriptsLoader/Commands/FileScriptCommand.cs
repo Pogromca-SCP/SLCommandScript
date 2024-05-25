@@ -46,13 +46,7 @@ public class FileScriptCommand(string location, string path) : FileScriptCommand
     /// </summary>
     private string[] _usage = null;
 
-    /// <summary>
-    /// Executes the command.
-    /// </summary>
-    /// <param name="arguments">Command arguments provided by sender.</param>
-    /// <param name="sender">Command sender.</param>
-    /// <param name="response">Response to display in sender's console.</param>
-    /// <returns><see langword="true" /> if command executed successfully, <see langword="false" /> otherwise.</returns>
+    /// <inheritdoc />
     public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
         if (RequiredPermissions is not null && RequiredPermissions.Length > 0)

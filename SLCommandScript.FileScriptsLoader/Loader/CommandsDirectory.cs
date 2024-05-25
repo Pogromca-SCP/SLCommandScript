@@ -92,9 +92,7 @@ public class CommandsDirectory : IDisposable
     /// </summary>
     ~CommandsDirectory() => DisposeAndUnregisterCommands();
 
-    /// <summary>
-    /// Releases resources.
-    /// </summary>
+    /// <inheritdoc />
     public void Dispose()
     {
         DisposeAndUnregisterCommands();

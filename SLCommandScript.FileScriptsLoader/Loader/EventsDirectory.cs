@@ -77,9 +77,7 @@ public class EventsDirectory : IDisposable
     /// </summary>
     ~EventsDirectory() => DisposeAndUnregisterEvents();
 
-    /// <summary>
-    /// Releases resources.
-    /// </summary>
+    /// <inheritdoc />
     public void Dispose()
     {
         DisposeAndUnregisterEvents();

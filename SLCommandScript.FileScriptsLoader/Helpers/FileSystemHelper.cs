@@ -79,67 +79,30 @@ public interface IFileSystemHelper
 /// </summary>
 public class FileSystemHelper : IFileSystemHelper
 {
-    /// <summary>
-    /// Checks if provided path is a directory.
-    /// </summary>
-    /// <param name="path">Path to check.</param>
-    /// <returns><see langword="true" /> if path is directory, <see langword="false" /> otherwise.</returns>
+    /// <inheritdoc />
     public bool DirectoryExists(string path) => Directory.Exists(path);
 
-    /// <summary>
-    /// Creates new directory.
-    /// </summary>
-    /// <param name="path">Directory to create.</param>
+    /// <inheritdoc />
     public void CreateDirectory(string path) => Directory.CreateDirectory(path);
 
-    /// <summary>
-    /// Returns the directory the specified path resides in.
-    /// </summary>
-    /// <param name="path">The path of the file.</param>
-    /// <returns>The directory the specified path resides in.</returns>
+    /// <inheritdoc />
     public string GetDirectory(string path) => Path.GetDirectoryName(path);
 
-    /// <summary>
-    /// Returns the file extension of the specified path.
-    /// </summary>
-    /// <param name="path">The path of the file.</param>
-    /// <returns>The file extension.</returns>
+    /// <inheritdoc />
     public string GetFileExtension(string path) => Path.GetExtension(path);
 
-    /// <summary>
-    /// Returns the file name of the specified path without the extension.
-    /// </summary>
-    /// <param name="path">The path of the file.</param>
-    /// <returns>The file name without extension.</returns>
+    /// <inheritdoc />
     public string GetFileNameWithoutExtension(string path) => Path.GetFileNameWithoutExtension(path);
 
-    /// <summary>
-    /// Reads all the text in the file.
-    /// </summary>
-    /// <param name="path"> The file to read from.</param>
-    /// <returns>A string containing all the text in the file.</returns>
+    /// <inheritdoc />
     public string ReadFile(string path) => File.ReadAllText(path);
 
-    /// <summary>
-    /// Reads command metadata from a json file.
-    /// </summary>
-    /// <param name="path">The file to read from.</param>
-    /// <returns>Loaded command metadata.</returns>
+    /// <inheritdoc />
     public CommandMetaData ReadMetadataFromJson(string path) => JsonSerialize.FromFile<CommandMetaData>(path);
 
-    /// <summary>
-    /// Returns an enumerable collection of  directories in a specified path.
-    /// </summary>
-    /// <param name="path">The path to the directory to search.</param>
-    /// <returns>An enumerable collection of the full names (including paths) for the directories in the directory.</returns>
+    /// <inheritdoc />
     public IEnumerable<string> EnumerateDirectories(string path) => Directory.EnumerateDirectories(path);
 
-    /// <summary>
-    /// Returns an enumerable collection of file names that match a search pattern in a specified path.
-    /// </summary>
-    /// <param name="path">The path to the directory to search.</param>
-    /// <param name="searchPattern">The search string to match against the names of files in path.</param>
-    /// <param name="searchOption">Specifies whether the search operation should include only the current directory or should include all subdirectories.</param>
-    /// <returns>An enumerable collection of the full names (including paths) for the files in the directory.</returns>
+    /// <inheritdoc />
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption) => Directory.EnumerateFiles(path, searchPattern, searchOption);
 }

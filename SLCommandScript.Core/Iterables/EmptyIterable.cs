@@ -13,48 +13,27 @@ public class EmptyIterable : IIterable
     /// </summary>
     public static EmptyIterable Instance { get; } = new();
 
-    /// <summary>
-    /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
-    /// </summary>
+    /// <inheritdoc />
     public bool IsAtEnd => true;
 
-    /// <summary>
-    /// Current amount of elements.
-    /// </summary>
+    /// <inheritdoc />
     public int Count => 0;
 
-    /// <summary>
-    /// Performs next iteration step and loads new property values into provided dictionary.
-    /// </summary>
-    /// <param name="targetVars">Dictionary to insert properties into.</param>
-    /// <returns><see langword="true" /> if the iteration can continue, <see langword="false" /> otherwise.</returns>
+    /// <inheritdoc />
     public bool LoadNext(IDictionary<string, string> targetVars) => false;
 
-    /// <summary>
-    /// Randomizes contained elements.
-    /// </summary>
+    /// <inheritdoc />
     public void Randomize() {}
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="amount">Amount of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(int amount) {}
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="amount">Percentage of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(float amount) {}
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="settings">Settings to use for randomization, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(RandomSettings settings) {}
 
-    /// <summary>
-    /// Resets iteration process.
-    /// </summary>
+    /// <inheritdoc />
     public void Reset() {}
 }

@@ -49,34 +49,22 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
     /// </summary>
     private readonly FileSystemWatcher _watcher;
 
-    /// <summary>
-    /// Contains watched directory.
-    /// </summary>
+    /// <inheritdoc />
     public string Directory => _watcher.Path;
 
-    /// <summary>
-    /// Event invoked on file creation.
-    /// </summary>
+    /// <inheritdoc />
     public event FileSystemEventHandler Created { add => _watcher.Created += value; remove => _watcher.Created -= value; }
 
-    /// <summary>
-    /// Event invoked on file change.
-    /// </summary>
+    /// <inheritdoc />
     public event FileSystemEventHandler Changed { add => _watcher.Changed += value; remove => _watcher.Changed -= value; }
 
-    /// <summary>
-    /// Event invoked on file renaming.
-    /// </summary>
+    /// <inheritdoc />
     public event RenamedEventHandler Renamed { add => _watcher.Renamed += value; remove => _watcher.Renamed -= value; }
 
-    /// <summary>
-    /// Event invoked on file deletion.
-    /// </summary>
+    /// <inheritdoc />
     public event FileSystemEventHandler Deleted { add => _watcher.Deleted += value; remove => _watcher.Deleted -= value; }
 
-    /// <summary>
-    /// Event invoked on error.
-    /// </summary>
+    /// <inheritdoc />
     public event ErrorEventHandler Error { add => _watcher.Error += value; remove => _watcher.Error -= value; }
 
     /// <summary>
@@ -101,9 +89,7 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
     /// </summary>
     ~FileSystemWatcherHelper() => DisposeWatcher();
 
-    /// <summary>
-    /// Releases resources.
-    /// </summary>
+    /// <inheritdoc />
     public void Dispose()
     {
         DisposeWatcher();

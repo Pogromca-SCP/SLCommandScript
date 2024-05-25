@@ -13,9 +13,7 @@ namespace SLCommandScript.Core.Iterables;
 /// <param name="mapper">Variable mapper to use to load variables.</param>
 public class IterableList<TItem>(Func<IEnumerable<TItem>> source, Action<IDictionary<string, string>, TItem> mapper) : IIterable
 {
-    /// <summary>
-    /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
-    /// </summary>
+    /// <inheritdoc />
     public bool IsAtEnd
     {
         get
@@ -50,9 +48,7 @@ public class IterableList<TItem>(Func<IEnumerable<TItem>> source, Action<IDictio
         }
     }
 
-    /// <summary>
-    /// Current amount of elements.
-    /// </summary>
+    /// <inheritdoc />
     public int Count { get; private set; } = 0;
 
     /// <summary>
@@ -85,11 +81,7 @@ public class IterableList<TItem>(Func<IEnumerable<TItem>> source, Action<IDictio
     /// </summary>
     private int _current = 0;
 
-    /// <summary>
-    /// Performs next iteration step and loads new property values into provided dictionary.
-    /// </summary>
-    /// <param name="targetVars">Dictionary to insert properties into.</param>
-    /// <returns><see langword="true" /> if the iteration can continue, <see langword="false" /> otherwise.</returns>
+    /// <inheritdoc />
     public bool LoadNext(IDictionary<string, string> targetVars)
     {
         if (IsAtEnd)
@@ -108,27 +100,16 @@ public class IterableList<TItem>(Func<IEnumerable<TItem>> source, Action<IDictio
         return true;
     }
 
-    /// <summary>
-    /// Randomizes contained elements.
-    /// </summary>
+    /// <inheritdoc />
     public void Randomize() => Randomize(new RandomSettings(-1));
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="amount">Amount of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(int amount) => Randomize(new RandomSettings(amount));
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="amount">Percentage of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(float amount) => Randomize(new RandomSettings(amount));
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="settings">Settings to use for randomization, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(RandomSettings settings)
     {
         Count = 0;
@@ -137,9 +118,7 @@ public class IterableList<TItem>(Func<IEnumerable<TItem>> source, Action<IDictio
         _randomSettings = settings;
     }
 
-    /// <summary>
-    /// Resets iteration process.
-    /// </summary>
+    /// <inheritdoc />
     public void Reset()
     {
         _enumerator = _objects?.GetEnumerator();

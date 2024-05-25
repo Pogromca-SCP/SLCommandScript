@@ -10,14 +10,10 @@ namespace SLCommandScript.Core.Iterables;
 /// <typeparam name="TItem">Type of contained objects.</typeparam>
 public class SingleItemIterable<TItem> : IIterable
 {
-    /// <summary>
-    /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
-    /// </summary>
+    /// <inheritdoc />
     public bool IsAtEnd { get; private set; }
 
-    /// <summary>
-    /// Current amount of elements.
-    /// </summary>
+    /// <inheritdoc />
     public int Count { get; }
 
     /// <summary>
@@ -63,11 +59,7 @@ public class SingleItemIterable<TItem> : IIterable
         _item = item;
     }
 
-    /// <summary>
-    /// Performs next iteration step and loads new property values into provided dictionary.
-    /// </summary>
-    /// <param name="targetVars">Dictionary to insert properties into.</param>
-    /// <returns><see langword="true" /> if the iteration can continue, <see langword="false" /> otherwise.</returns>
+    /// <inheritdoc />
     public bool LoadNext(IDictionary<string, string> targetVars)
     {
         if (IsAtEnd)
@@ -89,31 +81,18 @@ public class SingleItemIterable<TItem> : IIterable
         return true;
     }
 
-    /// <summary>
-    /// Randomizes contained elements.
-    /// </summary>
+    /// <inheritdoc />
     public void Randomize() => Reset();
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="amount">Amount of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(int amount) => Reset();
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="amount">Percentage of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(float amount) => Reset();
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="settings">Settings to use for randomization, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(RandomSettings settings) => Reset();
 
-    /// <summary>
-    /// Resets iteration process.
-    /// </summary>
+    /// <inheritdoc />
     public void Reset() => IsAtEnd = Count == 0;
 }

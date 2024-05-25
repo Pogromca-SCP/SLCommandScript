@@ -13,14 +13,10 @@ namespace SLCommandScript.Core.Iterables;
 /// <param name="mapper">Variable mapper to use to load variables.</param>
 public class PredefinedIterable<TItem>(IEnumerable<TItem> source, Action<IDictionary<string, string>, TItem> mapper) : IIterable
 {
-    /// <summary>
-    /// <see langword="true" /> if last object was reached, <see langword="false" /> otherwise.
-    /// </summary>
+    /// <inheritdoc />
     public bool IsAtEnd => _source is null || _current >= Count;
 
-    /// <summary>
-    /// Current amount of elements.
-    /// </summary>
+    /// <inheritdoc />
     public int Count { get; } = source?.Count() ?? 0;
 
     /// <summary>
@@ -43,11 +39,7 @@ public class PredefinedIterable<TItem>(IEnumerable<TItem> source, Action<IDictio
     /// </summary>
     private int _current = 0;
 
-    /// <summary>
-    /// Performs next iteration step and loads new property values into provided dictionary.
-    /// </summary>
-    /// <param name="targetVars">Dictionary to insert properties into.</param>
-    /// <returns><see langword="true" /> if the iteration can continue, <see langword="false" /> otherwise.</returns>
+    /// <inheritdoc />
     public bool LoadNext(IDictionary<string, string> targetVars)
     {
         if (IsAtEnd)
@@ -66,32 +58,19 @@ public class PredefinedIterable<TItem>(IEnumerable<TItem> source, Action<IDictio
         return true;
     }
 
-    /// <summary>
-    /// Randomizes contained elements.
-    /// </summary>
+    /// <inheritdoc />
     public void Randomize() => Reset();
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="amount">Amount of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(int amount) => Reset();
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="amount">Percentage of random elements to select from iterable object, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(float amount) => Reset();
 
-    /// <summary>
-    /// Randomizes contained elements and limits their amount.
-    /// </summary>
-    /// <param name="settings">Settings to use for randomization, negative values disable the limit, zero disables randomization.</param>
+    /// <inheritdoc />
     public void Randomize(RandomSettings settings) => Reset();
 
-    /// <summary>
-    /// Resets iteration process.
-    /// </summary>
+    /// <inheritdoc />
     public void Reset()
     {
         _enumerator = _source?.GetEnumerator();

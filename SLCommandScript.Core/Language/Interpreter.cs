@@ -117,11 +117,7 @@ public class Interpreter : IExprVisitor<bool>
     #endregion
 
     #region Expressions Processing
-    /// <summary>
-    /// Visits a command expression.
-    /// </summary>
-    /// <param name="expr">Expression to visit.</param>
-    /// <returns>Result value of the visit.</returns>
+    /// <inheritdoc />
     public bool VisitCommandExpr(CommandExpr expr)
     {
         if (expr is null)
@@ -159,11 +155,7 @@ public class Interpreter : IExprVisitor<bool>
         return result;
     }
 
-    /// <summary>
-    /// Visits a delay expression.
-    /// </summary>
-    /// <param name="expr">Expression to visit.</param>
-    /// <returns>Result value of the visit.</returns>
+    /// <inheritdoc />
     public bool VisitDelayExpr(DelayExpr expr)
     {
         if (expr is null)
@@ -187,11 +179,7 @@ public class Interpreter : IExprVisitor<bool>
         return true;
     }
 
-    /// <summary>
-    /// Visits a foreach expression.
-    /// </summary>
-    /// <param name="expr">Expression to visit.</param>
-    /// <returns>Result value of the visit.</returns>
+    /// <inheritdoc />
     public bool VisitForeachExpr(ForeachExpr expr)
     {
         if (expr is null)
@@ -229,11 +217,7 @@ public class Interpreter : IExprVisitor<bool>
         return true;
     }
 
-    /// <summary>
-    /// Visits a for else expression.
-    /// </summary>
-    /// <param name="expr">Expression to visit.</param>
-    /// <returns>Result value of the visit.</returns>
+    /// <inheritdoc />
     public bool VisitForElseExpr(ForElseExpr expr)
     {
         if (expr is null)
@@ -281,11 +265,7 @@ public class Interpreter : IExprVisitor<bool>
         return true;
     }
 
-    /// <summary>
-    /// Visits an if expression.
-    /// </summary>
-    /// <param name="expr">Expression to visit.</param>
-    /// <returns>Result value of the visit.</returns>
+    /// <inheritdoc />
     public bool VisitIfExpr(IfExpr expr)
     {
         if (expr is null)
@@ -319,11 +299,7 @@ public class Interpreter : IExprVisitor<bool>
         }
     }
 
-    /// <summary>
-    /// Visits a sequence expression.
-    /// </summary>
-    /// <param name="expr">Expression to visit.</param>
-    /// <returns>Result value of the visit.</returns>
+    /// <inheritdoc />
     public bool VisitSequenceExpr(SequenceExpr expr)
     {
         if (expr is null)
