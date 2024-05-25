@@ -15,7 +15,8 @@ public static class RangesProvider
     /// <param name="start">First number to include.</param>
     /// <param name="end">Last number to include.</param>
     /// <returns>Iterable object for specific range.</returns>
-    public static IIterable StandardRange(int start, int end) => new IterableList<int>(() => GetRange(start, end), LoadVariables);
+    public static IIterable StandardRange(int start, int end) =>
+        start == end ? new SingleItemIterable<int>(start, LoadVariables) : new IterableList<int>(() => GetRange(start, end), LoadVariables);
 
     /// <summary>
     /// Loads number value and inserts it into a dictionary.
