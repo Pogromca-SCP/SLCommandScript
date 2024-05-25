@@ -7,7 +7,7 @@ using System.Linq;
 namespace SLCommandScript.Core.UnitTests.Iterables;
 
 [TestFixture]
-public class IterableListTests
+public class ListIterableTests
 {
     private static void Inject(IDictionary<string, string> target, string item)
     {
@@ -34,7 +34,7 @@ public class IterableListTests
     public void IterableList_ShouldProperlyInitialize_WhenProvidedDataSourceIsNull()
     {
         // Act
-        var iterable = new IterableList<string>(null, null);
+        var iterable = new ListIterable<string>(null, null);
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
@@ -46,7 +46,7 @@ public class IterableListTests
     public void IterableList_ShouldProperlyInitialize_WhenProvidedDataSourceIsNotNull(string[] strings)
     {
         // Act
-        var iterable = new IterableList<string>(() => strings, null);
+        var iterable = new ListIterable<string>(() => strings, null);
 
         // Assert
         var len = strings?.Length ?? 0;
@@ -60,7 +60,7 @@ public class IterableListTests
     public void LoadNext_ShouldProperlyIterate_WhenDataSourceIsNull()
     {
         // Arrange
-        var iterable = new IterableList<string>(null, null);
+        var iterable = new ListIterable<string>(null, null);
 
         // Act
         var result = iterable.LoadNext(null);
@@ -75,7 +75,7 @@ public class IterableListTests
     public void LoadNext_ShouldProperlyIterate_WhenProvidedDictionaryIsNull(string[] strings)
     {
         // Arrange
-        var iterable = new IterableList<string>(() => strings, null);
+        var iterable = new ListIterable<string>(() => strings, null);
         var count = 0;
 
         // Act
@@ -95,7 +95,7 @@ public class IterableListTests
     public void LoadNext_ShouldProperlyIterate_WhenProvidedMapperIsNull(string[] strings)
     {
         // Arrange
-        var iterable = new IterableList<string>(() => strings, null);
+        var iterable = new ListIterable<string>(() => strings, null);
         var variables = new TestVariablesCollector();
         var count = 0;
 
@@ -117,7 +117,7 @@ public class IterableListTests
     public void LoadNext_ShouldProperlySetVariables_WhenProvidedDictionaryIsNotNull(string[] strings)
     {
         // Arrange
-        var iterable = new IterableList<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, Inject);
         var variables = new TestVariablesCollector();
         var count = 0;
 
@@ -141,7 +141,7 @@ public class IterableListTests
     public void Randomize_ShouldProperlyRandomizeElements(string[] strings)
     {
         // Arrange
-        var iterable = new IterableList<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, Inject);
         var count = 0;
         var variables = new TestVariablesCollector();
 
@@ -165,7 +165,7 @@ public class IterableListTests
     public void Randomize_ShouldProperlyRandomizeElements(string[] strings, int randAmount)
     {
         // Arrange
-        var iterable = new IterableList<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, Inject);
         var count = 0;
 
         // Act
@@ -187,7 +187,7 @@ public class IterableListTests
     public void Randomize_ShouldProperlyRandomizeElementsByPercentage(string[] strings, float percentage)
     {
         // Arrange
-        var iterable = new IterableList<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, Inject);
         var count = 0;
         var len = strings?.Length ?? 0;
         var randAmount = (int) (len * percentage);
@@ -212,7 +212,7 @@ public class IterableListTests
     public void Reset_ShouldProperlyResetIterable_BeforeRunning(string[] strings)
     {
         // Arrange
-        var iterable = new IterableList<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, Inject);
 
         // Act
         iterable.Reset();
@@ -227,7 +227,7 @@ public class IterableListTests
     public void Reset_ShouldProperlyResetIterable_AfterRunning(string[] strings)
     {
         // Arrange
-        var iterable = new IterableList<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, Inject);
 
         // Act
         while (iterable.LoadNext(null)) {}

@@ -11,7 +11,7 @@ namespace SLCommandScript.Core.Iterables;
 /// <typeparam name="TItem">Type of contained objects.</typeparam>
 /// <param name="source">Source of objects to insert into wrapped list.</param>
 /// <param name="mapper">Variable mapper to use to load variables.</param>
-public class IterableList<TItem>(Func<IEnumerable<TItem>> source, Action<IDictionary<string, string>, TItem> mapper) : IIterable
+public class ListIterable<TItem>(Func<IEnumerable<TItem>> source, Action<IDictionary<string, string>, TItem> mapper) : IIterable
 {
     /// <inheritdoc />
     public bool IsAtEnd

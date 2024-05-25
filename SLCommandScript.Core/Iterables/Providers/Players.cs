@@ -16,67 +16,67 @@ public static class PlayerIterablesProvider
     /// Retrieves iterable object for all players.
     /// </summary>
     /// <returns>Iterable object for all players.</returns>
-    public static IIterable AllPlayers() => new IterableList<Player>(Player.GetPlayers, LoadVariables);
+    public static IIterable AllPlayers() => new ListIterable<Player>(Player.GetPlayers, LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all class d personnel.
     /// </summary>
     /// <returns>Iterable object for all class d personnel.</returns>
-    public static IIterable AllClassDs() => new IterableList<Player>(() => Player.GetPlayers().Where(p => p.Team == Team.ClassD), LoadVariables);
+    public static IIterable AllClassDs() => new ListIterable<Player>(() => Player.GetPlayers().Where(p => p.Team == Team.ClassD), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all scientists.
     /// </summary>
     /// <returns>Iterable object for all scientists.</returns>
-    public static IIterable AllScientists() => new IterableList<Player>(() => Player.GetPlayers().Where(p => p.Team == Team.Scientists), LoadVariables);
+    public static IIterable AllScientists() => new ListIterable<Player>(() => Player.GetPlayers().Where(p => p.Team == Team.Scientists), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all MTFs.
     /// </summary>
     /// <returns>Iterable object for all MTFs.</returns>
-    public static IIterable AllMTFs() => new IterableList<Player>(() => Player.GetPlayers().Where(p => p.IsNTF), LoadVariables);
+    public static IIterable AllMTFs() => new ListIterable<Player>(() => Player.GetPlayers().Where(p => p.IsNTF), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all chaos insurgents.
     /// </summary>
     /// <returns>Iterable object for all chaos insurgents.</returns>
-    public static IIterable AllChaos() => new IterableList<Player>(() => Player.GetPlayers().Where(p => p.IsChaos), LoadVariables);
+    public static IIterable AllChaos() => new ListIterable<Player>(() => Player.GetPlayers().Where(p => p.IsChaos), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all SCPs.
     /// </summary>
     /// <returns>Iterable object for all SCPs.</returns>
-    public static IIterable AllSCPs() => new IterableList<Player>(() => Player.GetPlayers().Where(p => p.IsSCP), LoadVariables);
+    public static IIterable AllSCPs() => new ListIterable<Player>(() => Player.GetPlayers().Where(p => p.IsSCP), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all humans.
     /// </summary>
     /// <returns>Iterable object for all humans.</returns>
-    public static IIterable AllHumans() => new IterableList<Player>(() => Player.GetPlayers().Where(p => p.IsHuman), LoadVariables);
+    public static IIterable AllHumans() => new ListIterable<Player>(() => Player.GetPlayers().Where(p => p.IsHuman), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all tutorials.
     /// </summary>
     /// <returns>Iterable object for all tutorials.</returns>
-    public static IIterable AllTutorials() => new IterableList<Player>(() => Player.GetPlayers().Where(p => p.IsTutorial), LoadVariables);
+    public static IIterable AllTutorials() => new ListIterable<Player>(() => Player.GetPlayers().Where(p => p.IsTutorial), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all spectators.
     /// </summary>
     /// <returns>Iterable object for all spectators.</returns>
-    public static IIterable AllSpectators() => new IterableList<Player>(() => Player.GetPlayers().Where(p => p.Role == RoleTypeId.Spectator), LoadVariables);
+    public static IIterable AllSpectators() => new ListIterable<Player>(() => Player.GetPlayers().Where(p => p.Role == RoleTypeId.Spectator), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all alive players.
     /// </summary>
     /// <returns>Iterable object for all alive players.</returns>
-    public static IIterable AllAlive() => new IterableList<Player>(() => Player.GetPlayers().Where(p => p.IsAlive), LoadVariables);
+    public static IIterable AllAlive() => new ListIterable<Player>(() => Player.GetPlayers().Where(p => p.IsAlive), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all disarmed humans.
     /// </summary>
     /// <returns>Iterable object for all disarmed humans.</returns>
-    public static IIterable AllDisarmed() => new IterableList<Player>(() => Player.GetPlayers().Where(p => p.IsDisarmed), LoadVariables);
+    public static IIterable AllDisarmed() => new ListIterable<Player>(() => Player.GetPlayers().Where(p => p.IsDisarmed), LoadVariables);
 
     /// <summary>
     /// Loads properties from player object and inserts them into a dictionary.
