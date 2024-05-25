@@ -13,11 +13,12 @@ variable			-> \S* ("$(" "^"* TEXT ")" \S*)+
 
 directive			-> "[" directive_body "]"
 directive_body		-> foreach_loop | if_expr | delay_expr | forrandom_loop | sequence
-foreach_loop		-> expression "foreach" TEXT  # Inner expression gets access to iterated objects properties through variables
+foreach_loop		-> expression "foreach" iterable  # Inner expression gets access to iterated objects properties through variables
 if_expr				-> (expression "if")? expression ("else" expression)?
 delay_expr			-> expression "delayby" NUMBER TEXT?
-forrandom_loop		-> expression "forrandom" TEXT (NUMBER "%"?)? ("else" expression)?  # Inner expressions get access to iterated objects properties through variables
+forrandom_loop		-> expression "forrandom" iterable (NUMBER "%"?)? ("else" expression)?  # Inner expressions get access to iterated objects properties through variables
 sequence			-> expression ("|" expression)+
+iterable			-> "-"? NUMBER ".." "-"? NUMBER | TEXT
 
 comment				-> "#" comment_body
 comment_body		-> permissions_guard | scope_guard | [^!?] .*

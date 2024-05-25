@@ -3,9 +3,11 @@ using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Iterables;
+using SLCommandScript.Core.Iterables.Providers;
 using SLCommandScript.Core.Language.Expressions;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace SLCommandScript.Core.Language;
 
@@ -14,6 +16,37 @@ namespace SLCommandScript.Core.Language;
 /// </summary>
 public class Parser
 {
+    /// <summary>
+    /// Contains regular expression for ranges.
+    /// </summary>
+    private static readonly Regex _rangePattern = new("^(-?[0-9]+)\\.\\.(-?[0-9]+)$");
+
+    /// <summary>
+    /// Converts a string into an integer.
+    /// </summary>
+    /// <param name="str">String to convert.</param>
+    /// <returns>Processed number.</returns>
+    private static int ToInt(string str)
+    {
+        var result = 0;
+        var index = 0;
+        var isNegative = str[0] == '-';
+
+        if (isNegative)
+        {
+            ++index;
+        }
+
+        while (index < str.Length)
+        {
+            result *= 10;
+            result += str[index] - '0';
+            ++index;
+        }
+
+        return isNegative ? -result : result;
+    }
+
     #region Fields and Properties
     /// <summary>
     /// Contains current error message.
@@ -479,17 +512,18 @@ public class Parser
             return null;
         }
 
-        if (!IterablesUtils.Providers.ContainsKey(_tokens[_current].Value))
+        var token = _tokens[_current].Value;
+
+        if (!IterablesUtils.Providers.ContainsKey(token))
         {
-            ErrorMessage = $"'{_tokens[_current].Value}' is not a valid iterable object name";
-            return null;
+            return GetRange();
         }
 
-        var provider = IterablesUtils.Providers[_tokens[_current].Value];
+        var provider = IterablesUtils.Providers[token];
 
         if (provider is null)
         {
-            ErrorMessage = $"Provider for '{_tokens[_current].Value}' iterable object is null";
+            ErrorMessage = $"Provider for '{token}' iterable object is null";
             return null;
         }
 
@@ -497,11 +531,30 @@ public class Parser
 
         if (iter is null)
         {
-            ErrorMessage = $"Provider for '{_tokens[_current].Value}' iterable object returned null";
+            ErrorMessage = $"Provider for '{token}' iterable object returned null";
             return null;
         }
 
         return iter;
+    }
+
+    /// <summary>
+    /// Attempts to create a range iterable.
+    /// </summary>
+    /// <returns>Retrieved iterable range object or <see langword="null" /> if something went wrong.</returns>
+    private IIterable GetRange()
+    {
+        var match = _rangePattern.Match(_tokens[_current].Value);
+
+        if (!match.Success)
+        {
+            ErrorMessage = $"'{_tokens[_current].Value}' is not a valid iterable object name";
+            return null;
+        }
+
+        var start = ToInt(match.Groups[1].Value);
+        var end = ToInt(match.Groups[2].Value);
+        return RangesProvider.StandardRange(start, end);
     }
     #endregion
 }

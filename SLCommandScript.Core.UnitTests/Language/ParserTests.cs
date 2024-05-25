@@ -5,6 +5,7 @@ using NUnit.Framework;
 using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.Core.Iterables;
+using SLCommandScript.Core.Iterables.Providers;
 using SLCommandScript.Core.Language;
 using SLCommandScript.Core.Language.Expressions;
 
@@ -114,10 +115,10 @@ public class ParserTests
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.ForRandom, "forrandom") },
             "Iterable object name is missing"],
 
-        // [ bc forrandom Human ]
+        // [ bc forrandom 2..5xd ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Foreach, "foreach"),
-            new(TokenType.Text, "Human"), new(TokenType.RightSquare, "]") },
-            "'Human' is not a valid iterable object name"],
+            new(TokenType.Text, "2..5xd"), new(TokenType.RightSquare, "]") },
+            "'2..5xd' is not a valid iterable object name"],
 
         // [ bc forrandom null ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.ForRandom, "forrandom"),
@@ -211,6 +212,11 @@ public class ParserTests
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
             new(TokenType.Variable, "$(Test)"), new(TokenType.Foreach, "foreach"), new(TokenType.Text, "test"), new(TokenType.RightSquare, "]") },
             new ForeachExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true), new TestIterable()), CommandsUtils.AllScopes],
+
+        // [ bc 5 $(Test) foreach 15..-12 ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
+            new(TokenType.Variable, "$(Test)"), new(TokenType.Foreach, "foreach"), new(TokenType.Text, "15..-12"), new(TokenType.RightSquare, "]") },
+            new ForeachExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true), RangesProvider.StandardRange(15, -12)), CommandsUtils.AllScopes],
 
         // [ [ bc 5 $(Test) foreach test ] foreach test ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"),
