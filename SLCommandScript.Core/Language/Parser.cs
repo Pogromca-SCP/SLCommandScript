@@ -399,7 +399,7 @@ public class Parser
         }
 
         ++_current;
-        var limit = new RandomSettings(1);
+        var limit = new IterableSettings(1);
 
         if (!IsAtEnd && (_tokens[_current].Type == TokenType.Number || _tokens[_current].Type == TokenType.Percentage))
         {

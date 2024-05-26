@@ -91,7 +91,7 @@ public class SingleItemIterable<TItem> : IIterable
     public void Randomize(float amount) => Reset();
 
     /// <inheritdoc />
-    public void Randomize(RandomSettings settings) => Reset();
+    public void Randomize(IterableSettings settings) => Reset();
 
     /// <inheritdoc />
     public void Reset() => IsAtEnd = Count == 0;

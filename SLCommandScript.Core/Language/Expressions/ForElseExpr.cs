@@ -11,7 +11,7 @@ namespace SLCommandScript.Core.Language.Expressions;
 /// <param name="iterable">Iterable object to loop over.</param>
 /// <param name="els">Expression to use as a secondary loop body.</param>
 /// <param name="limit">Limit of iterations for primary expression.</param>
-public class ForElseExpr(Expr then, IIterable iterable, Expr els, RandomSettings limit) : Expr
+public class ForElseExpr(Expr then, IIterable iterable, Expr els, IterableSettings limit) : Expr
 {
     /// <summary>
     /// Expression to use as a primary loop body.
@@ -31,7 +31,7 @@ public class ForElseExpr(Expr then, IIterable iterable, Expr els, RandomSettings
     /// <summary>
     /// Limit of iterations for primary expression.
     /// </summary>
-    public RandomSettings Limit { get; } = limit;
+    public IterableSettings Limit { get; } = limit;
 
     /// <summary>
     /// Accepts a visit from an expression visitor.

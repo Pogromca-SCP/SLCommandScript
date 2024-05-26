@@ -3,7 +3,7 @@
 /// <summary>
 /// Contains configuration settings for iterables randomization.
 /// </summary>
-public readonly struct RandomSettings
+public readonly struct IterableSettings
 {
     /// <summary>
     /// Contains precise amount of elements to retrieve.
@@ -33,13 +33,13 @@ public readonly struct RandomSettings
     /// <summary>
     /// Initializes empty random settings.
     /// </summary>
-    public RandomSettings() : this(0) {}
+    public IterableSettings() : this(0) {}
 
     /// <summary>
     /// Initializes new random settings.
     /// </summary>
     /// <param name="amount">Precise amount ot retrieve.</param>
-    public RandomSettings(int amount)
+    public IterableSettings(int amount)
     {
         Amount = amount;
         Percent = 0.0f;
@@ -49,7 +49,7 @@ public readonly struct RandomSettings
     /// Initializes new random settings.
     /// </summary>
     /// <param name="percent">Percentage to retrieve.</param>
-    public RandomSettings(float percent)
+    public IterableSettings(float percent)
     {
         Amount = 0;
         Percent = percent;

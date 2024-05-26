@@ -46,7 +46,7 @@ public interface IIterable
     /// Randomizes contained elements and limits their amount.
     /// </summary>
     /// <param name="settings">Settings to use for randomization, negative values disable the limit, zero disables randomization.</param>
-    void Randomize(RandomSettings settings);
+    void Randomize(IterableSettings settings);
 
     /// <summary>
     /// Resets iteration process.

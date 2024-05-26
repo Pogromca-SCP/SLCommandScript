@@ -9,23 +9,21 @@ namespace SLCommandScript.Core.Iterables;
 /// Iterable wrapper for a list of objects.
 /// </summary>
 /// <typeparam name="TItem">Type of contained objects.</typeparam>
-/// <param name="source">Source of objects to insert into wrapped list.</param>
-/// <param name="mapper">Variable mapper to use to load variables.</param>
-public class ListIterable<TItem>(Func<IEnumerable<TItem>> source, Action<IDictionary<string, string>, TItem> mapper) : IIterable
+public class ListIterable<TItem> : IIterable
 {
     /// <inheritdoc />
     public bool IsAtEnd
     {
         get
         {
-            if (_source is null)
+            if (_source is null && _items is null)
             {
                 return true;
             }
 
             if (_objects is null)
             {
-                _objects = _source() ?? [];
+                _objects = (_source is null ? _items.ToList() : _source()) ?? [];
 
                 if (!_randomSettings.IsEmpty)
                 {
@@ -49,37 +47,76 @@ public class ListIterable<TItem>(Func<IEnumerable<TItem>> source, Action<IDictio
     }
 
     /// <inheritdoc />
-    public int Count { get; private set; } = 0;
+    public int Count { get; private set; }
 
     /// <summary>
     /// Source of iterated objects.
     /// </summary>
-    private readonly Func<IEnumerable<TItem>> _source = source;
+    private readonly Func<IEnumerable<TItem>> _source;
+
+    /// <summary>
+    /// Original iterated objects collection.
+    /// </summary>
+    private readonly IEnumerable<TItem> _items;
 
     /// <summary>
     /// Variable mapper used for loading variables.
     /// </summary>
-    private readonly Action<IDictionary<string, string>, TItem> _mapper = mapper;
+    private readonly Action<IDictionary<string, string>, TItem> _mapper;
 
     /// <summary>
     /// Contains wrapped list of objects.
     /// </summary>
-    private IEnumerable<TItem> _objects = null;
+    private IEnumerable<TItem> _objects;
 
     /// <summary>
     /// Contains currently used iterator.
     /// </summary>
-    private IEnumerator<TItem> _enumerator = null;
+    private IEnumerator<TItem> _enumerator;
 
     /// <summary>
     /// Random settings used for randomization.
     /// </summary>
-    private RandomSettings _randomSettings = new();
+    private IterableSettings _randomSettings;
 
     /// <summary>
     /// Contains index of current object.
     /// </summary>
-    private int _current = 0;
+    private int _current;
+
+    /// <summary>
+    /// Creates new lazy loaded list iterable.
+    /// </summary>
+    /// <param name="source">Source of objects to insert into wrapped list.</param>
+    /// <param name="mapper">Variable mapper to use to load variables.</param>
+    public ListIterable(Func<IEnumerable<TItem>> source, Action<IDictionary<string, string>, TItem> mapper)
+    {
+        Count = 0;
+        _source = source;
+        _items = null;
+        _mapper = mapper;
+        _objects = null;
+        _enumerator = null;
+        _randomSettings = new();
+        _current = 0;
+    }
+
+    /// <summary>
+    /// Creates new predefined list iterable.
+    /// </summary>
+    /// <param name="item">Objects to insert into wrapped list.</param>
+    /// <param name="mapper">Variable mapper to use to load variables.</param>
+    public ListIterable(IEnumerable<TItem> items, Action<IDictionary<string, string>, TItem> mapper)
+    {
+        Count = 0;
+        _source = null;
+        _items = items;
+        _mapper = mapper;
+        _objects = null;
+        _enumerator = null;
+        _randomSettings = new();
+        _current = 0;
+    }
 
     /// <inheritdoc />
     public bool LoadNext(IDictionary<string, string> targetVars)
@@ -101,16 +138,16 @@ public class ListIterable<TItem>(Func<IEnumerable<TItem>> source, Action<IDictio
     }
 
     /// <inheritdoc />
-    public void Randomize() => Randomize(new RandomSettings(-1));
+    public void Randomize() => Randomize(new IterableSettings(-1));
 
     /// <inheritdoc />
-    public void Randomize(int amount) => Randomize(new RandomSettings(amount));
+    public void Randomize(int amount) => Randomize(new IterableSettings(amount));
 
     /// <inheritdoc />
-    public void Randomize(float amount) => Randomize(new RandomSettings(amount));
+    public void Randomize(float amount) => Randomize(new IterableSettings(amount));
 
     /// <inheritdoc />
-    public void Randomize(RandomSettings settings)
+    public void Randomize(IterableSettings settings)
     {
         Count = 0;
         _objects = null;

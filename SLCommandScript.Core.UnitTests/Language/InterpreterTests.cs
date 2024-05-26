@@ -900,7 +900,7 @@ public class TestIterable : IIterable
 
     public void Randomize(float amount) { }
 
-    public void Randomize(RandomSettings settings) {}
+    public void Randomize(IterableSettings settings) {}
 
     public void Reset()
     {

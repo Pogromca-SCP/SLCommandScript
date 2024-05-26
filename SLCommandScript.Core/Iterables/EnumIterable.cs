@@ -49,6 +49,7 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
                         _values = _randomSettings.Percent > 0.0f ? IterablesUtils.Shuffle(_values, _randomSettings.Percent) : IterablesUtils.Shuffle(_values);
                     }
                 }
+
                 _current = 0;
             }
 
@@ -72,7 +73,7 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     /// <summary>
     /// Random settings used for randomization.
     /// </summary>
-    private RandomSettings _randomSettings = new();
+    private IterableSettings _randomSettings = new();
 
     /// <summary>
     /// Contains index of current object.
@@ -97,16 +98,16 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     }
 
     /// <inheritdoc />
-    public void Randomize() => Randomize(new RandomSettings(-1));
+    public void Randomize() => Randomize(new IterableSettings(-1));
 
     /// <inheritdoc />
-    public void Randomize(int amount) => Randomize(new RandomSettings(amount));
+    public void Randomize(int amount) => Randomize(new IterableSettings(amount));
 
     /// <inheritdoc />
-    public void Randomize(float amount) => Randomize(new RandomSettings(amount));
+    public void Randomize(float amount) => Randomize(new IterableSettings(amount));
 
     /// <inheritdoc />
-    public void Randomize(RandomSettings settings)
+    public void Randomize(IterableSettings settings)
     {
         _values = null;
         _randomSettings = settings;

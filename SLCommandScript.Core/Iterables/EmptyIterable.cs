@@ -32,7 +32,7 @@ public class EmptyIterable : IIterable
     public void Randomize(float amount) {}
 
     /// <inheritdoc />
-    public void Randomize(RandomSettings settings) {}
+    public void Randomize(IterableSettings settings) {}
 
     /// <inheritdoc />
     public void Reset() {}
