@@ -23,7 +23,7 @@ public class ListIterable<TItem> : IIterable
 
             if (_objects is null)
             {
-                _objects = (_source is null ? _items.ToList() : _source()) ?? [];
+                _objects = (_source is null ? _items : _source()) ?? [];
 
                 if (!_randomSettings.IsEmpty)
                 {
