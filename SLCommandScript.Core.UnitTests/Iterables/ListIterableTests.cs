@@ -32,7 +32,7 @@ public class ListIterableTests
 
     #region Constructor Tests
     [Test]
-    public void IterableList_ShouldProperlyInitialize_WhenProvidedDataSourceIsNull()
+    public void ListIterable_ShouldProperlyInitialize_WhenProvidedDataSourceIsNull()
     {
         // Act
         var iterable = new ListIterable<string>((Func<IEnumerable<string>>) null, null);
@@ -44,7 +44,7 @@ public class ListIterableTests
 
 
     [TestCaseSource(nameof(_strings))]
-    public void IterableList_ShouldProperlyInitialize_WhenProvidedDataSourceIsNotNull(string[] strings)
+    public void ListIterable_ShouldProperlyInitialize_WhenProvidedDataSourceIsNotNull(string[] strings)
     {
         // Act
         var iterable = new ListIterable<string>(() => strings, null);
@@ -56,7 +56,7 @@ public class ListIterableTests
     }
 
     [Test]
-    public void IterableList_ShouldProperlyInitialize_WhenProvidedItemsAreNull()
+    public void ListIterable_ShouldProperlyInitialize_WhenProvidedItemsAreNull()
     {
         // Act
         var iterable = new ListIterable<string>((IEnumerable<string>) null, null);
@@ -68,7 +68,7 @@ public class ListIterableTests
 
 
     [TestCaseSource(nameof(_strings))]
-    public void IterableList_ShouldProperlyInitialize_WhenProvidedItemsAreNotNull(string[] strings)
+    public void ListIterable_ShouldProperlyInitialize_WhenProvidedItemsAreNotNull(string[] strings)
     {
         // Act
         var iterable = new ListIterable<string>(strings, null);
@@ -314,6 +314,7 @@ public class ListIterableTests
     public void Randomize_ShouldProperlyRandomizePredefinedElements(string[] strings)
     {
         // Arrange
+        var items = strings?.ToArray();
         var iterable = new ListIterable<string>(strings, Inject);
         var count = 0;
         var variables = new TestVariablesCollector();
@@ -328,6 +329,7 @@ public class ListIterableTests
 
         // Assert
         var len = strings?.Length ?? 0;
+        items.Should().Equal(strings);
         iterable.IsAtEnd.Should().BeTrue();
         iterable.Count.Should().Be(len);
         count.Should().Be(len);
@@ -338,6 +340,7 @@ public class ListIterableTests
     public void Randomize_ShouldProperlyRandomizePredefinedElements(string[] strings, int randAmount)
     {
         // Arrange
+        var items = strings?.ToArray();
         var iterable = new ListIterable<string>(strings, Inject);
         var count = 0;
 
@@ -351,6 +354,7 @@ public class ListIterableTests
 
         // Assert
         var len = strings?.Length ?? 0;
+        items.Should().Equal(strings);
         iterable.IsAtEnd.Should().BeTrue();
         iterable.Count.Should().Be(len > randAmount && randAmount > 0 ? randAmount : len);
         count.Should().Be(len > randAmount && randAmount > 0 ? randAmount : len);
@@ -360,6 +364,7 @@ public class ListIterableTests
     public void Randomize_ShouldProperlyRandomizePredefinedElementsByPercentage(string[] strings, float percentage)
     {
         // Arrange
+        var items = strings?.ToArray();
         var iterable = new ListIterable<string>(strings, Inject);
         var count = 0;
         var len = strings?.Length ?? 0;
@@ -374,6 +379,7 @@ public class ListIterableTests
         }
 
         // Assert
+        items.Should().Equal(strings);
         iterable.IsAtEnd.Should().BeTrue();
         iterable.Count.Should().Be(len > randAmount && percentage > 0.0f ? randAmount : len);
         count.Should().Be(len > randAmount && percentage > 0.0f ? randAmount : len);
