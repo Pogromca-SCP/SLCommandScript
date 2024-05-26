@@ -31,12 +31,12 @@ public readonly struct IterableSettings
     public bool IsValid => IsPrecise ? Amount > 0 : Percent > 0.0f;
 
     /// <summary>
-    /// Initializes empty random settings.
+    /// Initializes empty iterable settings.
     /// </summary>
     public IterableSettings() : this(0) {}
 
     /// <summary>
-    /// Initializes new random settings.
+    /// Initializes new iterable settings.
     /// </summary>
     /// <param name="amount">Precise amount ot retrieve.</param>
     public IterableSettings(int amount)
@@ -46,7 +46,7 @@ public readonly struct IterableSettings
     }
 
     /// <summary>
-    /// Initializes new random settings.
+    /// Initializes new iterable settings.
     /// </summary>
     /// <param name="percent">Percentage to retrieve.</param>
     public IterableSettings(float percent)
