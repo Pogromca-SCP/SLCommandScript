@@ -33,12 +33,14 @@ public class SyntaxCommand : ICommand
         { "perm", "Permissions guard:\n#! <permission_names...>\n(guards cannot be placed inside expressions)" },
         { "scope", "Scope guard:\n#? <scope_names...>\n(guards cannot be placed inside expressions)" },
         { "cmd", "Command expression:\n<command_name> <arguments...>" },
-        { "if", "If expression:\n[ <expression> if <expression> ]\n[ <expression> else <expression> ]\n[ <expression> if <expression> else <expression> ]" },
-        { "foreach", "Foreach expression:\n[ <expression> foreach <iterable_name> ]" },
-        { "delay", "Delay expression:\n[ <expression> delayby <time_in_ms> ]\n[ <expression> delayby <time_in_ms> <name_to_use_for_error_log> ]" },
-        { "forrandom", "Forrandom expression:\n[ <expression> forrandom <iterable_name> ]\n[ <expression> forrandom <iterable_name> <limit_number_or_percentage> ]\n"
-            + "[ <expression> forrandom <iterable_name> else <expression> ]\n[ <expression> forrandom <iterable_name> <limit_number_or_percentage> else <expression> ]" },
-        { "seq", "Sequence expression:\n[ <expressions_separated_with_|...> ]" }
+        { "if", "If expression:\n[<expression> if <expression>]\n[<expression> else <expression>]\n[<expression> if <expression> else <expression>]" },
+        { "foreach", "Foreach expression:\n[<expression> foreach <iterable_name_or_numbers_range>]" },
+        { "delay", "Delay expression:\n[<expression> delayby <time_in_ms>]\n[<expression> delayby <time_in_ms> <name_to_use_for_error_log>]" },
+        { "forrandom", "Forrandom expression:\n[<expression> forrandom <iterable_name_or_numbers_range>]\n" +
+            "[<expression> forrandom <iterable_name_or_numbers_range> <limit_number_or_percentage>]\n" +
+            "[<expression> forrandom <iterable_name_or_numbers_range> else <expression>]\n" +
+            "[<expression> forrandom <iterable_name_or_numbers_range> <limit_number_or_percentage> else <expression>]" },
+        { "seq", "Sequence expression:\n[<expressions_separated_with_|...>]" }
     };
 
     /// <summary>
