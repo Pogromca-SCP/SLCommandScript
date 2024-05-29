@@ -30,16 +30,15 @@ public class FileScriptDirectoryCommandTests
     #endregion
 
     #region Execute Tests
-    [TestCase(true)]
-    [TestCase(false)]
-    public void ExecuteParent_ShouldProperlyInvokeSubcommand(bool isSuccess)
+    [Test]
+    public void ExecuteParent_ShouldProperlyInvokeSubcommand([Values] bool isSuccess)
     {
         // Arrange
         var response = "hello";
         var cmd = new FileScriptDirectoryCommand(null);
         var cmdMock = new Mock<ICommand>(MockBehavior.Strict);
         cmdMock.Setup(x => x.Command).Returns("test");
-        cmdMock.Setup(x => x.Aliases).Returns((string[]) null);
+        cmdMock.Setup(x => x.Aliases).Returns<string[]>(null);
         cmdMock.Setup(x => x.Execute(new(new[] { "test" }, 0, 0), null, out response)).Returns(isSuccess);
         cmd.RegisterCommand(cmdMock.Object);
 

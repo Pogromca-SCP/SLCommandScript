@@ -18,7 +18,8 @@
 		<PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\SLCommandScript.FileScriptsLoader\SLCommandScript.FileScriptsLoader.csproj" />
+		<ProjectReference Include="../SLCommandScript.FileScriptsLoader/SLCommandScript.FileScriptsLoader.csproj" />
+		<ProjectReference Include="../SLCommandScript.TestUtils/SLCommandScript.TestUtils.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="Assembly-CSharp" HintPath="$(SL_REFERENCES)/Assembly-CSharp.dll" />

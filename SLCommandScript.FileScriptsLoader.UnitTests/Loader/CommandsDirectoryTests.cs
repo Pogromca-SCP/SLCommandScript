@@ -7,10 +7,10 @@ using RemoteAdmin;
 using SLCommandScript.FileScriptsLoader.Commands;
 using SLCommandScript.FileScriptsLoader.Helpers;
 using SLCommandScript.FileScriptsLoader.Loader;
+using SLCommandScript.TestUtils;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Loader;
 
@@ -36,12 +36,9 @@ public class CommandsDirectoryTests
 
     private static readonly CommandType[] _validTypes = [CommandType.RemoteAdmin, CommandType.GameConsole];
 
-    private static IEnumerable<object[]> InvalidCommandsXTypes => JoinArrays(_invalidCommands, _validTypes);
+    private static IEnumerable<object[]> InvalidCommandsXTypes => TestArrays.CartesianJoin(_invalidCommands, _validTypes);
 
-    private static IEnumerable<object[]> ValidCommandsXTypes => JoinArrays(_validCommands, _validTypes);
-
-    private static IEnumerable<object[]> JoinArrays(string[] first, CommandType[] second) =>
-        first.SelectMany(f => second.Select(s => new object[] { f, s }));
+    private static IEnumerable<object[]> ValidCommandsXTypes => TestArrays.CartesianJoin(_validCommands, _validTypes);
     #endregion
 
     #region Helper Methods
