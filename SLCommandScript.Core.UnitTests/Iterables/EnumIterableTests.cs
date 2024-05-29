@@ -1,8 +1,6 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
 using SLCommandScript.Core.Iterables;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace SLCommandScript.Core.UnitTests.Iterables;
@@ -11,8 +9,6 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 public class EnumIterableTests
 {
     #region Static Utilities
-    private static readonly bool[] _boolValues = [false, true];
-
     private static readonly int[] _sizes = [-1, 0, 1, 2, 3];
 
     private static readonly float[] _percentages = [-1.0f, 0.0f, 0.25f, 0.1f, 0.5f, 2.5f];
@@ -43,8 +39,8 @@ public class EnumIterableTests
     #endregion
 
     #region Constructor Tests
-    [TestCaseSource(nameof(_boolValues))]
-    public void EnumIterable_ShouldProperlyInitialize_WhenProvidedEnumTypeHasNoValues(bool enableNone)
+    [Test]
+    public void EnumIterable_ShouldProperlyInitialize_WhenProvidedEnumTypeHasNoValues([Values] bool enableNone)
     {
         // Act
         var iterable = new EnumIterable<EmptyEnum>(enableNone);
@@ -55,8 +51,8 @@ public class EnumIterableTests
         iterable.Count.Should().Be(0);
     }
 
-    [TestCaseSource(nameof(_boolValues))]
-    public void EnumIterable_ShouldProperlyInitialize_WhenProvidedEnumTypeHasValues(bool enableNone)
+    [Test]
+    public void EnumIterable_ShouldProperlyInitialize_WhenProvidedEnumTypeHasValues([Values] bool enableNone)
     {
         // Act
         var iterable = new EnumIterable<FullEnum>(enableNone);
@@ -69,8 +65,8 @@ public class EnumIterableTests
     #endregion
 
     #region LoadNext Tests
-    [TestCaseSource(nameof(_boolValues))]
-    public void LoadNext_ShouldProperlyIterate_WhenEnumTypeHasNoValues(bool enableNone)
+    [Test]
+    public void LoadNext_ShouldProperlyIterate_WhenEnumTypeHasNoValues([Values] bool enableNone)
     {
         // Arrange
         var iterable = new EnumIterable<EmptyEnum>(enableNone);
@@ -84,8 +80,8 @@ public class EnumIterableTests
         iterable.Count.Should().Be(0);
     }
 
-    [TestCaseSource(nameof(_boolValues))]
-    public void LoadNext_ShouldProperlyIterate_WhenProvidedDictionaryIsNull(bool enableNone)
+    [Test]
+    public void LoadNext_ShouldProperlyIterate_WhenProvidedDictionaryIsNull([Values] bool enableNone)
     {
         // Arrange
         var iterable = new EnumIterable<FullEnum>(enableNone);
@@ -103,8 +99,8 @@ public class EnumIterableTests
         count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
     }
 
-    [TestCaseSource(nameof(_boolValues))]
-    public void LoadNext_ShouldProperlySetVariables_WhenProvidedDictionaryIsNotNull(bool enableNone)
+    [Test]
+    public void LoadNext_ShouldProperlySetVariables_WhenProvidedDictionaryIsNotNull([Values] bool enableNone)
     {
         // Arrange
         var iterable = new EnumIterable<FullEnum>(enableNone);
@@ -126,8 +122,8 @@ public class EnumIterableTests
     #endregion
 
     #region Randomize Tests
-    [TestCaseSource(nameof(_boolValues))]
-    public void Randomize_ShouldProperlyRandomizeElements(bool enableNone)
+    [Test]
+    public void Randomize_ShouldProperlyRandomizeElements([Values] bool enableNone)
     {
         // Arrange
         var iterable = new EnumIterable<FullEnum>(enableNone);
@@ -194,8 +190,8 @@ public class EnumIterableTests
     #endregion
 
     #region Reset Tests
-    [TestCaseSource(nameof(_boolValues))]
-    public void Reset_ShouldProperlyResetIterable_BeforeRunning(bool enableNone)
+    [Test]
+    public void Reset_ShouldProperlyResetIterable_BeforeRunning([Values] bool enableNone)
     {
         // Arrange
         var iterable = new EnumIterable<FullEnum>(enableNone);
@@ -208,8 +204,8 @@ public class EnumIterableTests
         iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
     }
 
-    [TestCaseSource(nameof(_boolValues))]
-    public void Reset_ShouldProperlyResetIterable_AfterRunning(bool enableNone)
+    [Test]
+    public void Reset_ShouldProperlyResetIterable_AfterRunning([Values] bool enableNone)
     {
         // Arrange
         var iterable = new EnumIterable<FullEnum>(enableNone);
@@ -236,48 +232,3 @@ public enum FullEnum : sbyte
     Fourth,
     Fifth
 }
-
-#region Variables Collector
-public class TestVariablesCollector : IDictionary<string, string>
-{
-    private readonly List<string> _values = [];
-
-    public string this[string key] { get => string.Empty; set => Add(key, value); }
-
-    public ICollection<string> Keys => null;
-
-    public ICollection<string> Values => null;
-
-    public int Count => 0;
-
-    public bool IsReadOnly => false;
-
-    public void Add(string key, string value) => _values.Add(value);
-
-    public void Add(KeyValuePair<string, string> item) {}
-
-    public void Clear() {}
-
-    public bool Contains(KeyValuePair<string, string> item) => false;
-
-    public bool ContainsKey(string key) => false;
-
-    public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex) {}
-
-    public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => null;
-
-    public bool Remove(string key) => true;
-
-    public bool Remove(KeyValuePair<string, string> item) => true;
-
-    public bool TryGetValue(string key, out string value)
-    {
-        value = string.Empty;
-        return true;
-    }
-
-    IEnumerator IEnumerable.GetEnumerator() => null;
-
-    public string[] GetArray() => _values.ToArray();
-}
-#endregion

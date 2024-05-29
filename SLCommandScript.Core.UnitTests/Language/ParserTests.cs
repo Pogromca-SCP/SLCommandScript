@@ -361,7 +361,7 @@ public class ParserTests
         var parser = new Parser();
 
         // Act
-        var result = parser.Parse([.. tokens]);
+        var result = parser.Parse([..tokens]);
 
         // Assert
         result.Should().BeNull();
@@ -376,7 +376,7 @@ public class ParserTests
         var parser = new Parser();
 
         // Act
-        var result = parser.Parse([.. tokens]);
+        var result = parser.Parse([..tokens]);
 
         // Assert
         result.Should().BeEquivalentTo(expectedExpr, options => options.RespectingRuntimeTypes());

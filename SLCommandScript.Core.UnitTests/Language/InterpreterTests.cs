@@ -2,12 +2,9 @@
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using SLCommandScript.Core.Interfaces;
-using SLCommandScript.Core.Iterables;
 using SLCommandScript.Core.Language;
 using SLCommandScript.Core.Language.Expressions;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SLCommandScript.Core.UnitTests.Language;
@@ -15,8 +12,6 @@ namespace SLCommandScript.Core.UnitTests.Language;
 [TestFixture]
 public class InterpreterTests
 {
-    private static readonly bool[] _booleanValues = [false, true];
-
     private static readonly int[] _limits = [-1, 0, 4, 7, 10, 12];
 
     private static readonly float[] _percentages = [-1.0f, 0.0f, 0.25f, 0.1f, 0.5f, 2.5f];
@@ -137,7 +132,7 @@ public class InterpreterTests
         // Arrange
         var interpreter = new Interpreter(null);
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        var expr = new CommandExpr(commandMock.Object, new string[0], false);
+        var expr = new CommandExpr(commandMock.Object, [], false);
 
         // Act
         var result = interpreter.VisitCommandExpr(expr);
@@ -223,8 +218,8 @@ public class InterpreterTests
         interpreter.ErrorMessage.Should().Be("Delay expression body is null");
     }
 
-    [TestCaseSource(nameof(_booleanValues))]
-    public void VisitDelayExpr_ShouldExecuteSynchronously_WhenDurationIsTooShort(bool success)
+    [Test]
+    public void VisitDelayExpr_ShouldExecuteSynchronously_WhenDurationIsTooShort([Values] bool success)
     {
         // Arrange
         var interpreter = new Interpreter(null);
@@ -244,8 +239,8 @@ public class InterpreterTests
         commandMock.VerifyNoOtherCalls();
     }
 
-    [TestCaseSource(nameof(_booleanValues))]
-    public async Task VisitDelayExpr_ShouldExecuteAsynchronously_WhenDurationIsValid(bool success)
+    [Test]
+    public async Task VisitDelayExpr_ShouldExecuteAsynchronously_WhenDurationIsValid([Values] bool success)
     {
         // Arrange
         var delay = 200;
@@ -466,8 +461,8 @@ public class InterpreterTests
         interpreter.ErrorMessage.Should().Be("Forelse secondary expression body is null");
     }
 
-    [TestCaseSource(nameof(_booleanValues))]
-    public void VisitForElseExpr_ShouldFail_WhenIterationFails(bool testPrimary)
+    [Test]
+    public void VisitForElseExpr_ShouldFail_WhenIterationFails([Values] bool testPrimary)
     {
         // Arrange
         var interpreter = new Interpreter(null);
@@ -869,43 +864,6 @@ public class InterpreterTests
         commandMock.VerifyNoOtherCalls();
     }
     #endregion
-}
-
-public class TestIterable : IIterable
-{
-    public const int MaxIterations = 10;
-
-    private int _index = 1;
-
-    public bool IsAtEnd => _index > MaxIterations;
-
-    public int Count => MaxIterations;
-
-    public bool LoadNext(IDictionary<string, string> targetVars)
-    {
-        if (IsAtEnd)
-        {
-            return false;
-        }
-
-        targetVars["i"] = _index.ToString();
-        targetVars["wut?"] = "hello";
-        ++_index;
-        return true;
-    }
-
-    public void Randomize() { }
-
-    public void Randomize(int amount) { }
-
-    public void Randomize(float amount) { }
-
-    public void Randomize(IterableSettings settings) {}
-
-    public void Reset()
-    {
-        _index = 1;
-    }
 }
 
 public class ArgumentsInjectionTestCommand : ICommand

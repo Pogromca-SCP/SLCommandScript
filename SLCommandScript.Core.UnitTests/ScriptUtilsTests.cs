@@ -31,8 +31,8 @@ public class ScriptUtilsTests
         var result = ScriptUtils.Execute(src, new(), null);
 
         // Assert
-        result.Item1.Should().Be(expectedError);
-        result.Item2.Should().Be(1);
+        result.Message.Should().Be(expectedError);
+        result.Line.Should().Be(1);
     }
 
     [TestCaseSource(nameof(_goldPaths))]
@@ -42,8 +42,8 @@ public class ScriptUtilsTests
         var result = ScriptUtils.Execute(src, new(), null);
 
         // Assert
-        result.Item1.Should().BeNull();
-        result.Item2.Should().Be(src.Length < 1 ? 0 : 1);
+        result.Message.Should().BeNull();
+        result.Line.Should().Be(src.Length < 1 ? 0 : 1);
     }
     #endregion
 }

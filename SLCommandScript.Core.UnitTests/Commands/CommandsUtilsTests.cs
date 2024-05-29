@@ -8,6 +8,7 @@ using NUnit.Framework;
 using PluginAPI.Enums;
 using RemoteAdmin;
 using SLCommandScript.Core.Commands;
+using SLCommandScript.TestUtils;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -41,18 +42,15 @@ public class CommandsUtilsTests
 
     private static readonly ICommand[] _exampleCommands = [new BroadcastCommand(), new CassieCommand(), new HelpCommand(ClientCommandHandler.Create())];
 
-    private static IEnumerable<object[]> AllHandlersXInvalidCommands => JoinArrays(_allHandlerTypes, _invalidCommandNames);
+    private static IEnumerable<object[]> AllHandlersXInvalidCommands => TestArrays.CartesianJoin(_allHandlerTypes, _invalidCommandNames);
 
-    private static IEnumerable<object[]> AllHandlersXInvalidAliases => JoinArrays(_allHandlerTypes, _invalidAliases);
+    private static IEnumerable<object[]> AllHandlersXInvalidAliases => TestArrays.CartesianJoin(_allHandlerTypes, _invalidAliases);
 
-    private static IEnumerable<object[]> ValidHandlersXExistingCommandNames => JoinArrays(_validHandlerTypes, _existingCommandNames);
+    private static IEnumerable<object[]> ValidHandlersXExistingCommandNames => TestArrays.CartesianJoin(_validHandlerTypes, _existingCommandNames);
 
-    private static IEnumerable<object[]> ValidHandlersXCommandsToRegister => JoinArrays(_validHandlerTypes, _commandsToRegister);
+    private static IEnumerable<object[]> ValidHandlersXCommandsToRegister => TestArrays.CartesianJoin(_validHandlerTypes, _commandsToRegister);
 
-    private static IEnumerable<object[]> ValidHandlersXExampleCommands => JoinArrays(_validHandlerTypes, _exampleCommands);
-
-    private static IEnumerable<object[]> JoinArrays<TFirst, TSecond>(TFirst[] first, TSecond[] second) =>
-        first.SelectMany(f => second.Select(s => new object[] { f, s }));
+    private static IEnumerable<object[]> ValidHandlersXExampleCommands => TestArrays.CartesianJoin(_validHandlerTypes, _exampleCommands);
     #endregion
 
     #region Helper Methods
@@ -101,6 +99,8 @@ public class CommandsUtilsTests
         mock.Setup(x => x.Aliases).Returns(aliases);
         return mock;
     }
+
+    private static ICommandHandler MakeHandler() => ClientCommandHandler.Create();
     #endregion
 
     #region GetCommandHandlers Tests
@@ -306,7 +306,7 @@ public class CommandsUtilsTests
     public void IsCommandRegistered_ShouldReturnNull_WhenCommandIsNull()
     {
         // Act
-        var result = CommandsUtils.IsCommandRegistered(ClientCommandHandler.Create(), null);
+        var result = CommandsUtils.IsCommandRegistered(MakeHandler(), null);
 
         // Assert
         result.Should().BeNull();
@@ -319,7 +319,7 @@ public class CommandsUtilsTests
         var commandMock = MockCommand(commandName);
 
         // Act
-        var result = CommandsUtils.IsCommandRegistered(ClientCommandHandler.Create(), commandMock.Object);
+        var result = CommandsUtils.IsCommandRegistered(MakeHandler(), commandMock.Object);
 
         // Assert
         result.Should().BeNull();
@@ -334,7 +334,7 @@ public class CommandsUtilsTests
         var commandMock = MockCommand(MockCommandName, aliases);
 
         // Act
-        var result = CommandsUtils.IsCommandRegistered(ClientCommandHandler.Create(), commandMock.Object);
+        var result = CommandsUtils.IsCommandRegistered(MakeHandler(), commandMock.Object);
 
         // Assert
         result.Should().BeNull();
@@ -346,7 +346,7 @@ public class CommandsUtilsTests
     public void IsCommandRegistered_ShouldReturnProperResult_WhenGoldFlow(ICommand command)
     {
         // Arrange
-        var handler = ClientCommandHandler.Create();
+        var handler = MakeHandler();
         var expectedResult = handler.TryGetCommand(command.Command, out _);
 
         // Act
@@ -448,7 +448,7 @@ public class CommandsUtilsTests
     public void RegisterCommand_ShouldReturnNull_WhenCommandIsNull()
     {
         // Act
-        var result = CommandsUtils.RegisterCommand(ClientCommandHandler.Create(), null);
+        var result = CommandsUtils.RegisterCommand(MakeHandler(), null);
 
         // Assert
         result.Should().BeNull();
@@ -461,7 +461,7 @@ public class CommandsUtilsTests
         var commandMock = MockCommand(commandName);
 
         // Act
-        var result = CommandsUtils.RegisterCommand(ClientCommandHandler.Create(), commandMock.Object);
+        var result = CommandsUtils.RegisterCommand(MakeHandler(), commandMock.Object);
 
         // Assert
         result.Should().BeNull();
@@ -476,7 +476,7 @@ public class CommandsUtilsTests
         var commandMock = MockCommand(MockCommandName, aliases);
 
         // Act
-        var result = CommandsUtils.RegisterCommand(ClientCommandHandler.Create(), commandMock.Object);
+        var result = CommandsUtils.RegisterCommand(MakeHandler(), commandMock.Object);
 
         // Assert
         result.Should().BeNull();
@@ -488,7 +488,7 @@ public class CommandsUtilsTests
     public void RegisterCommand_ShouldProperlyRegister_WhenGoldFlow(ICommand command)
     {
         // Arrange
-        var handler = ClientCommandHandler.Create();
+        var handler = MakeHandler();
         var expectedResult = !handler.TryGetCommand(command.Command, out _);
 
         // Act
@@ -591,7 +591,7 @@ public class CommandsUtilsTests
     public void UnegisterCommand_ShouldReturnNull_WhenCommandIsNull()
     {
         // Act
-        var result = CommandsUtils.UnregisterCommand(ClientCommandHandler.Create(), null);
+        var result = CommandsUtils.UnregisterCommand(MakeHandler(), null);
 
         // Assert
         result.Should().BeNull();
@@ -604,7 +604,7 @@ public class CommandsUtilsTests
         var commandMock = MockCommand(commandName);
 
         // Act
-        var result = CommandsUtils.UnregisterCommand(ClientCommandHandler.Create(), commandMock.Object);
+        var result = CommandsUtils.UnregisterCommand(MakeHandler(), commandMock.Object);
 
         // Assert
         result.Should().BeNull();
@@ -619,7 +619,7 @@ public class CommandsUtilsTests
         var commandMock = MockCommand(MockCommandName, aliases);
 
         // Act
-        var result = CommandsUtils.UnregisterCommand(ClientCommandHandler.Create(), commandMock.Object);
+        var result = CommandsUtils.UnregisterCommand(MakeHandler(), commandMock.Object);
 
         // Assert
         result.Should().BeNull();
@@ -631,7 +631,7 @@ public class CommandsUtilsTests
     public void UnregisterCommand_ShouldProperlyUnregister_WhenGoldFlow(ICommand command)
     {
         // Arrange
-        var handler = ClientCommandHandler.Create();
+        var handler = MakeHandler();
         var expectedResult = handler.TryGetCommand(command.Command, out _);
 
         // Act

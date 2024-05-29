@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
 using SLCommandScript.Core.Iterables;
+using SLCommandScript.TestUtils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +11,6 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 [TestFixture]
 public class ListIterableTests
 {
-    private static void Inject(IDictionary<string, string> target, string item)
-    {
-        target[item] = item;
-    }
-
     #region Test Case Sources
     private static readonly string[][] _strings = [null, [], [null, null, null, null], ["example", null, "", "test"], ["  \t ", "Test", "test", "TEST"]];
 
@@ -22,12 +18,9 @@ public class ListIterableTests
 
     private static readonly float[] _percentages = [-1.0f, 0.0f, 0.25f, 0.1f, 0.5f, 2.5f];
 
-    private static IEnumerable<object[]> StringsXSizes => JoinArrays(_strings, _sizes);
+    private static IEnumerable<object[]> StringsXSizes => TestArrays.CartesianJoin(_strings, _sizes);
 
-    private static IEnumerable<object[]> StringsXPercentages => JoinArrays(_strings, _percentages);
-
-    private static IEnumerable<object[]> JoinArrays<TFirst, TSecond>(TFirst[] first, TSecond[] second) =>
-        first.SelectMany(f => second.Select(s => new object[] { f, s }));
+    private static IEnumerable<object[]> StringsXPercentages => TestArrays.CartesianJoin(_strings, _percentages);
     #endregion
 
     #region Constructor Tests
@@ -142,7 +135,7 @@ public class ListIterableTests
     public void LoadNext_ShouldProperlySetVariables_WhenProvidedDictionaryIsNotNull(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, TestVariablesCollector.Inject);
         var variables = new TestVariablesCollector();
         var count = 0;
 
@@ -221,7 +214,7 @@ public class ListIterableTests
     public void LoadNext_ShouldProperlySetVariables_WhenPredefinedAndProvidedDictionaryIsNotNull(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(strings, Inject);
+        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
         var variables = new TestVariablesCollector();
         var count = 0;
 
@@ -245,7 +238,7 @@ public class ListIterableTests
     public void Randomize_ShouldProperlyRandomizeElements(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, TestVariablesCollector.Inject);
         var count = 0;
         var variables = new TestVariablesCollector();
 
@@ -269,7 +262,7 @@ public class ListIterableTests
     public void Randomize_ShouldProperlyRandomizeElements(string[] strings, int randAmount)
     {
         // Arrange
-        var iterable = new ListIterable<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, TestVariablesCollector.Inject);
         var count = 0;
 
         // Act
@@ -291,7 +284,7 @@ public class ListIterableTests
     public void Randomize_ShouldProperlyRandomizeElementsByPercentage(string[] strings, float percentage)
     {
         // Arrange
-        var iterable = new ListIterable<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, TestVariablesCollector.Inject);
         var count = 0;
         var len = strings?.Length ?? 0;
         var randAmount = (int) (len * percentage);
@@ -315,7 +308,7 @@ public class ListIterableTests
     {
         // Arrange
         var items = strings?.ToArray();
-        var iterable = new ListIterable<string>(strings, Inject);
+        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
         var count = 0;
         var variables = new TestVariablesCollector();
 
@@ -341,7 +334,7 @@ public class ListIterableTests
     {
         // Arrange
         var items = strings?.ToArray();
-        var iterable = new ListIterable<string>(strings, Inject);
+        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
         var count = 0;
 
         // Act
@@ -365,7 +358,7 @@ public class ListIterableTests
     {
         // Arrange
         var items = strings?.ToArray();
-        var iterable = new ListIterable<string>(strings, Inject);
+        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
         var count = 0;
         var len = strings?.Length ?? 0;
         var randAmount = (int)(len * percentage);
@@ -391,7 +384,7 @@ public class ListIterableTests
     public void Reset_ShouldProperlyResetIterable_BeforeRunning(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, TestVariablesCollector.Inject);
 
         // Act
         iterable.Reset();
@@ -406,7 +399,7 @@ public class ListIterableTests
     public void Reset_ShouldProperlyResetIterable_AfterRunning(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(() => strings, Inject);
+        var iterable = new ListIterable<string>(() => strings, TestVariablesCollector.Inject);
 
         // Act
         while (iterable.LoadNext(null)) {}
@@ -422,7 +415,7 @@ public class ListIterableTests
     public void Reset_ShouldProperlyResetPredefinedIterable_BeforeRunning(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(strings, Inject);
+        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
 
         // Act
         iterable.Reset();
@@ -437,10 +430,10 @@ public class ListIterableTests
     public void Reset_ShouldProperlyResetPredefinedIterable_AfterRunning(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(strings, Inject);
+        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
 
         // Act
-        while (iterable.LoadNext(null)) { }
+        while (iterable.LoadNext(null)) {}
         iterable.Reset();
 
         // Assert

@@ -18,7 +18,7 @@ public static class ScriptUtils
     /// <param name="sender">Script sender.</param>
     /// <param name="permissionsResolver">Optional custom permissions resolver to use.</param>
     /// <returns>Error message if something goes wrong, <see langword="null" /> otherwise. Line number provided alongside.</returns>
-    public static (string, int) Execute(string source, ArraySegment<string> arguments, ICommandSender sender, IPermissionsResolver permissionsResolver = null)
+    public static (string Message, int Line) Execute(string source, ArraySegment<string> arguments, ICommandSender sender, IPermissionsResolver permissionsResolver = null)
     {
         var lexer = Lexer.Rent(source, arguments, sender, permissionsResolver);
         var parser = new Parser();

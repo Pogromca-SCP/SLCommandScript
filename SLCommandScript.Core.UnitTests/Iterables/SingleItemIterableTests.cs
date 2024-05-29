@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using SLCommandScript.Core.Iterables;
 using System;
-using System.Collections.Generic;
 
 namespace SLCommandScript.Core.UnitTests.Iterables;
 
@@ -10,11 +9,6 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 public class SingleItemIterableTests
 {
     private const string TestString = "test";
-
-    private static void Inject(IDictionary<string, string> target, string item)
-    {
-        target[item] = item;
-    }
 
     #region Constructor Tests
     [Test]
@@ -111,7 +105,7 @@ public class SingleItemIterableTests
     public void LoadNext_ShouldProperlySetVariables_WhenProvidedDictionaryIsNotNull()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>(() => TestString, Inject);
+        var iterable = new SingleItemIterable<string>(() => TestString, TestVariablesCollector.Inject);
         var variables = new TestVariablesCollector();
         var count = 0;
 
@@ -173,7 +167,7 @@ public class SingleItemIterableTests
     public void LoadNext_ShouldProperlySetVariables_WhenProvidedItemAndDictionaryIsNotNull()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>(TestString, Inject);
+        var iterable = new SingleItemIterable<string>(TestString, TestVariablesCollector.Inject);
         var variables = new TestVariablesCollector();
         var count = 0;
 
@@ -197,7 +191,7 @@ public class SingleItemIterableTests
     public void Reset_ShouldProperlyResetIterable_WhenSourceIsNull()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>((Func<string>) null, Inject);
+        var iterable = new SingleItemIterable<string>((Func<string>) null, TestVariablesCollector.Inject);
 
         // Act
         iterable.Reset();
@@ -211,7 +205,7 @@ public class SingleItemIterableTests
     public void Reset_ShouldProperlyResetIterable_BeforeRunning()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>(() => TestString, Inject);
+        var iterable = new SingleItemIterable<string>(() => TestString, TestVariablesCollector.Inject);
 
         // Act
         iterable.Reset();
@@ -225,7 +219,7 @@ public class SingleItemIterableTests
     public void Reset_ShouldProperlyResetIterable_AfterRunning()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>(() => TestString, Inject);
+        var iterable = new SingleItemIterable<string>(() => TestString, TestVariablesCollector.Inject);
 
         // Act
         while (iterable.LoadNext(null)) {}
@@ -240,7 +234,7 @@ public class SingleItemIterableTests
     public void Reset_ShouldProperlyResetIterable_BeforeRunningOnItem()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>(TestString, Inject);
+        var iterable = new SingleItemIterable<string>(TestString, TestVariablesCollector.Inject);
 
         // Act
         iterable.Reset();
@@ -254,10 +248,10 @@ public class SingleItemIterableTests
     public void Reset_ShouldProperlyResetIterable_AfterRunningOnItem()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>(TestString, Inject);
+        var iterable = new SingleItemIterable<string>(TestString, TestVariablesCollector.Inject);
 
         // Act
-        while (iterable.LoadNext(null)) { }
+        while (iterable.LoadNext(null)) {}
         iterable.Reset();
 
         // Assert

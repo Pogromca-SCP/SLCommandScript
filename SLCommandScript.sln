@@ -40,6 +40,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{
 		.github\pull_request_template.md = .github\pull_request_template.md
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLCommandScript.TestUtils", "SLCommandScript.TestUtils\SLCommandScript.TestUtils.csproj", "{6A4A0425-B8F6-4712-99C6-71482E4E28EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{4E15510B-EA42-43BA-AD44-471DB9E649C9}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{4E15510B-EA42-43BA-AD44-471DB9E649C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E15510B-EA42-43BA-AD44-471DB9E649C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A4A0425-B8F6-4712-99C6-71482E4E28EB}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{6A4A0425-B8F6-4712-99C6-71482E4E28EB}.Debug|Any CPU.Build.0 = Release|Any CPU
+		{6A4A0425-B8F6-4712-99C6-71482E4E28EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A4A0425-B8F6-4712-99C6-71482E4E28EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
