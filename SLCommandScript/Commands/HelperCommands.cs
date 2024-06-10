@@ -14,13 +14,11 @@ public class HelperCommands : ParentCommand, IUsageProvider
     /// <summary>
     /// Creates an info line.
     /// </summary>
-    /// <param name="isConsole">Whether or not the line should have colors.</param>
     /// <param name="name">Item name.</param>
     /// <param name="version">Item version.</param>
     /// <param name="author">Item author.</param>
     /// <returns>Created info line.</returns>
-    private static string MakeInfoLine(bool isConsole, string name, string version, string author) => isConsole ? $"{name} v{version} @{author}" :
-        $"{name} <color=#808080ff>v{version}</color> <color=orange>@{author}</color>";
+    private static string MakeInfoLine(string name, string version, string author) => $"{name} v{version} @{author}";
 
     /// <summary>
     /// Contains command name.
@@ -75,11 +73,10 @@ public class HelperCommands : ParentCommand, IUsageProvider
     /// <returns><see langword="true"/> if command executed successfully, <see langword="false"/> otherwise.</returns>
     protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
-        var isConsole = sender is ServerConsoleSender;
         var sb = StringBuilderPool.Shared.Rent("Current SLCommandScript environment state:\n");
-        sb.AppendLine(MakeInfoLine(isConsole, Plugin.PluginName, Plugin.PluginVersion, Plugin.PluginAuthor));
-        sb.AppendLine(MakeInfoLine(isConsole, Constants.Name, Constants.Version, Constants.Author));
-        sb.Append(_loader is null ? "No Scripts Loader currently in use" : MakeInfoLine(isConsole, _loader.LoaderName, _loader.LoaderVersion, _loader.LoaderAuthor));
+        sb.AppendLine(MakeInfoLine(Plugin.PluginName, Plugin.PluginVersion, Plugin.PluginAuthor));
+        sb.AppendLine(MakeInfoLine(Constants.Name, Constants.Version, Constants.Author));
+        sb.Append(_loader is null ? "No Scripts Loader currently in use" : MakeInfoLine(_loader.LoaderName, _loader.LoaderVersion, _loader.LoaderAuthor));
         response = StringBuilderPool.Shared.ToStringReturn(sb);
         return true;
     }

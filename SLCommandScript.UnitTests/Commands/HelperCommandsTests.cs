@@ -23,28 +23,7 @@ public class HelperCommandsTests
 
     #region ExecuteParent Tests
     [Test]
-    public void ExecuteParent_ShouldSucceed_WhenLoaderIsNull_InGame()
-    {
-        // Arrange
-        var command = new HelperCommands(null);
-        var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
-
-        // Act
-        var result = command.Execute(new(), senderMock.Object, out var response);
-
-        // Assert
-        result.Should().BeTrue();
-
-        response.Should().Be($"Current SLCommandScript environment state:\n{Plugin.PluginName} <color=#808080ff>v{Plugin.PluginVersion}</color> " +
-            $"<color=orange>@{Plugin.PluginAuthor}</color>\r\n{Constants.Name} <color=#808080ff>v{Constants.Version}</color> " +
-            $"<color=orange>@{Constants.Author}</color>\r\nNo Scripts Loader currently in use");
-
-        senderMock.VerifyAll();
-        senderMock.VerifyNoOtherCalls();
-    }
-
-    [Test]
-    public void ExecuteParent_ShouldSucceed_WhenLoaderIsNull_InConsole()
+    public void ExecuteParent_ShouldSucceed_WhenLoaderIsNull()
     {
         // Arrange
         var command = new HelperCommands(null);
@@ -64,35 +43,7 @@ public class HelperCommandsTests
     }
 
     [Test]
-    public void ExecuteParent_ShouldSucceed_WhenLoaderIsNotNull_InGame()
-    {
-        // Arrange
-        var loaderMock = new Mock<IScriptsLoader>(MockBehavior.Strict);
-        loaderMock.Setup(x => x.LoaderName).Returns("test");
-        loaderMock.Setup(x => x.LoaderVersion).Returns("1.0.0");
-        loaderMock.Setup(x => x.LoaderAuthor).Returns("unknown");
-        var command = new HelperCommands(loaderMock.Object);
-        var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
-
-        // Act
-        var result = command.Execute(new(), senderMock.Object, out var response);
-
-        // Assert
-        result.Should().BeTrue();
-
-        response.Should().Be($"Current SLCommandScript environment state:\n{Plugin.PluginName} <color=#808080ff>v{Plugin.PluginVersion}</color> " +
-            $"<color=orange>@{Plugin.PluginAuthor}</color>\r\n{Constants.Name} <color=#808080ff>v{Constants.Version}</color> " +
-            $"<color=orange>@{Constants.Author}</color>\r\ntest <color=#808080ff>v1.0.0</color> " +
-            "<color=orange>@unknown</color>");
-
-        senderMock.VerifyAll();
-        senderMock.VerifyNoOtherCalls();
-        loaderMock.VerifyAll();
-        loaderMock.VerifyNoOtherCalls();
-    }
-
-    [Test]
-    public void ExecuteParent_ShouldSucceed_WhenLoaderIsNotNull_InConsole()
+    public void ExecuteParent_ShouldSucceed_WhenLoaderIsNotNull()
     {
         // Arrange
         var loaderMock = new Mock<IScriptsLoader>(MockBehavior.Strict);

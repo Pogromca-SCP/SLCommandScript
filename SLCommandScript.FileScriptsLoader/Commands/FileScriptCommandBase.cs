@@ -49,6 +49,11 @@ public class FileScriptCommandBase : ICommand
     public string Description { get => _desc; set => _desc = string.IsNullOrWhiteSpace(value) ? DefaultDescription : value; }
 
     /// <summary>
+    /// Tells whether or not command response should be sanitized.
+    /// </summary>
+    public bool SanitizeResponse => true;
+
+    /// <summary>
     /// Root location where the shortened file path starts from.
     /// </summary>
     public string Location { get; }

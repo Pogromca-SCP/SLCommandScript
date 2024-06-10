@@ -7,3 +7,4 @@ using System.Reflection;
 [assembly: AssemblyCopyright("Copyright © 2023-2024 " + Constants.ProjectAuthor)]
 [assembly: AssemblyVersion(Constants.ProjectVersion)]
 [assembly: AssemblyFileVersion(Constants.ProjectVersion)]
+[assembly: AssemblyInformationalVersion(Constants.ProjectVersion)]
