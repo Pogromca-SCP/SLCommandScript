@@ -10,6 +10,14 @@ namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 [TestFixture]
 public class FileScriptCommandTests
 {
+    [TearDown]
+    public void TearDown()
+    {
+        HelpersProvider.FileSystemHelper = null;
+        FileScriptCommandBase.PermissionsResolver = null;
+        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
+    }
+
     #region Usage Tests
     [Test]
     public void Usage_ShouldBeSetToNull_WhenProvidedValueIsNull()

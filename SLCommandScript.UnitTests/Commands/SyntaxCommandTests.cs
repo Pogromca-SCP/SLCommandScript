@@ -12,9 +12,12 @@ public class SyntaxCommandTests
     [SetUp]
     public void SetUp()
     {
-        _command = new();
+        _command ??= new();
         _command.Rules.Clear();
     }
+
+    [OneTimeTearDown]
+    public void OneTimeTearDown() => _command = null;
 
     #region Execute Tests
     [Test]

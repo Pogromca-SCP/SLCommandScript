@@ -19,9 +19,16 @@ public class FileScriptsLoaderTests
 {
     private static readonly PluginDirectory _testDirectory = new("./");
 
-    private static readonly Type[] _emptyTypesArray = [];
-
     private static readonly Func<string, string, bool, IFileSystemWatcherHelper> _testWatcherFactory = (directory, filter, allowSubdirectories) => null;
+
+    [TearDown]
+    public void TearDown()
+    {
+        HelpersProvider.FileSystemHelper = null;
+        HelpersProvider.FileSystemWatcherHelperFactory = null;
+        FileScriptCommandBase.PermissionsResolver = null;
+        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
+    }
 
     [Test]
     public void Properties_ShouldReturnProperData()
@@ -40,10 +47,6 @@ public class FileScriptsLoaderTests
     public void InitScriptsLoader_ShouldNotInitialize_WhenProvidedPluginObjectIsNull()
     {
         // Arrange
-        HelpersProvider.FileSystemHelper = null;
-        HelpersProvider.FileSystemWatcherHelperFactory = null;
-        FileScriptCommandBase.PermissionsResolver = null;
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         var loader = new FileScriptsLoader();
 
         // Act
@@ -60,10 +63,6 @@ public class FileScriptsLoaderTests
     public void InitScriptsLoader_ShouldNotInitialize_WhenProvidedPluginHandlerIsNull()
     {
         // Arrange
-        HelpersProvider.FileSystemHelper = null;
-        HelpersProvider.FileSystemWatcherHelperFactory = null;
-        FileScriptCommandBase.PermissionsResolver = null;
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         var loader = new FileScriptsLoader();
 
         // Act
@@ -90,13 +89,9 @@ public class FileScriptsLoaderTests
             EnableScriptEventHandlers = false
         };
 
-        HelpersProvider.FileSystemHelper = null;
-        HelpersProvider.FileSystemWatcherHelperFactory = null;
-        FileScriptCommandBase.PermissionsResolver = null;
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         using var loader = new FileScriptsLoader();
         var plugin = new TestPlugin();
-        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), _emptyTypesArray), config);
+        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), []), config);
         var fileSystemHelper = HelpersProvider.FileSystemHelper;
         var fileSystemWatcherFactory = HelpersProvider.FileSystemWatcherHelperFactory;
         var permissionsResolver = FileScriptCommandBase.PermissionsResolver;
@@ -105,7 +100,7 @@ public class FileScriptsLoaderTests
         config.ScriptExecutionsLimit *= 2;
 
         // Act
-        secondLoader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), _emptyTypesArray), config);
+        secondLoader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), []), config);
 
         // Assert
         HelpersProvider.FileSystemHelper.Should().Be(fileSystemHelper);
@@ -120,15 +115,11 @@ public class FileScriptsLoaderTests
     public void InitScriptsLoader_ShouldInitialize_WhenNoDirectoriesAreEnabled(int execsLimit)
     {
         // Arrange
-        HelpersProvider.FileSystemHelper = null;
-        HelpersProvider.FileSystemWatcherHelperFactory = null;
-        FileScriptCommandBase.PermissionsResolver = null;
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         using var loader = new FileScriptsLoader();
         var plugin = new TestPlugin();
 
         // Act
-        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), _emptyTypesArray), new()
+        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), []), new()
         {
             CustomPermissionsResolver = "xd",
             ScriptExecutionsLimit = execsLimit,
@@ -150,15 +141,11 @@ public class FileScriptsLoaderTests
     public void InitScriptsLoader_ShouldLoadCustomPermissionsLoader(int execsLimit)
     {
         // Arrange
-        HelpersProvider.FileSystemHelper = null;
-        HelpersProvider.FileSystemWatcherHelperFactory = null;
-        FileScriptCommandBase.PermissionsResolver = null;
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         using var loader = new FileScriptsLoader();
         var plugin = new TestPlugin();
 
         // Act
-        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), _emptyTypesArray), new()
+        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), []), new()
         {
             CustomPermissionsResolver = typeof(CustomResolver).AssemblyQualifiedName,
             ScriptExecutionsLimit = execsLimit,
@@ -182,13 +169,11 @@ public class FileScriptsLoaderTests
         fileSystemMock.Setup(x => x.DirectoryExists(It.IsAny<string>())).Returns(true);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         HelpersProvider.FileSystemWatcherHelperFactory = _testWatcherFactory;
-        FileScriptCommandBase.PermissionsResolver = null;
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         using var loader = new FileScriptsLoader();
         var plugin = new TestPlugin();
 
         // Act
-        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), _emptyTypesArray), new()
+        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), []), new()
         {
             CustomPermissionsResolver = null,
             ScriptExecutionsLimit = 0,
@@ -217,13 +202,11 @@ public class FileScriptsLoaderTests
         fileSystemMock.Setup(x => x.DirectoryExists(It.IsAny<string>())).Returns(true);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         HelpersProvider.FileSystemWatcherHelperFactory = _testWatcherFactory;
-        FileScriptCommandBase.PermissionsResolver = null;
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         using var loader = new FileScriptsLoader();
         var plugin = new TestPlugin();
 
         // Act
-        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), _emptyTypesArray), new()
+        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), []), new()
         {
             CustomPermissionsResolver = null,
             ScriptExecutionsLimit = 0,
@@ -250,13 +233,11 @@ public class FileScriptsLoaderTests
         fileSystemMock.Setup(x => x.CreateDirectory(It.IsAny<string>()));
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         HelpersProvider.FileSystemWatcherHelperFactory = _testWatcherFactory;
-        FileScriptCommandBase.PermissionsResolver = null;
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         using var loader = new FileScriptsLoader();
         var plugin = new TestPlugin();
 
         // Act
-        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), _emptyTypesArray), null);
+        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), []), null);
 
         // Assert
         HelpersProvider.FileSystemHelper.Should().Be(fileSystemMock.Object);
@@ -280,7 +261,7 @@ public class FileScriptsLoaderTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         HelpersProvider.FileSystemWatcherHelperFactory = _testWatcherFactory;
         var loader = new FileScriptsLoader();
-        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), _emptyTypesArray), null);
+        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), []), null);
 
         // Act
         loader.Dispose();
@@ -304,7 +285,7 @@ public class FileScriptsLoaderTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         HelpersProvider.FileSystemWatcherHelperFactory = _testWatcherFactory;
         using var loader = new FileScriptsLoader();
-        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), _emptyTypesArray), null);
+        loader.InitScriptsLoader(plugin, new(_testDirectory, plugin, plugin.GetType(), []), null);
         var secondLoader = new FileScriptsLoader();
 
         // Act
@@ -324,7 +305,7 @@ public class FileScriptsLoaderTests
 public class TestPlugin
 {
     [PluginEntryPoint("TestPlugin", "1.0.0", "Plugin for testing purposes only", "Test")]
-    void Load() {}
+    private void Load() {}
 }
 
 public class CustomResolver : IPermissionsResolver

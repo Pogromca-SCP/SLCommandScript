@@ -12,21 +12,24 @@ public class FileScriptCommandBaseTests
 {
     private const string TestPath = "test.slcs";
 
-    #region Error Flow Test Case Sources
     private static readonly string[][] _errorPaths = [
         ["xd", "Command 'xd' was not found\nat test.slcs:1"],
         [null, "Cannot read script from file 'test.slcs'"],
         ["[", "No directive keywords were used\nat test.slcs:1"]
     ];
-    #endregion
 
-    #region Gold Flow Test Case Sources
     private static readonly string[] _goldPaths = [
         string.Empty,
         "help",
         "#This is a comment"
     ];
-    #endregion
+
+    [TearDown]
+    public void TearDown()
+    {
+        HelpersProvider.FileSystemHelper = null;
+        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
+    }
 
     #region Description Tests
     [Test]
@@ -97,7 +100,7 @@ public class FileScriptCommandBaseTests
     {
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Throws(new Exception());
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Throws<Exception>();
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
@@ -140,7 +143,6 @@ public class FileScriptCommandBaseTests
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
         var cmd = new FileScriptCommandBase(null, null);
 
         // Act
@@ -159,7 +161,7 @@ public class FileScriptCommandBaseTests
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(TestPath)).Returns("test");
-        fileSystemMock.Setup(x => x.ReadFile(TestPath)).Throws(new Exception());
+        fileSystemMock.Setup(x => x.ReadFile(TestPath)).Throws<Exception>();
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         FileScriptCommandBase.ConcurrentExecutionsLimit = 1;
         var cmd = new FileScriptCommandBase(null, TestPath);

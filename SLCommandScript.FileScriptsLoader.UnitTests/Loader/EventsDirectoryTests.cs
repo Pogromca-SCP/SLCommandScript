@@ -4,6 +4,7 @@ using NUnit.Framework;
 using PluginAPI.Enums;
 using SLCommandScript.FileScriptsLoader.Helpers;
 using SLCommandScript.FileScriptsLoader.Loader;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,6 @@ public class EventsDirectoryTests
 
     private static readonly TestPlugin _plugin = new();
 
-    #region Test Case Sources
     private static readonly string[] _invalidEvents = [string.Empty, "hello", "there"];
 
     private static readonly string[] _validEvents = [$"{ServerEventType.PlayerDeath}", $"On{ServerEventType.Scp079CameraChanged}", $"on{ServerEventType.PlaceBlood}"];
@@ -29,9 +29,7 @@ public class EventsDirectoryTests
     private static IEnumerable<object[]> ValidEvents => JoinArrays(_validEvents, _eventTypes);
 
     private static IEnumerable<object[]> JoinArrays(string[] names, ServerEventType[] types) => names.Select((n, index) => new object[] { n, types[index] });
-    #endregion
 
-    #region Helper Methods
     private static Mock<IFileSystemWatcherHelper> MakeWatcherMock()
     {
         var watcherMock = new Mock<IFileSystemWatcherHelper>(MockBehavior.Strict);
@@ -49,17 +47,23 @@ public class EventsDirectoryTests
         fileSystemMock.Setup(x => x.EnumerateFiles(_testDirectory, EventsDirectory.ScriptFilesFilter, SearchOption.TopDirectoryOnly)).Returns(foundFiles);
         return fileSystemMock;
     }
-    #endregion
+
+    private static EventsDirectory MakeSupressed(object plugin, IFileSystemWatcherHelper watcher)
+    {
+        var dir = new EventsDirectory(plugin, watcher);
+        GC.SuppressFinalize(dir);
+        return dir;
+    }
+
+    [TearDown]
+    public void TearDown() => HelpersProvider.FileSystemHelper = null;
 
     #region Constructor Tests
     [Test]
     public void EventsDirectory_ShouldNotInitialize_WhenProvidedWatcherIsNull()
     {
-        // Arrange
-        HelpersProvider.FileSystemHelper = null;
-
         // Act
-        var result = new EventsDirectory(_plugin, null);
+        var result = MakeSupressed(_plugin, null);
 
         // Assert
         result.PluginObject.Should().Be(_plugin);
@@ -76,7 +80,7 @@ public class EventsDirectoryTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new EventsDirectory(null, watcherMock.Object);
+        var result = MakeSupressed(null, watcherMock.Object);
 
         // Assert
         result.PluginObject.Should().BeNull();
@@ -97,7 +101,7 @@ public class EventsDirectoryTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new EventsDirectory(_plugin, watcherMock.Object);
+        var result = MakeSupressed(_plugin, watcherMock.Object);
 
         // Assert
         result.PluginObject.Should().Be(_plugin);
@@ -121,7 +125,7 @@ public class EventsDirectoryTests
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new EventsDirectory(_plugin, watcherMock.Object);
+        var result = MakeSupressed(_plugin, watcherMock.Object);
 
         // Assert
         result.PluginObject.Should().Be(_plugin);
@@ -139,8 +143,7 @@ public class EventsDirectoryTests
     public void Dispose_ShouldDoNothing_WhenPropertiesAreNull()
     {
         // Arrange
-        HelpersProvider.FileSystemHelper = null;
-        var dir = new EventsDirectory(null, null);
+        var dir = MakeSupressed(null, null);
 
         // Act
         dir.Dispose();
@@ -155,8 +158,7 @@ public class EventsDirectoryTests
     public void Dispose_ShouldUnregisterEvents_WhenWatcherIsNull()
     {
         // Arrange
-        HelpersProvider.FileSystemHelper = null;
-        var dir = new EventsDirectory(_plugin, null);
+        var dir = MakeSupressed(_plugin, null);
 
         // Act
         dir.Dispose();
@@ -175,7 +177,7 @@ public class EventsDirectoryTests
         watcherMock.Setup(x => x.Dispose());
         var fileSystemMock = MakeFilesHelper([]);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(null, watcherMock.Object);
+        var dir = MakeSupressed(null, watcherMock.Object);
 
         // Act
         dir.Dispose();
@@ -201,7 +203,7 @@ public class EventsDirectoryTests
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension("xd")).Returns(ServerEventType.MapGenerated.ToString());
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(string.Empty)).Returns(string.Empty);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(_plugin, watcherMock.Object);
+        var dir = MakeSupressed(_plugin, watcherMock.Object);
 
         // Act
         dir.Dispose();
@@ -226,7 +228,7 @@ public class EventsDirectoryTests
         var fileSystemMock = MakeFilesHelper([]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(null, watcherMock.Object);
+        var dir = MakeSupressed(null, watcherMock.Object);
 
         // Act
         watcherMock.Raise(x => x.Created += null, new FileSystemEventArgs(WatcherChangeTypes.Created, _testDirectory, name));
@@ -247,7 +249,7 @@ public class EventsDirectoryTests
         var fileSystemMock = MakeFilesHelper([]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(null, watcherMock.Object);
+        var dir = MakeSupressed(null, watcherMock.Object);
 
         // Act
         watcherMock.Raise(x => x.Created += null, new FileSystemEventArgs(WatcherChangeTypes.Created, _testDirectory, name));
@@ -269,7 +271,7 @@ public class EventsDirectoryTests
         var fileSystemMock = MakeFilesHelper([]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(null, watcherMock.Object);
+        var dir = MakeSupressed(null, watcherMock.Object);
         dir.Handler.EventScripts.Add(key, null);
 
         // Act
@@ -294,7 +296,7 @@ public class EventsDirectoryTests
         var fileSystemMock = MakeFilesHelper([]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(null, watcherMock.Object);
+        var dir = MakeSupressed(null, watcherMock.Object);
         dir.Handler.EventScripts.Add(key, null);
 
         // Act
@@ -317,7 +319,7 @@ public class EventsDirectoryTests
         var fileSystemMock = MakeFilesHelper([]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(null, watcherMock.Object);
+        var dir = MakeSupressed(null, watcherMock.Object);
         dir.Handler.EventScripts.Add(key, null);
 
         // Act
@@ -339,7 +341,7 @@ public class EventsDirectoryTests
         var fileSystemMock = MakeFilesHelper([]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(null, watcherMock.Object);
+        var dir = MakeSupressed(null, watcherMock.Object);
 
         // Act
         watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Created, _testDirectory, name));
@@ -363,7 +365,7 @@ public class EventsDirectoryTests
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(null, watcherMock.Object);
+        var dir = MakeSupressed(null, watcherMock.Object);
         dir.Handler.EventScripts.Add(key, null);
 
         // Act
@@ -387,7 +389,7 @@ public class EventsDirectoryTests
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(null, watcherMock.Object);
+        var dir = MakeSupressed(null, watcherMock.Object);
         dir.Handler.EventScripts.Add(key, null);
 
         // Act
@@ -411,7 +413,7 @@ public class EventsDirectoryTests
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\{name}")).Returns(name);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"XD{name}")).Returns(string.Empty);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(null, watcherMock.Object);
+        var dir = MakeSupressed(null, watcherMock.Object);
         dir.Handler.EventScripts.Add(key, null);
 
         // Act
@@ -434,7 +436,7 @@ public class EventsDirectoryTests
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(name)).Returns(name);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension($"{_testDirectory}\\XD{name}")).Returns(string.Empty);
         HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        var dir = new EventsDirectory(null, watcherMock.Object);
+        var dir = MakeSupressed(null, watcherMock.Object);
 
         // Act
         watcherMock.Raise(x => x.Renamed += null, new RenamedEventArgs(WatcherChangeTypes.Renamed, _testDirectory, name, $"XD{name}"));
