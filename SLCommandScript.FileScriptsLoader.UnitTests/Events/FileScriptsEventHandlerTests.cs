@@ -27,9 +27,6 @@ public class FileScriptsEventHandlerTests
         _handler.EventScripts.Clear();
     }
 
-    [OneTimeTearDown]
-    public void OneTimeTearDown() => _handler = null;
-
     #region HandleEvent Tests
     [TestCaseSource(nameof(_testedEvents))]
     public void HandleEvent_ShouldNotThrow_WhenEventIsNotRegistered(ServerEventType type, IEventArguments args)

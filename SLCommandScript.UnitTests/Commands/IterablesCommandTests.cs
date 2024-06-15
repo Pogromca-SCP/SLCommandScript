@@ -26,12 +26,7 @@ public class IterablesCommandTests
     }
 
     [OneTimeTearDown]
-    public void OneTimeTearDown()
-    {
-        TestDictionaries.SetDictionary(IterablesUtils.Providers, _originalIterables);
-        _originalIterables = null;
-        _command = null;
-    }
+    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers, _originalIterables);
 
     #region Execute Tests
     [Test]

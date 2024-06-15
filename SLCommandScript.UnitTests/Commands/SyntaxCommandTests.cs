@@ -16,9 +16,6 @@ public class SyntaxCommandTests
         _command.Rules.Clear();
     }
 
-    [OneTimeTearDown]
-    public void OneTimeTearDown() => _command = null;
-
     #region Execute Tests
     [Test]
     public void Execute_ShouldSucceed_WhenNoArgumentsArePassed()
