@@ -7,18 +7,25 @@ namespace SLCommandScript.UnitTests.Commands;
 [TestFixture]
 public class SyntaxCommandTests
 {
+    private SyntaxCommand _command;
+
+    [SetUp]
+    public void SetUp()
+    {
+        _command = new();
+        _command.Rules.Clear();
+    }
+
     #region Execute Tests
     [Test]
     public void Execute_ShouldSucceed_WhenNoArgumentsArePassed()
     {
         // Arrange
-        var command = new SyntaxCommand();
-        command.Rules.Clear();
-        command.Rules["test"] = null;
-        command.Rules["xd"] = null;
+        _command.Rules["test"] = null;
+        _command.Rules["xd"] = null;
 
         // Act
-        var result = command.Execute(new(), null, out var response);
+        var result = _command.Execute(new(), null, out var response);
 
         // Assert
         result.Should().BeTrue();
@@ -28,12 +35,8 @@ public class SyntaxCommandTests
     [Test]
     public void Execute_ShouldFail_WhenSyntaxTipDoesNotExist()
     {
-        // Arrange
-        var command = new SyntaxCommand();
-        command.Rules.Clear();
-
         // Act
-        var result = command.Execute(new(["xd"], 0, 1), null, out var response);
+        var result = _command.Execute(new(["xd"], 0, 1), null, out var response);
 
         // Assert
         result.Should().BeFalse();
@@ -44,16 +47,14 @@ public class SyntaxCommandTests
     public void Execute_ShouldSucceed_WhenGoldFlow()
     {
         // Arrange
-        var command = new SyntaxCommand();
-        command.Rules.Clear();
-        command.Rules["test"] = "Example text";
+        _command.Rules["test"] = "Example text";
 
         // Act
-        var result = command.Execute(new(["test"], 0, 1), null, out var response);
+        var result = _command.Execute(new(["test"], 0, 1), null, out var response);
 
         // Assert
         result.Should().BeTrue();
-        response.Should().Be(command.Rules["test"]);
+        response.Should().Be(_command.Rules["test"]);
     }
     #endregion
 }

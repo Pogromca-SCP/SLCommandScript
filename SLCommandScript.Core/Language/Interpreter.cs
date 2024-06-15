@@ -45,6 +45,7 @@ public class Interpreter : IExprVisitor<bool>
     }
     #endregion
 
+    #region Static Elements
     /// <summary>
     /// Contains regular expression for variables.
     /// </summary>
@@ -66,6 +67,7 @@ public class Interpreter : IExprVisitor<bool>
             Log.Error(interp.ErrorMessage, expr.Name is null ? "Async script: " : $"Async script ('{expr.Name}'): ");
         }
     }
+    #endregion
 
     #region Fields and Properties
     /// <summary>

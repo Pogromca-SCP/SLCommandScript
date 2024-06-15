@@ -12,6 +12,7 @@ namespace SLCommandScript.FileScriptsLoader.Events;
 /// </summary>
 public class FileScriptsEventHandler
 {
+    #region Events Management
     /// <summary>
     /// Contains registered event handling scripts.
     /// </summary>
@@ -37,6 +38,7 @@ public class FileScriptsEventHandler
             Log.Error(message, "FileScriptsEventHandler: ");
         }
     }
+    #endregion
 
     #region Players
     #region Technical

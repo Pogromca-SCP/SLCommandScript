@@ -11,4 +11,7 @@
 		<Configurations>Release</Configurations>
 		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>
+	<ItemGroup>
+		<Reference Include="CommandSystem.Core" HintPath="$(SL_REFERENCES)/CommandSystem.Core.dll" />
+	</ItemGroup>
 </Project>

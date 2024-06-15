@@ -4,13 +4,13 @@ using NUnit.Framework;
 using SLCommandScript.Commands;
 using SLCommandScript.Core;
 using SLCommandScript.Core.Interfaces;
-using System.Linq;
 
 namespace SLCommandScript.UnitTests.Commands;
 
 [TestFixture]
 public class HelperCommandsTests
 {
+    #region Constructor Tests
     [Test]
     public void HelperCommands_ShouldProperlyInitialize()
     {
@@ -18,8 +18,9 @@ public class HelperCommandsTests
         var command = new HelperCommands(null);
 
         // Assert
-        command.AllCommands.Count().Should().Be(2);
+        command.AllCommands.Should().HaveCount(2);
     }
+    #endregion
 
     #region ExecuteParent Tests
     [Test]

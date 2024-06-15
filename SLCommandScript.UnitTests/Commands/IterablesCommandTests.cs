@@ -3,6 +3,8 @@ using NUnit.Framework;
 using SLCommandScript.Commands;
 using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Iterables;
+using SLCommandScript.TestUtils;
+using System;
 using System.Collections.Generic;
 
 namespace SLCommandScript.UnitTests.Commands;
@@ -12,17 +14,29 @@ public class IterablesCommandTests
 {
     private const string TestIterable = "test";
 
+    private IEnumerable<KeyValuePair<string, Func<IIterable>>> _originalIterables;
+
+    private IterablesCommand _command;
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+        _originalIterables = TestDictionaries.ClearDictionary(IterablesUtils.Providers);
+        _command = new();
+    }
+
+    [OneTimeTearDown]
+    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers, _originalIterables);
+
     #region Execute Tests
     [Test]
     public void Execute_ShouldSucceed_WhenNoArgumentsArePassed()
     {
         // Arrange
-        IterablesUtils.Providers.Clear();
         IterablesUtils.Providers[TestIterable] = null;
-        var command = new IterablesCommand();
 
         // Act
-        var result = command.Execute(new(), null, out var response);
+        var result = _command.Execute(new(), null, out var response);
 
         // Assert
         result.Should().BeTrue();
@@ -34,10 +48,9 @@ public class IterablesCommandTests
     {
         // Arrange
         IterablesUtils.Providers.Clear();
-        var command = new IterablesCommand();
 
         // Act
-        var result = command.Execute(new([TestIterable], 0, 1), null, out var response);
+        var result = _command.Execute(new([TestIterable], 0, 1), null, out var response);
 
         // Assert
         result.Should().BeFalse();
@@ -48,12 +61,10 @@ public class IterablesCommandTests
     public void Execute_ShouldFail_WhenIterableIsNull()
     {
         // Arrange
-        IterablesUtils.Providers.Clear();
         IterablesUtils.Providers[TestIterable] = null;
-        var command = new IterablesCommand();
 
         // Act
-        var result = command.Execute(new([TestIterable], 0, 1), null, out var response);
+        var result = _command.Execute(new([TestIterable], 0, 1), null, out var response);
 
         // Assert
         result.Should().BeFalse();
@@ -64,12 +75,10 @@ public class IterablesCommandTests
     public void Execute_ShouldFail_WhenIterableReturnsNull()
     {
         // Arrange
-        IterablesUtils.Providers.Clear();
         IterablesUtils.Providers[TestIterable] = () => null;
-        var command = new IterablesCommand();
 
         // Act
-        var result = command.Execute(new([TestIterable], 0, 1), null, out var response);
+        var result = _command.Execute(new([TestIterable], 0, 1), null, out var response);
 
         // Assert
         result.Should().BeFalse();
@@ -80,12 +89,10 @@ public class IterablesCommandTests
     public void Execute_ShouldFail_WhenIterationFailsToLoadElements()
     {
         // Arrange
-        IterablesUtils.Providers.Clear();
         IterablesUtils.Providers[TestIterable] = () => new TestIterable(true, false);
-        var command = new IterablesCommand();
 
         // Act
-        var result = command.Execute(new([TestIterable], 0, 1), null, out var response);
+        var result = _command.Execute(new([TestIterable], 0, 1), null, out var response);
 
         // Assert
         result.Should().BeFalse();
@@ -96,12 +103,10 @@ public class IterablesCommandTests
     public void Execute_ShouldSucceed_WhenIterableHasNoVariables()
     {
         // Arrange
-        IterablesUtils.Providers.Clear();
         IterablesUtils.Providers[TestIterable] = () => new TestIterable(false, false);
-        var command = new IterablesCommand();
 
         // Act
-        var result = command.Execute(new([TestIterable], 0, 1), null, out var response);
+        var result = _command.Execute(new([TestIterable], 0, 1), null, out var response);
 
         // Assert
         result.Should().BeTrue();
@@ -112,12 +117,10 @@ public class IterablesCommandTests
     public void Execute_ShouldSucceed_WhenGoldFlow()
     {
         // Arrange
-        IterablesUtils.Providers.Clear();
         IterablesUtils.Providers[TestIterable] = () => new TestIterable(false, true);
-        var command = new IterablesCommand();
 
         // Act
-        var result = command.Execute(new([TestIterable], 0, 1), null, out var response);
+        var result = _command.Execute(new([TestIterable], 0, 1), null, out var response);
 
         // Assert
         result.Should().BeTrue();

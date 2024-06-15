@@ -16,6 +16,7 @@ namespace SLCommandScript.Core.Language;
 /// </summary>
 public class Parser
 {
+    #region Static Elements
     /// <summary>
     /// Contains regular expression for ranges.
     /// </summary>
@@ -46,6 +47,7 @@ public class Parser
 
         return isNegative ? -result : result;
     }
+    #endregion
 
     #region Fields and Properties
     /// <summary>
