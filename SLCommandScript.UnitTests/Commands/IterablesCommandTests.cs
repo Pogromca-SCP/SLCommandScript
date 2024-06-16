@@ -14,16 +14,12 @@ public class IterablesCommandTests
 {
     private const string TestIterable = "test";
 
+    private readonly IterablesCommand _command = new();
+
     private IEnumerable<KeyValuePair<string, Func<IIterable>>> _originalIterables;
 
-    private IterablesCommand _command;
-
     [OneTimeSetUp]
-    public void OneTimeSetUp()
-    {
-        _originalIterables = TestDictionaries.ClearDictionary(IterablesUtils.Providers);
-        _command = new();
-    }
+    public void OneTimeSetUp() => _originalIterables = TestDictionaries.ClearDictionary(IterablesUtils.Providers);
 
     [OneTimeTearDown]
     public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers, _originalIterables);

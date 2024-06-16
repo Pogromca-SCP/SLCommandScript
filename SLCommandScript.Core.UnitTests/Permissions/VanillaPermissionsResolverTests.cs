@@ -15,9 +15,6 @@ public class VanillaPermissionsResolverTests
     private static readonly PlayerPermissions[] _existingPermissions = [PlayerPermissions.Noclip, PlayerPermissions.Announcer,
         PlayerPermissions.FacilityManagement, PlayerPermissions.ForceclassToSpectator, PlayerPermissions.ForceclassSelf];
 
-    private VanillaPermissionsResolver _resolver;
-
-    #region Helper Methods
     private static Mock<CommandSender> GetSenderMock() => new(MockBehavior.Strict);
 
     private static Mock<CommandSender> GetSenderMock(ulong perms)
@@ -27,13 +24,8 @@ public class VanillaPermissionsResolverTests
         mock.Setup(x => x.Permissions).Returns(perms);
         return mock;
     }
-    #endregion
 
-    [OneTimeSetUp]
-    public void OneTimeSetUp()
-    {
-        _resolver = new();
-    }
+    private readonly VanillaPermissionsResolver _resolver = new();
 
     #region CheckPermissions Tests
     [TestCaseSource(nameof(_existingPermissions))]

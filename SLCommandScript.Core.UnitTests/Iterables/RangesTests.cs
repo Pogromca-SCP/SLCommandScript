@@ -7,7 +7,6 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 [TestFixture]
 public class RangesTests
 {
-    #region Test Case Sources
     private static readonly object[][] _testRanges = [
         [0, 0, new[] { 0 }],
         [0, 10, new[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }],
@@ -15,7 +14,6 @@ public class RangesTests
         [1, 2, new[] { 1, 2 }],
         [5, -2, new[] { 5, 4, 3, 2, 1, 0, -1, -2 }]
     ];
-    #endregion
 
     #region GetRange Tests
     [TestCaseSource(nameof(_testRanges))]

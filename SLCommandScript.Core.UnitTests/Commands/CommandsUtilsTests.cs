@@ -21,7 +21,6 @@ public class CommandsUtilsTests
 
     private const CommandType InvalidCommandType = CommandType.Console;
 
-    #region Test Case Sources
     private static readonly CommandType[] _allHandlerTypes = [CommandType.RemoteAdmin, CommandType.Console,
         CommandType.GameConsole, CommandType.RemoteAdmin | CommandType.Console, CommandType.RemoteAdmin | CommandType.GameConsole,
         CommandType.GameConsole | CommandType.Console, CommandType.RemoteAdmin | CommandType.GameConsole | CommandType.Console];
@@ -51,9 +50,7 @@ public class CommandsUtilsTests
     private static IEnumerable<object[]> ValidHandlersXCommandsToRegister => TestArrays.CartesianJoin(_validHandlerTypes, _commandsToRegister);
 
     private static IEnumerable<object[]> ValidHandlersXExampleCommands => TestArrays.CartesianJoin(_validHandlerTypes, _exampleCommands);
-    #endregion
 
-    #region Helper Methods
     private static IEnumerable<ICommandHandler> GetExpectedCommandHandlers(CommandType handlerType) => handlerType switch
     {
         CommandType.RemoteAdmin => [CommandProcessor.RemoteAdminCommandHandler],
@@ -101,7 +98,24 @@ public class CommandsUtilsTests
     }
 
     private static ICommandHandler MakeHandler() => ClientCommandHandler.Create();
-    #endregion
+
+    private IEnumerable<ICommand> _originalRemoteAdmin;
+
+    private IEnumerable<ICommand> _originalClient;
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+        _originalRemoteAdmin = TestCommandHandlers.CopyCommands(CommandProcessor.RemoteAdminCommandHandler);
+        _originalClient = TestCommandHandlers.CopyCommands(QueryProcessor.DotCommandHandler);
+    }
+
+    [OneTimeTearDown]
+    public void OneTimeTearDown()
+    {
+        TestCommandHandlers.SetCommands(CommandProcessor.RemoteAdminCommandHandler, _originalRemoteAdmin);
+        TestCommandHandlers.SetCommands(QueryProcessor.DotCommandHandler, _originalClient);
+    }
 
     #region GetCommandHandlers Tests
     [TestCaseSource(nameof(_allHandlerTypes))]

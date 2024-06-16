@@ -4,10 +4,14 @@ using FluentAssertions;
 using NUnit.Framework;
 using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
+using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Iterables;
 using SLCommandScript.Core.Iterables.Providers;
 using SLCommandScript.Core.Language;
 using SLCommandScript.Core.Language.Expressions;
+using SLCommandScript.TestUtils;
+using System;
+using System.Collections.Generic;
 
 namespace SLCommandScript.Core.UnitTests.Language;
 
@@ -317,24 +321,32 @@ public class ParserTests
     ];
     #endregion
 
+    private IEnumerable<KeyValuePair<string, Func<IIterable>>> _originalProviders;
+
+    private Parser _parser;
+
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        IterablesUtils.Providers.Clear();
+        _originalProviders = TestDictionaries.ClearDictionary(IterablesUtils.Providers);
         IterablesUtils.Providers["Null"] = null;
         IterablesUtils.Providers["Bad"] = () => null;
         IterablesUtils.Providers["Test"] = () => new TestIterable();
     }
 
+    [OneTimeTearDown]
+    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers, _originalProviders);
+
+    [SetUp]
+    public void SetUp() => _parser = new();
+
     #region Constructor Tests
+    [Test]
     public void Parser_ShouldProperlyInitialize()
     {
-        // Act
-        var parser = new Parser();
-
         // Assert
-        parser.ErrorMessage.Should().BeNull();
-        parser.Scope.Should().Be(CommandsUtils.AllScopes);
+        _parser.ErrorMessage.Should().BeNull();
+        _parser.Scope.Should().Be(CommandsUtils.AllScopes);
     }
     #endregion
 
@@ -342,46 +354,37 @@ public class ParserTests
     [Test]
     public void Parse_ShouldReturnProperErrorMessage_WhenTokensListIsNull()
     {
-        // Arrange
-        var parser = new Parser();
-
         // Act
-        var result = parser.Parse(null);
+        var result = _parser.Parse(null);
 
         // Assert
         result.Should().BeNull();
-        parser.ErrorMessage.Should().Be("Provided tokens list to parse was null");
-        parser.Scope.Should().Be(CommandsUtils.AllScopes);
+        _parser.ErrorMessage.Should().Be("Provided tokens list to parse was null");
+        _parser.Scope.Should().Be(CommandsUtils.AllScopes);
     }
 
     [TestCaseSource(nameof(_errorPaths))]
     public void Parse_ShouldReturnProperErrorMessage_WhenAnIssueOccurs(Core.Language.Token[] tokens, string expectedError)
     {
-        // Arrange
-        var parser = new Parser();
-
         // Act
-        var result = parser.Parse([..tokens]);
+        var result = _parser.Parse([..tokens]);
 
         // Assert
         result.Should().BeNull();
-        parser.ErrorMessage.Should().Be(expectedError);
-        parser.Scope.Should().Be(CommandsUtils.AllScopes);
+        _parser.ErrorMessage.Should().Be(expectedError);
+        _parser.Scope.Should().Be(CommandsUtils.AllScopes);
     }
 
     [TestCaseSource(nameof(_goldPaths))]
     public void Parse_ShouldReturnProperExpression_WhenGoldFlow(Core.Language.Token[] tokens, Expr expectedExpr, CommandType expectedScope)
     {
-        // Arrange
-        var parser = new Parser();
-
         // Act
-        var result = parser.Parse([..tokens]);
+        var result = _parser.Parse([..tokens]);
 
         // Assert
         result.Should().BeEquivalentTo(expectedExpr, options => options.RespectingRuntimeTypes());
-        parser.ErrorMessage.Should().BeNull();
-        parser.Scope.Should().Be(expectedScope);
+        _parser.ErrorMessage.Should().BeNull();
+        _parser.Scope.Should().Be(expectedScope);
     }
     #endregion
 }

@@ -11,7 +11,6 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 [TestFixture]
 public class ListIterableTests
 {
-    #region Test Case Sources
     private static readonly string[][] _strings = [null, [], [null, null, null, null], ["example", null, "", "test"], ["  \t ", "Test", "test", "TEST"]];
 
     private static readonly int[] _sizes = [-1, 0, 1, 2, 3];
@@ -21,7 +20,6 @@ public class ListIterableTests
     private static IEnumerable<object[]> StringsXSizes => TestArrays.CartesianJoin(_strings, _sizes);
 
     private static IEnumerable<object[]> StringsXPercentages => TestArrays.CartesianJoin(_strings, _percentages);
-    #endregion
 
     #region Constructor Tests
     [Test]

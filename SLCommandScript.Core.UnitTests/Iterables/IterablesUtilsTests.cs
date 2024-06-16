@@ -7,13 +7,10 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 [TestFixture]
 public class IterablesUtilsTests
 {
-    #region Test Case Sources
     private static readonly int[][] _invalidArrays = [null, [], [0]];
 
     private static readonly int[][] _validArrays = [[1, 2, 3], [5, -9, 2], [0, 0, 5, 1, 7, 8]];
-    #endregion
 
-    #region Helper Methods
     private static int[] CopyArray(int[] src)
     {
         if (src is null)
@@ -25,7 +22,6 @@ public class IterablesUtilsTests
         src.CopyTo(cp, 0);
         return cp;
     }
-    #endregion
 
     #region Shuffle Tests
     [TestCaseSource(nameof(_invalidArrays))]

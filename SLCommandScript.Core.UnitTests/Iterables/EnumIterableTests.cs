@@ -8,13 +8,11 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 [TestFixture]
 public class EnumIterableTests
 {
-    #region Static Utilities
     private static readonly int[] _sizes = [-1, 0, 1, 2, 3];
 
     private static readonly float[] _percentages = [-1.0f, 0.0f, 0.25f, 0.1f, 0.5f, 2.5f];
 
     private static readonly string[] _values = ((FullEnum[]) typeof(FullEnum).GetEnumValues()).Select(v => v.ToString("D")).ToArray();
-    #endregion
 
     #region Get Tests
     [Test]
