@@ -20,13 +20,13 @@ public class LexerTests
 
     #region Gold Flow Test Case Sources
     private static readonly object[][] _testsData = [
-        [string.Empty, new[] { "TestEmpty" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[0], 0],
+        [string.Empty, new[] { "TestEmpty" }, PlayerPermissions.KickingAndShortTermBanning, Array.Empty<Core.Language.Token>(), 0],
 
-    [BlankLine, new[] { "TestBlank" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[0], 1],
+    [BlankLine, new[] { "TestBlank" }, PlayerPermissions.KickingAndShortTermBanning, Array.Empty<Core.Language.Token>(), 1],
 
         [@"
 
-", new[] { "" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] {  }, 2],
+", new[] { "" }, PlayerPermissions.KickingAndShortTermBanning, Array.Empty<Core.Language.Token>(), 2],
 
         [@"
     cassie why am I here #What is the point of life?
@@ -49,7 +49,7 @@ public class LexerTests
             new(TokenType.Text, "This"), new(TokenType.Text, "is"), new(TokenType.Text, "a"), new(TokenType.Text, "very"),
             new(TokenType.Text, "long"), new(TokenType.Text, "one"), new(TokenType.Text, "boiiii"), new(TokenType.Text, "\\") }, 3],
 
-        ["\\\r\\", new[] { "TestLineBreakText" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[0], 1],
+        ["\\\r\\", new[] { "TestLineBreakText" }, PlayerPermissions.KickingAndShortTermBanning, Array.Empty<Core.Language.Token>(), 1],
 
         ["#\nhello", new[] { "TestLineOnCommentStart" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] {
             new(TokenType.Text, "hello") }, 2],
@@ -361,6 +361,60 @@ public class LexerTests
     #endregion
 
     private static ArraySegment<string> EmptyArgs => new([], 0, 0);
+
+    #region IsWhitespace Tests
+    [TestCaseSource(nameof(_testCharacters))]
+    public void IsWhiteSpace_ShouldProperlyDetectWhiteSpace(char ch)
+    {
+        // Act
+        var result = Lexer.IsWhiteSpace(ch);
+
+        // Assert
+        result.Should().Be(char.IsWhiteSpace(ch) || ch == '\0');
+    }
+    #endregion
+
+    #region IsDigit Tests
+    [TestCaseSource(nameof(_testCharacters))]
+    public void IsDigit_ShouldProperlyDetectDigit(char ch)
+    {
+        // Act
+        var result = Lexer.IsDigit(ch);
+
+        // Assert
+        result.Should().Be(ch >= '0' && ch <= '9');
+    }
+    #endregion
+
+    #region IsSpecialCharacter Tests
+    [TestCaseSource(nameof(_testCharacters))]
+    public void IsSpecialCharacter_ShouldProperlyDetectSpecialCharacter(char ch)
+    {
+        // Act
+        var result = Lexer.IsSpecialCharacter(ch);
+
+        // Assert
+        result.Should().Be(ch == '[' || ch == ']' || ch == '#');
+    }
+    #endregion
+
+    #region IsKeyword Tests
+    [TestCase("", false)]
+    [TestCase(null, false)]
+    [TestCase("xd", false)]
+    [TestCase("    ", false)]
+    [TestCase("if", true)]
+    [TestCase("FOreach", true)]
+    [TestCase("|", true)]
+    public void IsKeyword_ShouldProperlyDetectKeyword(string str, bool expectedResult)
+    {
+        // Act
+        var result = Lexer.IsKeyword(str);
+
+        // Assert
+        result.Should().Be(expectedResult);
+    }
+    #endregion
 
     #region Rent Tests
     [Test]
@@ -981,54 +1035,6 @@ public class LexerTests
         lexer.ErrorMessage.Should().BeNull();
         lexer.IsAtEnd.Should().BeTrue();
         result.Should().BeEquivalentTo(expectedTokens, options => options.ComparingByValue<Core.Language.Token>());
-    }
-    #endregion
-
-    #region StaticChecks Tests
-    [TestCaseSource(nameof(_testCharacters))]
-    public void IsWhiteSpace_ShouldProperlyDetectWhiteSpace(char ch)
-    {
-        // Act
-        var result = Lexer.IsWhiteSpace(ch);
-
-        // Assert
-        result.Should().Be(char.IsWhiteSpace(ch) || ch == '\0');
-    }
-
-    [TestCaseSource(nameof(_testCharacters))]
-    public void IsDigit_ShouldProperlyDetectDigit(char ch)
-    {
-        // Act
-        var result = Lexer.IsDigit(ch);
-
-        // Assert
-        result.Should().Be(ch >= '0' && ch <= '9');
-    }
-
-    [TestCaseSource(nameof(_testCharacters))]
-    public void IsSpecialCharacter_ShouldProperlyDetectSpecialCharacter(char ch)
-    {
-        // Act
-        var result = Lexer.IsSpecialCharacter(ch);
-
-        // Assert
-        result.Should().Be(ch == '[' || ch == ']' || ch == '#');
-    }
-
-    [TestCase("", false)]
-    [TestCase(null, false)]
-    [TestCase("xd", false)]
-    [TestCase("    ", false)]
-    [TestCase("if", true)]
-    [TestCase("FOreach", true)]
-    [TestCase("|", true)]
-    public void IsKeyword_ShouldProperlyDetectKeyword(string str, bool expectedResult)
-    {
-        // Act
-        var result = Lexer.IsKeyword(str);
-
-        // Assert
-        result.Should().Be(expectedResult);
     }
     #endregion
 }
