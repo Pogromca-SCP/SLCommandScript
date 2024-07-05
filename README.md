@@ -9,7 +9,7 @@ Simple, commands based scripting language for SCP: Secret Laboratory.
 
 This plugin was created using [official Northwood Plugin API](https://github.com/northwood-studios/NwPluginAPI). No additional dependencies need to be installed in order to run it.
 
-The project was developed as part of the educational process at [PJAIT](https://pja.edu.pl/en/).
+This project was developed as part of the educational process at [PJAIT](https://pja.edu.pl/en/).
 
 ## Installation
 ### Automatic
