@@ -170,15 +170,7 @@ public class Lexer
     /// <summary>
     /// Contains script arguments.
     /// </summary>
-    public ArraySegment<string> Arguments
-    {
-        get => _arguments;
-        private set
-        {
-            ClearArguments();
-            _arguments = value;
-        }
-    }
+    public ArraySegment<string> Arguments { get; private set; }
 
     /// <summary>
     /// Contains command sender for permissions guards evaluation.
@@ -223,12 +215,7 @@ public class Lexer
     /// <summary>
     /// <see langword="true" /> if its top level tokenizer, <see langword="false" /> otherwise.
     /// </summary>
-    private bool IsTopLevel => _argLexers is not null;
-
-    /// <summary>
-    /// Contains script arguments.
-    /// </summary>
-    private ArraySegment<string> _arguments;
+    private bool IsTopLevel => _argResults is not null;
 
     /// <summary>
     /// Tells whether or not the command sender has missing permission.
@@ -243,7 +230,12 @@ public class Lexer
     /// <summary>
     /// Caches provided arguments processing results.
     /// </summary>
-    private readonly Dictionary<int, Lexer> _argLexers;
+    private readonly Dictionary<int, ArgResult> _argResults;
+
+    /// <summary>
+    /// Contains lexer instance used for arguments processing.
+    /// </summary>
+    private Lexer _argLexer;
 
     /// <summary>
     /// Contains current token start index.
@@ -274,11 +266,12 @@ public class Lexer
     private Lexer(bool isTopLevel)
     {
         Source = string.Empty;
-        _arguments = new();
+        Arguments = new();
         Sender = null;
         PermissionsResolver = null;
         _tokens = [];
-        _argLexers = isTopLevel ? [] : null;
+        _argResults = isTopLevel ? [] : null;
+        _argLexer = null;
     }
 
     /// <summary>
@@ -287,12 +280,13 @@ public class Lexer
     /// <returns>List with processed tokens.</returns>
     public IList<Token> ScanNextLine()
     {
+        _tokens.Clear();
+
         if (ErrorMessage is not null || IsAtEnd)
         {
             return _tokens;
         }
 
-        _tokens.Clear();
         ++Line;
         var canRead = true;
 
@@ -501,19 +495,6 @@ public class Lexer
         Sender = sender;
         PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
         Reset();
-    }
-
-    /// <summary>
-    /// Disposes arguments lexers.
-    /// </summary>
-    private void ClearArguments()
-    {
-        foreach (var lexer in _argLexers.Values)
-        {
-            Return(lexer);
-        }
-
-        _argLexers.Clear();
     }
 
     /// <summary>
@@ -939,22 +920,24 @@ public class Lexer
             return TokenType.None;
         }
 
-        if (_argLexers.ContainsKey(argNum))
+        if (_argResults.ContainsKey(argNum))
         {
-            return InjectArg(_argLexers[argNum], startedAt, type);
+            return InjectArg(_argResults[argNum], startedAt, type);
         }
 
-        var lexer = Rent(_arguments.Array[_arguments.Offset + argNum - 1]);
-        _argLexers[argNum] = lexer;
-        lexer.ScanNextLine();
+        _argLexer ??= new(false);
+        _argLexer.Reset(Arguments.Array[Arguments.Offset + argNum - 1]);
+        _argLexer.ScanNextLine();
+        var result = new ArgResult(_argLexer.Source, [.._argLexer._tokens]);
+        _argResults[argNum] = result;
 
-        if (lexer.ErrorMessage is not null)
+        if (_argLexer.ErrorMessage is not null)
         {
-            ErrorMessage = $"{lexer.ErrorMessage}\nat $({argNum})";
+            ErrorMessage = $"{_argLexer.ErrorMessage}\nat $({argNum})";
             return TokenType.None;
         }
 
-        return InjectArg(lexer, startedAt, type);
+        return InjectArg(result, startedAt, type);
     }
 
     /// <summary>
@@ -963,37 +946,37 @@ public class Lexer
     /// <param name="argNum">Number of processed argument.</param>
     private void ValidateArgs(int argNum)
     {
-        if (_arguments.Array is null)
+        if (Arguments.Array is null)
         {
             ErrorMessage = $"Invalid argument $({argNum}), provided arguments array is null";
             return;
         }
 
-        if (_arguments.Offset < 1)
+        if (Arguments.Offset < 1)
         {
-            ErrorMessage = $"Invalid argument $({argNum}), provided arguments array has incorrect offset ({_arguments.Offset})";
+            ErrorMessage = $"Invalid argument $({argNum}), provided arguments array has incorrect offset ({Arguments.Offset})";
             return;
         }
 
-        if (argNum > _arguments.Count)
+        if (argNum > Arguments.Count)
         {
-            ErrorMessage = $"Missing argument $({argNum}), sender provided only {_arguments.Count} arguments";
+            ErrorMessage = $"Missing argument $({argNum}), sender provided only {Arguments.Count} arguments";
         }
     }
 
     /// <summary>
     /// Injects argument content in place of current variable.
     /// </summary>
-    /// <param name="lexer">Lexer of argument to inject.</param>
+    /// <param name="result">Result of argument to inject.</param>
     /// <param name="startedAt">Start index of processed variable.</param>
     /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType InjectArg(Lexer lexer, int startedAt, TokenType type) => lexer._tokens.Count switch
+    private TokenType InjectArg(ArgResult result, int startedAt, TokenType type) => result.Tokens.Count switch
     {
-        0 => InjectNoTokensArg(lexer.Source.Length < 1, startedAt, type),
-        1 => Inject1TokenArg(lexer, startedAt, type),
-        2 => Inject2TokensArg(lexer, startedAt, type),
-        _ => InjectNTokensArg(lexer, startedAt, type)
+        0 => InjectNoTokensArg(result.Source.Length < 1, startedAt, type),
+        1 => Inject1TokenArg(result, startedAt, type),
+        2 => Inject2TokensArg(result, startedAt, type),
+        _ => InjectNTokensArg(result, startedAt, type)
     };
     #endregion
 
@@ -1026,18 +1009,18 @@ public class Lexer
     /// <summary>
     /// Injects arguments content in place of current variable.
     /// </summary>
-    /// <param name="lexer">Lexer of argument to inject.</param>
+    /// <param name="result">Result of argument to inject.</param>
     /// <param name="startedAt">Start index of processed variable.</param>
     /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType Inject1TokenArg(Lexer lexer, int startedAt, TokenType type)
+    private TokenType Inject1TokenArg(ArgResult result, int startedAt, TokenType type)
     {
-        var token = lexer._tokens[0];
-        var isEnd = IsWhiteSpace(Current) || IsAtomic(token.Type) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]);
+        var token = result.Tokens[0];
+        var isEnd = IsWhiteSpace(Current) || IsAtomic(token.Type) || IsWhiteSpace(result.Source[result.Source.Length - 1]);
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(lexer.Source[0]) || IsAtomic(token.Type))
+            if (IsWhiteSpace(result.Source[0]) || IsAtomic(token.Type))
             {
                 AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
             }
@@ -1072,17 +1055,17 @@ public class Lexer
     /// <summary>
     /// Injects arguments content in place of current variable.
     /// </summary>
-    /// <param name="lexer">Lexer of argument to inject.</param>
+    /// <param name="result">Result of argument to inject.</param>
     /// <param name="startedAt">Start index of processed variable.</param>
     /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType Inject2TokensArg(Lexer lexer, int startedAt, TokenType type)
+    private TokenType Inject2TokensArg(ArgResult result, int startedAt, TokenType type)
     {
-        var token = lexer._tokens[0];
+        var token = result.Tokens[0];
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(lexer.Source[0]) || IsAtomic(token.Type))
+            if (IsWhiteSpace(result.Source[0]) || IsAtomic(token.Type))
             {
                 AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
                 AddToken(token.Type, token.Value, token.NumericValue);
@@ -1098,9 +1081,9 @@ public class Lexer
             AddToken(token.Type, token.Value, token.NumericValue);
         }
 
-        var lastToken = lexer._tokens[1];
+        var lastToken = result.Tokens[1];
 
-        if (IsWhiteSpace(Current) || IsAtomic(lastToken.Type) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]))
+        if (IsWhiteSpace(Current) || IsAtomic(lastToken.Type) || IsWhiteSpace(result.Source[result.Source.Length - 1]))
         {
             AddToken(lastToken.Type, lastToken.Value, lastToken.NumericValue);
             return TokenType.None;
@@ -1115,29 +1098,29 @@ public class Lexer
     /// <summary>
     /// Injects arguments content in place of current variable.
     /// </summary>
-    /// <param name="lexer">Lexer of argument to inject.</param>
+    /// <param name="result">Result of argument to inject.</param>
     /// <param name="startedAt">Start index of processed variable.</param>
     /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType InjectNTokensArg(Lexer lexer, int startedAt, TokenType type)
+    private TokenType InjectNTokensArg(ArgResult result, int startedAt, TokenType type)
     {
-        IEnumerable<Token> tokens = lexer._tokens;
-        var isEnd = IsWhiteSpace(Current) || IsAtomic(lexer._tokens[lexer._tokens.Count - 1].Type) || IsWhiteSpace(lexer.Source[lexer.Source.Length - 1]);
+        IEnumerable<Token> tokens = result.Tokens;
+        var isEnd = IsWhiteSpace(Current) || IsAtomic(result.Tokens[result.Tokens.Count - 1].Type) || IsWhiteSpace(result.Source[result.Source.Length - 1]);
 
         if (!isEnd)
         {
-            tokens = tokens.Take(lexer._tokens.Count - 1);
+            tokens = tokens.Take(result.Tokens.Count - 1);
         }
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(lexer.Source[0]) || IsAtomic(lexer._tokens[0].Type))
+            if (IsWhiteSpace(result.Source[0]) || IsAtomic(result.Tokens[0].Type))
             {
                 AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
             }
             else
             {
-                var token = lexer._tokens[0];
+                var token = result.Tokens[0];
                 var newType = MergeTypes(type, token);
                 AddToken(newType, GetTextWithPrefix(startedAt) + token.Value, MergeNumbers(_numericValue, newType, token));
                 tokens = tokens.Skip(1);
@@ -1154,7 +1137,7 @@ public class Lexer
             return TokenType.None;
         }
 
-        var lastToken = lexer._tokens[lexer._tokens.Count - 1];
+        var lastToken = result.Tokens[result.Tokens.Count - 1];
         _prefix = lastToken.Value;
         _numericValue = lastToken.NumericValue;
         _start = _current;
