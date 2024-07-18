@@ -20,7 +20,7 @@ public static class ScriptUtils
     /// <returns>Error message if something goes wrong, <see langword="null" /> otherwise. Line number provided alongside.</returns>
     public static (string Message, int Line) Execute(string source, ArraySegment<string> arguments, ICommandSender sender, IPermissionsResolver permissionsResolver = null)
     {
-        var lexer = Lexer.Rent(source, arguments, sender, permissionsResolver);
+        var lexer = new Lexer(source, arguments, sender, permissionsResolver);
         var parser = new Parser();
         var interpreter = new Interpreter(sender);
 
@@ -30,14 +30,14 @@ public static class ScriptUtils
 
             if (lexer.ErrorMessage is not null)
             {
-                return (lexer.ErrorMessage, ReturnLexer(lexer));
+                return (lexer.ErrorMessage, lexer.Line);
             }
 
             var expr = parser.Parse(tokens);
 
             if (parser.ErrorMessage is not null)
             {
-                return (parser.ErrorMessage, ReturnLexer(lexer));
+                return (parser.ErrorMessage, lexer.Line);
             }
 
             if (expr is not null)
@@ -46,23 +46,11 @@ public static class ScriptUtils
 
                 if (!result)
                 {
-                    return (interpreter.ErrorMessage, ReturnLexer(lexer));
+                    return (interpreter.ErrorMessage, lexer.Line);
                 }
             }
         }
 
-        return (null, ReturnLexer(lexer));
-    }
-
-    /// <summary>
-    /// Returns a lexer to the pool and loads it's current line number.
-    /// </summary>
-    /// <param name="lexer">Lexer to return.</param>
-    /// <returns>Line number from returned lexer.</returns>
-    private static int ReturnLexer(Lexer lexer)
-    {
-        var line = lexer.Line;
-        Lexer.Return(lexer);
-        return line;
+        return (null, lexer.Line);
     }
 }

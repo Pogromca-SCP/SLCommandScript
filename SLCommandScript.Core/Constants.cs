@@ -13,7 +13,7 @@ public static class Constants
     /// <summary>
     /// Contains current project version.
     /// </summary>
-    public const string ProjectVersion = "0.10.1";
+    public const string ProjectVersion = "0.11.0";
 
     /// <summary>
     /// Contains project author.

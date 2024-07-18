@@ -28,16 +28,6 @@ public class Lexer
     };
 
     /// <summary>
-    /// Contains all available top level lexers.
-    /// </summary>
-    private static readonly ConcurrentQueue<Lexer> _topLevelLexers = new();
-
-    /// <summary>
-    /// Contains all available argument lexers.
-    /// </summary>
-    private static readonly ConcurrentQueue<Lexer> _argumentLexers = new();
-
-    /// <summary>
     /// Checks if provided character is a whitespace.
     /// </summary>
     /// <param name="ch">Character to check.</param>
@@ -64,67 +54,6 @@ public class Lexer
     /// <param name="str">String to check.</param>
     /// <returns><see langword="true" /> if string is a keyword, <see langword="false" /> otherwise.</returns>
     public static bool IsKeyword(string str) => str is not null && _keywords.ContainsKey(str);
-
-    /// <summary>
-    /// Rents a top level lexer instance.
-    /// </summary>
-    /// <param name="source">Source code to tokenize.</param>
-    /// <param name="arguments">Script arguments to inject.</param>
-    /// <param name="sender">Command sender to use for permissions guards evaluation.</param>
-    /// <param name="resolver">Permissions resolver to use for permissions guards evaluation.</param>
-    /// <returns>Rented top level lexer.</returns>
-    public static Lexer Rent(string source, ArraySegment<string> arguments, ICommandSender sender, IPermissionsResolver resolver = null)
-    {
-        if (!_topLevelLexers.TryDequeue(out var result))
-        {
-            result = new(true);
-        }
-
-        result.Reset(source, arguments, sender, resolver);
-        return result;
-    }
-
-    /// <summary>
-    /// Returns a lexer instance to the correct pool.
-    /// </summary>
-    /// <param name="lexer">Lexer to return.</param>
-    public static void Return(Lexer lexer)
-    {
-        if (lexer is not null)
-        {
-            lexer.Source = string.Empty;
-            lexer.ErrorMessage = null;
-
-            if (lexer.IsTopLevel)
-            {
-                lexer.Arguments = new();
-                lexer.Sender = null;
-                lexer.PermissionsResolver = null;
-                lexer._prefix = string.Empty;
-                _topLevelLexers.Enqueue(lexer);
-            }
-            else
-            {
-                _argumentLexers.Enqueue(lexer);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Rents an argument lexer instance.
-    /// </summary>
-    /// <param name="source">Source code to tokenize.</param>
-    /// <returns>Rented argument lexer.</returns>
-    private static Lexer Rent(string source)
-    {
-        if (!_argumentLexers.TryDequeue(out var result))
-        {
-            result = new(false);
-        }
-
-        result.Reset(source);
-        return result;
-    }
 
     /// <summary>
     /// Checks if provided token type is atomic.
@@ -262,16 +191,31 @@ public class Lexer
     /// <summary>
     /// Creates new lexer instance.
     /// </summary>
-    /// <param name="isTopLevel">Whether or not this lexer should be top level.</param>
-    private Lexer(bool isTopLevel)
+    /// <param name="source">Source code to tokenize.</param>
+    /// <param name="arguments">Script arguments to inject.</param>
+    /// <param name="sender">Command sender to use.</param>
+    /// <param name="resolver">Permissions resolver to use.</param>
+    public Lexer(string source, ArraySegment<string> arguments, ICommandSender sender, IPermissionsResolver resolver = null)
+    {
+        _tokens = [];
+        _argResults = [];
+        _argLexer = null;
+        Reset(source, arguments, sender, resolver);
+    }
+
+    /// <summary>
+    /// Creates new lexer instance.
+    /// </summary>
+    private Lexer()
     {
         Source = string.Empty;
         Arguments = new();
         Sender = null;
         PermissionsResolver = null;
         _tokens = [];
-        _argResults = isTopLevel ? [] : null;
+        _argResults = null;
         _argLexer = null;
+        Reset();
     }
 
     /// <summary>
@@ -925,7 +869,7 @@ public class Lexer
             return InjectArg(_argResults[argNum], startedAt, type);
         }
 
-        _argLexer ??= new(false);
+        _argLexer ??= new();
         _argLexer.Reset(Arguments.Array[Arguments.Offset + argNum - 1]);
         _argLexer.ScanNextLine();
         var result = new ArgResult(_argLexer.Source, [.._argLexer._tokens]);
