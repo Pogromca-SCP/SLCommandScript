@@ -38,18 +38,12 @@ public static class IterablesUtils
         { "ez_room", RoomIterablesProvider.AllEntranceRooms },
         { "surface_room", RoomIterablesProvider.AllSurfaceRooms },
 
-        // Doors
-        { "door", DoorIterablesProvider.AllDoors },
-        { "breakable_door", DoorIterablesProvider.AllBreakableDoors },
-        { "gate", DoorIterablesProvider.AllGates },
-        { "locked_door", DoorIterablesProvider.AllLockedDoors },
-        { "unlocked_door", DoorIterablesProvider.AllUnlockedDoors },
-        { "opened_door", DoorIterablesProvider.AllOpenedDoors },
-        { "closed_door", DoorIterablesProvider.AllClosedDoors },
+        // Plugins
+        { "plugin", PluginIterablesProvider.AllPlugins },
 
         // Enums
-        { "role", EnumIterable<RoleTypeId>.Get },
-        { "item", EnumIterable<ItemType>.Get }
+        { "roleid", EnumIterable<RoleTypeId>.Get },
+        { "itemid", EnumIterable<ItemType>.Get }
     };
     #endregion
 

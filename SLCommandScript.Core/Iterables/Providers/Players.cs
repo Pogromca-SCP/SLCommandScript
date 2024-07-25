@@ -90,6 +90,6 @@ public static class PlayerIterablesProvider
         targetVars["id"] = player.PlayerId.ToString();
         targetVars["team"] = player.Team.ToString();
         targetVars["role"] = player.RoleName;
-        targetVars["roleid"] = ((sbyte) player.Role).ToString();
+        targetVars["roleid"] = player.Role.ToString("D");
     }
 }
