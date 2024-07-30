@@ -99,7 +99,15 @@ public class Lexer
     /// <summary>
     /// Contains script arguments.
     /// </summary>
-    public ArraySegment<string> Arguments { get; private set; }
+    public ArraySegment<string> Arguments
+    {
+        get => _arguments;
+        set
+        {
+            _argResults.Clear();
+            _arguments = value;
+        }
+    }
 
     /// <summary>
     /// Contains command sender for permissions guards evaluation.
@@ -145,6 +153,11 @@ public class Lexer
     /// <see langword="true" /> if its top level tokenizer, <see langword="false" /> otherwise.
     /// </summary>
     private bool IsTopLevel => _argResults is not null;
+
+    /// <summary>
+    /// Contains script arguments.
+    /// </summary>
+    private ArraySegment<string> _arguments;
 
     /// <summary>
     /// Tells whether or not the command sender has missing permission.
@@ -209,7 +222,7 @@ public class Lexer
     private Lexer()
     {
         Source = string.Empty;
-        Arguments = new();
+        _arguments = new();
         Sender = null;
         PermissionsResolver = null;
         _tokens = [];
@@ -870,7 +883,7 @@ public class Lexer
         }
 
         _argLexer ??= new();
-        _argLexer.Reset(Arguments.Array[Arguments.Offset + argNum - 1]);
+        _argLexer.Reset(_arguments.Array[_arguments.Offset + argNum - 1]);
         _argLexer.ScanNextLine();
         var result = new ArgResult(_argLexer.Source, [.._argLexer._tokens]);
         _argResults[argNum] = result;
@@ -890,21 +903,21 @@ public class Lexer
     /// <param name="argNum">Number of processed argument.</param>
     private void ValidateArgs(int argNum)
     {
-        if (Arguments.Array is null)
+        if (_arguments.Array is null)
         {
             ErrorMessage = $"Invalid argument $({argNum}), provided arguments array is null";
             return;
         }
 
-        if (Arguments.Offset < 1)
+        if (_arguments.Offset < 1)
         {
-            ErrorMessage = $"Invalid argument $({argNum}), provided arguments array has incorrect offset ({Arguments.Offset})";
+            ErrorMessage = $"Invalid argument $({argNum}), provided arguments array has incorrect offset ({_arguments.Offset})";
             return;
         }
 
-        if (argNum > Arguments.Count)
+        if (argNum > _arguments.Count)
         {
-            ErrorMessage = $"Missing argument $({argNum}), sender provided only {Arguments.Count} arguments";
+            ErrorMessage = $"Missing argument $({argNum}), sender provided only {_arguments.Count} arguments";
         }
     }
 
