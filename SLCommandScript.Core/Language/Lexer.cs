@@ -46,7 +46,7 @@ public class Lexer
     /// </summary>
     /// <param name="ch">Character to check.</param>
     /// <returns><see langword="true" /> if character is a special character, <see langword="false" /> otherwise.</returns>
-    public static bool IsSpecialCharacter(char ch) => ch == '[' || ch == ']' || ch == '#';
+    public static bool IsSpecialCharacter(char ch) => ch == '[' || ch == ']';
 
     /// <summary>
     /// Checks if provided string is a keyword.
@@ -576,7 +576,7 @@ public class Lexer
     /// </summary>
     private void Guard()
     {
-        if (!IsTopLevel)
+        if (!IsTopLevel || (_current > 2 && !IsWhiteSpace(Source[_current - 2])))
         {
             Text(false);
             return;

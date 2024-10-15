@@ -55,7 +55,7 @@ public class LexerTests
             new(TokenType.Text, "hello") }, 2],
 
         [@"
-    bc 10 Long comment#I am a storm \
+    bc 10 Long comment #I am a storm \
     that is approaching \
     Provoking black clouds...
 ", new[] { "TestLineBreakComment" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "bc"),
@@ -65,12 +65,12 @@ public class LexerTests
     [ print If true elSe [ \
     loop foReAch human ] \
     ]
-    [ print dELayBy 5 ]
+    [#print dELayBy 5 ]#
 ", new[] { "TestDirectiveAndKeywords" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.LeftSquare, "["),
             new(TokenType.Text, "print"), new(TokenType.If, "If"), new(TokenType.Text, "true"), new(TokenType.Else, "elSe"),
             new(TokenType.LeftSquare, "["), new(TokenType.Text, "loop"), new(TokenType.Foreach, "foReAch"), new(TokenType.Text, "human"),
-            new(TokenType.RightSquare, "]"), new(TokenType.RightSquare, "]"), new(TokenType.LeftSquare, "["), new(TokenType.Text, "print"),
-            new(TokenType.DelayBy, "dELayBy"), new(TokenType.Number, "5", 5), new(TokenType.RightSquare, "]") }, 5],
+            new(TokenType.RightSquare, "]"), new(TokenType.RightSquare, "]"), new(TokenType.LeftSquare, "["), new(TokenType.Text, "#print"),
+            new(TokenType.DelayBy, "dELayBy"), new(TokenType.Number, "5", 5), new(TokenType.RightSquare, "]"), new(TokenType.Text, "#") }, 5],
 
         [@"
     print ski$()bidi bop$(name) $(no#?)yes $(what?)
@@ -84,7 +84,7 @@ public class LexerTests
         [@"
     cassie why am I here # This is a comment \
     #? Console
-    print I have no idea#? Console $(0)
+    print I have no idea #? Console $(0)
     #?RemoteAdmin Hello \
     #? !wowlo!
 ", new[] { "TestScopeGuards" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "cassie"),
@@ -95,10 +95,10 @@ public class LexerTests
             new(TokenType.Text, "#?"), new(TokenType.Text, "!wowlo!") }, 6],
 
         [@"
-    \cassie why am I here \if\# This is a comment \
+    \cassie why am I here \if# This is a comment \
     #? Console
     print \I \have no id\ea \23 \[ #! bruh
-    this sh\#ould \#not appea\#r#? test?
+    this sh\#ould \#not appea\#r #? test?
 ", new[] { "TestQuotation" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.Text, "cassie"),
             new(TokenType.Text, "why"), new(TokenType.Text, "am"), new(TokenType.Text, "I"), new(TokenType.Text, "here"), new(TokenType.Text, "if#"),
             new(TokenType.Text, "This"), new(TokenType.Text, "is"), new(TokenType.Text, "a"), new(TokenType.Text, "comment"),
@@ -113,10 +113,10 @@ public class LexerTests
     print \This \should not appear
     #! Noclip! ?Announcer \
     #!ServerConsoleCommands
-    print This should not appear#? Console
+    print This should not appear #? Console
     #! Noclip
     print Hello there #!Noclip Announcer
-    print Class d has micro p p#!
+    print Class d has micro p p #!
     print 1 ... #! \
     !92424..awwghow*(
 ", new[] { "TestPermissionGuards" }, PlayerPermissions.Noclip | PlayerPermissions.Announcer, new Core.Language.Token[] { new(TokenType.Text, "cassie"),
@@ -127,7 +127,7 @@ public class LexerTests
             new(TokenType.Text, "d"), new(TokenType.Text, "has"), new(TokenType.Text, "micro"), new(TokenType.Text, "p"), new(TokenType.Text, "p"),
             new(TokenType.Text, "print"), new(TokenType.Number, "1", 1), new(TokenType.Text, "...") }, 13],
 
-        ["$(2) $(00001) $(0)\n$(3) $(4) $(5)#Hello $(3)", new[] { "TestSimpleArgs", "happenned ?", "#What", BlankLine, "number 1 5%",
+        ["$(2) $(00001) $(0)\n$(3) $(4) $(5) #Hello $(3)", new[] { "TestSimpleArgs", "happenned ?", "#What", BlankLine, "number 1 5%",
             string.Empty }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Text, "#What"), new(TokenType.Text, "happenned"),
             new(TokenType.Text, "?"), new(TokenType.Text, "TestSimpleArgs"), new(TokenType.Text, "number"), new(TokenType.Number, "1", 1),
             new(TokenType.Percentage, "5%", 5) }, 2],
@@ -394,7 +394,7 @@ public class LexerTests
         var result = Lexer.IsSpecialCharacter(ch);
 
         // Assert
-        result.Should().Be(ch == '[' || ch == ']' || ch == '#');
+        result.Should().Be(ch == '[' || ch == ']');
     }
     #endregion
 
