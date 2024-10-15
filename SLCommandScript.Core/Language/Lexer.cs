@@ -2,7 +2,6 @@
 using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Permissions;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -190,6 +189,11 @@ public class Lexer
     private int _current;
 
     /// <summary>
+    /// Contains current scope depth level.
+    /// </summary>
+    private int _depth;
+
+    /// <summary>
     /// Contains a prefix to use in arguments merging.
     /// </summary>
     private string _prefix;
@@ -244,6 +248,7 @@ public class Lexer
             return _tokens;
         }
 
+        _depth = 0;
         ++Line;
         var canRead = true;
 
@@ -265,6 +270,7 @@ public class Lexer
         _hasMissingPerms = false;
         _start = 0;
         _current = 0;
+        _depth = 0;
         ErrorMessage = null;
         _prefix = string.Empty;
         _numericValue = 0;
@@ -481,7 +487,7 @@ public class Lexer
             case '\t':
                 break;
             case '\n':
-                return !IsTopLevel;
+                return NewLine();
             default:
                 Text(true);
                 break;
@@ -552,6 +558,26 @@ public class Lexer
         ++_current;
         return true;
     }
+
+    /// <summary>
+    /// Processes new line transition.
+    /// </summary>
+    /// <returns><see langword="true" /> if reading can continue, <see langword="false" /> otherwise.</returns>
+    private bool NewLine()
+    {
+        if (!IsTopLevel)
+        {
+            return true;
+        }
+
+        if (_depth > 0)
+        {
+            ++Line;
+            return true;
+        }
+
+        return false;
+    }
     #endregion
 
     #region Tokens Processing
@@ -567,6 +593,7 @@ public class Lexer
         }
         else
         {
+            _depth += type == TokenType.LeftSquare ? 1 : -1;
             AddToken(type);
         }
     }
@@ -879,13 +906,15 @@ public class Lexer
 
         if (_argResults.ContainsKey(argNum))
         {
-            return InjectArg(_argResults[argNum], startedAt, type);
+            var argResult = _argResults[argNum];
+            _depth += argResult.Depth;
+            return InjectArg(argResult, startedAt, type);
         }
 
         _argLexer ??= new();
         _argLexer.Reset(_arguments.Array[_arguments.Offset + argNum - 1]);
         _argLexer.ScanNextLine();
-        var result = new ArgResult(_argLexer.Source, [.._argLexer._tokens]);
+        var result = new ArgResult(_argLexer.Source, [.._argLexer._tokens], _argLexer._depth);
         _argResults[argNum] = result;
 
         if (_argLexer.ErrorMessage is not null)
@@ -894,6 +923,7 @@ public class Lexer
             return TokenType.None;
         }
 
+        _depth += result.Depth;
         return InjectArg(result, startedAt, type);
     }
 
@@ -973,11 +1003,12 @@ public class Lexer
     private TokenType Inject1TokenArg(ArgResult result, int startedAt, TokenType type)
     {
         var token = result.Tokens[0];
-        var isEnd = IsWhiteSpace(Current) || IsAtomic(token.Type) || IsWhiteSpace(result.Source[result.Source.Length - 1]);
+        var isAtomic = IsAtomic(token.Type);
+        var isEnd = IsWhiteSpace(Current) || isAtomic || IsWhiteSpace(result.Source[result.Source.Length - 1]);
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(result.Source[0]) || IsAtomic(token.Type))
+            if (IsWhiteSpace(result.Source[0]) || isAtomic)
             {
                 AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
             }

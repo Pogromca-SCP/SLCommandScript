@@ -62,8 +62,8 @@ public class LexerTests
             new(TokenType.Number, "10", 10), new(TokenType.Text, "Long"), new(TokenType.Text, "comment") }, 4],
 
         [@"
-    [ print If true elSe [ \
-    loop foReAch human ] \
+    [ print If true elSe [
+    loop foReAch human ]
     ]
     [#print dELayBy 5 ]#
 ", new[] { "TestDirectiveAndKeywords" }, PlayerPermissions.KickingAndShortTermBanning, new Core.Language.Token[] { new(TokenType.LeftSquare, "["),
@@ -226,7 +226,7 @@ public class LexerTests
     12$(1)3 75$(1) $(1)34 $(1)
 ", new[] { "TestDirectiveInjection", "[", }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Number, "12", 12), new(TokenType.LeftSquare, "["),
             new(TokenType.Number, "3", 3), new(TokenType.Number, "75", 75), new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["),
-            new(TokenType.Number, "34", 34), new(TokenType.LeftSquare, "[") }, 2],
+            new(TokenType.Number, "34", 34), new(TokenType.LeftSquare, "[") }, 3],
 
         [@"
     12$(1)3 12$(2)3 12$(3)3 12$(4)3 12$(5)3 12$(6)3 12$(7)3 12$(8)3

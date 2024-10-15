@@ -7,7 +7,8 @@ namespace SLCommandScript.Core.Language;
 /// </summary>
 /// <param name="source">Argument source code.</param>
 /// <param name="tokens">Tokens produced from argument.</param>
-public readonly struct ArgResult(string source, IList<Token> tokens)
+/// <param name="depth">Argument final scope depth level.</param>
+public readonly struct ArgResult(string source, IList<Token> tokens, int depth)
 {
     /// <summary>
     /// Contains argument source code.
@@ -20,7 +21,12 @@ public readonly struct ArgResult(string source, IList<Token> tokens)
     public IList<Token> Tokens { get; } = tokens;
 
     /// <summary>
+    /// Contains argument final scope depth level.
+    /// </summary>
+    public int Depth { get; } = depth;
+
+    /// <summary>
     /// Creates new argument processing result.
     /// </summary>
-    public ArgResult() : this(string.Empty, []) {}
+    public ArgResult() : this(string.Empty, [], 0) {}
 }
