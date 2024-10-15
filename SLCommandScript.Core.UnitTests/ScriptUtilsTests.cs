@@ -1,8 +1,7 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
-using SLCommandScript.Core;
 
-namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
+namespace SLCommandScript.Core.UnitTests;
 
 [TestFixture]
 public class ScriptUtilsTests
@@ -10,7 +9,7 @@ public class ScriptUtilsTests
     private static readonly string[][] _errorPaths = [
         ["xd", "Command 'xd' was not found"],
         ["[ bc if bc", "Missing closing square bracket for directive"],
-        ["[", "No directive keywords were used"]
+        ["[", "Directive structure is invalid"]
     ];
 
     private static readonly string[] _goldPaths = [

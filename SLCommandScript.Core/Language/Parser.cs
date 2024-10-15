@@ -214,6 +214,7 @@ public class Parser
 
         Expr body = keyword.Type switch
         {
+            TokenType.RightSquare => expr,
             TokenType.If => If(expr),
             TokenType.Else => Else(expr),
             TokenType.Foreach => Foreach(expr),
@@ -227,11 +228,11 @@ public class Parser
 
         if (body is null)
         {
-            ErrorMessage ??= "No directive keywords were used";
+            ErrorMessage ??= "Directive structure is invalid";
             return null;
         }
 
-        if (!Match(TokenType.RightSquare))
+        if (keyword.Type != TokenType.RightSquare && !Match(TokenType.RightSquare))
         {
             ErrorMessage = "Missing closing square bracket for directive";
             return null;

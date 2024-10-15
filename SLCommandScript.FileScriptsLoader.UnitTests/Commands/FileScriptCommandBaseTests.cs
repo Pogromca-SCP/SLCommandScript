@@ -15,7 +15,7 @@ public class FileScriptCommandBaseTests
     private static readonly string[][] _errorPaths = [
         ["xd", "Command 'xd' was not found\nat test.slcs:1"],
         [null, "Cannot read script from file 'test.slcs'"],
-        ["[", "No directive keywords were used\nat test.slcs:1"]
+        ["[", "Directive structure is invalid\nat test.slcs:1"]
     ];
 
     private static readonly string[] _goldPaths = [

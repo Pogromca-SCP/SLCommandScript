@@ -7,7 +7,6 @@
 		<AssemblyName>SLCommandScript.TestUtils</AssemblyName>
 		<RootNamespace>SLCommandScript.TestUtils</RootNamespace>
 		<LangVersion>12</LangVersion>
-		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
 		<Configurations>Release</Configurations>
 		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>

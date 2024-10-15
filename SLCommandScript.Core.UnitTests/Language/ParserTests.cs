@@ -36,11 +36,10 @@ public class ParserTests
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "foreach"), new(TokenType.Text, "RemoteAdmin"),
             new(TokenType.Text, "Test"), new(TokenType.RightSquare, "]") }, "Command 'foreach' was not found"],
 
-        // [ bc RemoteAdmin Test ]
-        [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Text, "RemoteAdmin"),
-            new(TokenType.Text, "Test"), new(TokenType.RightSquare, "]") }, "No directive keywords were used"],
+        // [
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "[") }, "Directive structure is invalid"],
 
-        // [ bc RemoteAdmin foreach test ]
+        // [ bc RemoteAdmin foreach test
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Text, "RemoteAdmin"),
             new(TokenType.Foreach, "foreach"), new(TokenType.Text, "test") }, "Missing closing square bracket for directive"],
 
@@ -180,6 +179,11 @@ public class ParserTests
         // bc 5 #? Console
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.ScopeGuard, "#?"),
             new(TokenType.Text, "Console") }, new CommandExpr(new BroadcastCommand(), ["bc", "5"], false), CommandType.Console],
+
+        // [ bc 5 test ]
+        [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
+            new(TokenType.Text, "test"), new(TokenType.RightSquare, "]") }, new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false),
+            CommandsUtils.AllScopes],
 
         // bc 5 Test #? console gameCONsole
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.Variable, "Test"),
