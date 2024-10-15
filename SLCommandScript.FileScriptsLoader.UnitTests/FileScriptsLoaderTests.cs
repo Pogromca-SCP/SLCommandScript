@@ -6,7 +6,6 @@ using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
 using PluginAPI.Loader.Features;
 using SLCommandScript.Core;
-using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Permissions;
 using SLCommandScript.FileScriptsLoader.Commands;
 using SLCommandScript.FileScriptsLoader.Helpers;

@@ -1,6 +1,5 @@
 ﻿using PluginAPI.Core;
 using PluginAPI.Loader;
-using SLCommandScript.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 

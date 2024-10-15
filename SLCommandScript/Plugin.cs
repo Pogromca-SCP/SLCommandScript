@@ -4,7 +4,6 @@ using PluginAPI.Enums;
 using SLCommandScript.Commands;
 using SLCommandScript.Core;
 using SLCommandScript.Core.Commands;
-using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Reflection;
 
 namespace SLCommandScript;
@@ -22,7 +21,7 @@ public class Plugin
     /// <summary>
     /// Contains current plugin version.
     /// </summary>
-    public const string PluginVersion = "0.7.2";
+    public const string PluginVersion = "0.8.0";
 
     /// <summary>
     /// Contains plugin description.

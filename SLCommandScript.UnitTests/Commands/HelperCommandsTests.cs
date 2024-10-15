@@ -3,7 +3,6 @@ using Moq;
 using NUnit.Framework;
 using SLCommandScript.Commands;
 using SLCommandScript.Core;
-using SLCommandScript.Core.Interfaces;
 
 namespace SLCommandScript.UnitTests.Commands;
 

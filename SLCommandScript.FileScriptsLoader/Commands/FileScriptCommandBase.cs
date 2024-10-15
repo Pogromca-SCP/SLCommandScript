@@ -1,6 +1,6 @@
 ﻿using CommandSystem;
 using SLCommandScript.Core;
-using SLCommandScript.Core.Interfaces;
+using SLCommandScript.Core.Permissions;
 using SLCommandScript.FileScriptsLoader.Helpers;
 using System;
 using System.Collections.Concurrent;

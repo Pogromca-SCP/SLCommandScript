@@ -1,5 +1,4 @@
 ﻿using PlayerRoles;
-using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Iterables.Providers;
 using System;
 using System.Collections.Generic;

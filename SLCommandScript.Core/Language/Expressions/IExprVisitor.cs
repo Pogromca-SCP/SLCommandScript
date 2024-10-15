@@ -1,6 +1,4 @@
-﻿using SLCommandScript.Core.Language.Expressions;
-
-namespace SLCommandScript.Core.Interfaces;
+﻿namespace SLCommandScript.Core.Language.Expressions;
 
 /// <summary>
 /// Interface to implement in order to create an expressions visitor.

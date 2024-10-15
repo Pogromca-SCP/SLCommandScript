@@ -2,7 +2,6 @@
 using MapGeneration;
 using PluginAPI.Core;
 using PluginAPI.Core.Zones;
-using SLCommandScript.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

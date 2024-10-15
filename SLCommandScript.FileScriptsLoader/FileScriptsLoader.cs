@@ -1,7 +1,6 @@
 ﻿using PluginAPI.Core;
 using PluginAPI.Enums;
 using SLCommandScript.Core;
-using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Permissions;
 using SLCommandScript.Core.Reflection;
 using SLCommandScript.FileScriptsLoader.Commands;
@@ -25,7 +24,7 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Contains current project version.
     /// </summary>
-    public const string ProjectVersion = "0.6.1";
+    public const string ProjectVersion = "0.7.0";
 
     /// <summary>
     /// Contains project author.

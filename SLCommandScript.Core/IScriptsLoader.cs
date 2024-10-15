@@ -1,7 +1,7 @@
 ﻿using PluginAPI.Core;
 using System;
 
-namespace SLCommandScript.Core.Interfaces;
+namespace SLCommandScript.Core;
 
 /// <summary>
 /// Interface to implement in order to create a custom scripts loader.

@@ -4,7 +4,6 @@ using FluentAssertions;
 using NUnit.Framework;
 using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
-using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Iterables;
 using SLCommandScript.Core.Iterables.Providers;
 using SLCommandScript.Core.Language;

@@ -1,7 +1,6 @@
 ﻿using CommandSystem;
 using NorthwoodLib.Pools;
 using SLCommandScript.Core;
-using SLCommandScript.Core.Interfaces;
 using System;
 
 namespace SLCommandScript.Commands;

@@ -1,7 +1,6 @@
-﻿using SLCommandScript.Core.Iterables;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace SLCommandScript.Core.Interfaces;
+namespace SLCommandScript.Core.Iterables;
 
 /// <summary>
 /// Interface to implement in order to create a custom iterable object wrapper.

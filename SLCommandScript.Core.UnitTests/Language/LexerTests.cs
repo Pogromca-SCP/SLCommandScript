@@ -2,8 +2,8 @@
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Language;
+using SLCommandScript.Core.Permissions;
 using System;
 using System.Collections.Generic;
 

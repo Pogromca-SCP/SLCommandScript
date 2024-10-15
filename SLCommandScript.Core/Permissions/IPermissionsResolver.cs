@@ -1,6 +1,6 @@
 ﻿using CommandSystem;
 
-namespace SLCommandScript.Core.Interfaces;
+namespace SLCommandScript.Core.Permissions;
 
 /// <summary>
 /// Interface to implement in order to create a custom permissions resolver.

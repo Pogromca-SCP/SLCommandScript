@@ -1,5 +1,4 @@
 ﻿using CommandSystem;
-using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Permissions;
 using System;
 using System.Collections.Generic;

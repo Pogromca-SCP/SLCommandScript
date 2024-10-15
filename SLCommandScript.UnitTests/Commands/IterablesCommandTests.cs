@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
 using SLCommandScript.Commands;
-using SLCommandScript.Core.Interfaces;
 using SLCommandScript.Core.Iterables;
 using SLCommandScript.TestUtils;
 using System;

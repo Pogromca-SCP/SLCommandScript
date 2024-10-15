@@ -1,6 +1,4 @@
-﻿using SLCommandScript.Core.Interfaces;
-
-namespace SLCommandScript.Core.Language.Expressions;
+﻿namespace SLCommandScript.Core.Language.Expressions;
 
 /// <summary>
 /// Base class for expression representations.

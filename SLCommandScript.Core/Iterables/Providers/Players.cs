@@ -1,6 +1,5 @@
 ﻿using PlayerRoles;
 using PluginAPI.Core;
-using SLCommandScript.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
