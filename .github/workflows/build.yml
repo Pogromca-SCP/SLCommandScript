@@ -23,4 +23,3 @@ jobs:
         plugin-name: SLCommandScript
         refs-variable: SL_REFERENCES
         dependencies: SLCommandScript.Core,SLCommandScript.FileScriptsLoader
-        depot-downloader-version: "2.7.3"
