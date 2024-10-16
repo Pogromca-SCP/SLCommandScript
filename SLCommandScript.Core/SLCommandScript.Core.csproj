@@ -11,6 +11,33 @@
 		<Configurations>Release</Configurations>
 		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>
+	<PropertyGroup>
+		<PackageId>SLCommandScript.Core</PackageId>
+		<Authors>Adam Szerszenowicz</Authors>
+		<Product>SLCommandScript</Product>
+		<Description>Contains core components for SLCS language.</Description>
+		<PackageProjectUrl>https://github.com/Pogromca-SCP/SLCommandScript</PackageProjectUrl>
+		<PackageIcon>logo.jpg</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/Pogromca-SCP/SLCommandScript</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>pluginapi,scpsl,slcs</PackageTags>
+		<NeutralLanguage>en</NeutralLanguage>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<EnablePackageValidation>true</EnablePackageValidation>
+		<Title>SLCommandScript.Core</Title>
+		<Copyright>Copyright © 2023-present Adam Szerszenowicz</Copyright>
+		<PackageVersion>0.13.0-rc</PackageVersion>
+		<PackageValidationBaselineVersion>0.12.0</PackageValidationBaselineVersion>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="README.md" Pack="True" PackagePath="/" />
+		<None Include="logo.jpg" Pack="True" PackagePath="/" />
+		<None Include="../LICENSE" Pack="True" PackagePath="/" />
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Northwood.PluginAPI" Version="13.1.2" />
 	</ItemGroup>

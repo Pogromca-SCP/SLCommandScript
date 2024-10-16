@@ -1,0 +1,32 @@
+name: Publish SLCommandScript.Core NuGet package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download Package
+      id: download
+      uses: robinraju/release-downloader@v1
+      with:
+        fileName: '*.nupkg'
+        tag: ${{ github.event.release.tag_name }}
+
+    - name: Setup .NET
+      if: ${{ fromJson(steps.download.outputs.downloaded_files)[0] }} != null
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Publish Package
+      if: ${{ fromJson(steps.download.outputs.downloaded_files)[0] }} != null
+      shell: pwsh
+      run: |
+        $file = ${{ fromJson(steps.download.outputs.downloaded_files)[0] }}
+        dotnet nuget push $file --api-key ${{ secrets.GITHUB_TOKEN }} --source github --skip-duplicate
+        dotnet nuget push $file --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json --skip-duplicate
