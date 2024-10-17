@@ -24,5 +24,6 @@ jobs:
       shell: pwsh
       run: |
         $file = ${{ fromJson(steps.download.outputs.downloaded_files)[0] }}
+        echo 'Pushing file: $file'
         dotnet nuget push $file --api-key ${{ secrets.GITHUB_TOKEN }} --source github --skip-duplicate
         dotnet nuget push $file --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json --skip-duplicate
