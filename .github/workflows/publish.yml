@@ -23,7 +23,6 @@ jobs:
     - name: Publish Package
       shell: pwsh
       run: |
-        $file = ${{ fromJson(steps.download.outputs.downloaded_files)[0] }}
-        echo 'Pushing file: $file'
-        dotnet nuget push $file --api-key ${{ secrets.GITHUB_TOKEN }} --source github --skip-duplicate
-        dotnet nuget push $file --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        echo "Pushing file: ${{ fromJson(steps.download.outputs.downloaded_files)[0] }}"
+        dotnet nuget push ${{ fromJson(steps.download.outputs.downloaded_files)[0] }} --api-key ${{ secrets.GITHUB_TOKEN }} --source github --skip-duplicate
+        dotnet nuget push ${{ fromJson(steps.download.outputs.downloaded_files)[0] }} --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json --skip-duplicate
