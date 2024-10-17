@@ -38,10 +38,10 @@ public class MyCustomScriptLoader : SLCommandScript.Core.IScriptsLoader
 ```
 ### Adding custom iterable objects
 ```csharp
-SLCommandScript.Core.Iterables.IIterable MyCustomIterablesProvider()
+SLCommandScript.Core.Iterables.IIterable MyCustomIterableProvider()
 {
     // Execute your logic here
 }
 
-SLCommandScript.Core.Iterables.IterablesUtils.Providers["MyIterablesName"] = MyCustomIterablesProvider;
+SLCommandScript.Core.Iterables.IterablesUtils.Providers["MyIterableName"] = MyCustomIterableProvider;
 ```
