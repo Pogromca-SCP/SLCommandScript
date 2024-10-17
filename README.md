@@ -1,5 +1,6 @@
 # SLCommandScript
 [![GitHub release](https://flat.badgen.net/github/release/Pogromca-SCP/SLCommandScript)](https://github.com/Pogromca-SCP/SLCommandScript/releases)
+[![NuGet core release](https://flat.badgen.net/nuget/v/SLCommandScript.Core/latest)](https://www.nuget.org/packages/SLCommandScript.Core)
 [![GitHub license](https://flat.badgen.net/github/license/Pogromca-SCP/SLCommandScript)](https://github.com/Pogromca-SCP/SLCommandScript/blob/main/LICENSE)
 ![GitHub downloads](https://flat.badgen.net/github/assets-dl/Pogromca-SCP/SLCommandScript)
 ![GitHub last commit](https://flat.badgen.net/github/last-commit/Pogromca-SCP/SLCommandScript/main)
@@ -21,6 +22,9 @@ This project was developed as part of the educational process at [PJAIT](https:/
 2. Place downloaded `*.dll` file in your server's plugins folder `{ServerDirectory}/PluginAPI/plugins/{port|global}`.
 3. Unzip the contents of the downloaded `*.zip` file into your server's plugin dependencies folder `{ServerDirectory}/PluginAPI/plugins/{port|global}/dependencies`.
 4. Restart the server.
+
+## Documentation
+Documentation for users and developers can be found in [project wiki](https://github.com/Pogromca-SCP/SLCommandScript/wiki).
 
 ## Configuration
 ### Plugin Config

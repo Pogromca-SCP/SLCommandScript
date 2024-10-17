@@ -1,9 +1,9 @@
 ﻿# SLCommandScript.Core
-Contains core components for SLCS language.
+Provides core components, interfaces and utilities for Secret Lab Command Script language.
 
-Manually adding references to SCP:SL assemblies in your project might be necessarry when using certain classes.
+Manually adding references to SCP: Secret Laboratory assemblies in your project might be necessary when using certain classes.
 
-Full documentation for developers can be found in [project repository](https://github.com/Pogromca-SCP/SLCommandScript).
+Full documentation for developers can be found in [project wiki](https://github.com/Pogromca-SCP/SLCommandScript/wiki).
 ## Basic usage examples for common use cases
 ### Creating custom permissions resolver
 ```csharp

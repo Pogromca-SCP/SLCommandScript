@@ -1,4 +1,4 @@
-name: Build SLCommand Script
+name: Build SLCommandScript
 
 on:
   push:

@@ -2,7 +2,7 @@
 using System.Reflection;
 
 [assembly: AssemblyTitle(Constants.ProjectName)]
-[assembly: AssemblyDescription("Contains core components for SLCS language.")]
+[assembly: AssemblyDescription("Provides core components, interfaces and utilities for SLCS language.")]
 [assembly: AssemblyProduct("SLCommandScript")]
 [assembly: AssemblyCopyright("Copyright © 2023-present " + Constants.ProjectAuthor)]
 [assembly: AssemblyVersion(Constants.ProjectVersion)]
