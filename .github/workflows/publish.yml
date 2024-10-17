@@ -15,7 +15,7 @@ jobs:
       uses: robinraju/release-downloader@v1
       with:
         fileName: '*.nupkg'
-        tag: ${{ github.event.release.tag_name }}
+        releaseId: ${{ github.event.release.release_id }}
 
     - name: Setup .NET
       if: ${{ fromJson(steps.download.outputs.downloaded_files)[0] }} != null
