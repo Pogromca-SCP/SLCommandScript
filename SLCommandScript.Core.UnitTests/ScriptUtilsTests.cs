@@ -9,7 +9,8 @@ public class ScriptUtilsTests
     private static readonly string[][] _errorPaths = [
         ["xd", "Command 'xd' was not found"],
         ["[ bc if bc", "Missing closing square bracket for directive"],
-        ["[", "Directive structure is invalid"]
+        ["[", "Directive structure is invalid"],
+        ["[help #comment \n ]", "Directive structure is invalid"]
     ];
 
     private static readonly string[] _goldPaths = [

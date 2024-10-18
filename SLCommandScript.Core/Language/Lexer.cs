@@ -608,6 +608,7 @@ public class Lexer
             return;
         }
 
+        _depth = 0;
         var action = Skip;
 
         if (Match('!'))
