@@ -103,7 +103,7 @@ public class ListIterable<TItem> : IIterable
     /// <summary>
     /// Creates new predefined list iterable.
     /// </summary>
-    /// <param name="item">Objects to insert into wrapped list.</param>
+    /// <param name="items">Objects to insert into wrapped list.</param>
     /// <param name="mapper">Variable mapper to use to load variables.</param>
     public ListIterable(IEnumerable<TItem> items, Action<IDictionary<string, string>, TItem> mapper)
     {

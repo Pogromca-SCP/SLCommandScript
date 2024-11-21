@@ -128,7 +128,7 @@ public class Parser
     /// <summary>
     /// Attempts to match specific token type.
     /// </summary>
-    /// <param name="types">Token type to match.</param>
+    /// <param name="type">Token type to match.</param>
     /// <returns><see langword="true" /> if token type was matched, <see langword="false" /> otherwise.</returns>
     private bool Match(TokenType type)
     {
