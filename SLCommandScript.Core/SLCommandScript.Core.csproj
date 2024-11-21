@@ -30,7 +30,7 @@
 		<EnablePackageValidation>true</EnablePackageValidation>
 		<Title>SLCommandScript.Core</Title>
 		<Copyright>Copyright © 2023-present Adam Szerszenowicz</Copyright>
-		<PackageVersion>1.0.1</PackageVersion>
+		<PackageVersion>1.0.2</PackageVersion>
 		<PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>
 	</PropertyGroup>
 	<ItemGroup>

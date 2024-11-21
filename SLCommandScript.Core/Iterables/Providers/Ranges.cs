@@ -21,7 +21,7 @@ public static class RangesProvider
     /// Loads number value and inserts it into a dictionary.
     /// </summary>
     /// <param name="targetVars">Dictionary to insert value into.</param>
-    /// <param name="player">Number value to load.</param>
+    /// <param name="number">Number value to load.</param>
     /// <exception cref="NullReferenceException">When provided object is <see langword="null"/>.</exception>
     public static void LoadVariables(IDictionary<string, string> targetVars, int number) => targetVars["i"] = number.ToString();
 
