@@ -10,17 +10,20 @@ jobs:
     steps:
     - name: Download package
       id: download
+      continue-on-error: true
       uses: robinraju/release-downloader@v1
       with:
         fileName: '*.nupkg'
         tag: ${{ github.event.release.tag_name }}
 
     - name: Setup .NET
+      if: steps.download.outcome == 'success'
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
 
     - name: Publish package
+      if: steps.download.outcome == 'success'
       run: |
         dotnet nuget push ${{ fromJson(steps.download.outputs.downloaded_files)[0] }} --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/Pogromca-SCP/index.json --skip-duplicate
         dotnet nuget push ${{ fromJson(steps.download.outputs.downloaded_files)[0] }} --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json --skip-duplicate
