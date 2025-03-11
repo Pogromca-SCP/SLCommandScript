@@ -1,4 +1,4 @@
-﻿using CommandSystem.Commands.RemoteAdmin;
+using CommandSystem.Commands.RemoteAdmin;
 using CommandSystem.Commands.RemoteAdmin.Broadcasts;
 using FluentAssertions;
 using NUnit.Framework;

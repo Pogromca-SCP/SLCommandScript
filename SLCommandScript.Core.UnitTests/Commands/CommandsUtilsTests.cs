@@ -1,4 +1,4 @@
-﻿using CommandSystem;
+using CommandSystem;
 using CommandSystem.Commands.RemoteAdmin;
 using CommandSystem.Commands.RemoteAdmin.Broadcasts;
 using CommandSystem.Commands.Shared;
