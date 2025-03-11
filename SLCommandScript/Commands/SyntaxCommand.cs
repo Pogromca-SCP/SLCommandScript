@@ -1,4 +1,4 @@
-﻿using CommandSystem;
+using CommandSystem;
 using NorthwoodLib.Pools;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using SLCommandScript.Core.Iterables;
+using SLCommandScript.Core.Iterables;
 using System;
 
 namespace SLCommandScript.Core.Language.Expressions;

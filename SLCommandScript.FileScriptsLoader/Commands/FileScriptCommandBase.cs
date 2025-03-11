@@ -1,4 +1,4 @@
-﻿using CommandSystem;
+using CommandSystem;
 using SLCommandScript.Core;
 using SLCommandScript.Core.Permissions;
 using SLCommandScript.FileScriptsLoader.Helpers;

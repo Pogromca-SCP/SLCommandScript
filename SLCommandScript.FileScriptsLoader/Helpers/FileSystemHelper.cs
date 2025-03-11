@@ -1,4 +1,4 @@
-﻿using SLCommandScript.FileScriptsLoader.Commands;
+using SLCommandScript.FileScriptsLoader.Commands;
 using System.Collections.Generic;
 using System.IO;
 

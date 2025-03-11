@@ -1,4 +1,4 @@
-﻿using CommandSystem;
+using CommandSystem;
 using System;
 
 namespace SLCommandScript.FileScriptsLoader.Commands;

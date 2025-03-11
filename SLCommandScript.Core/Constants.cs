@@ -1,4 +1,4 @@
-﻿namespace SLCommandScript.Core;
+namespace SLCommandScript.Core;
 
 /// <summary>
 /// Contains project related constants.

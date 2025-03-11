@@ -1,4 +1,4 @@
-﻿using SLCommandScript.FileScriptsLoader;
+using SLCommandScript.FileScriptsLoader;
 using System.Reflection;
 
 [assembly: AssemblyTitle(FileScriptsLoader.ProjectName)]

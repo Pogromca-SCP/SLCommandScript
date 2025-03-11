@@ -1,4 +1,4 @@
-﻿using CommandSystem;
+using CommandSystem;
 using GameCore;
 using PluginAPI.Enums;
 using RemoteAdmin;

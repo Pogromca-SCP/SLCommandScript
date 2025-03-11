@@ -1,4 +1,4 @@
-﻿using NorthwoodLib.Pools;
+using NorthwoodLib.Pools;
 using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.Core.Iterables;
