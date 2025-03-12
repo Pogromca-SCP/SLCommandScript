@@ -1,4 +1,4 @@
-﻿using PluginAPI.Core;
+using PluginAPI.Core;
 using PluginAPI.Enums;
 using SLCommandScript.Core;
 using SLCommandScript.Core.Permissions;

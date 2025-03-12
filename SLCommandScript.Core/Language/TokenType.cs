@@ -1,4 +1,4 @@
-﻿namespace SLCommandScript.Core.Language;
+namespace SLCommandScript.Core.Language;
 
 /// <summary>
 /// Defines SLC Script token types.

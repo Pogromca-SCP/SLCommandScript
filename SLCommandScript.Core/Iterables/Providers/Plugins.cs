@@ -1,4 +1,4 @@
-﻿using PluginAPI.Core;
+using PluginAPI.Core;
 using PluginAPI.Loader;
 using System;
 using System.Collections.Generic;

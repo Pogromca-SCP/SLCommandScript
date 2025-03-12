@@ -1,4 +1,4 @@
-﻿using CommandSystem;
+using CommandSystem;
 using PluginAPI.Core;
 using SLCommandScript.Core.Language.Expressions;
 using System;

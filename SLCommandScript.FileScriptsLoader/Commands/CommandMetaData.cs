@@ -1,4 +1,4 @@
-﻿namespace SLCommandScript.FileScriptsLoader.Commands;
+namespace SLCommandScript.FileScriptsLoader.Commands;
 
 /// <summary>
 /// Contains command meta data.

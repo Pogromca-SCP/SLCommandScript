@@ -1,4 +1,4 @@
-﻿using SLCommandScript.Core;
+using SLCommandScript.Core;
 using System.Reflection;
 
 [assembly: AssemblyTitle(Constants.ProjectName)]

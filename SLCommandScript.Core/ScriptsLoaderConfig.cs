@@ -1,4 +1,4 @@
-﻿using PluginAPI.Enums;
+using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
 using System.ComponentModel;
 

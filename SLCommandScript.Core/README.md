@@ -1,4 +1,4 @@
-﻿# SLCommandScript.Core
+# SLCommandScript.Core
 Provides core components, interfaces and utilities for Secret Lab Command Script language.
 
 Manually adding references to SCP: Secret Laboratory assemblies in your project might be necessary when using certain classes.

@@ -1,4 +1,4 @@
-﻿using PluginAPI.Enums;
+using PluginAPI.Enums;
 using PluginAPI.Events;
 using SLCommandScript.FileScriptsLoader.Commands;
 using SLCommandScript.FileScriptsLoader.Events;

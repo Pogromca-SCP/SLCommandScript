@@ -1,4 +1,4 @@
-﻿using FacilityZone = MapGeneration.FacilityZone;
+using FacilityZone = MapGeneration.FacilityZone;
 using MapGeneration;
 using PluginAPI.Core;
 using PluginAPI.Core.Zones;

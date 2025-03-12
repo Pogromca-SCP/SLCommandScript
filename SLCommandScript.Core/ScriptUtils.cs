@@ -1,4 +1,4 @@
-﻿using CommandSystem;
+using CommandSystem;
 using SLCommandScript.Core.Language;
 using SLCommandScript.Core.Permissions;
 using System;

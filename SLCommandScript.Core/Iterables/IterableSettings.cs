@@ -1,4 +1,4 @@
-﻿namespace SLCommandScript.Core.Iterables;
+namespace SLCommandScript.Core.Iterables;
 
 /// <summary>
 /// Contains configuration settings for iterables randomization.

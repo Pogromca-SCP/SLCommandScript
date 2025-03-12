@@ -1,4 +1,4 @@
-﻿using CommandSystem;
+using CommandSystem;
 using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.FileScriptsLoader.Commands;

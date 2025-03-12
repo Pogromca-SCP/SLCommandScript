@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using SLCommandScript.Commands;
 using SLCommandScript.Core.Iterables;
