@@ -385,7 +385,7 @@ public class ParserTests
         var result = _parser.Parse([..tokens]);
 
         // Assert
-        result.Should().BeEquivalentTo(expectedExpr, options => options.RespectingRuntimeTypes());
+        result.Should().BeEquivalentTo(expectedExpr, options => options.PreferringRuntimeMemberTypes());
         _parser.ErrorMessage.Should().BeNull();
         _parser.Scope.Should().Be(expectedScope);
     }
