@@ -1,17 +1,20 @@
 using CommandSystem;
 using System;
+using System.IO;
 
 namespace SLCommandScript.FileScriptsLoader.Commands;
 
 /// <summary>
 /// Special parent command used for directories.
 /// </summary>
-public class FileScriptDirectoryCommand : ParentCommand
+/// <param name="name">Name of the command.</param>
+/// <param name="parent">Parent which stores this command.</param>
+public class FileScriptDirectoryCommand(string name, IFileScriptCommandParent parent) : ParentCommand, IFileScriptCommandParent
 {
     /// <summary>
     /// Contains command name.
     /// </summary>
-    public override string Command { get; }
+    public override string Command { get; } = name ?? string.Empty;
 
     /// <summary>
     /// Defines command aliases.
@@ -21,29 +24,20 @@ public class FileScriptDirectoryCommand : ParentCommand
     /// <summary>
     /// Contains command description.
     /// </summary>
-    public override string Description { get; }
+    public override string Description { get; } = "Parent command containing all scripts in a directory.";
 
     /// <summary>
-    /// Contains shortened directory path.
+    /// Contains parent object which stores this command.
     /// </summary>
-    public string Path { get; }
-
-    /// <summary>
-    /// Initializes the command.
-    /// </summary>
-    /// <param name="path">Path to use.</param>
-    public FileScriptDirectoryCommand(string path)
-    {
-        Path = path;
-        var index = path?.LastIndexOf('/') ?? -1;
-        Command = index < 0 ? path : path.Substring(index + 1);
-        Description = "Parent command containing all scripts in a directory.";
-    }
+    public IFileScriptCommandParent Parent { get; } = parent;
 
     /// <summary>
     /// Loads subcommands.
     /// </summary>
     public override void LoadGeneratedCommands() {}
+
+    /// <inheritdoc />
+    public string GetLocation(bool includeRoot = false) => Parent is null ? Command : $"{Parent.GetLocation(includeRoot)}{Path.DirectorySeparatorChar}{Command}";
 
     /// <summary>
     /// Executes the parent command.

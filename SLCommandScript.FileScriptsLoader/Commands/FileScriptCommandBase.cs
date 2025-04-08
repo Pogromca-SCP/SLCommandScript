@@ -1,9 +1,8 @@
 using CommandSystem;
 using SLCommandScript.Core;
-using SLCommandScript.Core.Permissions;
-using SLCommandScript.FileScriptsLoader.Helpers;
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Threading;
 
 namespace SLCommandScript.FileScriptsLoader.Commands;
@@ -11,22 +10,15 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// <summary>
 /// Base class for script executing commands.
 /// </summary>
-public class FileScriptCommandBase : ICommand
+/// <param name="name">Name of the command.</param>
+/// <param name="parent">Parent which stores this command.</param>
+/// <param name="config">Configuration to use.</param>
+public class FileScriptCommandBase(string name, IFileScriptCommandParent parent, RuntimeConfig config) : ICommand
 {
     /// <summary>
     /// Default command description to use.
     /// </summary>
     public const string DefaultDescription = "Custom script command.";
-
-    /// <summary>
-    /// Contains permissions resolver object to use.
-    /// </summary>
-    public static IPermissionsResolver PermissionsResolver { get; set; } = null;
-
-    /// <summary>
-    /// Contains a maximum amount of concurrent executions a single script can have.
-    /// </summary>
-    public static int ConcurrentExecutionsLimit { get; set; } = 0;
 
     /// <summary>
     /// Contains currently loaded scripts.
@@ -36,7 +28,7 @@ public class FileScriptCommandBase : ICommand
     /// <summary>
     /// Contains command name.
     /// </summary>
-    public string Command { get; }
+    public string Command { get; } = name ?? string.Empty;
 
     /// <summary>
     /// Defines command aliases.
@@ -54,39 +46,24 @@ public class FileScriptCommandBase : ICommand
     public bool SanitizeResponse => true;
 
     /// <summary>
-    /// Root location where the shortened file path starts from.
+    /// Contains parent object which stores this command.
     /// </summary>
-    public string Location { get; }
+    public IFileScriptCommandParent Parent { get; } = parent;
 
     /// <summary>
-    /// Contains shortened file path.
+    /// Stores used configuration.
     /// </summary>
-    public string Path { get; }
+    public RuntimeConfig Config { get; } = config ?? new(null, null, 10);
 
     /// <summary>
     /// Contains command description.
     /// </summary>
-    private string _desc;
+    private string _desc = DefaultDescription;
 
     /// <summary>
     /// Contains script calls counter.
     /// </summary>
-    private int _calls;
-
-    /// <summary>
-    /// Initializes the command.
-    /// </summary>
-    /// <param name="location">Root location where the used path starts from.</param>
-    /// <param name="path">Path to use.</param>
-    public FileScriptCommandBase(string location, string path)
-    {
-        Location = location;
-        Path = path;
-        var index = path?.LastIndexOf('/') ?? -1;
-        Command = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(index < 0 ? path : path.Substring(index + 1));
-        _desc = DefaultDescription;
-        _calls = 0;
-    }
+    private int _calls = 0;
 
     /// <summary>
     /// Executes the command.
@@ -97,23 +74,25 @@ public class FileScriptCommandBase : ICommand
     /// <returns><see langword="true" /> if command executed successfully, <see langword="false" /> otherwise.</returns>
     public virtual bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {
-        if (Interlocked.Increment(ref _calls) > ConcurrentExecutionsLimit)
+        if (Interlocked.Increment(ref _calls) > Config.ScriptExecutionsLimit)
         {
             Interlocked.Decrement(ref _calls);
             response = "Script execution terminated due to exceeded concurrent executions limit";
             return false;
         }
 
-        var src = LoadSource();
+        var file = $"{Command}.slcs";
+        var path = Parent is null ? file : $"{Parent.GetLocation(true)}{Path.DirectorySeparatorChar}{file}";
+        var src = LoadSource(path);
 
         if (src is null)
         {
             Interlocked.Decrement(ref _calls);
-            response = $"Cannot read script from file '{Path}'";
+            response = $"Cannot read script from file '{path}'";
             return false;
         }
 
-        (response, var line) = ScriptUtils.Execute(src, arguments, sender, PermissionsResolver);
+        (response, var line) = ScriptUtils.Execute(src, arguments, sender, Config.PermissionsResolver);
 
         if (Interlocked.Decrement(ref _calls) < 1)
         {
@@ -128,14 +107,15 @@ public class FileScriptCommandBase : ICommand
     /// <summary>
     /// Loads script source code.
     /// </summary>
+    /// <param name="path">Path to read script from.</param>
     /// <returns>Loaded source code string.</returns>
-    private string LoadSource()
+    private string LoadSource(string path)
     {
         if (!_loadedScripts.TryGetValue(this, out var src))
         {
             try
             {
-                src = HelpersProvider.FileSystemHelper.ReadFile($"{Location}{Path}");
+                src = Config.FileSystemHelper.ReadFile(path);
             }
             catch (Exception)
             {

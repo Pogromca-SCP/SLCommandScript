@@ -3,29 +3,76 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using SLCommandScript.FileScriptsLoader.Commands;
+using System.IO;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 
 [TestFixture]
 public class FileScriptDirectoryCommandTests
 {
+    private const string TestName = "test";
+
     #region Constructor Tests
-    [TestCase("hello", "hello")]
-    [TestCase(null, null)]
-    [TestCase("example/", "")]
-    [TestCase("/example", "example")]
-    [TestCase("example/test", "test")]
-    [TestCase("example/multiple//test", "test")]
-    public void FileScriptDirectoryCommand_ShouldProperlyInitialize(string path, string name)
+    [Test]
+    public void FileScriptDirectoryCommand_ShouldProperlyInitialize_WhenNullsProvided()
     {
         // Act
-        var result = new FileScriptDirectoryCommand(path);
+        var result = new FileScriptDirectoryCommand(null, null);
 
         // Assert
-        result.Command.Should().Be(name);
+        result.Command.Should().BeEmpty();
         result.Aliases.Should().BeNull();
         result.Description.Should().Be("Parent command containing all scripts in a directory.");
-        result.Path.Should().Be(path);
+        result.Parent.Should().BeNull();
+    }
+
+    [Test]
+    public void FileScriptDirectoryCommand_ShouldProperlyInitialize_WhenDataProvided()
+    {
+        // Arrange
+        var parentMock = new Mock<IFileScriptCommandParent>(MockBehavior.Strict);
+
+        // Act
+        var result = new FileScriptDirectoryCommand(TestName, parentMock.Object);
+
+        // Assert
+        result.Command.Should().Be(TestName);
+        result.Aliases.Should().BeNull();
+        result.Description.Should().Be("Parent command containing all scripts in a directory.");
+        result.Parent.Should().Be(parentMock.Object);
+        parentMock.VerifyAll();
+        parentMock.VerifyNoOtherCalls();
+    }
+    #endregion
+
+    #region GetLocation Tests
+    [Test]
+    public void GetLocation_ShouldReturnProperPath_WhenNoParentPresent([Values] bool includeRoot)
+    {
+        // Arrange
+        var cmd = new FileScriptDirectoryCommand(TestName, null);
+
+        // Act
+        var result = cmd.GetLocation(includeRoot);
+
+        // Assert
+        result.Should().Be(cmd.Command);
+    }
+
+    [Test]
+    public void GetLocation_ShouldReturnProperPath_WhenParentIsPresent([Values] bool includeRoot)
+    {
+        // Arrange
+        const string parentLocation = "parent";
+        var parentMock = new Mock<IFileScriptCommandParent>(MockBehavior.Strict);
+        parentMock.Setup(x => x.GetLocation(includeRoot)).Returns(parentLocation);
+        var cmd = new FileScriptDirectoryCommand(TestName, parentMock.Object);
+
+        // Act
+        var result = cmd.GetLocation(includeRoot);
+
+        // Assert
+        result.Should().Be($"{parentLocation}{Path.DirectorySeparatorChar}{cmd.Command}");
     }
     #endregion
 
@@ -35,7 +82,7 @@ public class FileScriptDirectoryCommandTests
     {
         // Arrange
         var response = "hello";
-        var cmd = new FileScriptDirectoryCommand(null);
+        var cmd = new FileScriptDirectoryCommand(null, null);
         var cmdMock = new Mock<ICommand>(MockBehavior.Strict);
         cmdMock.Setup(x => x.Command).Returns("test");
         cmdMock.Setup(x => x.Aliases).Returns<string[]>(null);
@@ -56,7 +103,7 @@ public class FileScriptDirectoryCommandTests
     public void ExecuteParent_ShouldFail()
     {
         // Arrange
-        var cmd = new FileScriptDirectoryCommand(null);
+        var cmd = new FileScriptDirectoryCommand(null, null);
 
         // Act
         var result = cmd.Execute(new(), null, out var message);

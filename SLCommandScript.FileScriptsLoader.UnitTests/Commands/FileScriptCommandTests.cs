@@ -10,90 +10,61 @@ namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 [TestFixture]
 public class FileScriptCommandTests
 {
-    [TearDown]
-    public void TearDown()
-    {
-        HelpersProvider.FileSystemHelper = null;
-        FileScriptCommandBase.PermissionsResolver = null;
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
-    }
+    private readonly RuntimeConfig _runtimeConfig = new(null, null, 10);
 
     #region Usage Tests
     [Test]
     public void Usage_ShouldBeSetToNull_WhenProvidedValueIsNull()
     {
-        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-
         // Act
-        var result = new FileScriptCommand(null, null)
+        var result = new FileScriptCommand(null, null, _runtimeConfig)
         {
             Usage = null
         };
 
         // Assert
         result.Usage.Should().BeNull();
-        fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
     }
 
     [Test]
     public void Usage_ShouldBeSetToNull_WhenProvidedValueIsEmptyArray()
     {
-        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-
         // Act
-        var result = new FileScriptCommand(null, null)
+        var result = new FileScriptCommand(null, null, _runtimeConfig)
         {
             Usage = []
         };
 
         // Assert
         result.Usage.Should().BeNull();
-        fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
     }
 
     [Test]
     public void Usage_ShouldBeSetToNull_WhenProvidedValueHasOnlyBlankEntries()
     {
-        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-
         // Act
-        var result = new FileScriptCommand(null, null)
+        var result = new FileScriptCommand(null, null, _runtimeConfig)
         {
             Usage = ["", "       ", null, "\t\t"]
         };
 
         // Assert
         result.Usage.Should().BeNull();
-        fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
     }
 
     [Test]
     public void Usage_ShouldBeSetToNewValue_WhenProvidedValueIsValid()
     {
         var usage = new[] { "Option", "Args..." };
-        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
 
         // Act
-        var result = new FileScriptCommand(null, null)
+        var result = new FileScriptCommand(null, null, _runtimeConfig)
         {
             Usage = usage
         };
 
         // Assert
         result.Usage.Should().BeEquivalentTo(usage);
-        fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
     }
     #endregion
 
@@ -101,15 +72,11 @@ public class FileScriptCommandTests
     [Test]
     public void Execute_ShouldFail_WhenPermissionCheckFails()
     {
-        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
         var message = "bottom text";
         resolverMock.Setup(x => x.CheckPermission(null, "Noclip", out message)).Returns(true);
-        FileScriptCommandBase.PermissionsResolver = resolverMock.Object;
 
-        var cmd = new FileScriptCommand(null, null)
+        var cmd = new FileScriptCommand(null, null, new(_runtimeConfig.FileSystemHelper, resolverMock.Object, 10))
         {
             RequiredPermissions = ["Noclip"]
         };
@@ -120,8 +87,6 @@ public class FileScriptCommandTests
         // Assert
         result.Should().BeFalse();
         message.Should().Be("bottom text");
-        fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
         resolverMock.VerifyAll();
         resolverMock.VerifyNoOtherCalls();
     }
@@ -129,15 +94,11 @@ public class FileScriptCommandTests
     [Test]
     public void Execute_ShouldFail_WhenSenderIsMissingRequiredPermission()
     {
-        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
         string message = null;
         resolverMock.Setup(x => x.CheckPermission(null, "Noclip", out message)).Returns(false);
-        FileScriptCommandBase.PermissionsResolver = resolverMock.Object;
 
-        var cmd = new FileScriptCommand(null, null)
+        var cmd = new FileScriptCommand(null, null, new(_runtimeConfig.FileSystemHelper, resolverMock.Object, 10))
         {
             RequiredPermissions = ["Noclip"]
         };
@@ -148,8 +109,6 @@ public class FileScriptCommandTests
         // Assert
         result.Should().BeFalse();
         message.Should().Be("Missing permission: 'Noclip'. Access denied");
-        fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
         resolverMock.VerifyAll();
         resolverMock.VerifyNoOtherCalls();
     }
@@ -157,11 +116,7 @@ public class FileScriptCommandTests
     [Test]
     public void Execute_ShouldFail_WhenNotEnoughArgumentsAreProvided()
     {
-        var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-
-        var cmd = new FileScriptCommand(null, null)
+        var cmd = new FileScriptCommand(null, null, _runtimeConfig)
         {
             Arity = 1
         };
@@ -172,8 +127,6 @@ public class FileScriptCommandTests
         // Assert
         result.Should().BeFalse();
         message.Should().Be("Missing argument: script expected 1 arguments, but sender provided 0");
-        fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -181,11 +134,8 @@ public class FileScriptCommandTests
     {
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(null)).Returns("test");
-        fileSystemMock.Setup(x => x.ReadFile(string.Empty)).Returns(string.Empty);
-        HelpersProvider.FileSystemHelper = fileSystemMock.Object;
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 1;
-        var cmd = new FileScriptCommand(null, null);
+        fileSystemMock.Setup(x => x.ReadFile(".slcs")).Returns(string.Empty);
+        var cmd = new FileScriptCommand(null, null, new(fileSystemMock.Object, _runtimeConfig.PermissionsResolver, 10));
 
         // Act
         var result = cmd.Execute(new(), null, out var message);
