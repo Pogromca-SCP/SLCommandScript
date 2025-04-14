@@ -161,7 +161,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().Be(message);
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -182,7 +181,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
     #endregion
 
@@ -357,7 +355,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -496,7 +493,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_percentages))]
@@ -518,7 +514,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_limits))]
@@ -664,7 +659,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().Be("Cannot execute a null command");
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -687,7 +681,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().Be(message);
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -709,7 +702,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -731,7 +723,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -753,7 +744,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -775,7 +765,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
     #endregion
 
@@ -861,7 +850,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
     #endregion
 }

@@ -39,7 +39,6 @@ public class HelperCommandsTests
             $"{Constants.Name} v{Constants.Version} @{Constants.Author}\r\nNo Scripts Loader currently in use");
 
         senderMock.VerifyAll();
-        senderMock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -63,9 +62,7 @@ public class HelperCommandsTests
             $"{Constants.Name} v{Constants.Version} @{Constants.Author}\r\ntest v1.0.0 @unknown");
 
         senderMock.VerifyAll();
-        senderMock.VerifyNoOtherCalls();
         loaderMock.VerifyAll();
-        loaderMock.VerifyNoOtherCalls();
     }
     #endregion
 }

@@ -1,3 +1,4 @@
+using PluginAPI.Events;
 using System;
 using System.IO;
 
@@ -37,6 +38,20 @@ public interface IFileSystemWatcherHelper : IDisposable
     /// Event invoked on error.
     /// </summary>
     event ErrorEventHandler Error;
+
+    /// <summary>
+    /// Registers an event handler.
+    /// </summary>
+    /// <param name="plugin">Plugin object responsible for event handler.</param>
+    /// <param name="eventHandler">Event handler to register.</param>
+    void RegisterEvents(object plugin, object eventHandler);
+
+    /// <summary>
+    /// Unregisters an event handler.
+    /// </summary>
+    /// <param name="plugin">Plugin object responsible for event handler.</param>
+    /// <param name="eventHandler">Event handler to unregister.</param>
+    void UnregisterEvents(object plugin, object eventHandler);
 }
 
 /// <summary>
@@ -95,6 +110,12 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
         DisposeWatcher();
         GC.SuppressFinalize(this);
     }
+
+    /// <inheritdoc />
+    public void RegisterEvents(object plugin, object eventHandler) => EventManager.RegisterEvents(plugin, eventHandler);
+
+    /// <inheritdoc />
+    public void UnregisterEvents(object plugin, object eventHandler) => EventManager.UnregisterEvents(plugin, eventHandler);
 
     /// <summary>
     /// Disposes wrapped watcher.

@@ -3,7 +3,6 @@ using PluginAPI.Enums;
 using SLCommandScript.Core;
 using SLCommandScript.Core.Permissions;
 using SLCommandScript.Core.Reflection;
-using SLCommandScript.FileScriptsLoader.Commands;
 using SLCommandScript.FileScriptsLoader.Helpers;
 using SLCommandScript.FileScriptsLoader.Loader;
 using System;
@@ -24,7 +23,7 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Contains current project version.
     /// </summary>
-    public const string ProjectVersion = "1.0.0";
+    public const string ProjectVersion = "2.0.0";
 
     /// <summary>
     /// Contains project author.
@@ -35,11 +34,6 @@ public class FileScriptsLoader : IScriptsLoader
     /// Prefix string to use in logs.
     /// </summary>
     private const string LoaderPrefix = "FileScriptsLoader: ";
-
-    /// <summary>
-    /// Contains a reference to initialized instance.
-    /// </summary>
-    private static FileScriptsLoader _instance = null;
 
     /// <summary>
     /// Prints a message to server log.
@@ -53,15 +47,6 @@ public class FileScriptsLoader : IScriptsLoader
     /// <param name="message">Message to print.</param>
     public static void PrintError(string message) => Log.Error(message, LoaderPrefix);
 
-    /// <summary>
-    /// Creates new file system watcher.
-    /// </summary>
-    /// <param name="path">Path to watch.</param>
-    /// <param name="filter">Files filter to use.</param>
-    /// <param name="includeSubdirectories">Whether or not subdirectories should be monitored.</param>
-    /// <returns>Newly created file watcher.</returns>
-    private static FileSystemWatcherHelper CreateWatcher(string path, string filter, bool includeSubdirectories) => new(path, filter, includeSubdirectories);
-
     /// <inheritdoc />
     public string LoaderName => ProjectName;
 
@@ -74,12 +59,12 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Contains all scripts directories monitors.
     /// </summary>
-    private readonly List<CommandsDirectory> _registeredDirectories = [];
+    private readonly List<CommandsDirectory> _registeredDirectories = new(3);
 
     /// <summary>
     /// Contains events directory monitor.
     /// </summary>
-    private EventsDirectory _eventsDirectory;
+    private EventsDirectory _eventsDirectory = null;
 
     /// <inheritdoc />
     public void InitScriptsLoader(object plugin, PluginHandler handler, ScriptsLoaderConfig loaderConfig)
@@ -96,23 +81,13 @@ public class FileScriptsLoader : IScriptsLoader
             return;
         }
 
-        if (_instance is not null)
-        {
-            PrintError("Only one instance of FileScriptsLoader can be initialized.");
-            return;
-        }
-
-        _instance = this;
         PrintLog("Initializing scripts loader...");
         loaderConfig ??= new();
-        FileScriptCommandBase.PermissionsResolver = LoadPermissionsResolver(loaderConfig.CustomPermissionsResolver);
-        FileScriptCommandBase.ConcurrentExecutionsLimit = loaderConfig.ScriptExecutionsLimit;
-        HelpersProvider.FileSystemHelper ??= new FileSystemHelper();
-        HelpersProvider.FileSystemWatcherHelperFactory ??= CreateWatcher;
-        LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", loaderConfig.EnableScriptEventHandlers ? CommandType.Console : 0);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", loaderConfig.AllowedScriptCommandTypes & CommandType.RemoteAdmin);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", loaderConfig.AllowedScriptCommandTypes & CommandType.Console);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/client/", loaderConfig.AllowedScriptCommandTypes & CommandType.GameConsole);
+        var runtimeConfig = new RuntimeConfig(new FileSystemHelper(), LoadPermissionsResolver(loaderConfig.CustomPermissionsResolver), loaderConfig.ScriptExecutionsLimit);
+        LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", loaderConfig.EnableScriptEventHandlers ? CommandType.Console : 0, runtimeConfig);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", loaderConfig.AllowedScriptCommandTypes & CommandType.RemoteAdmin, runtimeConfig);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", loaderConfig.AllowedScriptCommandTypes & CommandType.Console, runtimeConfig);
+        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/client/", loaderConfig.AllowedScriptCommandTypes & CommandType.GameConsole, runtimeConfig);
         PrintLog("Scripts loader is initialized.");
     }
 
@@ -143,18 +118,6 @@ public class FileScriptsLoader : IScriptsLoader
         _registeredDirectories.Clear();
         _eventsDirectory?.Dispose();
         _eventsDirectory = null;
-
-        if (!ReferenceEquals(_instance, this))
-        {
-            PrintLog("Scripts loader is disabled but static helpers are still active.");
-            return;
-        }
-
-        FileScriptCommandBase.ConcurrentExecutionsLimit = 0;
-        FileScriptCommandBase.PermissionsResolver = null;
-        HelpersProvider.FileSystemHelper = null;
-        HelpersProvider.FileSystemWatcherHelperFactory = null;
-        _instance = null;
         PrintLog("Scripts loader is disabled.");
     }
 
@@ -191,27 +154,28 @@ public class FileScriptsLoader : IScriptsLoader
     /// <param name="plugin">Plugin object.</param>
     /// <param name="directory">Directory to load.</param>
     /// <param name="handlerType">Handler to use for commands registration.</param>
-    private void LoadDirectory(object plugin, string directory, CommandType handlerType)
+    /// <param name="config">Configuration to apply.</param>
+    private void LoadDirectory(object plugin, string directory, CommandType handlerType, RuntimeConfig config)
     {
         if (handlerType == 0)
         {
             return;
         }
 
-        if (!HelpersProvider.FileSystemHelper.DirectoryExists(directory))
+        if (!config.FileSystemHelper.DirectoryExists(directory))
         {
-            HelpersProvider.FileSystemHelper.CreateDirectory(directory);
+            config.FileSystemHelper.CreateDirectory(directory);
         }
 
         if (plugin is null)
         {
             PrintLog($"Initializing commands directory for {handlerType}...");
-            _registeredDirectories.Add(new CommandsDirectory(HelpersProvider.FileSystemWatcherHelperFactory(directory, null, true), handlerType));
+            _registeredDirectories.Add(new CommandsDirectory(new FileSystemWatcherHelper(directory, null, true), handlerType, config));
         }
         else
         {
             PrintLog("Initializing events directory...");
-            _eventsDirectory = new EventsDirectory(plugin, HelpersProvider.FileSystemWatcherHelperFactory(directory, EventsDirectory.ScriptFilesFilter, false));
+            _eventsDirectory = new EventsDirectory(plugin, new FileSystemWatcherHelper(directory, EventsDirectory.ScriptFilesFilter, false), config);
         }
     }
 }

@@ -12,7 +12,7 @@ public class EnumIterableTests
 
     private static readonly float[] _percentages = [-1.0f, 0.0f, 0.25f, 0.1f, 0.5f, 2.5f];
 
-    private static readonly string[] _values = ((FullEnum[]) typeof(FullEnum).GetEnumValues()).Select(v => v.ToString("D")).ToArray();
+    private static readonly string[] _values = [..((FullEnum[]) typeof(FullEnum).GetEnumValues()).Select(v => v.ToString("D"))];
 
     #region Get Tests
     [Test]

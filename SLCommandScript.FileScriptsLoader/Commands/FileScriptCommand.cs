@@ -1,5 +1,4 @@
 using CommandSystem;
-using SLCommandScript.Core.Permissions;
 using System;
 using System.Linq;
 
@@ -8,9 +7,10 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// <summary>
 /// Script command used to launch interpreted scripts.
 /// </summary>
-/// <param name="location">Root location where the used path starts from.</param>
-/// <param name="path">Path to associated script.</param>
-public class FileScriptCommand(string location, string path) : FileScriptCommandBase(location, path), IUsageProvider
+/// <param name="name">Name of the command.</param>
+/// <param name="parent">Parent which stores this command.</param>
+/// <param name="config">Configuration to use.</param>
+public class FileScriptCommand(string name, IFileScriptCommandParent parent, RuntimeConfig config) : FileScriptCommandBase(name, parent, config), IUsageProvider
 {
     /// <summary>
     /// Describes command arguments usage.
@@ -27,7 +27,7 @@ public class FileScriptCommand(string location, string path) : FileScriptCommand
             }
 
             var usage = value.Where(i => !string.IsNullOrWhiteSpace(i));
-            _usage = usage.Count() > 0 ? usage.ToArray() : null;
+            _usage = usage.Count() > 0 ? [..usage] : null;
         }
     }
 
@@ -51,7 +51,7 @@ public class FileScriptCommand(string location, string path) : FileScriptCommand
     {
         if (RequiredPermissions is not null && RequiredPermissions.Length > 0)
         {
-            var resolver = PermissionsResolver ?? new VanillaPermissionsResolver();
+            var resolver = Config.PermissionsResolver;
 
             foreach (var perm in RequiredPermissions)
             {

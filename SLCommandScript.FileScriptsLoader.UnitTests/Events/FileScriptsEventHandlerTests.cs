@@ -18,21 +18,19 @@ public class FileScriptsEventHandlerTests
         [ServerEventType.RoundStart, new RoundStartEvent()]
     ];
 
-    private FileScriptsEventHandler _handler;
+    private readonly FileScriptsEventHandler _handler = new();
+
+    private MethodInfo GetEventMethod(ServerEventType type) => _handler.GetType().GetMethod($"On{type}", BindingFlags.Instance | BindingFlags.NonPublic);
 
     [SetUp]
-    public void SetUp()
-    {
-        _handler ??= new();
-        _handler.EventScripts.Clear();
-    }
+    public void SetUp() => _handler.EventScripts.Clear();
 
     #region HandleEvent Tests
     [TestCaseSource(nameof(_testedEvents))]
     public void HandleEvent_ShouldNotThrow_WhenEventIsNotRegistered(ServerEventType type, IEventArguments args)
     {
         // Arrange
-        var method = _handler.GetType().GetMethod($"On{type}", BindingFlags.Instance | BindingFlags.NonPublic);
+        var method = GetEventMethod(type);
 
         // Act
         method.Invoke(_handler, [args]);
@@ -46,14 +44,13 @@ public class FileScriptsEventHandlerTests
         var cmdMock = new Mock<ICommand>(MockBehavior.Strict);
         cmdMock.Setup(x => x.Execute(It.IsAny<ArraySegment<string>>(), ServerConsole.Scs, out message)).Returns(true);
         _handler.EventScripts.Add(type, cmdMock.Object);
-        var method = _handler.GetType().GetMethod($"On{type}", BindingFlags.Instance | BindingFlags.NonPublic);
+        var method = GetEventMethod(type);
 
         // Act
         method.Invoke(_handler, [args]);
 
         // Assert
         cmdMock.VerifyAll();
-        cmdMock.VerifyNoOtherCalls();
     }
     #endregion
 }

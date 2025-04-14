@@ -1,5 +1,4 @@
 using PluginAPI.Enums;
-using PluginAPI.Events;
 using SLCommandScript.FileScriptsLoader.Commands;
 using SLCommandScript.FileScriptsLoader.Events;
 using SLCommandScript.FileScriptsLoader.Helpers;
@@ -11,7 +10,7 @@ namespace SLCommandScript.FileScriptsLoader.Loader;
 /// <summary>
 /// Monitors a directory and related scripts.
 /// </summary>
-public class EventsDirectory : IDisposable
+public class EventsDirectory : IDisposable, IFileScriptCommandParent
 {
     /// <summary>
     /// Defines script files extension filter.
@@ -39,22 +38,29 @@ public class EventsDirectory : IDisposable
     public IFileSystemWatcherHelper Watcher { get; }
 
     /// <summary>
+    /// Contains commands configuration to apply.
+    /// </summary>
+    public RuntimeConfig Config { get; }
+
+    /// <summary>
     /// Creates new directory monitor and initializes the watcher.
     /// </summary>
     /// <param name="plugin">Plugin object.</param>
     /// <param name="watcher">File system watcher to use.</param>
-    public EventsDirectory(object plugin, IFileSystemWatcherHelper watcher)
+    /// <param name="config">Runtime configuration to use by event scripts.</param>
+    public EventsDirectory(object plugin, IFileSystemWatcherHelper watcher, RuntimeConfig config)
     {
         PluginObject = plugin;
         Handler = new();
         Watcher = watcher;
+        Config = config ?? new(null, null, 10);
 
         if (Watcher is null)
         {
             return;
         }
 
-        foreach (var file in HelpersProvider.FileSystemHelper.EnumerateFiles(Watcher.Directory, ScriptFilesFilter, SearchOption.TopDirectoryOnly))
+        foreach (var file in Config.FileSystemHelper.EnumerateFiles(Watcher.Directory, ScriptFilesFilter, SearchOption.TopDirectoryOnly))
         {
             RegisterEvent(file);
         }
@@ -69,7 +75,7 @@ public class EventsDirectory : IDisposable
             return;
         }
 
-        EventManager.RegisterEvents(PluginObject, Handler);
+        Watcher.RegisterEvents(PluginObject, Handler);
     }
 
     /// <summary>
@@ -84,6 +90,9 @@ public class EventsDirectory : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <inheritdoc />
+    public string GetLocation(bool includeRoot = false) => Watcher is not null && includeRoot ? Watcher.Directory : string.Empty;
+
     /// <summary>
     /// Disposes the watcher and unregisters events.
     /// </summary>
@@ -91,21 +100,13 @@ public class EventsDirectory : IDisposable
     {
         Watcher?.Dispose();
 
-        if (PluginObject is null)
+        if (PluginObject is null || Watcher is null)
         {
             return;
         }
 
-        EventManager.UnregisterEvents(PluginObject, Handler);
+        Watcher.UnregisterEvents(PluginObject, Handler);
     }
-
-    /// <summary>
-    /// Processes and formats directory path.
-    /// </summary>
-    /// <param name="path">Path to process.</param>
-    /// <returns>Processed path.</returns>
-    private string ProcessDirectoryPath(string path) =>
-        path.Length > Watcher.Directory.Length ? path.Substring(Watcher.Directory.Length).Replace('\\', '/') : string.Empty;
 
     /// <summary>
     /// Registers an event.
@@ -113,7 +114,7 @@ public class EventsDirectory : IDisposable
     /// <param name="scriptFile">Event script file to register.</param>
     private void RegisterEvent(string scriptFile)
     {
-        var cmd = new FileScriptCommandBase(Watcher.Directory, ProcessDirectoryPath(scriptFile));
+        var cmd = new FileScriptCommandBase(Config.FileSystemHelper.GetFileNameWithoutExtension(scriptFile), this, Config);
         var name = cmd.Command;
 
         if (name.Length > EventHandlerPrefix.Length && name.StartsWith(EventHandlerPrefix, StringComparison.OrdinalIgnoreCase))
@@ -140,7 +141,7 @@ public class EventsDirectory : IDisposable
     /// <param name="scriptFile">Event script file to unregister.</param>
     private void UnregisterEvent(string scriptFile)
     {
-        var name = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(scriptFile);
+        var name = Config.FileSystemHelper.GetFileNameWithoutExtension(scriptFile);
 
         if (name.Length > EventHandlerPrefix.Length && name.StartsWith(EventHandlerPrefix, StringComparison.OrdinalIgnoreCase))
         {

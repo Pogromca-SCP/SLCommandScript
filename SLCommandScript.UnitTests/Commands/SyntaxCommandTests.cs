@@ -7,14 +7,10 @@ namespace SLCommandScript.UnitTests.Commands;
 [TestFixture]
 public class SyntaxCommandTests
 {
-    private SyntaxCommand _command;
+    private readonly SyntaxCommand _command = new();
 
     [SetUp]
-    public void SetUp()
-    {
-        _command ??= new();
-        _command.Rules.Clear();
-    }
+    public void SetUp() => _command.Rules.Clear();
 
     #region Execute Tests
     [Test]
