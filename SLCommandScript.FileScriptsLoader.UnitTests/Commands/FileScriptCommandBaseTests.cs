@@ -9,7 +9,7 @@ using System.IO;
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 
 [TestFixture]
-public class FileScriptCommandBaseTests
+public class FileScriptCommandBaseTests : TestWithConfigBase
 {
     private const string TestCommand = "test";
 
@@ -27,14 +27,12 @@ public class FileScriptCommandBaseTests
         "#This is a comment"
     ];
 
-    private readonly RuntimeConfig _runtimeConfig = new(null, null, 10);
-
     #region Description Tests
     [Test]
     public void Description_ShouldBeSetToDefault_WhenProvidedValueIsNull()
     {
         // Act
-        var result = new FileScriptCommandBase(null, null, _runtimeConfig)
+        var result = new FileScriptCommandBase(null, null, RuntimeConfig)
         {
             Description = null
         };
@@ -47,7 +45,7 @@ public class FileScriptCommandBaseTests
     public void Description_ShouldBeSetToDefault_WhenProvidedValueIsBlank()
     {
         // Act
-        var result = new FileScriptCommandBase(null, null, _runtimeConfig)
+        var result = new FileScriptCommandBase(null, null, RuntimeConfig)
         {
             Description = "     "
         };
@@ -63,7 +61,7 @@ public class FileScriptCommandBaseTests
         const string newDesc = "HelloThere!";
 
         // Act
-        var result = new FileScriptCommandBase(null, null, _runtimeConfig)
+        var result = new FileScriptCommandBase(null, null, RuntimeConfig)
         {
             Description = newDesc
         };
@@ -96,7 +94,7 @@ public class FileScriptCommandBaseTests
         var fileScriptParentMock = new Mock<IFileScriptCommandParent>(MockBehavior.Strict);
 
         // Act
-        var result = new FileScriptCommandBase(TestCommand, fileScriptParentMock.Object, _runtimeConfig);
+        var result = new FileScriptCommandBase(TestCommand, fileScriptParentMock.Object, RuntimeConfig);
 
         // Assert
         result.Command.Should().Be(TestCommand);
@@ -104,9 +102,8 @@ public class FileScriptCommandBaseTests
         result.Description.Should().Be(FileScriptCommandBase.DefaultDescription);
         result.SanitizeResponse.Should().BeTrue();
         result.Parent.Should().Be(fileScriptParentMock.Object);
-        result.Config.Should().Be(_runtimeConfig);
+        result.Config.Should().Be(RuntimeConfig);
         fileScriptParentMock.VerifyAll();
-        fileScriptParentMock.VerifyNoOtherCalls();
     }
     #endregion
 
@@ -115,7 +112,7 @@ public class FileScriptCommandBaseTests
     public void Execute_ShouldFail_WhenConcurrentExecutionsLimitIsExceeded()
     {
         // Arrange
-        var cmd = new FileScriptCommandBase(null, null, new(_runtimeConfig.FileSystemHelper, _runtimeConfig.PermissionsResolver, 0));
+        var cmd = new FileScriptCommandBase(null, null, new(RuntimeConfig.FileSystemHelper, RuntimeConfig.PermissionsResolver, 0));
 
         // Act
         var result = cmd.Execute(new(), null, out var message);
@@ -131,7 +128,7 @@ public class FileScriptCommandBaseTests
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.ReadFile(TestPath)).Throws<Exception>();
-        var cmd = new FileScriptCommandBase(TestCommand, null, new(fileSystemMock.Object, _runtimeConfig.PermissionsResolver, 10));
+        var cmd = new FileScriptCommandBase(TestCommand, null, FromFilesMock(fileSystemMock));
 
         // Act
         var result = cmd.Execute(new(), null, out var message);
@@ -140,7 +137,6 @@ public class FileScriptCommandBaseTests
         result.Should().BeFalse();
         message.Should().Be("Cannot read script from file 'test.slcs'");
         fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -151,7 +147,7 @@ public class FileScriptCommandBaseTests
         fileSystemMock.Setup(x => x.ReadFile($"parent{Path.DirectorySeparatorChar}test.slcs")).Throws<Exception>();
         var scriptParentMock = new Mock<IFileScriptCommandParent>(MockBehavior.Strict);
         scriptParentMock.Setup(x => x.GetLocation(true)).Returns("parent");
-        var cmd = new FileScriptCommandBase(TestCommand, scriptParentMock.Object, new(fileSystemMock.Object, _runtimeConfig.PermissionsResolver, 10));
+        var cmd = new FileScriptCommandBase(TestCommand, scriptParentMock.Object, FromFilesMock(fileSystemMock));
 
         // Act
         var result = cmd.Execute(new(), null, out var message);
@@ -160,9 +156,7 @@ public class FileScriptCommandBaseTests
         result.Should().BeFalse();
         message.Should().Be($"Cannot read script from file 'parent{Path.DirectorySeparatorChar}test.slcs'");
         fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
         scriptParentMock.VerifyAll();
-        scriptParentMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_errorPaths))]
@@ -171,7 +165,7 @@ public class FileScriptCommandBaseTests
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.ReadFile(TestPath)).Returns(src);
-        var cmd = new FileScriptCommandBase(TestCommand, null, new(fileSystemMock.Object, _runtimeConfig.PermissionsResolver, 10));
+        var cmd = new FileScriptCommandBase(TestCommand, null, FromFilesMock(fileSystemMock));
 
         // Act
         var result = cmd.Execute(new(), null, out var message);
@@ -180,7 +174,6 @@ public class FileScriptCommandBaseTests
         result.Should().BeFalse();
         message.Should().Be(expectedError);
         fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_goldPaths))]
@@ -189,7 +182,7 @@ public class FileScriptCommandBaseTests
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.ReadFile(TestPath)).Returns(src);
-        var cmd = new FileScriptCommandBase(TestCommand, null, new(fileSystemMock.Object, _runtimeConfig.PermissionsResolver, 10));
+        var cmd = new FileScriptCommandBase(TestCommand, null, FromFilesMock(fileSystemMock));
 
         // Act
         var result = cmd.Execute(new(), null, out var message);
@@ -198,7 +191,6 @@ public class FileScriptCommandBaseTests
         result.Should().BeTrue();
         message.Should().Be("Script executed successfully.");
         fileSystemMock.VerifyAll();
-        fileSystemMock.VerifyNoOtherCalls();
     }
     #endregion
 }

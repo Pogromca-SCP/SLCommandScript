@@ -41,7 +41,6 @@ public class FileScriptDirectoryCommandTests
         result.Description.Should().Be("Parent command containing all scripts in a directory.");
         result.Parent.Should().Be(parentMock.Object);
         parentMock.VerifyAll();
-        parentMock.VerifyNoOtherCalls();
     }
     #endregion
 
@@ -73,6 +72,7 @@ public class FileScriptDirectoryCommandTests
 
         // Assert
         result.Should().Be($"{parentLocation}{Path.DirectorySeparatorChar}{cmd.Command}");
+        parentMock.VerifyAll();
     }
     #endregion
 
@@ -96,7 +96,6 @@ public class FileScriptDirectoryCommandTests
         result.Should().Be(isSuccess);
         message.Should().Be(response);
         cmdMock.VerifyAll();
-        cmdMock.VerifyNoOtherCalls();
     }
 
     [Test]

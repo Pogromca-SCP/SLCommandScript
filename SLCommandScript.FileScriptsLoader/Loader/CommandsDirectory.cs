@@ -12,7 +12,7 @@ namespace SLCommandScript.FileScriptsLoader.Loader;
 /// <summary>
 /// Monitors a directory and related scripts.
 /// </summary>
-public class CommandsDirectory : IDisposable
+public class CommandsDirectory : IDisposable, IFileScriptCommandParent
 {
     /// <summary>
     /// Contains script files extension.
@@ -43,11 +43,6 @@ public class CommandsDirectory : IDisposable
     }
 
     /// <summary>
-    /// Contains all subdirectories from monitored directory.
-    /// </summary>
-    public Dictionary<string, FileScriptDirectoryCommand> Directories { get; }
-
-    /// <summary>
     /// Contains all registered scripts commands from monitored directory.
     /// </summary>
     public Dictionary<string, ICommand> Commands { get; }
@@ -63,16 +58,22 @@ public class CommandsDirectory : IDisposable
     public IFileSystemWatcherHelper Watcher { get; }
 
     /// <summary>
+    /// Contains commands configuration to apply.
+    /// </summary>
+    public RuntimeConfig Config { get; }
+
+    /// <summary>
     /// Creates new directory monitor and initializes the watcher.
     /// </summary>
     /// <param name="watcher">File system watcher to use.</param>
     /// <param name="handlerType">Type of handler to use.</param>
-    public CommandsDirectory(IFileSystemWatcherHelper watcher, CommandType handlerType)
+    /// <param name="config">Runtime configuration to use by event scripts.</param>
+    public CommandsDirectory(IFileSystemWatcherHelper watcher, CommandType handlerType, RuntimeConfig config)
     {
-        Directories = new(StringComparer.OrdinalIgnoreCase);
         Commands = new(StringComparer.OrdinalIgnoreCase);
         HandlerType = handlerType;
         Watcher = watcher;
+        Config = config ?? new(null, null, 10);
 
         if (Watcher is null)
         {
@@ -99,6 +100,9 @@ public class CommandsDirectory : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <inheritdoc />
+    public string GetLocation(bool includeRoot = false) => Watcher is not null && includeRoot ? Watcher.Directory : string.Empty;
+
     /// <summary>
     /// Disposes the watcher and performs command cleanup.
     /// </summary>
@@ -113,37 +117,61 @@ public class CommandsDirectory : IDisposable
     }
 
     /// <summary>
-    /// Processes and formats directory path.
-    /// </summary>
-    /// <param name="path">Path to process.</param>
-    /// <returns>Processed path.</returns>
-    private string ProcessDirectoryPath(string path) =>
-        path.Length > Watcher.Directory.Length ? path.Substring(Watcher.Directory.Length).Replace('\\', '/') : string.Empty;
-
-    /// <summary>
     /// Loads initial files and directories.
     /// </summary>
     private void LoadInitialFiles()
     {
-        foreach (var path in HelpersProvider.FileSystemHelper.EnumerateDirectories(Watcher.Directory))
+        foreach (var path in Config.FileSystemHelper.EnumerateDirectories(Watcher.Directory))
         {
-            var cmd = new FileScriptDirectoryCommand(ProcessDirectoryPath(path));
-
-            if (RegisterCommand(path, cmd))
-            {
-                Directories[cmd.Path] = cmd;
-            }
+            RegisterCommand(new FileScriptDirectoryCommand(Config.FileSystemHelper.GetDirectory(path), GetCommand<IFileScriptCommandParent>(path) ?? this));
         }
 
-        foreach (var path in HelpersProvider.FileSystemHelper.EnumerateFiles(Watcher.Directory, EventsDirectory.ScriptFilesFilter, SearchOption.AllDirectories))
+        foreach (var path in Config.FileSystemHelper.EnumerateFiles(Watcher.Directory, EventsDirectory.ScriptFilesFilter, SearchOption.AllDirectories))
         {
-            RegisterCommand(path, new FileScriptCommand(Watcher.Directory, ProcessDirectoryPath(path)));
+            RegisterCommand(new FileScriptCommand(Config.FileSystemHelper.GetFileNameWithoutExtension(path), GetCommand<IFileScriptCommandParent>(path) ?? this, Config));
         }
 
-        foreach (var path in HelpersProvider.FileSystemHelper.EnumerateFiles(Watcher.Directory, DescriptionFilesFilter, SearchOption.AllDirectories))
+        foreach (var path in Config.FileSystemHelper.EnumerateFiles(Watcher.Directory, DescriptionFilesFilter, SearchOption.AllDirectories))
         {
             UpdateScriptDescription(path);
         }
+    }
+
+    /// <summary>
+    /// Retrieves command as a specific type.
+    /// </summary>
+    /// <typeparam name="T">Type of returned value.</typeparam>
+    /// <param name="path">Path to get command from.</param>
+    /// <returns>Reference to command or <see langword="null" /> if nothing was found.</returns>
+    private T GetCommand<T>(string path) where T : class
+    {
+        var processedPath = path.Substring(Watcher.Directory.Length + 1);
+
+        if (processedPath.Length < 1)
+        {
+            return null;
+        }
+
+        var names = processedPath.Split(Path.DirectorySeparatorChar);
+        var index = 0;
+        var found = Commands.TryGetValue(names[index++], out var foundCommand);
+
+        while (found && index < names.Length)
+        {
+            if (foundCommand is not ICommandHandler commandHandler)
+            {
+                return foundCommand as T;
+            }
+
+            found = commandHandler.TryGetCommand(names[index++], out var tmp);
+
+            if (found)
+            {
+                foundCommand = tmp;
+            }
+        }
+
+        return foundCommand as T;
     }
 
     /// <summary>
@@ -152,23 +180,17 @@ public class CommandsDirectory : IDisposable
     /// <param name="path">File path to register.</param>
     private void RegisterFile(string path)
     {
-        if (HelpersProvider.FileSystemHelper.DirectoryExists(path))
+        if (Config.FileSystemHelper.DirectoryExists(path))
         {
-            var cmd = new FileScriptDirectoryCommand(ProcessDirectoryPath(path));
-            
-            if (RegisterCommand(path, cmd))
-            {
-                Directories[cmd.Path] = cmd;
-            }
-
+            RegisterCommand(new FileScriptDirectoryCommand(Config.FileSystemHelper.GetDirectory(path), GetCommand<IFileScriptCommandParent>(path) ?? this));
             return;
         }
 
-        var ext = HelpersProvider.FileSystemHelper.GetFileExtension(path);
+        var ext = Config.FileSystemHelper.GetFileExtension(path);
 
         if (ext.Equals(ScriptFileExtension, StringComparison.OrdinalIgnoreCase))
         {
-            RegisterCommand(path, new FileScriptCommand(Watcher.Directory, ProcessDirectoryPath(path)));
+            RegisterCommand(new FileScriptCommand(Config.FileSystemHelper.GetFileNameWithoutExtension(path), GetCommand<IFileScriptCommandParent>(path) ?? this, Config));
             return;
         }
 
@@ -184,7 +206,7 @@ public class CommandsDirectory : IDisposable
     /// <param name="path">File path to update.</param>
     private void RefreshDescription(string path)
     {
-        var ext = HelpersProvider.FileSystemHelper.GetFileExtension(path);
+        var ext = Config.FileSystemHelper.GetFileExtension(path);
 
         if (ext.Equals(ScriptDescriptionExtension, StringComparison.OrdinalIgnoreCase))
         {
@@ -198,19 +220,13 @@ public class CommandsDirectory : IDisposable
     /// <param name="path">File path to unregister.</param>
     private void UnregisterFile(string path)
     {
-        if (HelpersProvider.FileSystemHelper.DirectoryExists(path))
+        if (Config.FileSystemHelper.DirectoryExists(path))
         {
-            var cmd = UnregisterCommand(path) as FileScriptDirectoryCommand;
-
-            if (cmd is not null)
-            {
-                Directories.Remove(cmd.Path);
-            }
-
+            UnregisterCommand(path);
             return;
         }
 
-        var ext = HelpersProvider.FileSystemHelper.GetFileExtension(path);
+        var ext = Config.FileSystemHelper.GetFileExtension(path);
 
         if (ext.Equals(ScriptFileExtension, StringComparison.OrdinalIgnoreCase))
         {
@@ -230,72 +246,61 @@ public class CommandsDirectory : IDisposable
     }
 
     /// <summary>
-    /// Checks if command parent directory exists and can be accessed.
-    /// </summary>
-    /// <param name="dir">Directory to check.</param>
-    /// <returns><see langword="true" /> if parent exists, <see langword="null" /> otherwise or <see langword="false" /> if parent is root directory.</returns>
-    private bool? CheckParent(string dir) => dir.Length > 0 ? (Directories.ContainsKey(dir) ? true : null) : false;
-
-    /// <summary>
     /// Registers a script command.
     /// </summary>
-    /// <param name="path">Script command file to register.</param>
     /// <param name="cmd">Command to register.</param>
     /// <returns><see langword="true" /> if registered without issues, <see langword="false" /> otherwise.</returns>
-    private bool RegisterCommand(string path, ICommand cmd)
+    private bool RegisterCommand(FileScriptDirectoryCommand cmd)
     {
-        var dir = ProcessDirectoryPath(HelpersProvider.FileSystemHelper.GetDirectory(path));
-        var hasParent = CheckParent(dir);
-        var displayName = dir.Length > 0 ? $"{dir}/{cmd.Command}" : cmd.Command;
-
-        var registered = hasParent switch
+        var registered = cmd.Parent switch
         {
-            true => CommandsUtils.RegisterCommand(Directories[dir], cmd) == true ? HandlerType : null,
-            false => CommandsUtils.RegisterCommand(HandlerType, cmd),
+            FileScriptDirectoryCommand parent => CommandsUtils.RegisterCommand(parent, cmd) == true ? HandlerType : null,
+            CommandsDirectory parent => CommandsUtils.RegisterCommand(parent.HandlerType, cmd),
             _ => null
         };
 
         if (registered != HandlerType)
         {
-            FileScriptsLoader.PrintError($"Could not register command '{displayName}' for {HandlerType}.");
+            FileScriptsLoader.PrintError($"Could not register command '{cmd.Command}' for {HandlerType}.");
             return false;
         }
 
-        if (hasParent == false)
+        if (this == cmd.Parent)
         {
             Commands[cmd.Command] = cmd;
         }
 
-        FileScriptsLoader.PrintLog($"Registered command '{displayName}' for {HandlerType}.");
+        FileScriptsLoader.PrintLog($"Registered command '{cmd.Command}' for {HandlerType}.");
         return true;
     }
 
     /// <summary>
-    /// Attempts to retrieve a registered command.
+    /// Registers a script command.
     /// </summary>
-    /// <param name="hasParent">Whether or not the command has valid parent.</param>
-    /// <param name="dir">Parent directory of the command.</param>
-    /// <param name="name">Name of the command to find.</param>
-    /// <returns>Found command or <see langword="null" /> if nothing was found.</returns>
-    private ICommand GetCommand(bool? hasParent, string dir, string name)
+    /// <param name="cmd">Command to register.</param>
+    /// <returns><see langword="true" /> if registered without issues, <see langword="false" /> otherwise.</returns>
+    private bool RegisterCommand(FileScriptCommandBase cmd)
     {
-        if (hasParent == null)
+        var registered = cmd.Parent switch
         {
-            return null;
+            FileScriptDirectoryCommand parent => CommandsUtils.RegisterCommand(parent, cmd) == true ? HandlerType : null,
+            CommandsDirectory parent => CommandsUtils.RegisterCommand(parent.HandlerType, cmd),
+            _ => null
+        };
+
+        if (registered != HandlerType)
+        {
+            FileScriptsLoader.PrintError($"Could not register command '{cmd.Command}' for {HandlerType}.");
+            return false;
         }
 
-        ICommand foundCommand;
-
-        if (hasParent.Value)
+        if (this == cmd.Parent)
         {
-            Directories[dir].TryGetCommand(name, out foundCommand);
-        }
-        else
-        {
-            Commands.TryGetValue(name, out foundCommand);
+            Commands[cmd.Command] = cmd;
         }
 
-        return foundCommand;
+        FileScriptsLoader.PrintLog($"Registered command '{cmd.Command}' for {HandlerType}.");
+        return true;
     }
 
     /// <summary>
@@ -305,14 +310,11 @@ public class CommandsDirectory : IDisposable
     /// <returns><see langword="true" /> if updated without issues, <see langword="false" /> otherwise.</returns>
     private bool UpdateScriptDescription(string path)
     {
-        var dir = ProcessDirectoryPath(HelpersProvider.FileSystemHelper.GetDirectory(path));
-        var hasParent = CheckParent(dir);
-        var name = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(path);
-        var displayName = dir.Length > 0 ? $"{dir}/{name}" : name;
+        var cmd = GetCommand<FileScriptCommand>(path);
 
-        if (GetCommand(hasParent, dir, name) is not FileScriptCommand cmd)
+        if (cmd is null)
         {
-            FileScriptsLoader.PrintError($"Could not update description for command '{displayName}' in {HandlerType}.");
+            FileScriptsLoader.PrintError($"Could not update description for undescriptable command in {HandlerType}.");
             return false;
         }
 
@@ -320,16 +322,16 @@ public class CommandsDirectory : IDisposable
 
         try
         {
-            desc = HelpersProvider.FileSystemHelper.ReadMetadataFromJson(path);
+            desc = Config.FileSystemHelper.ReadMetadataFromJson(path);
         }
         catch (Exception ex)
         {
-            FileScriptsLoader.PrintError($"An error has occured during '{displayName}' in {HandlerType} description deserialization: {ex.Message}");
+            FileScriptsLoader.PrintError($"An error has occured during '{cmd.Command}' in {HandlerType} description deserialization: {ex.Message}");
             return false;
         }
 
         UpdateCommandDesc(cmd, desc);
-        FileScriptsLoader.PrintLog($"Description update for '{displayName}' command in {HandlerType} finished successfully.");
+        FileScriptsLoader.PrintLog($"Description update for '{cmd.Command}' command in {HandlerType} finished successfully.");
         return true;
     }
 
@@ -340,31 +342,71 @@ public class CommandsDirectory : IDisposable
     /// <returns>Unregistered command if no issues occured, <see langword="null" /> otherwise.</returns>
     private ICommand UnregisterCommand(string path)
     {
-        var dir = ProcessDirectoryPath(HelpersProvider.FileSystemHelper.GetDirectory(path));
-        var hasParent = CheckParent(dir);
-        var name = HelpersProvider.FileSystemHelper.GetFileNameWithoutExtension(path);
-        var displayName = dir.Length > 0 ? $"{dir}/{name}" : name;
-        var cmd = GetCommand(hasParent, dir, name);
+        var cmd = GetCommand<ICommand>(path);
 
-        var removed = hasParent switch
+        return cmd switch
         {
-            true => CommandsUtils.UnregisterCommand(Directories[dir], cmd) == true ? HandlerType : null,
-            false => CommandsUtils.UnregisterCommand(HandlerType, cmd),
+            FileScriptDirectoryCommand dir => UnregisterCommand(dir),
+            FileScriptCommandBase script => UnregisterCommand(script),
+            _ => null,
+        };
+    }
+
+    /// <summary>
+    /// Unregisters a script command.
+    /// </summary>
+    /// <param name="cmd">Command to unregister.</param>
+    /// <returns>Unregistered command if no issues occured, <see langword="null" /> otherwise.</returns>
+    private FileScriptCommandBase UnregisterCommand(FileScriptCommandBase cmd)
+    {
+        var removed = cmd.Parent switch
+        {
+            FileScriptDirectoryCommand parent => CommandsUtils.UnregisterCommand(parent, cmd) == true ? HandlerType : null,
+            CommandsDirectory parent => CommandsUtils.UnregisterCommand(parent.HandlerType, cmd),
             _ => null
         };
 
         if (removed != HandlerType)
         {
-            FileScriptsLoader.PrintError($"Could not unregister command '{displayName}' from {HandlerType}.");
+            FileScriptsLoader.PrintError($"Could not unregister command '{cmd.Command}' from {HandlerType}.");
             return null;
         }
 
-        if (hasParent == false)
+        if (this == cmd.Parent)
         {
             Commands.Remove(cmd.Command);
         }
 
-        FileScriptsLoader.PrintLog($"Unregistered command '{displayName}' from {HandlerType}.");
+        FileScriptsLoader.PrintLog($"Unregistered command '{cmd.Command}' from {HandlerType}.");
+        return cmd;
+    }
+
+    /// <summary>
+    /// Unregisters a script command.
+    /// </summary>
+    /// <param name="cmd">Command to unregister.</param>
+    /// <returns>Unregistered command if no issues occured, <see langword="null" /> otherwise.</returns>
+    private FileScriptDirectoryCommand UnregisterCommand(FileScriptDirectoryCommand cmd)
+    {
+        var removed = cmd.Parent switch
+        {
+            FileScriptDirectoryCommand parent => CommandsUtils.UnregisterCommand(parent, cmd) == true ? HandlerType : null,
+            CommandsDirectory parent => CommandsUtils.UnregisterCommand(parent.HandlerType, cmd),
+            _ => null
+        };
+
+        if (removed != HandlerType)
+        {
+            FileScriptsLoader.PrintError($"Could not unregister command '{cmd.Command}' from {HandlerType}.");
+            return null;
+        }
+
+        if (this == cmd.Parent)
+        {
+            Commands.Remove(cmd.Command);
+        }
+
+        FileScriptsLoader.PrintLog($"Unregistered command '{cmd.Command}' from {HandlerType}.");
         return cmd;
     }
 }
