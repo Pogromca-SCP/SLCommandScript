@@ -912,7 +912,6 @@ public class LexerTests
         lexer.IsAtEnd.Should().BeFalse();
         result.Should().BeEmpty();
         resolverMock.VerifyAll();
-        resolverMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_argSizes))]

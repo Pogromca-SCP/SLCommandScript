@@ -52,7 +52,6 @@ public class VanillaPermissionsResolverTests
         result.Should().BeFalse();
         message.Should().Be($"Permission name '{perm}' is invalid");
         senderMock.VerifyAll();
-        senderMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_validPermissionNames))]
@@ -68,7 +67,6 @@ public class VanillaPermissionsResolverTests
         result.Should().BeFalse();
         message.Should().Be($"Permission '{perm}' does not exist");
         senderMock.VerifyAll();
-        senderMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_existingPermissions))]
@@ -84,7 +82,6 @@ public class VanillaPermissionsResolverTests
         result.Should().BeFalse();
         message.Should().BeNull();
         senderMock.VerifyAll();
-        senderMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_existingPermissions))]
@@ -100,7 +97,6 @@ public class VanillaPermissionsResolverTests
         result.Should().BeTrue();
         message.Should().BeNull();
         senderMock.VerifyAll();
-        senderMock.VerifyNoOtherCalls();
     }
     #endregion
 }

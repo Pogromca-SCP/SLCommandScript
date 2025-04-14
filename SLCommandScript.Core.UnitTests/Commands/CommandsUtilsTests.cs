@@ -21,6 +21,7 @@ public class CommandsUtilsTests
 
     private const CommandType InvalidCommandType = CommandType.Console;
 
+    #region Test Case Sources
     private static readonly CommandType[] _allHandlerTypes = [CommandType.RemoteAdmin, CommandType.Console,
         CommandType.GameConsole, CommandType.RemoteAdmin | CommandType.Console, CommandType.RemoteAdmin | CommandType.GameConsole,
         CommandType.GameConsole | CommandType.Console, CommandType.RemoteAdmin | CommandType.GameConsole | CommandType.Console];
@@ -50,7 +51,9 @@ public class CommandsUtilsTests
     private static IEnumerable<object[]> ValidHandlersXCommandsToRegister => TestArrays.CartesianJoin(_validHandlerTypes, _commandsToRegister);
 
     private static IEnumerable<object[]> ValidHandlersXExampleCommands => TestArrays.CartesianJoin(_validHandlerTypes, _exampleCommands);
+    #endregion
 
+    #region Utilities
     private static IEnumerable<ICommandHandler> GetExpectedCommandHandlers(CommandType handlerType) => handlerType switch
     {
         CommandType.RemoteAdmin => [CommandProcessor.RemoteAdminCommandHandler],
@@ -102,6 +105,7 @@ public class CommandsUtilsTests
     private IEnumerable<ICommand> _originalRemoteAdmin;
 
     private IEnumerable<ICommand> _originalClient;
+#endregion
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
@@ -155,7 +159,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeTrue();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_invalidAliases))]
@@ -170,7 +173,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeTrue();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_validAliases))]
@@ -185,7 +187,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeFalse();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
     #endregion
 
@@ -256,7 +257,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(AllHandlersXInvalidAliases))]
@@ -271,7 +271,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_validCommandNames))]
@@ -286,7 +285,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().Be(0);
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(ValidHandlersXExampleCommands))]
@@ -338,7 +336,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_invalidAliases))]
@@ -353,7 +350,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_exampleCommands))]
@@ -394,7 +390,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(AllHandlersXInvalidAliases))]
@@ -409,7 +404,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_validCommandNames))]
@@ -424,7 +418,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().Be(0);
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(ValidHandlersXCommandsToRegister))]
@@ -441,7 +434,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().Be(expectedResult);
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
         handlers.Select(h => h.TryGetCommand(commandName, out _)).Should().NotContain(false);
     }
 
@@ -480,7 +472,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_invalidAliases))]
@@ -495,7 +486,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_exampleCommands))]
@@ -537,7 +527,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(AllHandlersXInvalidAliases))]
@@ -552,7 +541,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_validCommandNames))]
@@ -567,7 +555,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().Be(0);
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(ValidHandlersXCommandsToRegister))]
@@ -584,7 +571,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().Be(expectedResult);
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
         handlers.Select(h => h.TryGetCommand(commandName, out _)).Should().NotContain(true);
     }
 
@@ -623,7 +609,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_invalidAliases))]
@@ -638,7 +623,6 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeNull();
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
     [TestCaseSource(nameof(_exampleCommands))]

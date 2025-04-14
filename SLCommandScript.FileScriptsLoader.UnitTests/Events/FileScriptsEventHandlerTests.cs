@@ -23,10 +23,7 @@ public class FileScriptsEventHandlerTests
     private MethodInfo GetEventMethod(ServerEventType type) => _handler.GetType().GetMethod($"On{type}", BindingFlags.Instance | BindingFlags.NonPublic);
 
     [SetUp]
-    public void SetUp()
-    {
-        _handler.EventScripts.Clear();
-    }
+    public void SetUp() => _handler.EventScripts.Clear();
 
     #region HandleEvent Tests
     [TestCaseSource(nameof(_testedEvents))]
