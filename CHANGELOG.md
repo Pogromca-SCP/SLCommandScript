@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
+- File scripts loader components now utilize dispose pattern properly.
 - File scripts loader was updated to no longer rely on static properties and files/directories location tracking.
 - Project now uses NwPluginAPI assembly directly from game files to use more up to date API.
 

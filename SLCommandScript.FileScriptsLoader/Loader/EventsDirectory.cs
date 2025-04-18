@@ -78,15 +78,10 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
         Watcher.RegisterEvents(PluginObject, Handler);
     }
 
-    /// <summary>
-    /// Releases resources.
-    /// </summary>
-    ~EventsDirectory() => DisposeAndUnregisterEvents();
-
     /// <inheritdoc />
     public void Dispose()
     {
-        DisposeAndUnregisterEvents();
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 
@@ -96,16 +91,20 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
     /// <summary>
     /// Disposes the watcher and unregisters events.
     /// </summary>
-    protected void DisposeAndUnregisterEvents()
+    /// <param name="disposing">Whether or not this method is invoked from <see cref="Dispose()" />.</param>
+    protected virtual void Dispose(bool disposing)
     {
-        Watcher?.Dispose();
-
-        if (PluginObject is null || Watcher is null)
+        if (!disposing)
         {
             return;
         }
 
-        Watcher.UnregisterEvents(PluginObject, Handler);
+        if (PluginObject is not null)
+        {
+            Watcher?.UnregisterEvents(PluginObject, Handler);
+        }
+
+        Watcher?.Dispose();
     }
 
     /// <summary>
