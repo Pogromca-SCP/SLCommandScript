@@ -88,15 +88,10 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
         Watcher.Error += (obj, args) => FileScriptsLoader.PrintError($"A {HandlerType} commands watcher error has occured: {args.GetException().Message}");
     }
 
-    /// <summary>
-    /// Releases resources.
-    /// </summary>
-    ~CommandsDirectory() => DisposeAndUnregisterCommands();
-
     /// <inheritdoc />
     public void Dispose()
     {
-        DisposeAndUnregisterCommands();
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 
@@ -106,8 +101,14 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
     /// <summary>
     /// Disposes the watcher and performs command cleanup.
     /// </summary>
-    protected void DisposeAndUnregisterCommands()
+    /// <param name="disposing">Whether or not this method is invoked from <see cref="Dispose()" />.</param>
+    protected virtual void Dispose(bool disposing)
     {
+        if (!disposing)
+        {
+            return;
+        }
+
         Watcher?.Dispose();
 
         foreach (var command in Commands.Values)

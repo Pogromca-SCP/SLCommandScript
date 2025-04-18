@@ -91,23 +91,24 @@ public class FileScriptsLoader : IScriptsLoader
         PrintLog("Scripts loader is initialized.");
     }
 
-    /// <summary>
-    /// Releases resources.
-    /// </summary>
-    ~FileScriptsLoader() => PerformCleanup();
-
     /// <inheritdoc />
     public void Dispose()
     {
-        PerformCleanup();
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 
     /// <summary>
     /// Unloads scripts and helpers.
     /// </summary>
-    protected void PerformCleanup()
+    /// <param name="disposing">Whether or not this method is invoked from <see cref="Dispose()" />.</param>
+    protected virtual void Dispose(bool disposing)
     {
+        if (!disposing)
+        {
+            return;
+        }
+
         PrintLog("Disabling scripts loader...");
 
         foreach (var dir in _registeredDirectories)

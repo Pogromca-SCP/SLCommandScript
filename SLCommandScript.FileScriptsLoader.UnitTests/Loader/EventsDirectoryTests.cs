@@ -184,7 +184,7 @@ public class EventsDirectoryTests : TestWithConfigBase
     }
 
     [Test]
-    public void Dispose_ShouldUnregisterEvents_WhenWatcherIsNull()
+    public void Dispose_ShouldDoNothing_WhenWatcherIsNull()
     {
         // Arrange
         var dir = MakeSupressed(_plugin, null, RuntimeConfig);

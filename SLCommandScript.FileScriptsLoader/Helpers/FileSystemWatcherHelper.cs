@@ -99,15 +99,10 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
         };
     }
 
-    /// <summary>
-    /// Releases resources.
-    /// </summary>
-    ~FileSystemWatcherHelper() => DisposeWatcher();
-
     /// <inheritdoc />
     public void Dispose()
     {
-        DisposeWatcher();
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 
@@ -120,9 +115,12 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
     /// <summary>
     /// Disposes wrapped watcher.
     /// </summary>
-    protected void DisposeWatcher()
+    /// <param name="disposing">Whether or not this method is invoked from <see cref="Dispose()" />.</param>
+    protected virtual void Dispose(bool disposing)
     {
-        _watcher.EnableRaisingEvents = false;
-        _watcher.Dispose();
+        if (disposing)
+        {
+            _watcher.Dispose();
+        }
     }
 }
