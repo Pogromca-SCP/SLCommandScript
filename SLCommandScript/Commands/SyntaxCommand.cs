@@ -18,7 +18,7 @@ public class SyntaxCommand : ICommand
     /// <summary>
     /// Defines command aliases.
     /// </summary>
-    public string[] Aliases => null;
+    public string[]? Aliases => null;
 
     /// <summary>
     /// Contains command description.
@@ -33,7 +33,7 @@ public class SyntaxCommand : ICommand
     /// <summary>
     /// Contains syntax rules.
     /// </summary>
-    public Dictionary<string, string> Rules { get; } = new(StringComparer.OrdinalIgnoreCase)
+    public Dictionary<string, string?> Rules { get; } = new(StringComparer.OrdinalIgnoreCase)
     {
         { "perm", "Permissions guard:\n#! <permission_names...>\n(guards cannot be placed inside expressions)" },
         { "scope", "Scope guard:\n#? <scope_names...>\n(guards cannot be placed inside expressions)" },
@@ -55,19 +55,19 @@ public class SyntaxCommand : ICommand
     /// <param name="sender">Command sender.</param>
     /// <param name="response">Response to display in sender's console.</param>
     /// <returns><see langword="true"/> if command executed successfully, <see langword="false"/> otherwise.</returns>
-    public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+    public bool Execute(ArraySegment<string?> arguments, ICommandSender? sender, out string? response)
     {
         if (arguments.Count > 0)
         {
             var key = arguments.At(0);
 
-            if (!Rules.ContainsKey(key))
+            if (!Rules.ContainsKey(key!))
             {
                 response = $"No syntax rules found for '{key}'";
                 return false;
             }
 
-            response = Rules[key];
+            response = Rules[key!];
             return true;
         }
 
@@ -75,7 +75,7 @@ public class SyntaxCommand : ICommand
 
         foreach (var name in Rules.Keys)
         {
-            sb.AppendLine(name);
+            sb.Append(name).Append('\n');
         }
 
         response = StringBuilderPool.Shared.ToStringReturn(sb);

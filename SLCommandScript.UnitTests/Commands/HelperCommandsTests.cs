@@ -35,8 +35,8 @@ public class HelperCommandsTests
         // Assert
         result.Should().BeTrue();
 
-        response.Should().Be($"Current SLCommandScript environment state:\n{Plugin.PluginName} v{Plugin.PluginVersion} @{Plugin.PluginAuthor}\r\n" +
-            $"{Constants.Name} v{Constants.Version} @{Constants.Author}\r\nNo Scripts Loader currently in use");
+        response.Should().Be($"Current SLCommandScript environment state:\n{SLCommandScriptPlugin.PluginName} v{SLCommandScriptPlugin.PluginVersion} @{SLCommandScriptPlugin.PluginAuthor}\n" +
+            $"{Constants.Name} v{Constants.Version} @{Constants.Author}\nNo scripts loader currently in use");
 
         senderMock.VerifyAll();
     }
@@ -58,8 +58,8 @@ public class HelperCommandsTests
         // Assert
         result.Should().BeTrue();
 
-        response.Should().Be($"Current SLCommandScript environment state:\n{Plugin.PluginName} v{Plugin.PluginVersion} @{Plugin.PluginAuthor}\r\n" +
-            $"{Constants.Name} v{Constants.Version} @{Constants.Author}\r\ntest v1.0.0 @unknown");
+        response.Should().Be($"Current SLCommandScript environment state:\n{SLCommandScriptPlugin.PluginName} v{SLCommandScriptPlugin.PluginVersion} @{SLCommandScriptPlugin.PluginAuthor}\n" +
+            $"{Constants.Name} v{Constants.Version} @{Constants.Author}\ntest v1.0.0 @unknown");
 
         senderMock.VerifyAll();
         loaderMock.VerifyAll();

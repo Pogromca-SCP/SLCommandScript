@@ -15,13 +15,13 @@ public class IterablesCommandTests
 
     private readonly IterablesCommand _command = new();
 
-    private IEnumerable<KeyValuePair<string, Func<IIterable>>> _originalIterables;
+    private IEnumerable<KeyValuePair<string, Func<IIterable>>>? _originalIterables;
 
     [OneTimeSetUp]
-    public void OneTimeSetUp() => _originalIterables = TestDictionaries.ClearDictionary(IterablesUtils.Providers);
+    public void OneTimeSetUp() => _originalIterables = TestDictionaries.ClearDictionary<string, Func<IIterable>>(IterablesUtils.Providers!);
 
     [OneTimeTearDown]
-    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers, _originalIterables);
+    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers!, _originalIterables!);
 
     #region Execute Tests
     [Test]
@@ -132,9 +132,9 @@ public class TestIterable(bool isAtEnd, bool addVars) : IIterable
 
     public bool AddVars { get; } = addVars;
 
-    public bool LoadNext(IDictionary<string, string> targetVars)
+    public bool LoadNext(IDictionary<string, string?>? targetVars)
     {
-        if (!IsAtEnd && AddVars)
+        if (targetVars is not null && !IsAtEnd && AddVars)
         {
             targetVars["test"] = "test";
         }
