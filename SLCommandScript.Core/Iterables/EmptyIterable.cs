@@ -19,7 +19,7 @@ public class EmptyIterable : IIterable
     public int Count => 0;
 
     /// <inheritdoc />
-    public bool LoadNext(IDictionary<string, string> targetVars) => false;
+    public bool LoadNext(IDictionary<string, string?>? targetVars) => false;
 
     /// <inheritdoc />
     public void Randomize() {}

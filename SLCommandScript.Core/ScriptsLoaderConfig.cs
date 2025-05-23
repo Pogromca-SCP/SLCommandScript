@@ -1,4 +1,3 @@
-using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
 using System.ComponentModel;
 
@@ -13,7 +12,7 @@ public class ScriptsLoaderConfig
     /// Custom permissions resolver implementation to use, leave empty if not needed.
     /// </summary>
     [Description("Custom permissions resolver implementation to use, leave empty if not needed")]
-    public string CustomPermissionsResolver { get; set; } = null;
+    public string? CustomPermissionsResolver { get; set; } = null;
 
     /// <summary>
     /// Set to <see langword="false" /> in order to disable event handling with scripts.

@@ -1,4 +1,4 @@
-using PluginAPI.Core;
+using LabApi.Loader.Features.Plugins;
 using System;
 
 namespace SLCommandScript.Core;
@@ -27,7 +27,6 @@ public interface IScriptsLoader : IDisposable
     /// Initializes the scripts loader.
     /// </summary>
     /// <param name="plugin">Plugin object.</param>
-    /// <param name="handler">Plugin handler object.</param>
     /// <param name="loaderConfig">Scripts loader configuration to use.</param>
-    void InitScriptsLoader(object plugin, PluginHandler handler, ScriptsLoaderConfig loaderConfig);
+    void InitScriptsLoader(Plugin? plugin, ScriptsLoaderConfig? loaderConfig);
 }

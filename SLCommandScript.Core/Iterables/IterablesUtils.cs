@@ -2,6 +2,7 @@ using PlayerRoles;
 using SLCommandScript.Core.Iterables.Providers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SLCommandScript.Core.Iterables;
@@ -15,7 +16,7 @@ public static class IterablesUtils
     /// <summary>
     /// Contains iterable objects providers.
     /// </summary>
-    public static Dictionary<string, Func<IIterable>> Providers { get; } = new(StringComparer.OrdinalIgnoreCase)
+    public static Dictionary<string, Func<IIterable?>?> Providers { get; } = new(StringComparer.OrdinalIgnoreCase)
     {
         // Players
         { "player", PlayerIterablesProvider.AllPlayers },
@@ -24,11 +25,14 @@ public static class IterablesUtils
         { "mtf", PlayerIterablesProvider.AllMTFs },
         { "chaos", PlayerIterablesProvider.AllChaos },
         { "scp", PlayerIterablesProvider.AllSCPs },
+        { "flamingo", PlayerIterablesProvider.AllFlamingos },
         { "human", PlayerIterablesProvider.AllHumans },
         { "tutorial", PlayerIterablesProvider.AllTutorials },
         { "spectator", PlayerIterablesProvider.AllSpectators },
         { "alive_player", PlayerIterablesProvider.AllAlive },
         { "disarmed_player", PlayerIterablesProvider.AllDisarmed },
+        { "npc", PlayerIterablesProvider.AllNPCs },
+        { "dummy", PlayerIterablesProvider.AllDummies },
 
         // Rooms
         { "room", RoomIterablesProvider.AllRooms },
@@ -39,10 +43,12 @@ public static class IterablesUtils
 
         // Plugins
         { "plugin", PluginIterablesProvider.AllPlugins },
+        { "enabled_plugin", PluginIterablesProvider.AllEnabledPlugins },
+        { "disabled_plugin", PluginIterablesProvider.AllDisabledPlugins },
 
         // Enums
         { "roleid", EnumIterable<RoleTypeId>.Get },
-        { "itemid", EnumIterable<ItemType>.Get }
+        { "itemid", EnumIterable<ItemType>.Get },
     };
     #endregion
 
@@ -57,7 +63,8 @@ public static class IterablesUtils
     /// <typeparam name="TItem">Type of elements contained in collection.</typeparam>
     /// <param name="data">Collection to shuffle.</param>
     /// <returns>Shuffled array if at least 2 elements were found.</returns>
-    public static TItem[] Shuffle<TItem>(IEnumerable<TItem> data) => Shuffle(data?.ToArray());
+    [return: NotNullIfNotNull(nameof(data))]
+    public static TItem[]? Shuffle<TItem>(IEnumerable<TItem>? data) => Shuffle(data?.ToArray());
 
     /// <summary>
     /// Shuffles and retrieves specific amount of elements from provided collection.
@@ -66,7 +73,7 @@ public static class IterablesUtils
     /// <param name="data">Collection to shuffle.</param>
     /// <param name="amount">Amount of elements to retrieve. Takes effect only when smaller than elements count.</param>
     /// <returns>Shuffled array if at least 2 elements were found.</returns>
-    public static TItem[] Shuffle<TItem>(IEnumerable<TItem> data, int amount) => Shuffle(data?.ToArray(), amount);
+    public static TItem[]? Shuffle<TItem>(IEnumerable<TItem>? data, int amount) => Shuffle(data?.ToArray(), amount);
 
     /// <summary>
     /// Shuffles and retrieves specific amount of elements from provided collection.
@@ -75,7 +82,8 @@ public static class IterablesUtils
     /// <param name="data">Collection to shuffle.</param>
     /// <param name="amount">Percent amount of elements to retrieve.</param>
     /// <returns>Shuffled array if at least 2 elements were found.</returns>
-    public static TItem[] Shuffle<TItem>(IEnumerable<TItem> data, float amount) => Shuffle(data?.ToArray(), amount);
+    [return: NotNullIfNotNull(nameof(data))]
+    public static TItem[]? Shuffle<TItem>(IEnumerable<TItem>? data, float amount) => Shuffle(data?.ToArray(), amount);
 
     /// <summary>
     /// Shuffles elements in provided array.
@@ -83,7 +91,8 @@ public static class IterablesUtils
     /// <typeparam name="TItem">Type of elements contained in array.</typeparam>
     /// <param name="array">Array to shuffle. This array is modified.</param>
     /// <returns>Shuffled original array if at least 2 elements were found.</returns>
-    public static TItem[] Shuffle<TItem>(TItem[] array) => array is null || array.Length < 2 ? array : ShuffleArray(array);
+    [return: NotNullIfNotNull(nameof(array))]
+    public static TItem[]? Shuffle<TItem>(TItem[]? array) => array is null || array.Length < 2 ? array : ShuffleArray(array);
 
     /// <summary>
     /// Shuffles and retrieves specific amount of elements from provided array.
@@ -92,7 +101,7 @@ public static class IterablesUtils
     /// <param name="array">Array to shuffle. This array is modified.</param>
     /// <param name="amount">Amount of elements to retrieve. Takes effect only when smaller than array length.</param>
     /// <returns>New shuffled array or original array if less than 2 elements were found.</returns>
-    public static TItem[] Shuffle<TItem>(TItem[] array, int amount)
+    public static TItem[]? Shuffle<TItem>(TItem[]? array, int amount)
     {
         if (amount < 1)
         {
@@ -130,7 +139,8 @@ public static class IterablesUtils
     /// <param name="array">Array to shuffle. This array is modified.</param>
     /// <param name="amount">Percent amount of elements to retrieve.</param>
     /// <returns>New shuffled array or original array if less than 2 elements were found.</returns>
-    public static TItem[] Shuffle<TItem>(TItem[] array, float amount) => Shuffle(array, array is null ? 1 : (int) (array.Length * amount));
+    [return: NotNullIfNotNull(nameof(array))]
+    public static TItem[]? Shuffle<TItem>(TItem[]? array, float amount) => Shuffle(array, array is null ? 1 : (int) (array.Length * amount));
 
     /// <summary>
     /// Shuffles elements in provided array.

@@ -15,7 +15,7 @@ public class SingleItemIterableTests
     public void SingleItemIterable_ShouldProperlyInitialize_WhenProvidedDataSourceIsNull()
     {
         // Act
-        var iterable = new SingleItemIterable<string>((Func<string>) null, null);
+        var iterable = new SingleItemIterable<string>((Func<string>?) null, null);
 
         // Assert
         iterable.IsAtEnd.Should().BeTrue();
@@ -50,7 +50,7 @@ public class SingleItemIterableTests
     public void LoadNext_ShouldProperlyIterate_WhenDataSourceIsNull()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>((Func<string>) null, null);
+        var iterable = new SingleItemIterable<string>((Func<string>?) null, null);
 
         // Act
         var result = iterable.LoadNext(null);
@@ -191,7 +191,7 @@ public class SingleItemIterableTests
     public void Reset_ShouldProperlyResetIterable_WhenSourceIsNull()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>((Func<string>) null, TestVariablesCollector.Inject);
+        var iterable = new SingleItemIterable<string>((Func<string>?) null, TestVariablesCollector.Inject);
 
         // Act
         iterable.Reset();

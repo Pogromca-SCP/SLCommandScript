@@ -114,6 +114,7 @@ public class LexerTests
     #! Noclip! ?Announcer \
     #!ServerConsoleCommands
     print This should not appear #? Console
+    more invisible text
     #! Noclip
     print Hello there #!Noclip Announcer
     print Class d has micro p p #!
@@ -125,7 +126,30 @@ public class LexerTests
             new(TokenType.Text, "idea"), new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "Console"), new(TokenType.Text, "print"),
             new(TokenType.Text, "Hello"), new(TokenType.Text, "there"), new(TokenType.Text, "print"), new(TokenType.Text, "Class"),
             new(TokenType.Text, "d"), new(TokenType.Text, "has"), new(TokenType.Text, "micro"), new(TokenType.Text, "p"), new(TokenType.Text, "p"),
-            new(TokenType.Text, "print"), new(TokenType.Number, "1", 1), new(TokenType.Text, "...") }, 13],
+            new(TokenType.Text, "print"), new(TokenType.Number, "1", 1), new(TokenType.Text, "...") }, 14],
+
+        [@"
+    cassie why am I here # This is a comment \
+    #$ 2137
+    print \I have no idea #$ 5
+    print \This \should not appear
+    #$ 2\
+    
+    print This should not appear #? Console
+    more invisible text
+    #$ 0 \
+
+    print Hello there #$0
+    print Class d has micro p p #$
+    print 1 ... #$ \
+    19
+", new[] { "TestArgumentsGuards" }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Text, "cassie"),
+            new(TokenType.Text, "why"), new(TokenType.Text, "am"), new(TokenType.Text, "I"), new(TokenType.Text, "here"),
+            new(TokenType.Text, "print"), new(TokenType.Text, "I"), new(TokenType.Text, "have"), new(TokenType.Text, "no"),
+            new(TokenType.Text, "idea"), new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "Console"), new(TokenType.Text, "print"),
+            new(TokenType.Text, "Hello"), new(TokenType.Text, "there"), new(TokenType.Text, "print"), new(TokenType.Text, "Class"),
+            new(TokenType.Text, "d"), new(TokenType.Text, "has"), new(TokenType.Text, "micro"), new(TokenType.Text, "p"), new(TokenType.Text, "p"),
+            new(TokenType.Text, "print"), new(TokenType.Number, "1", 1), new(TokenType.Text, "...") }, 15],
 
         ["$(2) $(00001) $(0)\n$(3) $(4) $(5) #Hello $(3)", new[] { "TestSimpleArgs", "happenned ?", "#What", BlankLine, "number 1 5%",
             string.Empty }, PlayerPermissions.Noclip, new Core.Language.Token[] { new(TokenType.Text, "#What"), new(TokenType.Text, "happenned"),
@@ -360,7 +384,7 @@ public class LexerTests
     ];
     #endregion
 
-    private static ArraySegment<string> EmptyArgs => new([], 0, 0);
+    private static ArraySegment<string?> EmptyArgs => new([], 0, 0);
 
     #region IsWhitespace Tests
     [TestCaseSource(nameof(_testCharacters))]
@@ -556,7 +580,7 @@ public class LexerTests
 
         // Act
         var result = lexer.ScanNextLine();
-        lexer.Reset(new ArraySegment<string>(new string[size], 0, size));
+        lexer.Reset(new ArraySegment<string?>(new string[size], 0, size));
 
         // Assert
         result.Should().BeEmpty();
@@ -622,7 +646,7 @@ public class LexerTests
 
         // Act
         var result = lexer.ScanNextLine();
-        lexer.Reset(newSrc, new ArraySegment<string>(new string[size], 0, size));
+        lexer.Reset(newSrc, new ArraySegment<string?>(new string[size], 0, size));
 
         // Assert
         result.Should().BeEmpty();
@@ -690,7 +714,7 @@ public class LexerTests
 
         // Act
         var result = lexer.ScanNextLine();
-        lexer.Reset(new ArraySegment<string>(new string[size], 0, size), senderMock.Object);
+        lexer.Reset(new ArraySegment<string?>(new string[size], 0, size), senderMock.Object);
 
         // Assert
         result.Should().BeEmpty();
@@ -712,7 +736,7 @@ public class LexerTests
 
         // Act
         var result = lexer.ScanNextLine();
-        lexer.Reset(new ArraySegment<string>(new string[size], 0, size), resolverMock.Object);
+        lexer.Reset(new ArraySegment<string?>(new string[size], 0, size), resolverMock.Object);
 
         // Assert
         result.Should().BeEmpty();
@@ -758,7 +782,7 @@ public class LexerTests
 
         // Act
         var result = lexer.ScanNextLine();
-        lexer.Reset(new ArraySegment<string>(new string[size], 0, size), senderMock.Object, resolverMock.Object);
+        lexer.Reset(new ArraySegment<string?>(new string[size], 0, size), senderMock.Object, resolverMock.Object);
 
         // Assert
         result.Should().BeEmpty();
@@ -977,6 +1001,69 @@ public class LexerTests
         result.Should().BeEmpty();
     }
 
+    [Test]
+    public void ScanNextLine_ShouldFail_WhenArgsGuardHasMoreContent()
+    {
+        // Arrange
+        const string src = "#$ 3 hge1";
+        var lexer = new Lexer(src, EmptyArgs, null);
+
+        // Act
+        var result = lexer.ScanNextLine();
+
+        // Assert
+        lexer.Source.Should().Be(src);
+        lexer.Arguments.Should().BeEmpty();
+        lexer.Sender.Should().BeNull();
+        lexer.PermissionsResolver.Should().NotBeNull();
+        lexer.Line.Should().Be(1);
+        lexer.ErrorMessage.Should().Be("Encountered an unexpected additional value in arguments guard");
+        lexer.IsAtEnd.Should().BeFalse();
+        result.Should().BeEmpty();
+    }
+
+    [Test]
+    public void ScanNextLine_ShouldFail_WhenArgsGuardIsNotANumber()
+    {
+        // Arrange
+        const string src = "#$ test";
+        var lexer = new Lexer(src, EmptyArgs, null);
+
+        // Act
+        var result = lexer.ScanNextLine();
+
+        // Assert
+        lexer.Source.Should().Be(src);
+        lexer.Arguments.Should().BeEmpty();
+        lexer.Sender.Should().BeNull();
+        lexer.PermissionsResolver.Should().NotBeNull();
+        lexer.Line.Should().Be(1);
+        lexer.ErrorMessage.Should().Be("Arguments guard value is not a number");
+        lexer.IsAtEnd.Should().BeFalse();
+        result.Should().BeEmpty();
+    }
+
+    [Test]
+    public void ScanNextLine_ShouldFail_WhenArgsGuardValueEndsWithText()
+    {
+        // Arrange
+        const string src = "#$ 56b";
+        var lexer = new Lexer(src, EmptyArgs, null);
+
+        // Act
+        var result = lexer.ScanNextLine();
+
+        // Assert
+        lexer.Source.Should().Be(src);
+        lexer.Arguments.Should().BeEmpty();
+        lexer.Sender.Should().BeNull();
+        lexer.PermissionsResolver.Should().NotBeNull();
+        lexer.Line.Should().Be(1);
+        lexer.ErrorMessage.Should().Be("Arguments guard value has an unexpected suffix");
+        lexer.IsAtEnd.Should().BeFalse();
+        result.Should().BeEmpty();
+    }
+
     [TestCaseSource(nameof(_testsData))]
     public void ScanNextLine_ShouldReturnProperTokens_WhenGoldFlow(string src, string[] args, PlayerPermissions perms, Core.Language.Token[] expectedTokens, int expectedLine)
     {
@@ -1008,7 +1095,7 @@ public class LexerTestResolver(PlayerPermissions permissions) : IPermissionsReso
 {
     public PlayerPermissions Permissions { get; } = permissions;
 
-    public bool CheckPermission(ICommandSender sender, string permission, out string message)
+    public bool CheckPermission(ICommandSender? sender, string? permission, out string? message)
     {
         Console.WriteLine($"Lexer test permission resolving: {permission}");
         var parsed = Enum.TryParse<PlayerPermissions>(permission, true, out var result);

@@ -1,5 +1,4 @@
 using NorthwoodLib.Pools;
-using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.Core.Iterables;
 using SLCommandScript.Core.Iterables.Providers;
@@ -52,7 +51,7 @@ public class Parser
     /// <summary>
     /// Contains current error message.
     /// </summary>
-    public string ErrorMessage { get; private set; }
+    public string? ErrorMessage { get; private set; }
 
     /// <summary>
     /// Contains current commands scope.
@@ -67,7 +66,7 @@ public class Parser
     /// <summary>
     /// Contains a list with tokens to process.
     /// </summary>
-    private IList<Token> _tokens;
+    private IList<Token> _tokens = null!;
 
     /// <summary>
     /// Contains current token index.
@@ -86,7 +85,7 @@ public class Parser
     /// </summary>
     /// <param name="tokens">List with tokens to process.</param>
     /// <returns>Parsed expression or <see langword="null" /> if something went wrong.</returns>
-    public Expr Parse(IList<Token> tokens)
+    public Expr? Parse(IList<Token>? tokens)
     {
         if (tokens is null)
         {
@@ -102,7 +101,7 @@ public class Parser
 
         if (ErrorMessage is not null)
         {
-            _tokens = null;
+            _tokens = null!;
             return null;
         }
 
@@ -110,18 +109,18 @@ public class Parser
 
         if (ErrorMessage is not null)
         {
-            _tokens = null;
+            _tokens = null!;
             return null;
         }
 
         if (!IsAtEnd)
         {
             ErrorMessage = $"An unexpected token remained after parsing (TokenType: {_tokens[_current].Type})";
-            _tokens = null;
+            _tokens = null!;
             return null;
         }
 
-        _tokens = null;
+        _tokens = null!;
         return expr;
     }
 
@@ -175,7 +174,7 @@ public class Parser
     /// Parses a single expression.
     /// </summary>
     /// <returns>Parsed expression or <see langword="null" /> if nothing could be parsed.</returns>
-    private Expr ParseExpr()
+    private Expr? ParseExpr()
     {
         if (Match(TokenType.LeftSquare))
         {
@@ -205,13 +204,13 @@ public class Parser
     /// Parses a directive expression.
     /// </summary>
     /// <returns>Parsed directive expression or <see langword="null" /> if something went wrong.</returns>
-    private Expr Directive()
+    private Expr? Directive()
     {
         ++_depth;
         var expr = ParseExpr();
         var keyword = Advance();
 
-        Expr body = keyword.Type switch
+        Expr? body = keyword.Type switch
         {
             TokenType.RightSquare => expr,
             TokenType.If => If(expr),
@@ -244,7 +243,7 @@ public class Parser
     /// Parses a command expression.
     /// </summary>
     /// <returns>Parsed command expression or <see langword="null" /> if something went wrong.</returns>
-    private CommandExpr Command()
+    private CommandExpr? Command()
     {
         var cmd = CommandsUtils.GetCommand(Scope, _tokens[_current].Value);
 
@@ -300,7 +299,7 @@ public class Parser
     /// </summary>
     /// <param name="expr">Expression to use as then branch expression.</param>
     /// <returns>Parsed if expression or <see langword="null" /> if something went wrong.</returns>
-    private IfExpr If(Expr expr)
+    private IfExpr? If(Expr? expr)
     {
         if (expr is null)
         {
@@ -316,7 +315,7 @@ public class Parser
             return null;
         }
 
-        Expr els = null;
+        Expr? els = null;
 
         if (Match(TokenType.Else))
         {
@@ -337,7 +336,7 @@ public class Parser
     /// </summary>
     /// <param name="expr">Expression to use as condition expression.</param>
     /// <returns>Parsed if expression or <see langword="null" /> if something went wrong.</returns>
-    private IfExpr Else(Expr expr)
+    private IfExpr? Else(Expr? expr)
     {
         if (expr is null)
         {
@@ -361,7 +360,7 @@ public class Parser
     /// </summary>
     /// <param name="body">Expression to use as loop body.</param>
     /// <returns>Parsed foreach expression or <see langword="null" /> if something went wrong.</returns>
-    private ForeachExpr Foreach(Expr body)
+    private ForeachExpr? Foreach(Expr? body)
     {
         if (body is null)
         {
@@ -385,7 +384,7 @@ public class Parser
     /// </summary>
     /// <param name="body">Expression to use as loop body.</param>
     /// <returns>Parsed expression or <see langword="null" /> if something went wrong.</returns>
-    private Expr ForRandom(Expr body)
+    private Expr? ForRandom(Expr? body)
     {
         if (body is null)
         {
@@ -439,7 +438,7 @@ public class Parser
     /// </summary>
     /// <param name="body">Expression to execute after the delay.</param>
     /// <returns>Parsed delay expression or <see langword="null" /> if something went wrong.</returns>
-    private DelayExpr Delay(Expr body)
+    private DelayExpr? Delay(Expr? body)
     {
         if (body is null)
         {
@@ -455,7 +454,7 @@ public class Parser
 
         var duration = _tokens[_current].NumericValue;
         ++_current;
-        string name = null;
+        string? name = null;
 
         if (!IsAtEnd && _tokens[_current].Type > TokenType.ScopeGuard)
         {
@@ -471,7 +470,7 @@ public class Parser
     /// </summary>
     /// <param name="initial">First expression to execute in the sequence.</param>
     /// <returns>Parsed sequence expression or <see langword="null" /> if something went wrong.</returns>
-    private SequenceExpr Sequence(Expr initial)
+    private SequenceExpr? Sequence(Expr? initial)
     {
         if (initial is null)
         {
@@ -479,7 +478,7 @@ public class Parser
             return null;
         }
 
-        var body = new List<Expr>()
+        var body = new List<Expr?>()
         {
             initial
         };
@@ -506,7 +505,7 @@ public class Parser
     /// Attempts to retrieve an iterable object from current token.
     /// </summary>
     /// <returns>Retrieved iterable object or <see langword="null" /> if something went wrong.</returns>
-    private IIterable GetIterable()
+    private IIterable? GetIterable()
     {
         if (IsAtEnd || _tokens[_current].Type < TokenType.Variable)
         {
@@ -544,7 +543,7 @@ public class Parser
     /// Attempts to create a range iterable.
     /// </summary>
     /// <returns>Retrieved iterable range object or <see langword="null" /> if something went wrong.</returns>
-    private IIterable GetRange()
+    private IIterable? GetRange()
     {
         var match = _rangePattern.Match(_tokens[_current].Value);
 

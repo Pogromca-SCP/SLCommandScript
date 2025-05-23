@@ -18,12 +18,12 @@ public class SingleItemIterable<TItem> : IIterable
     /// <summary>
     /// Source of iterated object.
     /// </summary>
-    private readonly Func<TItem> _source;
+    private readonly Func<TItem>? _source;
 
     /// <summary>
     /// Variable mapper used for loading variables.
     /// </summary>
-    private readonly Action<IDictionary<string, string>, TItem> _mapper;
+    private readonly Action<IDictionary<string, string?>, TItem>? _mapper;
 
     /// <summary>
     /// Currently stored item.
@@ -35,13 +35,13 @@ public class SingleItemIterable<TItem> : IIterable
     /// </summary>
     /// <param name="source">Source of iterated object.</param>
     /// <param name="mapper">Variable mapper to use to load variables.</param>
-    public SingleItemIterable(Func<TItem> source, Action<IDictionary<string, string>, TItem> mapper)
+    public SingleItemIterable(Func<TItem>? source, Action<IDictionary<string, string?>, TItem>? mapper)
     {
         IsAtEnd = source is null;
         Count = source is null ? 0 : 1;
         _source = source;
         _mapper = mapper;
-        _item = default;
+        _item = default!;
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ public class SingleItemIterable<TItem> : IIterable
     /// </summary>
     /// <param name="item">Iterated object.</param>
     /// <param name="mapper">Variable mapper to use to load variables.</param>
-    public SingleItemIterable(TItem item, Action<IDictionary<string, string>, TItem> mapper)
+    public SingleItemIterable(TItem item, Action<IDictionary<string, string?>, TItem>? mapper)
     {
         IsAtEnd = false;
         Count = 1;
@@ -59,7 +59,7 @@ public class SingleItemIterable<TItem> : IIterable
     }
 
     /// <inheritdoc />
-    public bool LoadNext(IDictionary<string, string> targetVars)
+    public bool LoadNext(IDictionary<string, string?>? targetVars)
     {
         if (IsAtEnd)
         {

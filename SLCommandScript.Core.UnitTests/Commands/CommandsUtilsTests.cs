@@ -5,7 +5,6 @@ using CommandSystem.Commands.Shared;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using PluginAPI.Enums;
 using RemoteAdmin;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.TestUtils;
@@ -23,18 +22,18 @@ public class CommandsUtilsTests
 
     #region Test Case Sources
     private static readonly CommandType[] _allHandlerTypes = [CommandType.RemoteAdmin, CommandType.Console,
-        CommandType.GameConsole, CommandType.RemoteAdmin | CommandType.Console, CommandType.RemoteAdmin | CommandType.GameConsole,
-        CommandType.GameConsole | CommandType.Console, CommandType.RemoteAdmin | CommandType.GameConsole | CommandType.Console];
+        CommandType.Client, CommandType.RemoteAdmin | CommandType.Console, CommandType.RemoteAdmin | CommandType.Client,
+        CommandType.Client | CommandType.Console, CommandType.RemoteAdmin | CommandType.Client | CommandType.Console];
 
-    private static readonly string[] _invalidCommandNames = [null, "", " ", " \t ", "  \t  \t\t"];
+    private static readonly string?[] _invalidCommandNames = [null, "", " ", " \t ", "  \t  \t\t"];
 
     private static readonly string[] _validCommandNames = ["hello", "item list", "?.cassie"];
 
-    private static readonly string[][] _invalidAliases = [["  "], [null, "test"], ["hello", "  \t", "   ", null]];
+    private static readonly string?[][] _invalidAliases = [["  "], [null, "test"], ["hello", "  \t", "   ", null]];
 
-    private static readonly string[][] _validAliases = [null, ["string", "example"], []];
+    private static readonly string[]?[] _validAliases = [null, ["string", "example"], []];
 
-    private static readonly CommandType[] _validHandlerTypes = [CommandType.RemoteAdmin, CommandType.GameConsole, CommandType.RemoteAdmin | CommandType.GameConsole];
+    private static readonly CommandType[] _validHandlerTypes = [CommandType.RemoteAdmin, CommandType.Client, CommandType.RemoteAdmin | CommandType.Client];
 
     private static readonly string[] _existingCommandNames = ["help", "HelP", "bc", "cassie", "BC"];
 
@@ -42,9 +41,9 @@ public class CommandsUtilsTests
 
     private static readonly ICommand[] _exampleCommands = [new BroadcastCommand(), new CassieCommand(), new HelpCommand(ClientCommandHandler.Create())];
 
-    private static IEnumerable<object[]> AllHandlersXInvalidCommands => TestArrays.CartesianJoin(_allHandlerTypes, _invalidCommandNames);
+    private static IEnumerable<object?[]> AllHandlersXInvalidCommands => TestArrays.CartesianJoin(_allHandlerTypes, _invalidCommandNames);
 
-    private static IEnumerable<object[]> AllHandlersXInvalidAliases => TestArrays.CartesianJoin(_allHandlerTypes, _invalidAliases);
+    private static IEnumerable<object?[]> AllHandlersXInvalidAliases => TestArrays.CartesianJoin(_allHandlerTypes, _invalidAliases);
 
     private static IEnumerable<object[]> ValidHandlersXExistingCommandNames => TestArrays.CartesianJoin(_validHandlerTypes, _existingCommandNames);
 
@@ -58,18 +57,18 @@ public class CommandsUtilsTests
     {
         CommandType.RemoteAdmin => [CommandProcessor.RemoteAdminCommandHandler],
         CommandType.RemoteAdmin | CommandType.Console => [CommandProcessor.RemoteAdminCommandHandler],
-        CommandType.GameConsole => [QueryProcessor.DotCommandHandler],
-        CommandType.GameConsole | CommandType.Console => [QueryProcessor.DotCommandHandler],
-        CommandType.RemoteAdmin | CommandType.GameConsole => [CommandProcessor.RemoteAdminCommandHandler, QueryProcessor.DotCommandHandler],
-        CommandType.RemoteAdmin | CommandType.GameConsole | CommandType.Console => [CommandProcessor.RemoteAdminCommandHandler, QueryProcessor.DotCommandHandler],
-        _ => []
+        CommandType.Client => [QueryProcessor.DotCommandHandler],
+        CommandType.Client | CommandType.Console => [QueryProcessor.DotCommandHandler],
+        CommandType.RemoteAdmin | CommandType.Client => [CommandProcessor.RemoteAdminCommandHandler, QueryProcessor.DotCommandHandler],
+        CommandType.RemoteAdmin | CommandType.Client | CommandType.Console => [CommandProcessor.RemoteAdminCommandHandler, QueryProcessor.DotCommandHandler],
+        _ => [],
     };
 
     private static CommandType GetCommandHandlerType(ICommandHandler handler) => handler switch
     {
         RemoteAdminCommandHandler => CommandType.RemoteAdmin,
-        ClientCommandHandler => CommandType.GameConsole,
-        _ => 0
+        ClientCommandHandler => CommandType.Client,
+        _ => 0,
     };
 
     private static CommandType JoinCommandTypes(IEnumerable<CommandType> handlerTypes)
@@ -86,25 +85,25 @@ public class CommandsUtilsTests
 
     private static Mock<ICommand> MockCommand() => new(MockBehavior.Strict);
 
-    private static Mock<ICommand> MockCommand(string name)
+    private static Mock<ICommand> MockCommand(string? name)
     {
         var mock = MockCommand();
-        mock.Setup(x => x.Command).Returns(name);
+        mock.Setup(x => x.Command).Returns(name!);
         return mock;
     }
 
-    private static Mock<ICommand> MockCommand(string name, string[] aliases)
+    private static Mock<ICommand> MockCommand(string? name, string?[]? aliases)
     {
         var mock = MockCommand(name);
-        mock.Setup(x => x.Aliases).Returns(aliases);
+        mock.Setup(x => x.Aliases).Returns(aliases!);
         return mock;
     }
 
     private static ICommandHandler MakeHandler() => ClientCommandHandler.Create();
 
-    private IEnumerable<ICommand> _originalRemoteAdmin;
+    private IEnumerable<ICommand> _originalRemoteAdmin = null!;
 
-    private IEnumerable<ICommand> _originalClient;
+    private IEnumerable<ICommand> _originalClient = null!;
 #endregion
 
     [OneTimeSetUp]
@@ -148,7 +147,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(_invalidCommandNames))]
-    public void IsCommandInvalid_ShouldReturnTrue_WhenCommandHasInvalidName(string commandName)
+    public void IsCommandInvalid_ShouldReturnTrue_WhenCommandHasInvalidName(string? commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);
@@ -162,7 +161,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(_invalidAliases))]
-    public void IsCommandInvalid_ShouldReturnTrue_WhenCommandHasInvalidAlias(string[] aliases)
+    public void IsCommandInvalid_ShouldReturnTrue_WhenCommandHasInvalidAlias(string?[] aliases)
     {
         // Arrange
         var commandMock = MockCommand(MockCommandName, aliases);
@@ -176,7 +175,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(_validAliases))]
-    public void IsCommandInvalid_ShouldReturnFalse_WhenCommandIsValid(string[] aliases)
+    public void IsCommandInvalid_ShouldReturnFalse_WhenCommandIsValid(string[]? aliases)
     {
         // Arrange
         var commandMock = MockCommand(MockCommandName, aliases);
@@ -192,7 +191,7 @@ public class CommandsUtilsTests
 
     #region GetCommand Tests
     [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
-    public void GetCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
+    public void GetCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string? commandName)
     {
         // Act
         var result = CommandsUtils.GetCommand(handlerType, commandName);
@@ -216,7 +215,7 @@ public class CommandsUtilsTests
     {
         // Arrange
         var handler = GetExpectedCommandHandlers(handlerType).FirstOrDefault(h => h.TryGetCommand(commandName, out _));
-        ICommand foundCommand = null;
+        ICommand? foundCommand = null;
         var commandExists = handler?.TryGetCommand(commandName, out foundCommand);
 
         // Act
@@ -246,7 +245,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
-    public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
+    public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string? commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);
@@ -260,7 +259,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(AllHandlersXInvalidAliases))]
-    public void IsCommandRegistered_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
+    public void IsCommandRegistered_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string?[] aliases)
     {
         // Arrange
         var commandMock = MockCommand(MockCommandName, aliases);
@@ -325,7 +324,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(_invalidCommandNames))]
-    public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(string commandName)
+    public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(string? commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);
@@ -339,7 +338,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(_invalidAliases))]
-    public void IsCommandRegistered_ShouldReturnNull_WhenCommandHasInvalidAlias(string[] aliases)
+    public void IsCommandRegistered_ShouldReturnNull_WhenCommandHasInvalidAlias(string?[] aliases)
     {
         // Arrange
         var commandMock = MockCommand(MockCommandName, aliases);
@@ -379,7 +378,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
-    public void RegisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
+    public void RegisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string? commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);
@@ -393,7 +392,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(AllHandlersXInvalidAliases))]
-    public void RegisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
+    public void RegisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string?[] aliases)
     {
         // Arrange
         var commandMock = MockCommand(MockCommandName, aliases);
@@ -475,7 +474,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(_invalidAliases))]
-    public void RegisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(string[] aliases)
+    public void RegisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(string?[] aliases)
     {
         // Arrange
         var commandMock = MockCommand(MockCommandName, aliases);
@@ -516,7 +515,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
-    public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
+    public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string? commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);
@@ -530,7 +529,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(AllHandlersXInvalidAliases))]
-    public void UnregisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string[] aliases)
+    public void UnregisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(CommandType handlerType, string?[] aliases)
     {
         // Arrange
         var commandMock = MockCommand(MockCommandName, aliases);
@@ -598,7 +597,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(_invalidCommandNames))]
-    public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(string commandName)
+    public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(string? commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);
@@ -612,7 +611,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(_invalidAliases))]
-    public void UnregisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(string[] aliases)
+    public void UnregisterCommand_ShouldReturnNull_WhenCommandHasInvalidAlias(string?[] aliases)
     {
         // Arrange
         var commandMock = MockCommand(MockCommandName, aliases);

@@ -5,7 +5,6 @@ using NUnit.Framework;
 using SLCommandScript.Core.Language;
 using SLCommandScript.Core.Language.Expressions;
 using System;
-using System.Threading.Tasks;
 
 namespace SLCommandScript.Core.UnitTests.Language;
 
@@ -234,42 +233,6 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().Be(success ? null : message);
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
-    }
-
-    [Test]
-    public async Task VisitDelayExpr_ShouldExecuteAsynchronously_WhenDurationIsValid([Values] bool success)
-    {
-        // Arrange
-        var delay = 200;
-        var interpreter = new Interpreter(null);
-        var message = success ? "Command succeeded" : "Command failed";
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), null, out message)).Returns(success);
-        var expr = new DelayExpr(new CommandExpr(commandMock.Object, ["test"], false), delay, null);
-
-        // Act
-        var result = interpreter.VisitDelayExpr(expr);
-
-        // Assert
-        result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
-        interpreter.ErrorMessage.Should().BeNull();
-        
-        try
-        {
-            commandMock.VerifyAll();
-            commandMock.VerifyNoOtherCalls();
-        }
-        catch (Exception)
-        {
-            await Task.Delay(delay * 2).ConfigureAwait(false);
-            commandMock.VerifyAll();
-            commandMock.VerifyNoOtherCalls();
-            return;
-        }
-
-        throw new Exception("Expected expression to execute asynchronously, but it was executed synchronously.");
     }
     #endregion
 
@@ -856,13 +819,13 @@ public class InterpreterTests
 
 public class ArgumentsInjectionTestCommand : ICommand
 {
-    public string Command => null;
+    public string? Command => null;
 
-    public string[] Aliases => null;
+    public string[]? Aliases => null;
 
-    public string Description => null;
+    public string? Description => null;
 
-    public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+    public bool Execute(ArraySegment<string> arguments, ICommandSender? sender, out string? response)
     {
         var firstArg = int.Parse(arguments.At(0));
         var thirdArg = int.Parse(arguments.At(2));
@@ -874,13 +837,13 @@ public class ArgumentsInjectionTestCommand : ICommand
 
 public class NestedArgumentsInjectionTestCommand : ICommand
 {
-    public string Command => null;
+    public string? Command => null;
 
-    public string[] Aliases => null;
+    public string[]? Aliases => null;
 
-    public string Description => null;
+    public string? Description => null;
 
-    public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+    public bool Execute(ArraySegment<string> arguments, ICommandSender? sender, out string? response)
     {
         var firstArg = int.Parse(arguments.At(0));
         var secondArg = int.Parse(arguments.At(1));

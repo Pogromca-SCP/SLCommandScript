@@ -11,40 +11,40 @@ public interface IExprVisitor<out TResult>
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    TResult VisitCommandExpr(CommandExpr expr);
+    TResult VisitCommandExpr(CommandExpr? expr);
 
     /// <summary>
     /// Visits a delay expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    TResult VisitDelayExpr(DelayExpr expr);
+    TResult VisitDelayExpr(DelayExpr? expr);
 
     /// <summary>
     /// Visits a foreach expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    TResult VisitForeachExpr(ForeachExpr expr);
+    TResult VisitForeachExpr(ForeachExpr? expr);
 
     /// <summary>
     /// Visits a for else expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    TResult VisitForElseExpr(ForElseExpr expr);
+    TResult VisitForElseExpr(ForElseExpr? expr);
 
     /// <summary>
     /// Visits an if expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    TResult VisitIfExpr(IfExpr expr);
+    TResult VisitIfExpr(IfExpr? expr);
 
     /// <summary>
     /// Visits a sequence expression.
     /// </summary>
     /// <param name="expr">Expression to visit.</param>
     /// <returns>Result value of the visit.</returns>
-    TResult VisitSequenceExpr(SequenceExpr expr);
+    TResult VisitSequenceExpr(SequenceExpr? expr);
 }
