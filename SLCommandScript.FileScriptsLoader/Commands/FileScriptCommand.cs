@@ -10,12 +10,12 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// <param name="name">Name of the command.</param>
 /// <param name="parent">Parent which stores this command.</param>
 /// <param name="config">Configuration to use.</param>
-public class FileScriptCommand(string name, IFileScriptCommandParent parent, RuntimeConfig config) : FileScriptCommandBase(name, parent, config), IUsageProvider
+public class FileScriptCommand(string? name, IFileScriptCommandParent? parent, RuntimeConfig? config) : FileScriptCommandBase(name, parent, config), IUsageProvider
 {
     /// <summary>
     /// Describes command arguments usage.
     /// </summary>
-    public string[] Usage
+    public string[]? Usage
     {
         get => _usage;
         set
@@ -39,15 +39,15 @@ public class FileScriptCommand(string name, IFileScriptCommandParent parent, Run
     /// <summary>
     /// Contains permission names required to run the command.
     /// </summary>
-    public string[] RequiredPermissions { get; set; } = null;
+    public string?[]? RequiredPermissions { get; set; } = null;
 
     /// <summary>
     /// Describes command arguments usage.
     /// </summary>
-    private string[] _usage = null;
+    private string[]? _usage = null;
 
     /// <inheritdoc />
-    public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+    public override bool Execute(ArraySegment<string?> arguments, ICommandSender? sender, out string response)
     {
         if (RequiredPermissions is not null && RequiredPermissions.Length > 0)
         {
@@ -55,10 +55,11 @@ public class FileScriptCommand(string name, IFileScriptCommandParent parent, Run
 
             foreach (var perm in RequiredPermissions)
             {
-                var hasPerm = resolver.CheckPermission(sender, perm, out response);
+                var hasPerm = resolver.CheckPermission(sender, perm, out var error);
 
-                if (response is not null)
+                if (error is not null)
                 {
+                    response = error;
                     return false;
                 }
 

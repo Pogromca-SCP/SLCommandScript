@@ -2,7 +2,6 @@ using CommandSystem;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using PluginAPI.Enums;
 using RemoteAdmin;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.FileScriptsLoader.Commands;
@@ -31,9 +30,9 @@ public class CommandsDirectoryTests : TestWithConfigBase
 
     private static readonly string[] _validCommands = ["example", "bull", "script"];
 
-    private static readonly CommandType[] _handlerTypes = [CommandType.RemoteAdmin, CommandType.Console, CommandType.GameConsole];
+    private static readonly CommandType[] _handlerTypes = [CommandType.RemoteAdmin, CommandType.Console, CommandType.Client];
 
-    private static readonly CommandType[] _validTypes = [CommandType.RemoteAdmin, CommandType.GameConsole];
+    private static readonly CommandType[] _validTypes = [CommandType.RemoteAdmin, CommandType.Client];
 
     private static IEnumerable<object[]> InvalidCommandsXTypes => TestArrays.CartesianJoin(_invalidCommands, _validTypes);
 
@@ -65,11 +64,11 @@ public class CommandsDirectoryTests : TestWithConfigBase
     private static ICommandHandler GetCommandHandler(CommandType type) => type switch
     {
         CommandType.RemoteAdmin => CommandProcessor.RemoteAdminCommandHandler,
-        CommandType.GameConsole => QueryProcessor.DotCommandHandler,
-        _ => null
+        CommandType.Client => QueryProcessor.DotCommandHandler,
+        _ => null!,
     };
 
-    private static CommandsDirectory MakeSupressed(IFileSystemWatcherHelper watcher, CommandType handlerType, RuntimeConfig config)
+    private static CommandsDirectory MakeSupressed(IFileSystemWatcherHelper? watcher, CommandType handlerType, RuntimeConfig? config)
     {
         var dir = new CommandsDirectory(watcher, handlerType, config);
         GC.SuppressFinalize(dir);
@@ -504,7 +503,7 @@ public class CommandsDirectoryTests : TestWithConfigBase
         var handler = GetCommandHandler(type);
         handler.AllCommands.Should().Contain(c => c.Command.Equals(name));
         dir.Commands.Should().ContainKey(name);
-        dir.Commands[name].Command.Should().Be(name);
+        dir.Commands[name]!.Command.Should().Be(name);
         watcherMock.VerifyAll();
         fileSystemMock.VerifyAll();
 
@@ -586,7 +585,7 @@ public class CommandsDirectoryTests : TestWithConfigBase
         var handler = GetCommandHandler(type);
         handler.AllCommands.Should().Contain(c => c.Command.Equals(name));
         dir.Commands.Should().ContainKey(name);
-        dir.Commands[name].Command.Should().Be(name);
+        dir.Commands[name]!.Command.Should().Be(name);
         watcherMock.VerifyAll();
         fileSystemMock.VerifyAll();
 

@@ -15,7 +15,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
 
     private const string TestPath = "test.slcs";
 
-    private static readonly string[][] _errorPaths = [
+    private static readonly string?[][] _errorPaths = [
         ["xd", "Command 'xd' was not found\nat test.slcs:1"],
         [null, "Cannot read script from file 'test.slcs'"],
         ["[", "Directive structure is invalid\nat test.slcs:1"]
@@ -34,7 +34,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         // Act
         var result = new FileScriptCommandBase(null, null, RuntimeConfig)
         {
-            Description = null
+            Description = null!,
         };
 
         // Assert
@@ -160,11 +160,11 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
     }
 
     [TestCaseSource(nameof(_errorPaths))]
-    public void Execute_ShouldFail_WhenScriptFails(string src, string expectedError)
+    public void Execute_ShouldFail_WhenScriptFails(string? src, string expectedError)
     {
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.ReadFile(TestPath)).Returns(src);
+        fileSystemMock.Setup(x => x.ReadFile(TestPath)).Returns(src!);
         var cmd = new FileScriptCommandBase(TestCommand, null, FromFilesMock(fileSystemMock));
 
         // Act

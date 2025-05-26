@@ -7,7 +7,8 @@
 		<AssemblyName>SLCommandScript.FileScriptsLoader</AssemblyName>
 		<RootNamespace>SLCommandScript.FileScriptsLoader</RootNamespace>
 		<LangVersion>12</LangVersion>
-		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+		<Nullable>enable</Nullable>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<Configurations>Release</Configurations>
 		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>
@@ -17,6 +18,5 @@
 	<ItemGroup>
 		<Reference Include="Assembly-CSharp" HintPath="$(SL_REFERENCES)/Assembly-CSharp.dll" />
 		<Reference Include="CommandSystem.Core" HintPath="$(SL_REFERENCES)/CommandSystem.Core.dll" />
-		<Reference Include="PluginAPI" HintPath="$(SL_REFERENCES)/PluginAPI.dll" />
 	</ItemGroup>
 </Project>

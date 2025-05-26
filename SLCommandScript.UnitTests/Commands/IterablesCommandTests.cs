@@ -35,7 +35,7 @@ public class IterablesCommandTests
 
         // Assert
         result.Should().BeTrue();
-        response.Should().Be($"Currently available iterables:\n{TestIterable}\r\n");
+        response.Should().Be($"Currently available iterables:\n{TestIterable}\n");
     }
 
     [Test]
@@ -119,7 +119,7 @@ public class IterablesCommandTests
 
         // Assert
         result.Should().BeTrue();
-        response.Should().Be($"Variables available in '{TestIterable}':\ntest\r\n");
+        response.Should().Be($"Variables available in '{TestIterable}':\ntest\n");
     }
     #endregion
 }

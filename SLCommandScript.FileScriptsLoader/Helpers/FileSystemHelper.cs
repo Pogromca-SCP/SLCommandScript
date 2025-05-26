@@ -14,7 +14,7 @@ public interface IFileSystemHelper
     /// </summary>
     /// <param name="path">Path to check.</param>
     /// <returns><see langword="true" /> if path is directory, <see langword="false" /> otherwise.</returns>
-    bool DirectoryExists(string path);
+    bool DirectoryExists(string? path);
 
     /// <summary>
     /// Creates new directory.
@@ -27,21 +27,21 @@ public interface IFileSystemHelper
     /// </summary>
     /// <param name="path">The path of the file.</param>
     /// <returns>The directory the specified path resides in.</returns>
-    string GetDirectory(string path);
+    string? GetDirectory(string? path);
 
     /// <summary>
     /// Returns the file extension of the specified path.
     /// </summary>
     /// <param name="path">The path of the file.</param>
     /// <returns>The file extension.</returns>
-    string GetFileExtension(string path);
+    string? GetFileExtension(string? path);
 
     /// <summary>
     /// Returns the file name of the specified path without the extension.
     /// </summary>
     /// <param name="path">The path of the file.</param>
     /// <returns>The file name without extension.</returns>
-    string GetFileNameWithoutExtension(string path);
+    string? GetFileNameWithoutExtension(string? path);
 
     /// <summary>
     /// Reads all the text in the file.
@@ -80,19 +80,19 @@ public interface IFileSystemHelper
 public class FileSystemHelper : IFileSystemHelper
 {
     /// <inheritdoc />
-    public bool DirectoryExists(string path) => Directory.Exists(path);
+    public bool DirectoryExists(string? path) => Directory.Exists(path);
 
     /// <inheritdoc />
     public void CreateDirectory(string path) => Directory.CreateDirectory(path);
 
     /// <inheritdoc />
-    public string GetDirectory(string path) => Path.GetDirectoryName(path);
+    public string? GetDirectory(string? path) => Path.GetDirectoryName(path);
 
     /// <inheritdoc />
-    public string GetFileExtension(string path) => Path.GetExtension(path);
+    public string? GetFileExtension(string? path) => Path.GetExtension(path);
 
     /// <inheritdoc />
-    public string GetFileNameWithoutExtension(string path) => Path.GetFileNameWithoutExtension(path);
+    public string? GetFileNameWithoutExtension(string? path) => Path.GetFileNameWithoutExtension(path);
 
     /// <inheritdoc />
     public string ReadFile(string path) => File.ReadAllText(path);

@@ -43,7 +43,7 @@ public class FileScriptCommandTests : TestWithConfigBase
         // Act
         var result = new FileScriptCommand(null, null, RuntimeConfig)
         {
-            Usage = ["", "       ", null, "\t\t"]
+            Usage = ["", "       ", null!, "\t\t"],
         };
 
         // Assert
@@ -92,7 +92,7 @@ public class FileScriptCommandTests : TestWithConfigBase
     public void Execute_ShouldFail_WhenSenderIsMissingRequiredPermission()
     {
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
-        string message = null;
+        string? message = null;
         resolverMock.Setup(x => x.CheckPermission(null, "Noclip", out message)).Returns(false);
 
         var cmd = new FileScriptCommand(null, null, new(RuntimeConfig.FileSystemHelper, resolverMock.Object, 10))

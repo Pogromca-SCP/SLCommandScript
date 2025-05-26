@@ -8,12 +8,12 @@ public class CommandMetaData : IJsonSerializable
     /// <summary>
     /// Contains command description.
     /// </summary>
-    public string Description { get; set; } = null;
+    public string? Description { get; set; } = null;
 
     /// <summary>
     /// Describes command arguments usage.
     /// </summary>
-    public string[] Usage { get; set; } = null;
+    public string?[]? Usage { get; set; } = null;
 
     /// <summary>
     /// Contains expected amount of arguments.
@@ -23,5 +23,5 @@ public class CommandMetaData : IJsonSerializable
     /// <summary>
     /// Contains permission names required to run the command.
     /// </summary>
-    public string[] RequiredPerms { get; set; } = null;
+    public string?[]? RequiredPerms { get; set; } = null;
 }

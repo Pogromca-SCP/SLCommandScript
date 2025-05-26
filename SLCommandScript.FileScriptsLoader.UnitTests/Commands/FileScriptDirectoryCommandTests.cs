@@ -85,7 +85,7 @@ public class FileScriptDirectoryCommandTests
         var cmd = new FileScriptDirectoryCommand(null, null);
         var cmdMock = new Mock<ICommand>(MockBehavior.Strict);
         cmdMock.Setup(x => x.Command).Returns("test");
-        cmdMock.Setup(x => x.Aliases).Returns<string[]>(null);
+        cmdMock.Setup(x => x.Aliases).Returns<string[]>(null!);
         cmdMock.Setup(x => x.Execute(new(new[] { "test" }, 0, 0), null, out response)).Returns(isSuccess);
         cmd.RegisterCommand(cmdMock.Object);
 

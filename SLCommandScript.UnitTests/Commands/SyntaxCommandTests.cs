@@ -25,7 +25,7 @@ public class SyntaxCommandTests
 
         // Assert
         result.Should().BeTrue();
-        response.Should().Be($"Available expression/guard types:\ntest\r\nxd\r\n");
+        response.Should().Be($"Available expression/guard types:\ntest\nxd\n");
     }
 
     [Test]
