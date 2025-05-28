@@ -86,7 +86,7 @@ public class FileSystemHelper : IFileSystemHelper
     public void CreateDirectory(string path) => Directory.CreateDirectory(path);
 
     /// <inheritdoc />
-    public string? GetDirectory(string? path) => Path.GetDirectoryName(path);
+    public string? GetDirectory(string? path) => Path.GetFileName(path);
 
     /// <inheritdoc />
     public string? GetFileExtension(string? path) => Path.GetExtension(path);

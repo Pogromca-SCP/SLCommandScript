@@ -18,7 +18,7 @@ public class SyntaxCommand : ICommand
     /// <summary>
     /// Defines command aliases.
     /// </summary>
-    public string[]? Aliases => null;
+    public string[] Aliases { get; } = ["s"];
 
     /// <summary>
     /// Contains command description.
@@ -37,6 +37,7 @@ public class SyntaxCommand : ICommand
     {
         { "perm", "Permissions guard:\n#! <permission_names...>\n(guards cannot be placed inside expressions)" },
         { "scope", "Scope guard:\n#? <scope_names...>\n(guards cannot be placed inside expressions)" },
+        { "args", "Arguments guard:\n#$ <number_of_arguments>\n(guards cannot be placed inside expressions)" },
         { "cmd", "Command expression:\n<command_name> <arguments...>" },
         { "if", "If expression:\n[<expression> if <expression>]\n[<expression> else <expression>]\n[<expression> if <expression> else <expression>]" },
         { "foreach", "Foreach expression:\n[<expression> foreach <iterable_name_or_numbers_range>]" },
@@ -45,7 +46,7 @@ public class SyntaxCommand : ICommand
             "[<expression> forrandom <iterable_name_or_numbers_range> <limit_number_or_percentage>]\n" +
             "[<expression> forrandom <iterable_name_or_numbers_range> else <expression>]\n" +
             "[<expression> forrandom <iterable_name_or_numbers_range> <limit_number_or_percentage> else <expression>]" },
-        { "seq", "Sequence expression:\n[<expressions_separated_with_|...>]" }
+        { "seq", "Sequence expression:\n[<expressions_separated_with_|...>]" },
     };
 
     /// <summary>

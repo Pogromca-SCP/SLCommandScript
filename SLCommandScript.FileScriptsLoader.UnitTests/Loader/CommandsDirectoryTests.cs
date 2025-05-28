@@ -17,8 +17,6 @@ namespace SLCommandScript.FileScriptsLoader.UnitTests.Loader;
 [TestFixture]
 public class CommandsDirectoryTests : TestWithConfigBase
 {
-    private const string TestDirectory = "commandsTest";
-
     private const string TestParent = "parentTest";
 
     private const string TestCommand = "test";
@@ -43,7 +41,7 @@ public class CommandsDirectoryTests : TestWithConfigBase
     private static Mock<IFileSystemWatcherHelper> MakeWatcherMock()
     {
         var watcherMock = new Mock<IFileSystemWatcherHelper>(MockBehavior.Strict);
-        watcherMock.Setup(x => x.Directory).Returns(TestDirectory);
+        watcherMock.Setup(x => x.Directory).Returns(_testDirectory);
         watcherMock.SetupAdd(x => x.Created += It.IsAny<FileSystemEventHandler>());
         watcherMock.SetupAdd(x => x.Changed += It.IsAny<FileSystemEventHandler>());
         watcherMock.SetupAdd(x => x.Deleted += It.IsAny<FileSystemEventHandler>());
@@ -55,9 +53,9 @@ public class CommandsDirectoryTests : TestWithConfigBase
     private static Mock<IFileSystemHelper> MakeFilesHelper(string[] foundFolders, string[] foundScripts, string[] foundJsons)
     {
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.EnumerateDirectories(TestDirectory)).Returns(foundFolders);
-        fileSystemMock.Setup(x => x.EnumerateFiles(TestDirectory, EventsDirectory.ScriptFilesFilter, SearchOption.AllDirectories)).Returns(foundScripts);
-        fileSystemMock.Setup(x => x.EnumerateFiles(TestDirectory, CommandsDirectory.DescriptionFilesFilter, SearchOption.AllDirectories)).Returns(foundJsons);
+        fileSystemMock.Setup(x => x.EnumerateDirectories(_testDirectory)).Returns(foundFolders);
+        fileSystemMock.Setup(x => x.EnumerateFiles(_testDirectory, EventsDirectory.ScriptFilesFilter, SearchOption.AllDirectories)).Returns(foundScripts);
+        fileSystemMock.Setup(x => x.EnumerateFiles(_testDirectory, CommandsDirectory.DescriptionFilesFilter, SearchOption.AllDirectories)).Returns(foundJsons);
         return fileSystemMock;
     }
 
@@ -103,7 +101,9 @@ public class CommandsDirectoryTests : TestWithConfigBase
         return cmd;
     }
 
-    private readonly string _testParentPath = $"{TestDirectory}{Path.DirectorySeparatorChar}{TestParent}";
+    private static readonly string _testDirectory = $"commandsTest{Path.DirectorySeparatorChar}";
+
+    private readonly string _testParentPath = $"{_testDirectory}{TestParent}";
 
     private readonly CommandMetaData _emptyMetadata = new();
 
@@ -114,7 +114,7 @@ public class CommandsDirectoryTests : TestWithConfigBase
         return dir;
     }
 
-    private string MakePath(bool withParent, string name) => $"{(withParent ? _testParentPath : TestDirectory)}{Path.DirectorySeparatorChar}{name}";
+    private string MakePath(bool withParent, string name) => $"{(withParent ? $"{_testParentPath}{Path.DirectorySeparatorChar}" : _testDirectory)}{name}";
 
     private Mock<IFileSystemHelper> SetupDirectoryCreate(bool withParent, string name)
     {
@@ -220,16 +220,16 @@ public class CommandsDirectoryTests : TestWithConfigBase
     }
 
     private void RaiseCreate(Mock<IFileSystemWatcherHelper> watcherMock, bool withParent, string name) =>
-        watcherMock.Raise(x => x.Created += null, new FileSystemEventArgs(WatcherChangeTypes.Created, withParent ? _testParentPath : TestDirectory, name));
+        watcherMock.Raise(x => x.Created += null, new FileSystemEventArgs(WatcherChangeTypes.Created, withParent ? _testParentPath : _testDirectory, name));
 
     private void RaiseChange(Mock<IFileSystemWatcherHelper> watcherMock, bool withParent, string name) =>
-        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, withParent ? _testParentPath : TestDirectory, name));
+        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, withParent ? _testParentPath : _testDirectory, name));
 
     private void RaiseDelete(Mock<IFileSystemWatcherHelper> watcherMock, bool withParent, string name) =>
-        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, withParent ? _testParentPath : TestDirectory, name));
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, withParent ? _testParentPath : _testDirectory, name));
 
     private void RaiseRename(Mock<IFileSystemWatcherHelper> watcherMock, bool withParent, string name, string oldName) =>
-        watcherMock.Raise(x => x.Renamed += null, new RenamedEventArgs(WatcherChangeTypes.Renamed, withParent ? _testParentPath : TestDirectory, name, oldName));
+        watcherMock.Raise(x => x.Renamed += null, new RenamedEventArgs(WatcherChangeTypes.Renamed, withParent ? _testParentPath : _testDirectory, name, oldName));
     #endregion
 
     #region Constructor Tests
@@ -271,9 +271,9 @@ public class CommandsDirectoryTests : TestWithConfigBase
     {
         // Arrange
         var watcherMock = MakeWatcherMock();
-        var folder1 = $"{TestDirectory}{Path.DirectorySeparatorChar}folder1";
-        var folder2 = $"{TestDirectory}{Path.DirectorySeparatorChar}folder2";
-        var globalFile = $"{TestDirectory}{Path.DirectorySeparatorChar}global";
+        var folder1 = $"{_testDirectory}folder1";
+        var folder2 = $"{_testDirectory}folder2";
+        var globalFile = $"{_testDirectory}global";
         var innerFile = $"{folder1}{Path.DirectorySeparatorChar}inner";
         var fileSystemMock = MakeFilesHelper([folder1, folder2], [globalFile, innerFile], [globalFile, innerFile]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(globalFile)).Returns("global");
@@ -347,9 +347,9 @@ public class CommandsDirectoryTests : TestWithConfigBase
         // Arrange
         var watcherMock = MakeWatcherMock();
         watcherMock.Setup(x => x.Dispose());
-        var folder1 = $"{TestDirectory}{Path.DirectorySeparatorChar}folder1";
-        var folder2 = $"{TestDirectory}{Path.DirectorySeparatorChar}folder2";
-        var globalFile = $"{TestDirectory}{Path.DirectorySeparatorChar}global";
+        var folder1 = $"{_testDirectory}folder1";
+        var folder2 = $"{_testDirectory}folder2";
+        var globalFile = $"{_testDirectory}global";
         var innerFile = $"{folder1}{Path.DirectorySeparatorChar}inner";
         var fileSystemMock = MakeFilesHelper([folder1, folder2], [globalFile, innerFile], [globalFile, innerFile]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(globalFile)).Returns("global");
@@ -421,7 +421,7 @@ public class CommandsDirectoryTests : TestWithConfigBase
         var result = dir.GetLocation(true);
 
         // Assert
-        result.Should().Be(TestDirectory);
+        result.Should().Be(_testDirectory);
         watcherMock.VerifyAll();
         fileSystemMock.VerifyAll();
     }

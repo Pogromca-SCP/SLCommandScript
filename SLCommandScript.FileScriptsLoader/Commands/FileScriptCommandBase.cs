@@ -2,7 +2,6 @@ using CommandSystem;
 using SLCommandScript.Core;
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Threading;
 
 namespace SLCommandScript.FileScriptsLoader.Commands;
@@ -82,7 +81,7 @@ public class FileScriptCommandBase(string? name, IFileScriptCommandParent? paren
         }
 
         var file = $"{Command}.slcs";
-        var path = Parent is null ? file : $"{Parent.GetLocation(true)}{Path.DirectorySeparatorChar}{file}";
+        var path = Parent is null ? file : $"{Parent.GetLocation(true)}{file}";
         var src = LoadSource(path);
 
         if (src is null)

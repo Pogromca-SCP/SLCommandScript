@@ -146,18 +146,24 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
     /// <returns>Reference to command or <see langword="null" /> if nothing was found.</returns>
     private T? GetCommand<T>(string path) where T : class
     {
-        var processedPath = path.Substring(Watcher!.Directory.Length + 1);
+        var processedPath = path.Substring(Watcher!.Directory.Length);
 
         if (processedPath.Length < 1)
         {
             return null;
         }
 
+        if (processedPath.Length > 5 && (processedPath.EndsWith(ScriptFileExtension) || processedPath.EndsWith(ScriptDescriptionExtension)))
+        {
+            processedPath = processedPath.Substring(0, processedPath.Length - 5);
+        }
+
         var names = processedPath.Split(Path.DirectorySeparatorChar);
+        var length = names.Length;
         var index = 0;
         var found = Commands.TryGetValue(names[index++], out var foundCommand);
 
-        while (found && index < names.Length)
+        while (found && index < length)
         {
             if (foundCommand is not ICommandHandler commandHandler)
             {

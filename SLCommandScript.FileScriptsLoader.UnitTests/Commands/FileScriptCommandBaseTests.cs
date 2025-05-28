@@ -144,9 +144,9 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
     {
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.ReadFile($"parent{Path.DirectorySeparatorChar}test.slcs")).Throws<Exception>();
+        fileSystemMock.Setup(x => x.ReadFile("parent-test.slcs")).Throws<Exception>();
         var scriptParentMock = new Mock<IFileScriptCommandParent>(MockBehavior.Strict);
-        scriptParentMock.Setup(x => x.GetLocation(true)).Returns("parent");
+        scriptParentMock.Setup(x => x.GetLocation(true)).Returns("parent-");
         var cmd = new FileScriptCommandBase(TestCommand, scriptParentMock.Object, FromFilesMock(fileSystemMock));
 
         // Act
@@ -154,7 +154,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
 
         // Assert
         result.Should().BeFalse();
-        message.Should().Be($"Cannot read script from file 'parent{Path.DirectorySeparatorChar}test.slcs'");
+        message.Should().Be("Cannot read script from file 'parent-test.slcs'");
         fileSystemMock.VerifyAll();
         scriptParentMock.VerifyAll();
     }

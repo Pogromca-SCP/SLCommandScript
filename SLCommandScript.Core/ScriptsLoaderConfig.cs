@@ -21,9 +21,9 @@ public class ScriptsLoaderConfig
     public bool EnableScriptEventHandlers { get; set; } = true;
 
     /// <summary>
-    /// Defines allowed script command types (Console, GameConsole or RemoteAdmin), set to 0 to disable all script commands.
+    /// Defines allowed script command types (Console, Client or RemoteAdmin), set to 0 to disable all script commands.
     /// </summary>
-    [Description("Defines allowed script command types (Console, GameConsole or RemoteAdmin), set to 0 to disable all script commands")]
+    [Description("Defines allowed script command types (Console, Client or RemoteAdmin), set to 0 to disable all script commands")]
     public CommandType AllowedScriptCommandTypes { get; set; } = CommandsUtils.AllScopes;
 
     /// <summary>

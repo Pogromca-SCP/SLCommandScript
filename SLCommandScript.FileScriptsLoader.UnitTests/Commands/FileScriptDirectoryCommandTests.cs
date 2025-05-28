@@ -71,7 +71,7 @@ public class FileScriptDirectoryCommandTests
         var result = cmd.GetLocation(includeRoot);
 
         // Assert
-        result.Should().Be($"{parentLocation}{Path.DirectorySeparatorChar}{cmd.Command}");
+        result.Should().Be($"{parentLocation}{cmd.Command}{Path.DirectorySeparatorChar}");
         parentMock.VerifyAll();
     }
     #endregion

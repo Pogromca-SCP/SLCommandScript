@@ -37,7 +37,7 @@ public class FileScriptDirectoryCommand(string? name, IFileScriptCommandParent? 
     public override void LoadGeneratedCommands() {}
 
     /// <inheritdoc />
-    public string GetLocation(bool includeRoot = false) => Parent is null ? Command : $"{Parent.GetLocation(includeRoot)}{Path.DirectorySeparatorChar}{Command}";
+    public string GetLocation(bool includeRoot = false) => Parent is null ? Command : $"{Parent.GetLocation(includeRoot)}{Command}{Path.DirectorySeparatorChar}";
 
     /// <summary>
     /// Executes the parent command.

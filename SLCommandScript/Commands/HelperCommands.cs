@@ -17,7 +17,7 @@ public class HelperCommands : ParentCommand, IUsageProvider
     /// <param name="version">Item version.</param>
     /// <param name="author">Item author.</param>
     /// <returns>Created info line.</returns>
-    private static string MakeInfoLine(string name, string version, string author) => $"{name} v{version} @{author}";
+    private static string MakeInfoLine(string name, string version, string author) => $"'{name}', Version: {version}, Author: '{author}'";
 
     /// <summary>
     /// Contains command name.
