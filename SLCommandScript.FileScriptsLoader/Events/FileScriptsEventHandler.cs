@@ -1,6 +1,13 @@
 using CommandSystem;
 using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.Scp0492Events;
+using LabApi.Events.Arguments.Scp049Events;
+using LabApi.Events.Arguments.Scp079Events;
+using LabApi.Events.Arguments.Scp096Events;
+using LabApi.Events.Arguments.Scp106Events;
+using LabApi.Events.Arguments.Scp173Events;
 using LabApi.Events.Arguments.Scp914Events;
+using LabApi.Events.Arguments.Scp939Events;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.Arguments.WarheadEvents;
 using LabApi.Events.CustomHandlers;
@@ -85,6 +92,15 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerUnmuted(PlayerUnmutedEventArgs args) => HandleEvent(EventType.PlayerUnmuted, nameof(EventType.PlayerUnmuted),
         args.Issuer.PlayerId.ToString(), args.Issuer.DisplayName, args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerToggledNoclip(PlayerToggledNoclipEventArgs args) => HandleEvent(EventType.PlayerToggleNoclip, nameof(EventType.PlayerToggleNoclip),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerChangedNickname(PlayerChangedNicknameEventArgs args) => HandleEvent(EventType.PlayerChangeNickname, nameof(EventType.PlayerChangeNickname),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerValidatedVisibility(PlayerValidatedVisibilityEventArgs args) => HandleEvent(EventType.PlayerValidateVisibility,
+        nameof(EventType.PlayerValidateVisibility), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
     #endregion
 
     #region State
@@ -136,6 +152,12 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerLeftPocketDimension(PlayerLeftPocketDimensionEventArgs args) => HandleEvent(EventType.PlayerExitPocketDimension,
         nameof(EventType.PlayerExitPocketDimension), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.IsSuccessful.ToString());
+
+    public override void OnPlayerCuffed(PlayerCuffedEventArgs args) => HandleEvent(EventType.PlayerHandcuff, nameof(EventType.PlayerHandcuff),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
+
+    public override void OnPlayerUncuffed(PlayerUncuffedEventArgs args) => HandleEvent(EventType.PlayerRemoveHandcuffs, nameof(EventType.PlayerRemoveHandcuffs),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
     #endregion
 
     #region Environment
@@ -185,6 +207,15 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerInteractedGenerator(PlayerInteractedGeneratorEventArgs args) => HandleEvent(EventType.PlayerInteractGenerator,
         nameof(EventType.PlayerInteractGenerator), args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerInteractedToy(PlayerInteractedToyEventArgs args) => HandleEvent(EventType.PlayerInteractToy, nameof(EventType.PlayerInteractToy),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerSearchedToy(PlayerSearchedToyEventArgs args) => HandleEvent(EventType.PlayerSearchToy, nameof(EventType.PlayerSearchToy),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerSearchToyAborted(PlayerSearchToyAbortedEventArgs args) => HandleEvent(EventType.PlayerSearchToyAbort,
+        nameof(EventType.PlayerSearchToyAbort), args.Player.PlayerId.ToString(), args.Player.DisplayName);
     #endregion
 
     #region Weapons
@@ -202,6 +233,9 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerUnloadedWeapon(PlayerUnloadedWeaponEventArgs args) => HandleEvent(EventType.PlayerUnloadWeapon, nameof(EventType.PlayerUnloadWeapon),
         args.FirearmItem.Type.ToString(), args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerToggledWeaponFlashlight(PlayerToggledWeaponFlashlightEventArgs args) => HandleEvent(EventType.PlayerToggleWeaponFlashlight,
+        nameof(EventType.PlayerToggleWeaponFlashlight), args.FirearmItem.Type.ToString(), args.Player.PlayerId.ToString(), args.Player.DisplayName);
     #endregion
 
     #region Items
@@ -216,6 +250,9 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerDroppedItem(PlayerDroppedItemEventArgs args) => HandleEvent(EventType.PlayerDropItem, nameof(EventType.PlayerDropItem),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Pickup.Type.ToString());
+
+    public override void OnPlayerPickedUpItem(PlayerPickedUpItemEventArgs args) => HandleEvent(EventType.PlayerPickupItem, nameof(EventType.PlayerPickupItem),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
     public override void OnPlayerPickedUpAmmo(PlayerPickedUpAmmoEventArgs args)
     {
@@ -245,6 +282,12 @@ public class FileScriptsEventHandler : CustomEventsHandler
     public override void OnPlayerSearchedPickup(PlayerSearchedPickupEventArgs args) => HandleEvent(EventType.PlayerSearchPickup, nameof(EventType.PlayerSearchPickup),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Pickup.Type.ToString());
 
+    public override void OnPlayerSearchedAmmo(PlayerSearchedAmmoEventArgs args) => HandleEvent(EventType.PlayerSearchAmmo, nameof(EventType.PlayerSearchAmmo),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerSearchedArmor(PlayerSearchedArmorEventArgs args) => HandleEvent(EventType.PlayerSearchArmor, nameof(EventType.PlayerSearchArmor),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
     public override void OnPlayerThrewItem(PlayerThrewItemEventArgs args) => HandleEvent(EventType.PlayerThrowItem, nameof(EventType.PlayerThrowItem),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Pickup.Type.ToString());
 
@@ -262,6 +305,9 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerFlippedCoin(PlayerFlippedCoinEventArgs args) => HandleEvent(EventType.PlayerCoinFlip, nameof(EventType.PlayerCoinFlip),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.IsTails.ToString());
+
+    public override void OnPlayerReceivedLoadout(PlayerReceivedLoadoutEventArgs args) => HandleEvent(EventType.PlayerReceiveLoadout,
+        nameof(EventType.PlayerReceiveLoadout), args.Player.PlayerId.ToString(), args.Player.DisplayName);
     #endregion
 
     #region Radio
@@ -290,6 +336,12 @@ public class FileScriptsEventHandler : CustomEventsHandler
     #region Items
     public override void OnServerItemSpawned(ItemSpawnedEventArgs args) => HandleEvent(EventType.ItemSpawned, nameof(EventType.ItemSpawned),
         args.Pickup.Type.ToString());
+
+    public override void OnServerPickupCreated(PickupCreatedEventArgs args) => HandleEvent(EventType.PickupCreated, nameof(EventType.PickupCreated),
+        args.Pickup.Type.ToString());
+
+    public override void OnServerPickupDestroyed(PickupDestroyedEventArgs args) => HandleEvent(EventType.PickupDestroyed, nameof(EventType.PickupDestroyed),
+        args.Pickup.Type.ToString());
     #endregion
 
     #region Environment
@@ -299,6 +351,29 @@ public class FileScriptsEventHandler : CustomEventsHandler
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
     public override void OnPlayerPlacedBulletHole(PlayerPlacedBulletHoleEventArgs args) => HandleEvent(EventType.PlaceBulletHole, nameof(EventType.PlaceBulletHole));
+
+    public override void OnPlayerEnteredHazard(PlayerEnteredHazardEventArgs args) => HandleEvent(EventType.PlayerEnterHazard, nameof(EventType.PlayerEnterHazard),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerLeftHazard(PlayerLeftHazardEventArgs args) => HandleEvent(EventType.PlayerLeaveHazard, nameof(EventType.PlayerLeaveHazard),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerIdledTesla(PlayerIdledTeslaEventArgs args) => HandleEvent(EventType.PlayerIdleTesla, nameof(EventType.PlayerIdleTesla),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerTriggeredTesla(PlayerTriggeredTeslaEventArgs args) => HandleEvent(EventType.PlayerTriggerTesla, nameof(EventType.PlayerTriggerTesla),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnPlayerUnlockedWarheadButton(PlayerUnlockedWarheadButtonEventArgs args) => HandleEvent(EventType.PlayerUnlockWarhead,
+        nameof(EventType.PlayerUnlockWarhead), args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnServerCassieAnnounced(CassieAnnouncedEventArgs args) => HandleEvent(EventType.CassieAnnouncement, nameof(EventType.CassieAnnouncement));
+
+    public override void OnServerExplosionSpawned(ExplosionSpawnedEventArgs args) => HandleEvent(EventType.ExplosionSpawn, nameof(EventType.ExplosionSpawn));
+
+    public override void OnServerProjectileExploded(ProjectileExplodedEventArgs args) => HandleEvent(EventType.ProjectileExplode, nameof(EventType.ProjectileExplode));
+
+    public override void OnServerSentAdminChat(SentAdminChatEventArgs args) => HandleEvent(EventType.AdminChat, nameof(EventType.AdminChat));
     #endregion
 
     #region Round Events
@@ -356,30 +431,144 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnScp914KnobChanged(Scp914KnobChangedEventArgs args) => HandleEvent(EventType.Scp914KnobChange, nameof(EventType.Scp914KnobChange),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.KnobSetting.ToString());
+
+    public override void OnScp914ProcessedInventoryItem(Scp914ProcessedInventoryItemEventArgs args) => HandleEvent(EventType.Scp914InventoryItemUpgraded,
+        nameof(EventType.Scp914InventoryItemUpgraded), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Item.Type.ToString(), args.KnobSetting.ToString());
+
+    public override void OnScp914ProcessedPickup(Scp914ProcessedPickupEventArgs args)
+    {
+        if (args.Pickup is null)
+        {
+            return;
+        }
+
+        HandleEvent(EventType.Scp914PickupUpgraded, nameof(EventType.Scp914PickupUpgraded), args.Pickup.Type.ToString(), args.KnobSetting.ToString());
+    }
+
+    public override void OnScp914ProcessedPlayer(Scp914ProcessedPlayerEventArgs args) => HandleEvent(EventType.Scp914ProcessPlayer,
+        nameof(EventType.Scp914ProcessPlayer), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.KnobSetting.ToString());
     #endregion
 
     #region 106
+    public override void OnScp106ChangedStalkMode(Scp106ChangedStalkModeEventArgs args) => HandleEvent(EventType.Scp106Stalking, nameof(EventType.Scp106Stalking),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
+    public override void OnScp106ChangedSubmersionStatus(Scp106ChangedSubmersionStatusEventArgs args) => HandleEvent(EventType.Scp106Submerging,
+        nameof(EventType.Scp106Submerging), args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnScp106ChangedVigor(Scp106ChangedVigorEventArgs args) => HandleEvent(EventType.Scp106VigorChange, nameof(EventType.Scp106VigorChange),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Value.ToString());
+
+    public override void OnScp106TeleportedPlayer(Scp106TeleportedPlayerEvent args) => HandleEvent(EventType.Scp106VigorChange, nameof(EventType.Scp106VigorChange),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
+
+    public override void OnScp106UsedHunterAtlas(Scp106UsedHunterAtlasEventArgs args) => HandleEvent(EventType.Scp106UsedHunterAtlas,
+        nameof(EventType.Scp106UsedHunterAtlas), args.Player.PlayerId.ToString(), args.Player.DisplayName);
     #endregion
 
     #region 173
+    public override void OnScp173PlayedSound(Scp173PlayedSoundEventArgs args) => HandleEvent(EventType.Scp173PlaySound, nameof(EventType.Scp173PlaySound),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
+    public override void OnScp173BreakneckSpeedChanged(Scp173BreakneckSpeedChangedEventArgs args) => HandleEvent(EventType.Scp173BreakneckSpeeds,
+        nameof(EventType.Scp173BreakneckSpeeds), args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnScp173AddedObserver(Scp173AddedObserverEventArgs args) => HandleEvent(EventType.Scp173NewObserver, nameof(EventType.Scp173NewObserver),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
+
+    public override void OnScp173RemovedObserver(Scp173RemovedObserverEventArgs args) => HandleEvent(EventType.Scp173RemovedObserver,
+        nameof(EventType.Scp173RemovedObserver), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
+
+    public override void OnScp173CreatedTantrum(Scp173CreatedTantrumEventArgs args) => HandleEvent(EventType.Scp173CreateTantrum, nameof(EventType.Scp173CreateTantrum),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
     #endregion
 
     #region 939
+    public override void OnScp939CreatedAmnesticCloud(Scp939CreatedAmnesticCloudEventArgs args) => HandleEvent(EventType.Scp939CreateAmnesticCloud,
+        nameof(EventType.Scp939CreateAmnesticCloud), args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
+    public override void OnScp939Lunged(Scp939LungedEventArgs args) => HandleEvent(EventType.Scp939Lunge, nameof(EventType.Scp939Lunge), args.Player.PlayerId.ToString(),
+        args.Player.DisplayName);
+
+    public override void OnScp939Attacked(Scp939AttackedEventArgs args) => HandleEvent(EventType.Scp939Attack, nameof(EventType.Scp939Attack),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
     #endregion
 
     #region 079
+    public override void OnScp079GainedExperience(Scp079GainedExperienceEventArgs args) => HandleEvent(EventType.Scp079GainExperience,
+        nameof(EventType.Scp079GainExperience), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Amount.ToString(), args.Reason.ToString());
 
+    public override void OnScp079LeveledUp(Scp079LeveledUpEventArgs args) => HandleEvent(EventType.Scp079LevelUpTier, nameof(EventType.Scp079LevelUpTier),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Tier.ToString());
+
+    public override void OnScp079UsedTesla(Scp079UsedTeslaEventArgs args) => HandleEvent(EventType.Scp079UseTesla, nameof(EventType.Scp079UseTesla),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnScp079LockedDownRoom(Scp079LockedDownRoomEventArgs args) => HandleEvent(EventType.Scp079LockdownRoom, nameof(EventType.Scp079LockdownRoom),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Room.Name.ToString());
+
+    public override void OnScp079CancelledRoomLockdown(Scp079CancelledRoomLockdownEventArgs args) => HandleEvent(EventType.Scp079CancelRoomLockdown,
+        nameof(EventType.Scp079CancelRoomLockdown), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Room.Name.ToString());
+
+    public override void OnScp079LockedDoor(Scp079LockedDoorEventArgs args) => HandleEvent(EventType.Scp079LockDoor, nameof(EventType.Scp079LockDoor),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnScp079UnlockedDoor(Scp079UnlockedDoorEventArgs args) => HandleEvent(EventType.Scp079UnlockDoor, nameof(EventType.Scp079UnlockDoor),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnScp079BlackedOutZone(Scp079BlackedOutZoneEventArgs args) => HandleEvent(EventType.Scp079BlackoutZone, nameof(EventType.Scp079BlackoutZone),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Zone.ToString());
+
+    public override void OnScp079BlackedOutRoom(Scp079BlackedOutRoomEventArgs args) => HandleEvent(EventType.Scp079BlackoutRoom, nameof(EventType.Scp079BlackoutRoom),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Room.Name.ToString());
+
+    public override void OnScp079ChangedCamera(Scp079ChangedCameraEventArgs args) => HandleEvent(EventType.Scp079ChangeCamera, nameof(EventType.Scp079ChangeCamera),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Camera.Base.Label);
+
+    public override void OnScp079Recontained(Scp079RecontainedEventArgs args) => HandleEvent(EventType.Scp079Recontained, nameof(EventType.Scp079Recontained),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
     #endregion
 
     #region 049
+    public override void OnScp049ResurrectedBody(Scp049ResurrectedBodyEventArgs args) => HandleEvent(EventType.Scp049ResurrectBody, nameof(EventType.Scp049ResurrectBody),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
 
+    public override void OnScp049UsedDoctorsCall(Scp049UsedDoctorsCallEventArgs args) => HandleEvent(EventType.Scp049UseDoctorsCall,
+        nameof(EventType.Scp049UseDoctorsCall), args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnScp049UsedSense(Scp049UsedSenseEventArgs args) => HandleEvent(EventType.Scp049UseSense, nameof(EventType.Scp049UseSense),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
+    #endregion
+
+    #region 049-2
+    public override void OnScp0492ConsumedCorpse(Scp0492ConsumedCorpseEventArgs args) => HandleEvent(EventType.Scp049_2ConsumeCorpse,
+        nameof(EventType.Scp049_2ConsumeCorpse), args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnScp0492StartedConsumingCorpse(Scp0492StartedConsumingCorpseEventArgs args) => HandleEvent(EventType.Scp049_2StartConsumingCorpse,
+        nameof(EventType.Scp049_2StartConsumingCorpse), args.Player.PlayerId.ToString(), args.Player.DisplayName);
     #endregion
 
     #region 096
+    public override void OnScp096AddedTarget(Scp096AddedTargetEventArgs args) => HandleEvent(EventType.Scp096AddTarget, nameof(EventType.Scp096AddTarget),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
 
+    public override void OnScp096Enraged(Scp096EnragedEventArgs args) => HandleEvent(EventType.Scp096Enrage, nameof(EventType.Scp096Enrage),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.InitialDuration.ToString());
+
+    public override void OnScp096ChangedState(Scp096ChangedStateEventArgs args) => HandleEvent(EventType.Scp096ChangeState, nameof(EventType.Scp096ChangeState),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.State.ToString());
+
+    public override void OnScp096Charged(Scp096ChargedEventArgs args) => HandleEvent(EventType.Scp096Charge, nameof(EventType.Scp096Charge),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnScp096PriedGate(Scp096PriedGateEventArgs args) => HandleEvent(EventType.Scp096PryGate, nameof(EventType.Scp096PryGate),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnScp096TriedNotToCry(Scp096TriedNotToCryEventArgs args) => HandleEvent(EventType.Scp096TryNotCry, nameof(EventType.Scp096TryNotCry),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnScp096StartedCrying(Scp096StartedCryingEventArgs args) => HandleEvent(EventType.Scp096StartCrying, nameof(EventType.Scp096StartCrying),
+        args.Player.PlayerId.ToString(), args.Player.DisplayName);
     #endregion
     #endregion
 
