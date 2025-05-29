@@ -27,7 +27,6 @@ public class VanillaPermissionsResolverTests
 
     private readonly VanillaPermissionsResolver _resolver = new();
 
-    #region CheckPermissions Tests
     [TestCaseSource(nameof(_existingPermissions))]
     public void CheckPermission_ShouldFail_WhenCommandSenderIsNull(PlayerPermissions perm)
     {
@@ -98,5 +97,4 @@ public class VanillaPermissionsResolverTests
         message.Should().BeNull();
         senderMock.VerifyAll();
     }
-    #endregion
 }

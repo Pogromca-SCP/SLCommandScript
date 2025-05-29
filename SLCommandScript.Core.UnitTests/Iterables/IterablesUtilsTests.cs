@@ -23,7 +23,6 @@ public class IterablesUtilsTests
         return cp;
     }
 
-    #region Shuffle Tests
     [TestCaseSource(nameof(_invalidArrays))]
     public void Shuffle_ShouldDoNothing_WhenNotEnoughElements(int[]? array)
     {
@@ -123,5 +122,4 @@ public class IterablesUtilsTests
         result.Should().HaveCount((int) (array.Length * 0.5f));
         result.Should().OnlyContain(x => copy.Contains(x));
     }
-    #endregion
 }

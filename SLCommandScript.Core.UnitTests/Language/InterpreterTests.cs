@@ -15,7 +15,6 @@ public class InterpreterTests
 
     private static readonly float[] _percentages = [-1.0f, 0.0f, 0.25f, 0.1f, 0.5f, 2.5f];
 
-    #region Constructor Tests
     [Test]
     public void Interpreter_ShouldProperlyInitialize_WhenCommandSenderIsNull()
     {
@@ -40,9 +39,7 @@ public class InterpreterTests
         interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
     }
-    #endregion
 
-    #region Reset Tests
     [Test]
     public void Reset_ShouldProperlyResetInterpreter_WhenCommandSenderIsNull()
     {
@@ -74,9 +71,7 @@ public class InterpreterTests
         interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
     }
-    #endregion
 
-    #region VisitCommandExpr Tests
     [Test]
     public void VisitCommandExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -181,9 +176,7 @@ public class InterpreterTests
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
-    #endregion
 
-    #region VisitDelayExpr Tests
     [Test]
     public void VisitDelayExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -234,9 +227,7 @@ public class InterpreterTests
         interpreter.ErrorMessage.Should().Be(success ? null : message);
         commandMock.VerifyAll();
     }
-    #endregion
 
-    #region VisitForeachExpr Tests
     [Test]
     public void VisitForeachExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -355,9 +346,7 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
     }
-    #endregion
 
-    #region VisitForElseExpr Tests
     [Test]
     public void VisitForElseExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -552,9 +541,7 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
     }
-    #endregion
 
-    #region VisitIfExpr Tests
     [Test]
     public void VisitIfExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -729,9 +716,7 @@ public class InterpreterTests
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
-    #endregion
 
-    #region VisitSequenceExpr Tests
     [Test]
     public void VisitSequenceExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -814,7 +799,6 @@ public class InterpreterTests
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
-    #endregion
 }
 
 public class ArgumentsInjectionTestCommand : ICommand

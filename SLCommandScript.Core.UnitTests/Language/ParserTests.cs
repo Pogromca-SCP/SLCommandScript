@@ -16,7 +16,6 @@ namespace SLCommandScript.Core.UnitTests.Language;
 [TestFixture]
 public class ParserTests
 {
-    #region Error Flow Test Case Sources
     private static readonly object[][] _errorPaths = [
         // #? $(bc)
         [new Core.Language.Token[] { new(TokenType.ScopeGuard, null), new(TokenType.Variable, "$(bc)") },
@@ -162,9 +161,7 @@ public class ParserTests
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Sequence, "|"),
             new(TokenType.RightSquare, "]") }, "Command ']' was not found\nin sequence expression 2"]
     ];
-    #endregion
 
-    #region Gold Flow Test Case Sources
     private static readonly object[][] _goldPaths = [
         // bc 5
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5) },
@@ -321,7 +318,6 @@ public class ParserTests
                 new CommandExpr(new BroadcastCommand(), ["bc"], false), new CommandExpr(new BroadcastCommand(), ["bc"], false)]),
                 new CommandExpr(new BroadcastCommand(), ["bc"], false)]), CommandsUtils.AllScopes]
     ];
-    #endregion
 
     private IEnumerable<KeyValuePair<string, Func<IIterable>>> _originalProviders = null!;
 
@@ -342,7 +338,6 @@ public class ParserTests
     [SetUp]
     public void SetUp() => _parser = new();
 
-    #region Constructor Tests
     [Test]
     public void Parser_ShouldProperlyInitialize()
     {
@@ -350,9 +345,7 @@ public class ParserTests
         _parser.ErrorMessage.Should().BeNull();
         _parser.Scope.Should().Be(CommandsUtils.AllScopes);
     }
-    #endregion
 
-    #region Parse Tests
     [Test]
     public void Parse_ShouldReturnProperErrorMessage_WhenTokensListIsNull()
     {
@@ -388,5 +381,4 @@ public class ParserTests
         _parser.ErrorMessage.Should().BeNull();
         _parser.Scope.Should().Be(expectedScope);
     }
-    #endregion
 }

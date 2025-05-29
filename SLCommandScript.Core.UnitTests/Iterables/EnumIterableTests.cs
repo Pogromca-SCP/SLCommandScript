@@ -14,7 +14,6 @@ public class EnumIterableTests
 
     private static readonly string[] _values = [..((FullEnum[]) typeof(FullEnum).GetEnumValues()).Select(v => v.ToString("D"))];
 
-    #region Get Tests
     [Test]
     public void Get_ShouldProperlyReturnIterableObject()
     {
@@ -34,9 +33,7 @@ public class EnumIterableTests
         // Assert
         iterable.Should().NotBeNull();
     }
-    #endregion
 
-    #region Constructor Tests
     [Test]
     public void EnumIterable_ShouldProperlyInitialize_WhenProvidedEnumTypeHasNoValues([Values] bool enableNone)
     {
@@ -60,9 +57,7 @@ public class EnumIterableTests
         iterable.IsAtEnd.Should().BeFalse();
         iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
     }
-    #endregion
 
-    #region LoadNext Tests
     [Test]
     public void LoadNext_ShouldProperlyIterate_WhenEnumTypeHasNoValues([Values] bool enableNone)
     {
@@ -117,9 +112,7 @@ public class EnumIterableTests
         count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
         variables.GetArray().Should().Equal(enableNone ? _values : _values.Where(v => !v.Equals(FullEnum.None.ToString("D"))));
     }
-    #endregion
 
-    #region Randomize Tests
     [Test]
     public void Randomize_ShouldProperlyRandomizeElements([Values] bool enableNone)
     {
@@ -185,9 +178,7 @@ public class EnumIterableTests
         iterable.Count.Should().Be(_values.Length > randAmount && percentage > 0.0f ? randAmount : _values.Length);
         count.Should().Be(_values.Length > randAmount && percentage > 0.0f ? randAmount : _values.Length);
     }
-    #endregion
 
-    #region Reset Tests
     [Test]
     public void Reset_ShouldProperlyResetIterable_BeforeRunning([Values] bool enableNone)
     {
@@ -216,7 +207,6 @@ public class EnumIterableTests
         iterable.IsAtEnd.Should().BeFalse();
         iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
     }
-    #endregion
 }
 
 public enum EmptyEnum : byte {}

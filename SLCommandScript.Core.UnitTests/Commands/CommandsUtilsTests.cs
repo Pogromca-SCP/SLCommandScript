@@ -20,7 +20,6 @@ public class CommandsUtilsTests
 
     private const CommandType InvalidCommandType = CommandType.Console;
 
-    #region Test Case Sources
     private static readonly CommandType[] _allHandlerTypes = [CommandType.RemoteAdmin, CommandType.Console,
         CommandType.Client, CommandType.RemoteAdmin | CommandType.Console, CommandType.RemoteAdmin | CommandType.Client,
         CommandType.Client | CommandType.Console, CommandType.RemoteAdmin | CommandType.Client | CommandType.Console];
@@ -50,9 +49,7 @@ public class CommandsUtilsTests
     private static IEnumerable<object[]> ValidHandlersXCommandsToRegister => TestArrays.CartesianJoin(_validHandlerTypes, _commandsToRegister);
 
     private static IEnumerable<object[]> ValidHandlersXExampleCommands => TestArrays.CartesianJoin(_validHandlerTypes, _exampleCommands);
-    #endregion
 
-    #region Utilities
     private static IEnumerable<ICommandHandler> GetExpectedCommandHandlers(CommandType handlerType) => handlerType switch
     {
         CommandType.RemoteAdmin => [CommandProcessor.RemoteAdminCommandHandler],
@@ -104,7 +101,6 @@ public class CommandsUtilsTests
     private IEnumerable<ICommand> _originalRemoteAdmin = null!;
 
     private IEnumerable<ICommand> _originalClient = null!;
-#endregion
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
@@ -120,7 +116,6 @@ public class CommandsUtilsTests
         TestCommandHandlers.SetCommands(QueryProcessor.DotCommandHandler, _originalClient);
     }
 
-    #region GetCommandHandlers Tests
     [TestCaseSource(nameof(_allHandlerTypes))]
     public void GetCommandHandlers_ShouldReturnProperHandlers(CommandType handlerType)
     {
@@ -133,9 +128,7 @@ public class CommandsUtilsTests
         // Assert
         result.Should().BeEquivalentTo(expectedHandlers);
     }
-    #endregion
 
-    #region IsCommandInvalid Tests
     [Test]
     public void IsCommandInvalid_ShouldReturnTrue_WhenCommandIsNull()
     {
@@ -187,9 +180,7 @@ public class CommandsUtilsTests
         result.Should().BeFalse();
         commandMock.VerifyAll();
     }
-    #endregion
 
-    #region GetCommand Tests
     [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
     public void GetCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string? commandName)
     {
@@ -231,9 +222,7 @@ public class CommandsUtilsTests
             result.Should().BeNull();
         }
     }
-    #endregion
 
-    #region IsCommandRegistered Tests
     [TestCaseSource(nameof(_allHandlerTypes))]
     public void IsCommandRegistered_ShouldReturnNull_WhenCommandIsNull(CommandType handlerType)
     {
@@ -364,9 +353,7 @@ public class CommandsUtilsTests
         // Assert
         result.Should().Be(expectedResult);
     }
-    #endregion
 
-    #region RegisterCommand Tests
     [TestCaseSource(nameof(_allHandlerTypes))]
     public void RegisterCommand_ShouldReturnNull_WhenCommandIsNull(CommandType handlerType)
     {
@@ -501,9 +488,7 @@ public class CommandsUtilsTests
         result.Should().Be(expectedResult);
         handler.TryGetCommand(command.Command, out _).Should().BeTrue();
     }
-    #endregion
 
-    #region UnregisterCommand Tests
     [TestCaseSource(nameof(_allHandlerTypes))]
     public void UnegisterCommand_ShouldReturnNull_WhenCommandIsNull(CommandType handlerType)
     {
@@ -638,5 +623,4 @@ public class CommandsUtilsTests
         result.Should().Be(expectedResult);
         handler.TryGetCommand(command.Command, out _).Should().BeFalse();
     }
-    #endregion
 }

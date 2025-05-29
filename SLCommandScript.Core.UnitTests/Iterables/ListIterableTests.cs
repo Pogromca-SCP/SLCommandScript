@@ -21,7 +21,6 @@ public class ListIterableTests
 
     private static IEnumerable<object?[]> StringsXPercentages => TestArrays.CartesianJoin(_strings, _percentages);
 
-    #region Constructor Tests
     [Test]
     public void ListIterable_ShouldProperlyInitialize_WhenProvidedDataSourceIsNull()
     {
@@ -69,9 +68,7 @@ public class ListIterableTests
         iterable.IsAtEnd.Should().Be(len < 1);
         iterable.Count.Should().Be(len);
     }
-    #endregion
 
-    #region LoadNext Tests
     [Test]
     public void LoadNext_ShouldProperlyIterate_WhenDataSourceIsNull()
     {
@@ -229,9 +226,7 @@ public class ListIterableTests
         count.Should().Be(len);
         variables.GetArray().Should().Equal(strings ?? []);
     }
-    #endregion
 
-    #region Randomize Tests
     [TestCaseSource(nameof(_strings))]
     public void Randomize_ShouldProperlyRandomizeElements(string?[]? strings)
     {
@@ -375,9 +370,7 @@ public class ListIterableTests
         iterable.Count.Should().Be(len > randAmount && percentage > 0.0f ? randAmount : len);
         count.Should().Be(len > randAmount && percentage > 0.0f ? randAmount : len);
     }
-    #endregion
 
-    #region Reset Tests
     [TestCaseSource(nameof(_strings))]
     public void Reset_ShouldProperlyResetIterable_BeforeRunning(string?[]? strings)
     {
@@ -439,5 +432,4 @@ public class ListIterableTests
         iterable.IsAtEnd.Should().Be(len < 1);
         iterable.Count.Should().Be(len);
     }
-    #endregion
 }

@@ -11,7 +11,6 @@ public class PluginPermissionsResolverTests
 {
     private readonly PluginPermissionsResolver _resolver = new();
 
-    #region CheckPermissions Tests
     [Test]
     public void CheckPermission_ShouldFail_WhenCommandSenderIsNull()
     {
@@ -40,5 +39,4 @@ public class PluginPermissionsResolverTests
         message.Should().Be("Cannot verify a null permission");
         senderMock.VerifyAll();
     }
-    #endregion
 }

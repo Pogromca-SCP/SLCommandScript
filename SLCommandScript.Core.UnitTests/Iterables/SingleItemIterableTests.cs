@@ -10,7 +10,6 @@ public class SingleItemIterableTests
 {
     private const string TestString = "test";
 
-    #region Constructor Tests
     [Test]
     public void SingleItemIterable_ShouldProperlyInitialize_WhenProvidedDataSourceIsNull()
     {
@@ -43,9 +42,7 @@ public class SingleItemIterableTests
         iterable.IsAtEnd.Should().BeFalse();
         iterable.Count.Should().Be(1);
     }
-    #endregion
 
-    #region LoadNext Tests
     [Test]
     public void LoadNext_ShouldProperlyIterate_WhenDataSourceIsNull()
     {
@@ -184,9 +181,7 @@ public class SingleItemIterableTests
         variables.GetArray().Should().HaveCount(1);
         variables.GetArray().Should().Contain(TestString);
     }
-    #endregion
 
-    #region Reset Tests
     [Test]
     public void Reset_ShouldProperlyResetIterable_WhenSourceIsNull()
     {
@@ -258,5 +253,4 @@ public class SingleItemIterableTests
         iterable.IsAtEnd.Should().BeFalse();
         iterable.Count.Should().Be(1);
     }
-    #endregion
 }
