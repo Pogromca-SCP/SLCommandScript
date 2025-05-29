@@ -12,7 +12,6 @@ namespace SLCommandScript.Core.Iterables;
 /// </summary>
 public static class IterablesUtils
 {
-    #region Providers
     /// <summary>
     /// Contains iterable objects providers.
     /// </summary>
@@ -50,7 +49,6 @@ public static class IterablesUtils
         { "roleid", EnumIterable<RoleTypeId>.Get },
         { "itemid", EnumIterable<ItemType>.Get },
     };
-    #endregion
 
     /// <summary>
     /// Used for random numbers generation.

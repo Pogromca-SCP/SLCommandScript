@@ -12,7 +12,6 @@ namespace SLCommandScript.Core.Language;
 /// </summary>
 public class Lexer
 {
-    #region Constants
     /// <summary>
     /// Tokens can be processed.
     /// </summary>
@@ -27,9 +26,7 @@ public class Lexer
     /// Command arguments are missing.
     /// </summary>
     private const sbyte MissingArgs = 2;
-    #endregion
 
-    #region Static Elements
     /// <summary>
     /// Contains language keywords associated with appropriate token types.
     /// </summary>
@@ -104,9 +101,7 @@ public class Lexer
         TokenType.Variable => TokenType.Variable,
         _ => nextToken.Type == TokenType.Variable ? TokenType.Variable : TokenType.Text
     };
-    #endregion
 
-    #region Fields and Properties
     /// <summary>
     /// Contains tokenized source code.
     /// </summary>
@@ -224,9 +219,7 @@ public class Lexer
     /// Contains current numeric value.
     /// </summary>
     private int _numericValue;
-    #endregion
 
-    #region State Management
     /// <summary>
     /// Creates new lexer instance.
     /// </summary>
@@ -602,9 +595,7 @@ public class Lexer
 
         return false;
     }
-    #endregion
 
-    #region Tokens Processing
     /// <summary>
     /// Processes directive start or end.
     /// </summary>
@@ -917,9 +908,7 @@ public class Lexer
                 return type;
         }
     }
-    #endregion
 
-    #region Arguments Processing
     /// <summary>
     /// Processes a potential variable.
     /// </summary>
@@ -1035,9 +1024,7 @@ public class Lexer
         2 => Inject2TokensArg(result, startedAt, type),
         _ => InjectNTokensArg(result, startedAt, type)
     };
-    #endregion
 
-    #region Arguments Injection
     /// <summary>
     /// Injects empty argument in place of currect variable.
     /// </summary>
@@ -1201,5 +1188,4 @@ public class Lexer
         _start = _current;
         return lastToken.Type;
     }
-    #endregion
 }

@@ -13,7 +13,6 @@ namespace SLCommandScript.Core.Language;
 /// </summary>
 public class Interpreter : IExprVisitor<bool>
 {
-    #region Scope
     /// <summary>
     /// Represents variables scope.
     /// </summary>
@@ -42,16 +41,12 @@ public class Interpreter : IExprVisitor<bool>
             }
         }
     }
-    #endregion
 
-    #region Static Elements
     /// <summary>
     /// Contains regular expression for variables.
     /// </summary>
     private static readonly Regex _variablePattern = new("\\$\\(([^)\\s]+)\\)");
-    #endregion
 
-    #region Fields and Properties
     /// <summary>
     /// Contains used command sender.
     /// </summary>
@@ -66,9 +61,7 @@ public class Interpreter : IExprVisitor<bool>
     /// Contains current variable values.
     /// </summary>
     private Scope? _variables;
-    #endregion
 
-    #region State Management
     /// <summary>
     /// Creates new interpreter instance.
     /// </summary>
@@ -98,9 +91,7 @@ public class Interpreter : IExprVisitor<bool>
         Sender = sender;
         ErrorMessage = null;
     }
-    #endregion
 
-    #region Expressions Processing
     /// <inheritdoc />
     public bool VisitCommandExpr(CommandExpr? expr)
     {
@@ -344,5 +335,4 @@ public class Interpreter : IExprVisitor<bool>
 
         return results;
     }
-    #endregion
 }

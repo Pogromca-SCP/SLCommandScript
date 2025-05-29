@@ -14,7 +14,6 @@ namespace SLCommandScript.Core.Language;
 /// </summary>
 public class Parser
 {
-    #region Static Elements
     /// <summary>
     /// Contains regular expression for ranges.
     /// </summary>
@@ -45,9 +44,7 @@ public class Parser
 
         return isNegative ? -result : result;
     }
-    #endregion
 
-    #region Fields and Properties
     /// <summary>
     /// Contains current error message.
     /// </summary>
@@ -77,9 +74,7 @@ public class Parser
     /// Contains current scope depth level.
     /// </summary>
     private int _depth;
-    #endregion
 
-    #region State Management
     /// <summary>
     /// Parses an expression from provided tokens list.
     /// </summary>
@@ -167,9 +162,7 @@ public class Parser
 
         return _tokens[_current - 1];
     }
-    #endregion
 
-    #region Expressions Parsing
     /// <summary>
     /// Parses a single expression.
     /// </summary>
@@ -498,9 +491,7 @@ public class Parser
 
         return new(body);
     }
-    #endregion
 
-    #region Helper Methods
     /// <summary>
     /// Attempts to retrieve an iterable object from current token.
     /// </summary>
@@ -557,5 +548,4 @@ public class Parser
         var end = ToInt(match.Groups[2].Value);
         return RangesProvider.StandardRange(start, end);
     }
-    #endregion
 }
