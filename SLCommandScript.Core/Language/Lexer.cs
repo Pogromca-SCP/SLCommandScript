@@ -69,7 +69,7 @@ public class Lexer
     /// </summary>
     /// <param name="str">String to check.</param>
     /// <returns><see langword="true" /> if string is a keyword, <see langword="false" /> otherwise.</returns>
-    public static bool IsKeyword(string? str) => str is not null && _keywords.ContainsKey(str);
+    public static bool IsKeyword([NotNullWhen(true)] string? str) => str is not null && _keywords.ContainsKey(str);
 
     /// <summary>
     /// Checks if provided token type is atomic.
@@ -168,7 +168,6 @@ public class Lexer
     /// <summary>
     /// <see langword="true" /> if its top level tokenizer, <see langword="false" /> otherwise.
     /// </summary>
-    [MemberNotNullWhen(true, nameof(_argResults), nameof(_argLexer))]
     private bool IsTopLevel => _argResults is not null;
 
     /// <summary>
@@ -1031,7 +1030,7 @@ public class Lexer
     /// <returns>Type of token to use in remaining token processing.</returns>
     private TokenType InjectArg(ArgResult result, int startedAt, TokenType type) => result.Tokens!.Count switch
     {
-        0 => InjectNoTokensArg(result.Source.Length < 1, startedAt, type),
+        0 => InjectNoTokensArg(result.Source!.Length < 1, startedAt, type),
         1 => Inject1TokenArg(result, startedAt, type),
         2 => Inject2TokensArg(result, startedAt, type),
         _ => InjectNTokensArg(result, startedAt, type)
@@ -1075,11 +1074,11 @@ public class Lexer
     {
         var token = result.Tokens![0];
         var isAtomic = IsAtomic(token.Type);
-        var isEnd = IsWhiteSpace(Current) || isAtomic || IsWhiteSpace(result.Source[result.Source.Length - 1]);
+        var isEnd = IsWhiteSpace(Current) || isAtomic || IsWhiteSpace(result.Source![result.Source.Length - 1]);
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(result.Source[0]) || isAtomic)
+            if (IsWhiteSpace(result.Source![0]) || isAtomic)
             {
                 AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
             }
@@ -1124,7 +1123,7 @@ public class Lexer
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(result.Source[0]) || IsAtomic(token.Type))
+            if (IsWhiteSpace(result.Source![0]) || IsAtomic(token.Type))
             {
                 AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
                 AddToken(token.Type, token.Value, token.NumericValue);
@@ -1142,7 +1141,7 @@ public class Lexer
 
         var lastToken = result.Tokens[1];
 
-        if (IsWhiteSpace(Current) || IsAtomic(lastToken.Type) || IsWhiteSpace(result.Source[result.Source.Length - 1]))
+        if (IsWhiteSpace(Current) || IsAtomic(lastToken.Type) || IsWhiteSpace(result.Source![result.Source.Length - 1]))
         {
             AddToken(lastToken.Type, lastToken.Value, lastToken.NumericValue);
             return TokenType.None;
@@ -1164,7 +1163,7 @@ public class Lexer
     private TokenType InjectNTokensArg(ArgResult result, int startedAt, TokenType type)
     {
         IEnumerable<Token> tokens = result.Tokens!;
-        var isEnd = IsWhiteSpace(Current) || IsAtomic(result.Tokens![result.Tokens.Count - 1].Type) || IsWhiteSpace(result.Source[result.Source.Length - 1]);
+        var isEnd = IsWhiteSpace(Current) || IsAtomic(result.Tokens![result.Tokens.Count - 1].Type) || IsWhiteSpace(result.Source![result.Source.Length - 1]);
 
         if (!isEnd)
         {
@@ -1173,7 +1172,7 @@ public class Lexer
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(result.Source[0]) || IsAtomic(result.Tokens![0].Type))
+            if (IsWhiteSpace(result.Source![0]) || IsAtomic(result.Tokens![0].Type))
             {
                 AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
             }

@@ -13,20 +13,20 @@ public static class CustomTypesUtils
     /// <typeparam name="TResult">Type to cast new instance into.</typeparam>
     /// <param name="typeName">Name of custom type to find.</param>
     /// <param name="message">Message to return on error.</param>
-    /// <returns>New custom type instance or <see langword="default" /> value of an error has occured.</returns>
-    public static TResult MakeCustomTypeInstance<TResult>(string? typeName, out string? message)
+    /// <returns>New custom type instance or <see langword="default" /> value if an error has occurred.</returns>
+    public static TResult? MakeCustomTypeInstance<TResult>(string? typeName, out string? message)
     {
         var customType = GetCustomType(typeName, out message);
 
         if (customType is null)
         {
-            return default!;
+            return default;
         }
 
         if (!typeof(TResult).IsAssignableFrom(customType))
         {
             message = $"Custom type '{customType.Name}' is not derived from desired type";
-            return default!;
+            return default;
         }
 
         return ActivateCustomInstance<TResult>(customType, out message);
@@ -38,8 +38,8 @@ public static class CustomTypesUtils
     /// <typeparam name="TResult">Type to cast new instance into.</typeparam>
     /// <param name="customType">Custom type to instantiate.</param>
     /// <param name="message">Message to return on error.</param>
-    /// <returns>New custom type instance or <see langword="default" /> value of an error has occured.</returns>
-    private static TResult ActivateCustomInstance<TResult>(Type customType, out string? message)
+    /// <returns>New custom type instance or <see langword="default" /> value if an error has occurred.</returns>
+    private static TResult? ActivateCustomInstance<TResult>(Type customType, out string? message)
     {
         try
         {
@@ -49,7 +49,7 @@ public static class CustomTypesUtils
         catch (Exception ex)
         {
             message = $"An error has occured during custom type instance creation: {ex.Message}";
-            return default!;
+            return default;
         }
     }
 

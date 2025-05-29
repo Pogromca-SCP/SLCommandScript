@@ -43,7 +43,7 @@ public static class CommandsUtils
     /// </summary>
     /// <param name="commandType">Type of registered command.</param>
     /// <param name="command">Command to register.</param>
-    /// <returns>Types of command handlers the command was registered to or <see langword="null" /> if command is invalid.</returns>
+    /// <returns>Types of command handlers the command was registered to or <see langword="null" /> if <paramref name="command" /> is invalid.</returns>
     public static CommandType? RegisterCommand(CommandType commandType, ICommand? command)
     {
         var registered = IsCommandRegistered(commandType, command);
@@ -55,7 +55,7 @@ public static class CommandsUtils
     /// </summary>
     /// <param name="commandType">Type of command to unregister.</param>
     /// <param name="command">Command to unregister.</param>
-    /// <returns>Types of command handlers the command was unregistered from or <see langword="null" /> if command is invalid.</returns>
+    /// <returns>Types of command handlers the command was unregistered from or <see langword="null" /> if <paramref name="command" /> is invalid.</returns>
     public static CommandType? UnregisterCommand(CommandType commandType, ICommand? command)
     {
         var registered = IsCommandRegistered(commandType, command);
@@ -67,7 +67,7 @@ public static class CommandsUtils
     /// </summary>
     /// <param name="handler">Handler to register to.</param>
     /// <param name="command">Command to register.</param>
-    /// <returns><see langword="true" /> if command was registered, <see langword="false" /> otherwise or <see langword="null" /> if command or handler is invalid.</returns>
+    /// <returns><see langword="true" /> if command was registered, <see langword="false" /> otherwise or <see langword="null" /> if <paramref name="command" /> or <paramref name="handler" /> is invalid.</returns>
     public static bool? RegisterCommand(ICommandHandler? handler, ICommand? command)
     {
         var registered = IsCommandRegistered(handler, command);
@@ -86,7 +86,7 @@ public static class CommandsUtils
     /// </summary>
     /// <param name="handler">Handler to unregister from.</param>
     /// <param name="command">Command to unregister.</param>
-    /// <returns><see langword="true" /> if command was unregistered, <see langword="false" /> otherwise or <see langword="null" /> if command or handler is invalid.</returns>
+    /// <returns><see langword="true" /> if command was unregistered, <see langword="false" /> otherwise or <see langword="null" /> if <paramref name="command" /> or <paramref name="handler" /> is invalid.</returns>
     public static bool? UnregisterCommand(ICommandHandler? handler, ICommand? command)
     {
         var registered = IsCommandRegistered(handler, command);
@@ -131,7 +131,7 @@ public static class CommandsUtils
     /// </summary>
     /// <param name="commandType">Handler types to check.</param>
     /// <param name="command">Command to check.</param>
-    /// <returns>Types of command handlers where the command is already registered in or <see langword="null" /> if command is invalid.</returns>
+    /// <returns>Types of command handlers where the command is already registered or <see langword="null" /> if <paramref name="command" /> is invalid.</returns>
     public static CommandType? IsCommandRegistered(CommandType commandType, ICommand? command)
     {
         if (IsCommandInvalid(command))
@@ -177,7 +177,7 @@ public static class CommandsUtils
     /// </summary>
     /// <param name="handler">Handler to check.</param>
     /// <param name="command">Command to check.</param>
-    /// <returns><see langword="true" /> if command is already registered, <see langword="false" /> otherwise or <see langword="null" /> if command or handler is invalid.</returns>
+    /// <returns><see langword="true" /> if command is already registered, <see langword="false" /> otherwise or <see langword="null" /> if <paramref name="command" /> or <paramref name="handler" /> is invalid.</returns>
     public static bool? IsCommandRegistered(ICommandHandler? handler, ICommand? command)
     {
         if (handler is null || IsCommandInvalid(command))

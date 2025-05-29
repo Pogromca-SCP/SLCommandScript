@@ -73,6 +73,7 @@ public static class IterablesUtils
     /// <param name="data">Collection to shuffle.</param>
     /// <param name="amount">Amount of elements to retrieve. Takes effect only when smaller than elements count.</param>
     /// <returns>Shuffled array if at least 2 elements were found.</returns>
+    [return: NotNullIfNotNull(nameof(data))]
     public static TItem[]? Shuffle<TItem>(IEnumerable<TItem>? data, int amount) => Shuffle(data?.ToArray(), amount);
 
     /// <summary>
@@ -101,6 +102,7 @@ public static class IterablesUtils
     /// <param name="array">Array to shuffle. This array is modified.</param>
     /// <param name="amount">Amount of elements to retrieve. Takes effect only when smaller than array length.</param>
     /// <returns>New shuffled array or original array if less than 2 elements were found.</returns>
+    [return: NotNullIfNotNull(nameof(array))]
     public static TItem[]? Shuffle<TItem>(TItem[]? array, int amount)
     {
         if (amount < 1)

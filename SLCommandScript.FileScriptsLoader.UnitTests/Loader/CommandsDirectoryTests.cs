@@ -17,6 +17,8 @@ namespace SLCommandScript.FileScriptsLoader.UnitTests.Loader;
 [TestFixture]
 public class CommandsDirectoryTests : TestWithConfigBase
 {
+    private const string TestDirectory = "commandsTest";
+
     private const string TestParent = "parentTest";
 
     private const string TestCommand = "test";
@@ -101,7 +103,7 @@ public class CommandsDirectoryTests : TestWithConfigBase
         return cmd;
     }
 
-    private static readonly string _testDirectory = $"commandsTest{Path.DirectorySeparatorChar}";
+    private static readonly string _testDirectory = $"{TestDirectory}{Path.DirectorySeparatorChar}";
 
     private readonly string _testParentPath = $"{_testDirectory}{TestParent}";
 
@@ -220,16 +222,16 @@ public class CommandsDirectoryTests : TestWithConfigBase
     }
 
     private void RaiseCreate(Mock<IFileSystemWatcherHelper> watcherMock, bool withParent, string name) =>
-        watcherMock.Raise(x => x.Created += null, new FileSystemEventArgs(WatcherChangeTypes.Created, withParent ? _testParentPath : _testDirectory, name));
+        watcherMock.Raise(x => x.Created += null, new FileSystemEventArgs(WatcherChangeTypes.Created, withParent ? _testParentPath : TestDirectory, name));
 
     private void RaiseChange(Mock<IFileSystemWatcherHelper> watcherMock, bool withParent, string name) =>
-        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, withParent ? _testParentPath : _testDirectory, name));
+        watcherMock.Raise(x => x.Changed += null, new FileSystemEventArgs(WatcherChangeTypes.Changed, withParent ? _testParentPath : TestDirectory, name));
 
     private void RaiseDelete(Mock<IFileSystemWatcherHelper> watcherMock, bool withParent, string name) =>
-        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, withParent ? _testParentPath : _testDirectory, name));
+        watcherMock.Raise(x => x.Deleted += null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, withParent ? _testParentPath : TestDirectory, name));
 
     private void RaiseRename(Mock<IFileSystemWatcherHelper> watcherMock, bool withParent, string name, string oldName) =>
-        watcherMock.Raise(x => x.Renamed += null, new RenamedEventArgs(WatcherChangeTypes.Renamed, withParent ? _testParentPath : _testDirectory, name, oldName));
+        watcherMock.Raise(x => x.Renamed += null, new RenamedEventArgs(WatcherChangeTypes.Renamed, withParent ? _testParentPath : TestDirectory, name, oldName));
     #endregion
 
     #region Constructor Tests
