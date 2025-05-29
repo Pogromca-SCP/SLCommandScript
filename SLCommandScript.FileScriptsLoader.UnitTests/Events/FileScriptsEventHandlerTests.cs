@@ -14,7 +14,6 @@ public class FileScriptsEventHandlerTests
     [SetUp]
     public void SetUp() => _handler.EventScripts.Clear();
 
-    #region HandleEvent Tests
     [Test]
     public void HandleEvent_ShouldNotThrow_WhenEventIsNotRegistered()
     {
@@ -37,5 +36,4 @@ public class FileScriptsEventHandlerTests
         // Assert
         cmdMock.VerifyAll();
     }
-    #endregion
 }

@@ -4,7 +4,6 @@ using NUnit.Framework;
 using SLCommandScript.FileScriptsLoader.Commands;
 using SLCommandScript.FileScriptsLoader.Helpers;
 using System;
-using System.IO;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 
@@ -27,7 +26,6 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         "#This is a comment"
     ];
 
-    #region Description Tests
     [Test]
     public void Description_ShouldBeSetToDefault_WhenProvidedValueIsNull()
     {
@@ -69,9 +67,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         // Assert
         result.Description.Should().Be(newDesc);
     }
-    #endregion
 
-    #region Constructor Tests
     [Test]
     public void FileScriptCommandBase_ShouldProperlyInitialize_WhenProvidedNullValues()
     {
@@ -105,9 +101,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         result.Config.Should().Be(RuntimeConfig);
         fileScriptParentMock.VerifyAll();
     }
-    #endregion
 
-    #region Execute Tests
     [Test]
     public void Execute_ShouldFail_WhenConcurrentExecutionsLimitIsExceeded()
     {
@@ -192,5 +186,4 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         message.Should().Be("Script executed successfully.");
         fileSystemMock.VerifyAll();
     }
-    #endregion
 }

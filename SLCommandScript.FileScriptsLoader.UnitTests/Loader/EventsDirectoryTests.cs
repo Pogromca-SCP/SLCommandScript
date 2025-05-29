@@ -16,7 +16,6 @@ public class EventsDirectoryTests : TestWithConfigBase
 {
     private const string TestDirectory = "eventsTest";
 
-    #region Test Case Sources
     private static readonly string[] _invalidEvents = [string.Empty, "hello", "there"];
 
     private static readonly string[] _validEvents = [$"{EventType.PlayerDeath}", $"On{EventType.MapGenerated}", $"on{EventType.PlaceBlood}"];
@@ -28,9 +27,7 @@ public class EventsDirectoryTests : TestWithConfigBase
     private static IEnumerable<object[]> ValidEvents => JoinArrays(_validEvents, _eventTypes);
 
     private static IEnumerable<object[]> JoinArrays(string[] names, EventType[] types) => names.Select((n, index) => new object[] { n, types[index] });
-    #endregion
 
-    #region Utilities
     private static Mock<IFileSystemWatcherHelper> MakeWatcherMock()
     {
         var watcherMock = new Mock<IFileSystemWatcherHelper>(MockBehavior.Strict);
@@ -79,9 +76,7 @@ public class EventsDirectoryTests : TestWithConfigBase
         GC.SuppressFinalize(dir);
         return dir;
     }
-    #endregion
 
-    #region Constructor Tests
     [Test]
     public void EventsDirectory_ShouldNotInitialize_WhenProvidedWatcherIsNull()
     {
@@ -137,9 +132,7 @@ public class EventsDirectoryTests : TestWithConfigBase
         watcherMock.VerifyAll();
         fileSystemMock.VerifyAll();
     }
-    #endregion
 
-    #region Dispose Tests
     [Test]
     public void Dispose_ShouldDoNothing_WhenPropertiesAreNull()
     {
@@ -197,9 +190,7 @@ public class EventsDirectoryTests : TestWithConfigBase
         watcherMock.VerifyAll();
         fileSystemMock.VerifyAll();
     }
-    #endregion
 
-    #region GetLocation Tests
     [Test]
     public void GetLocation_ShouldReturnEmptyString_WhenWatcherIsNull([Values] bool includeRoot)
     {
@@ -246,9 +237,7 @@ public class EventsDirectoryTests : TestWithConfigBase
         watcherMock.VerifyAll();
         fileSystemMock.VerifyAll();
     }
-    #endregion
 
-    #region Created Tests
     [TestCaseSource(nameof(_invalidEvents))]
     public void Created_ShouldNotRegisterEvent_WhenEventNameIsInvalid(string name)
     {
@@ -302,9 +291,7 @@ public class EventsDirectoryTests : TestWithConfigBase
         watcherMock.VerifyAll();
         fileSystemMock.VerifyAll();
     }
-    #endregion
 
-    #region Deleted Tests
     [TestCaseSource(nameof(InvalidEvents))]
     public void Deleted_ShouldNotUnregisterEvent_WhenEventNameIsInvalid(string name, EventType key)
     {
@@ -358,9 +345,7 @@ public class EventsDirectoryTests : TestWithConfigBase
         watcherMock.VerifyAll();
         fileSystemMock.VerifyAll();
     }
-    #endregion
 
-    #region Renamed Tests
     [TestCaseSource(nameof(InvalidEvents))]
     public void Renamed_ShouldDoNothing_WhenEventNameIsInvalid(string name, EventType key)
     {
@@ -438,5 +423,4 @@ public class EventsDirectoryTests : TestWithConfigBase
         watcherMock.VerifyAll();
         fileSystemMock.VerifyAll();
     }
-    #endregion
 }

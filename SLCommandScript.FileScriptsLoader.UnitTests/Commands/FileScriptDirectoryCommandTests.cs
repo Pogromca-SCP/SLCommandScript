@@ -12,7 +12,6 @@ public class FileScriptDirectoryCommandTests
 {
     private const string TestName = "test";
 
-    #region Constructor Tests
     [Test]
     public void FileScriptDirectoryCommand_ShouldProperlyInitialize_WhenNullsProvided()
     {
@@ -42,9 +41,7 @@ public class FileScriptDirectoryCommandTests
         result.Parent.Should().Be(parentMock.Object);
         parentMock.VerifyAll();
     }
-    #endregion
 
-    #region GetLocation Tests
     [Test]
     public void GetLocation_ShouldReturnProperPath_WhenNoParentPresent([Values] bool includeRoot)
     {
@@ -74,9 +71,7 @@ public class FileScriptDirectoryCommandTests
         result.Should().Be($"{parentLocation}{cmd.Command}{Path.DirectorySeparatorChar}");
         parentMock.VerifyAll();
     }
-    #endregion
 
-    #region Execute Tests
     [Test]
     public void ExecuteParent_ShouldProperlyInvokeSubcommand([Values] bool isSuccess)
     {
@@ -111,5 +106,4 @@ public class FileScriptDirectoryCommandTests
         result.Should().BeFalse();
         message.Should().Be("Cannot execute this parent command");
     }
-    #endregion
 }

@@ -10,7 +10,6 @@ namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 [TestFixture]
 public class FileScriptCommandTests : TestWithConfigBase
 {
-    #region Usage Tests
     [Test]
     public void Usage_ShouldBeSetToNull_WhenProvidedValueIsNull()
     {
@@ -64,9 +63,7 @@ public class FileScriptCommandTests : TestWithConfigBase
         // Assert
         result.Usage.Should().BeEquivalentTo(usage);
     }
-    #endregion
 
-    #region Execute Tests
     [Test]
     public void Execute_ShouldFail_WhenPermissionCheckFails()
     {
@@ -141,5 +138,4 @@ public class FileScriptCommandTests : TestWithConfigBase
         message.Should().Be("Script executed successfully.");
         fileSystemMock.VerifyAll();
     }
-    #endregion
 }
