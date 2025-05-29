@@ -25,7 +25,7 @@ public class MyCustomScriptLoader : SLCommandScript.Core.IScriptsLoader
 
     public string LoaderAuthor { get; } = "ProjectAuthors";
 
-    public void InitScriptsLoader(object plugin, PluginHandler handler, ScriptsLoaderConfig loaderConfig)
+    public void InitScriptsLoader(Plugin plugin, ScriptsLoaderConfig loaderConfig)
     {
         // Initialize loader here
     }

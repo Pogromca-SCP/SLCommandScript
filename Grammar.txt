@@ -21,10 +21,11 @@ sequence			-> expression ("|" expression)+
 iterable			-> "-"? NUMBER ".." "-"? NUMBER | TEXT
 
 comment				-> [^\s] "#" comment_body
-comment_body		-> permissions_guard | scope_guard | [^!?] .*
+comment_body		-> permissions_guard | scope_guard | arguments_guard | [^!?] .*
 permissions_guard	-> "!" TEXT*
 scope_guard			-> "?" scope_name*
-scope_name			-> "RemoteAdmin" | "Console" | "GameConsole"
+scope_name			-> "RemoteAdmin" | "Console" | "Client"
+arguments_guard		-> "$" NUMBER?
 
 TEXT				-> \S+
 NUMBER				-> [0-9]+

@@ -7,11 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Added
+
+- Added arguments guards to the language, they can be used to prevent script execution when there are not enough arguments provided.
+
 ## Changed
 
+- File scripts loader events handler now provides more usefull arguments.
+- Changed the consoles scope name from `GameConsole` to `Client`.
 - File scripts loader components now utilize dispose pattern properly.
 - File scripts loader was updated to no longer rely on static properties and files/directories location tracking.
-- Project now uses NwPluginAPI assembly directly from game files to use more up to date API.
+- Upgraded project to [LabAPI v1.0.2](https://github.com/northwood-studios/LabAPI/releases/tag/1.0.2).
 
 ## [1.0.2]- 2024-11-21
 
