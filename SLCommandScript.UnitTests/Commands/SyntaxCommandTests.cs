@@ -12,7 +12,6 @@ public class SyntaxCommandTests
     [SetUp]
     public void SetUp() => _command.Rules.Clear();
 
-    #region Execute Tests
     [Test]
     public void Execute_ShouldSucceed_WhenNoArgumentsArePassed()
     {
@@ -52,5 +51,4 @@ public class SyntaxCommandTests
         result.Should().BeTrue();
         response.Should().Be(_command.Rules["test"]);
     }
-    #endregion
 }

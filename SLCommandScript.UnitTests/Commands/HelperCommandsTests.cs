@@ -9,7 +9,6 @@ namespace SLCommandScript.UnitTests.Commands;
 [TestFixture]
 public class HelperCommandsTests
 {
-    #region Constructor Tests
     [Test]
     public void HelperCommands_ShouldProperlyInitialize()
     {
@@ -19,9 +18,7 @@ public class HelperCommandsTests
         // Assert
         command.AllCommands.Should().HaveCount(2);
     }
-    #endregion
 
-    #region ExecuteParent Tests
     [Test]
     public void ExecuteParent_ShouldSucceed_WhenLoaderIsNull()
     {
@@ -66,5 +63,4 @@ public class HelperCommandsTests
         senderMock.VerifyAll();
         loaderMock.VerifyAll();
     }
-    #endregion
 }

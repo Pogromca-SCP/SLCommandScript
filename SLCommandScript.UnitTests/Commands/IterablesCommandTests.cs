@@ -23,7 +23,6 @@ public class IterablesCommandTests
     [OneTimeTearDown]
     public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers!, _originalIterables!);
 
-    #region Execute Tests
     [Test]
     public void Execute_ShouldSucceed_WhenNoArgumentsArePassed()
     {
@@ -121,7 +120,6 @@ public class IterablesCommandTests
         result.Should().BeTrue();
         response.Should().Be($"Variables available in '{TestIterable}':\ntest\n");
     }
-    #endregion
 }
 
 public class TestIterable(bool isAtEnd, bool addVars) : IIterable
