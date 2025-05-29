@@ -21,7 +21,6 @@ namespace SLCommandScript.FileScriptsLoader.Events;
 /// </summary>
 public class FileScriptsEventHandler : CustomEventsHandler
 {
-    #region Events Management
     /// <summary>
     /// Contains registered event handling scripts.
     /// </summary>
@@ -46,10 +45,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
             Logger.Error(message);
         }
     }
-    #endregion
 
-    #region Players
-    #region Technical
     public override void OnPlayerJoined(PlayerJoinedEventArgs args) => HandleEvent(EventType.PlayerJoined, nameof(EventType.PlayerJoined), args.Player.PlayerId.ToString(),
         args.Player.DisplayName);
 
@@ -101,9 +97,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerValidatedVisibility(PlayerValidatedVisibilityEventArgs args) => HandleEvent(EventType.PlayerValidateVisibility,
         nameof(EventType.PlayerValidateVisibility), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
-    #endregion
 
-    #region State
     public override void OnPlayerDeath(PlayerDeathEventArgs args)
     {
         const EventType eventType = EventType.PlayerDeath;
@@ -158,9 +152,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerUncuffed(PlayerUncuffedEventArgs args) => HandleEvent(EventType.PlayerRemoveHandcuffs, nameof(EventType.PlayerRemoveHandcuffs),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
-    #endregion
 
-    #region Environment
     public override void OnPlayerActivatedGenerator(PlayerActivatedGeneratorEventArgs args) => HandleEvent(EventType.PlayerActivateGenerator,
         nameof(EventType.PlayerActivateGenerator), args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
@@ -216,9 +208,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerSearchToyAborted(PlayerSearchToyAbortedEventArgs args) => HandleEvent(EventType.PlayerSearchToyAbort,
         nameof(EventType.PlayerSearchToyAbort), args.Player.PlayerId.ToString(), args.Player.DisplayName);
-    #endregion
 
-    #region Weapons
     public override void OnPlayerAimedWeapon(PlayerAimedWeaponEventArgs args) => HandleEvent(EventType.PlayerAimWeapon, nameof(EventType.PlayerAimWeapon),
         args.Aiming.ToString(), args.FirearmItem.Type.ToString(), args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
@@ -236,9 +226,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerToggledWeaponFlashlight(PlayerToggledWeaponFlashlightEventArgs args) => HandleEvent(EventType.PlayerToggleWeaponFlashlight,
         nameof(EventType.PlayerToggleWeaponFlashlight), args.FirearmItem.Type.ToString(), args.Player.PlayerId.ToString(), args.Player.DisplayName);
-    #endregion
 
-    #region Items
     public override void OnPlayerCancelledUsingItem(PlayerCancelledUsingItemEventArgs args) => HandleEvent(EventType.PlayerCancelUsingItem,
         nameof(EventType.PlayerCancelUsingItem), args.UsableItem.Type.ToString(), args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
@@ -308,9 +296,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerReceivedLoadout(PlayerReceivedLoadoutEventArgs args) => HandleEvent(EventType.PlayerReceiveLoadout,
         nameof(EventType.PlayerReceiveLoadout), args.Player.PlayerId.ToString(), args.Player.DisplayName);
-    #endregion
 
-    #region Radio
     public override void OnPlayerChangedRadioRange(PlayerChangedRadioRangeEventArgs args) => HandleEvent(EventType.PlayerChangeRadioRange,
         nameof(EventType.PlayerChangeRadioRange), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Range.ToString());
 
@@ -319,21 +305,14 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnPlayerUsedRadio(PlayerUsedRadioEventArgs args) => HandleEvent(EventType.PlayerUsingRadio, nameof(EventType.PlayerUsingRadio),
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
-    #endregion
-    #endregion
 
-    #region Decontamination
     public override void OnServerLczDecontaminationStarted() => HandleEvent(EventType.LczDecontaminationStart, nameof(EventType.LczDecontaminationStart));
 
     public override void OnServerLczDecontaminationAnnounced(LczDecontaminationAnnouncedEventArgs args) => HandleEvent(EventType.LczDecontaminationAnnouncement,
         nameof(EventType.LczDecontaminationAnnouncement), args.Phase.ToString());
-    #endregion
 
-    #region Map Generation
     public override void OnServerMapGenerated(MapGeneratedEventArgs args) => HandleEvent(EventType.MapGenerated, nameof(EventType.MapGenerated), args.Seed.ToString());
-    #endregion
 
-    #region Items
     public override void OnServerItemSpawned(ItemSpawnedEventArgs args) => HandleEvent(EventType.ItemSpawned, nameof(EventType.ItemSpawned),
         args.Pickup.Type.ToString());
 
@@ -342,9 +321,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnServerPickupDestroyed(PickupDestroyedEventArgs args) => HandleEvent(EventType.PickupDestroyed, nameof(EventType.PickupDestroyed),
         args.Pickup.Type.ToString());
-    #endregion
 
-    #region Environment
     public override void OnServerGeneratorActivated(GeneratorActivatedEventArgs args) => HandleEvent(EventType.GeneratorActivated, nameof(EventType.GeneratorActivated));
 
     public override void OnPlayerPlacedBlood(PlayerPlacedBloodEventArgs args) => HandleEvent(EventType.PlaceBlood, nameof(EventType.PlaceBlood),
@@ -374,9 +351,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
     public override void OnServerProjectileExploded(ProjectileExplodedEventArgs args) => HandleEvent(EventType.ProjectileExplode, nameof(EventType.ProjectileExplode));
 
     public override void OnServerSentAdminChat(SentAdminChatEventArgs args) => HandleEvent(EventType.AdminChat, nameof(EventType.AdminChat));
-    #endregion
 
-    #region Round Events
     public override void OnServerRoundEnded(RoundEndedEventArgs args) => HandleEvent(EventType.RoundEnd, nameof(EventType.RoundEnd), args.LeadingTeam.ToString());
 
     public override void OnServerRoundRestarted() => HandleEvent(EventType.RoundRestart, nameof(EventType.RoundRestart));
@@ -390,9 +365,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnServerWaveRespawned(WaveRespawnedEventArgs args) => HandleEvent(EventType.TeamRespawn, nameof(EventType.TeamRespawn),
         args.Wave.Faction.ToString(), args.Players.Count.ToString());
-    #endregion
 
-    #region Warhead
     public override void OnWarheadStarted(WarheadStartedEventArgs args) => HandleEvent(EventType.WarheadStart, nameof(EventType.WarheadStart),
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
@@ -400,9 +373,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
     public override void OnWarheadDetonated(WarheadDetonatedEventArgs args) => HandleEvent(EventType.WarheadDetonation, nameof(EventType.WarheadDetonation));
-    #endregion
 
-    #region Commands
     public override void OnServerCommandExecuted(CommandExecutedEventArgs args)
     {
         const EventType eventType = EventType.CommandExecuted;
@@ -417,15 +388,10 @@ public class FileScriptsEventHandler : CustomEventsHandler
             HandleEvent(eventType, eventName, args.Command.Command, args.Sender.SenderId, args.Sender.Nickname);
         }
     }
-    #endregion
 
-    #region SCPs
-    #region General
     public override void OnServerCassieQueuedScpTermination(CassieQueuedScpTerminationEventArgs args) => HandleEvent(EventType.CassieQueueScpTermination,
         nameof(EventType.CassieQueueScpTermination), args.Player.Role.ToString(), args.Announcement);
-    #endregion
 
-    #region 914
     public override void OnScp914Activated(Scp914ActivatedEventArgs args) => HandleEvent(EventType.Scp914Activate, nameof(EventType.Scp914Activate),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.KnobSetting.ToString());
 
@@ -447,9 +413,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnScp914ProcessedPlayer(Scp914ProcessedPlayerEventArgs args) => HandleEvent(EventType.Scp914ProcessPlayer,
         nameof(EventType.Scp914ProcessPlayer), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.KnobSetting.ToString());
-    #endregion
 
-    #region 106
     public override void OnScp106ChangedStalkMode(Scp106ChangedStalkModeEventArgs args) => HandleEvent(EventType.Scp106Stalking, nameof(EventType.Scp106Stalking),
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
@@ -464,9 +428,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnScp106UsedHunterAtlas(Scp106UsedHunterAtlasEventArgs args) => HandleEvent(EventType.Scp106UsedHunterAtlas,
         nameof(EventType.Scp106UsedHunterAtlas), args.Player.PlayerId.ToString(), args.Player.DisplayName);
-    #endregion
 
-    #region 173
     public override void OnScp173PlayedSound(Scp173PlayedSoundEventArgs args) => HandleEvent(EventType.Scp173PlaySound, nameof(EventType.Scp173PlaySound),
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
@@ -481,9 +443,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnScp173CreatedTantrum(Scp173CreatedTantrumEventArgs args) => HandleEvent(EventType.Scp173CreateTantrum, nameof(EventType.Scp173CreateTantrum),
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
-    #endregion
 
-    #region 939
     public override void OnScp939CreatedAmnesticCloud(Scp939CreatedAmnesticCloudEventArgs args) => HandleEvent(EventType.Scp939CreateAmnesticCloud,
         nameof(EventType.Scp939CreateAmnesticCloud), args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
@@ -492,9 +452,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnScp939Attacked(Scp939AttackedEventArgs args) => HandleEvent(EventType.Scp939Attack, nameof(EventType.Scp939Attack),
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
-    #endregion
 
-    #region 079
     public override void OnScp079GainedExperience(Scp079GainedExperienceEventArgs args) => HandleEvent(EventType.Scp079GainExperience,
         nameof(EventType.Scp079GainExperience), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Amount.ToString(), args.Reason.ToString());
 
@@ -527,9 +485,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnScp079Recontained(Scp079RecontainedEventArgs args) => HandleEvent(EventType.Scp079Recontained, nameof(EventType.Scp079Recontained),
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
-    #endregion
 
-    #region 049
     public override void OnScp049ResurrectedBody(Scp049ResurrectedBodyEventArgs args) => HandleEvent(EventType.Scp049ResurrectBody, nameof(EventType.Scp049ResurrectBody),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
 
@@ -538,17 +494,13 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnScp049UsedSense(Scp049UsedSenseEventArgs args) => HandleEvent(EventType.Scp049UseSense, nameof(EventType.Scp049UseSense),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
-    #endregion
 
-    #region 049-2
     public override void OnScp0492ConsumedCorpse(Scp0492ConsumedCorpseEventArgs args) => HandleEvent(EventType.Scp049_2ConsumeCorpse,
         nameof(EventType.Scp049_2ConsumeCorpse), args.Player.PlayerId.ToString(), args.Player.DisplayName);
 
     public override void OnScp0492StartedConsumingCorpse(Scp0492StartedConsumingCorpseEventArgs args) => HandleEvent(EventType.Scp049_2StartConsumingCorpse,
         nameof(EventType.Scp049_2StartConsumingCorpse), args.Player.PlayerId.ToString(), args.Player.DisplayName);
-    #endregion
 
-    #region 096
     public override void OnScp096AddedTarget(Scp096AddedTargetEventArgs args) => HandleEvent(EventType.Scp096AddTarget, nameof(EventType.Scp096AddTarget),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
 
@@ -569,10 +521,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnScp096StartedCrying(Scp096StartedCryingEventArgs args) => HandleEvent(EventType.Scp096StartCrying, nameof(EventType.Scp096StartCrying),
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
-    #endregion
-    #endregion
 
-    #region Bans
     public override void OnServerBanIssued(BanIssuedEventArgs args) => HandleEvent(EventType.BanIssued, nameof(EventType.BanIssued), args.BanDetails.Id,
         args.BanType.ToString());
 
@@ -581,5 +530,4 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnServerBanUpdated(BanUpdatedEventArgs args) => HandleEvent(EventType.BanUpdated, nameof(EventType.BanUpdated), args.BanDetails.Id,
         args.BanType.ToString());
-    #endregion
 }
