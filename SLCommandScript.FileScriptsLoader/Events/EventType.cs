@@ -5,18 +5,18 @@ namespace SLCommandScript.FileScriptsLoader.Events;
 /// </summary>
 public enum EventType : byte
 {
-    PlayerJoined,
-    PlayerLeft,
-    PlayerBanned,
-    PlayerKicked,
+    PlayerJoin,
+    PlayerLeave,
+    PlayerBan,
+    PlayerKick,
     PlayerCheaterReport,
     PlayerChangeRole,
     PlayerPreauth,
     PlayerGetGroup,
     PlayerReport,
     RagdollSpawn,
-    PlayerMuted,
-    PlayerUnmuted,
+    PlayerMute,
+    PlayerUnmute,
     PlayerToggleNoclip,
     PlayerChangeNickname,
     PlayerValidateVisibility,
@@ -35,11 +35,11 @@ public enum EventType : byte
 
 
     PlayerActivateGenerator,
-    PlayerUsedIntercom,
+    PlayerUseIntercom,
     PlayerCloseGenerator,
-    PlayerDamagedShootingTarget,
-    PlayerDamagedWindow,
-    PlayerDeactivatedGenerator,
+    PlayerDamageShootingTarget,
+    PlayerDamageWindow,
+    PlayerDeactivateGenerator,
     PlayerOpenGenerator,
     PlayerInteractShootingTarget,
     PlayerInteractLocker,
@@ -55,7 +55,7 @@ public enum EventType : byte
     PlayerAimWeapon,
     PlayerDryfireWeapon,
     PlayerReloadWeapon,
-    PlayerShotWeapon,
+    PlayerShootWeapon,
     PlayerUnloadWeapon,
     PlayerToggleWeaponFlashlight,
 
@@ -73,7 +73,7 @@ public enum EventType : byte
     PlayerSearchArmor,
     PlayerThrowItem,
     PlayerToggleFlashlight,
-    PlayerUsedItem,
+    PlayerUseItem,
     PlayerInteractScp330,
     PlayerThrowProjectile,
     PlayerCoinFlip,
@@ -81,23 +81,23 @@ public enum EventType : byte
 
 
     PlayerChangeRadioRange,
-    PlayerRadioToggle,
-    PlayerUsingRadio,
+    PlayerToggleRadio,
+    PlayerUseRadio,
 
 
     LczDecontaminationStart,
     LczDecontaminationAnnouncement,
 
 
-    MapGenerated,
+    MapGenerate,
 
 
-    ItemSpawned,
-    PickupCreated,
-    PickupDestroyed,
+    ItemSpawn,
+    CreatePickup,
+    DestroyPickup,
 
 
-    GeneratorActivated,
+    GeneratorActivate,
     PlaceBlood,
     PlaceBulletHole,
     PlayerEnterHazard,
@@ -115,7 +115,7 @@ public enum EventType : byte
     RoundRestart,
     RoundStart,
     WaitingForPlayers,
-    TeamRespawnSelected,
+    TeamRespawnSelection,
     TeamRespawn,
 
 
@@ -124,7 +124,7 @@ public enum EventType : byte
     WarheadDetonation,
 
 
-    CommandExecuted,
+    ExecuteCommand,
 
 
     CassieQueueScpTermination,
@@ -132,22 +132,22 @@ public enum EventType : byte
 
     Scp914Activate,
     Scp914KnobChange,
-    Scp914InventoryItemUpgraded,
-    Scp914PickupUpgraded,
+    Scp914InventoryItemUpgrade,
+    Scp914PickupUpgrade,
     Scp914ProcessPlayer,
 
 
-    Scp106Stalking,
-    Scp106Submerging,
+    Scp106Stalk,
+    Scp106Submerge,
     Scp106VigorChange,
     Scp106TeleportPlayer,
-    Scp106UsedHunterAtlas,
+    Scp106UseHunterAtlas,
 
 
     Scp173PlaySound,
     Scp173BreakneckSpeeds,
     Scp173NewObserver,
-    Scp173RemovedObserver,
+    Scp173RemoveObserver,
     Scp173CreateTantrum,
 
 
@@ -166,7 +166,7 @@ public enum EventType : byte
     Scp079BlackoutZone,
     Scp079BlackoutRoom,
     Scp079ChangeCamera,
-    Scp079Recontained,
+    Scp079Recontainment,
 
 
     Scp049ResurrectBody,

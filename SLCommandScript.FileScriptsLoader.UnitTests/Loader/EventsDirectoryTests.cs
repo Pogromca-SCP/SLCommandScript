@@ -18,9 +18,9 @@ public class EventsDirectoryTests : TestWithConfigBase
 
     private static readonly string[] _invalidEvents = [string.Empty, "hello", "there"];
 
-    private static readonly string[] _validEvents = [$"{EventType.PlayerDeath}", $"On{EventType.MapGenerated}", $"on{EventType.PlaceBlood}"];
+    private static readonly string[] _validEvents = [$"{EventType.PlayerDeath}", $"On{EventType.MapGenerate}", $"on{EventType.PlaceBlood}"];
 
-    private static readonly EventType[] _eventTypes = [EventType.PlayerDeath, EventType.MapGenerated, EventType.PlaceBlood];
+    private static readonly EventType[] _eventTypes = [EventType.PlayerDeath, EventType.MapGenerate, EventType.PlaceBlood];
 
     private static IEnumerable<object[]> InvalidEvents => JoinArrays(_invalidEvents, _eventTypes);
 
@@ -117,8 +117,8 @@ public class EventsDirectoryTests : TestWithConfigBase
         var path3 = "bad";
         var watcherMock = MakeWatcherMock();
         var fileSystemMock = MakeFilesHelper([path1, path2, path3]);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(path1)).Returns(EventType.ItemSpawned.ToString());
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(path2)).Returns(EventType.MapGenerated.ToString());
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(path1)).Returns(EventType.ItemSpawn.ToString());
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(path2)).Returns(EventType.MapGenerate.ToString());
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(path3)).Returns(string.Empty);
         var config = FromFilesMock(fileSystemMock);
 
@@ -174,8 +174,8 @@ public class EventsDirectoryTests : TestWithConfigBase
         watcherMock.Setup(x => x.UnregisterEvents(It.IsAny<FileScriptsEventHandler>()));
         watcherMock.Setup(x => x.Dispose());
         var fileSystemMock = MakeFilesHelper([path1, path2, path3]);
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(path1)).Returns(EventType.ItemSpawned.ToString());
-        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(path2)).Returns(EventType.MapGenerated.ToString());
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(path1)).Returns(EventType.ItemSpawn.ToString());
+        fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(path2)).Returns(EventType.MapGenerate.ToString());
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(path3)).Returns(string.Empty);
         var config = FromFilesMock(fileSystemMock);
         var dir = MakeSupressed(watcherMock.Object, config);
