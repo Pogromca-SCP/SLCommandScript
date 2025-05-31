@@ -1,6 +1,8 @@
-using PluginAPI.Core;
-using PluginAPI.Enums;
+using LabApi.Features.Console;
+using LabApi.Loader;
+using LabApi.Loader.Features.Plugins;
 using SLCommandScript.Core;
+using SLCommandScript.Core.Commands;
 using SLCommandScript.Core.Permissions;
 using SLCommandScript.Core.Reflection;
 using SLCommandScript.FileScriptsLoader.Helpers;
@@ -30,23 +32,6 @@ public class FileScriptsLoader : IScriptsLoader
     /// </summary>
     public const string ProjectAuthor = "Adam Szerszenowicz";
 
-    /// <summary>
-    /// Prefix string to use in logs.
-    /// </summary>
-    private const string LoaderPrefix = "FileScriptsLoader: ";
-
-    /// <summary>
-    /// Prints a message to server log.
-    /// </summary>
-    /// <param name="message">Message to print.</param>
-    public static void PrintLog(string message) => Log.Info(message, LoaderPrefix);
-
-    /// <summary>
-    /// Prints an error message to server log.
-    /// </summary>
-    /// <param name="message">Message to print.</param>
-    public static void PrintError(string message) => Log.Error(message, LoaderPrefix);
-
     /// <inheritdoc />
     public string LoaderName => ProjectName;
 
@@ -64,31 +49,26 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Contains events directory monitor.
     /// </summary>
-    private EventsDirectory _eventsDirectory = null;
+    private EventsDirectory? _eventsDirectory = null;
 
     /// <inheritdoc />
-    public void InitScriptsLoader(object plugin, PluginHandler handler, ScriptsLoaderConfig loaderConfig)
+    public void InitScriptsLoader(Plugin? plugin, ScriptsLoaderConfig? loaderConfig)
     {
         if (plugin is null)
         {
-            PrintError("Provided plugin object is null.");
+            Logger.Error("Provided plugin object is null.");
             return;
         }
 
-        if (handler is null)
-        {
-            PrintError("Provided plugin handler is null.");
-            return;
-        }
-
-        PrintLog("Initializing scripts loader...");
+        Logger.Info("Initializing scripts loader...");
         loaderConfig ??= new();
         var runtimeConfig = new RuntimeConfig(new FileSystemHelper(), LoadPermissionsResolver(loaderConfig.CustomPermissionsResolver), loaderConfig.ScriptExecutionsLimit);
-        LoadDirectory(plugin, $"{handler.PluginDirectoryPath}/scripts/events/", loaderConfig.EnableScriptEventHandlers ? CommandType.Console : 0, runtimeConfig);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/ra/", loaderConfig.AllowedScriptCommandTypes & CommandType.RemoteAdmin, runtimeConfig);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/server/", loaderConfig.AllowedScriptCommandTypes & CommandType.Console, runtimeConfig);
-        LoadDirectory(null, $"{handler.PluginDirectoryPath}/scripts/client/", loaderConfig.AllowedScriptCommandTypes & CommandType.GameConsole, runtimeConfig);
-        PrintLog("Scripts loader is initialized.");
+        var directory = plugin.GetConfigDirectory();
+        LoadDirectory(false, $"{directory.FullName}/scripts/events/", loaderConfig.EnableScriptEventHandlers ? CommandType.Console : 0, runtimeConfig);
+        LoadDirectory(true, $"{directory.FullName}/scripts/ra/", loaderConfig.AllowedScriptCommandTypes & CommandType.RemoteAdmin, runtimeConfig);
+        LoadDirectory(true, $"{directory.FullName}/scripts/server/", loaderConfig.AllowedScriptCommandTypes & CommandType.Console, runtimeConfig);
+        LoadDirectory(true, $"{directory.FullName}/scripts/client/", loaderConfig.AllowedScriptCommandTypes & CommandType.Client, runtimeConfig);
+        Logger.Info("Scripts loader is initialized.");
     }
 
     /// <inheritdoc />
@@ -109,7 +89,7 @@ public class FileScriptsLoader : IScriptsLoader
             return;
         }
 
-        PrintLog("Disabling scripts loader...");
+        Logger.Info("Disabling scripts loader...");
 
         foreach (var dir in _registeredDirectories)
         {
@@ -119,7 +99,7 @@ public class FileScriptsLoader : IScriptsLoader
         _registeredDirectories.Clear();
         _eventsDirectory?.Dispose();
         _eventsDirectory = null;
-        PrintLog("Scripts loader is disabled.");
+        Logger.Info("Scripts loader is disabled.");
     }
 
     /// <summary>
@@ -127,11 +107,11 @@ public class FileScriptsLoader : IScriptsLoader
     /// </summary>
     /// <param name="resolverToUse">Custom type of resolver to use.</param>
     /// <returns>Loaded permissions resolver instance.</returns>
-    private IPermissionsResolver LoadPermissionsResolver(string resolverToUse)
+    private IPermissionsResolver LoadPermissionsResolver(string? resolverToUse)
     {
         if (string.IsNullOrWhiteSpace(resolverToUse))
         {
-            PrintLog("Using default permissions resolver.");
+            Logger.Info("Using default permissions resolver.");
             return new VanillaPermissionsResolver();
         }
 
@@ -139,12 +119,12 @@ public class FileScriptsLoader : IScriptsLoader
 
         if (permissionsResolver is null)
         {
-            PrintError(message);
+            Logger.Warn($"Failed to load custom permissions resolver: {message}. Using default resolver.");
             return new VanillaPermissionsResolver();
         }
         else
         {
-            PrintLog("Custom permissions resolver loaded successfully.");
+            Logger.Info("Custom permissions resolver loaded successfully.");
             return permissionsResolver;
         }
     }
@@ -152,11 +132,11 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Loads all scripts from directory.
     /// </summary>
-    /// <param name="plugin">Plugin object.</param>
+    /// <param name="isCommand">Determines the directory be for commands or events.</param>
     /// <param name="directory">Directory to load.</param>
     /// <param name="handlerType">Handler to use for commands registration.</param>
     /// <param name="config">Configuration to apply.</param>
-    private void LoadDirectory(object plugin, string directory, CommandType handlerType, RuntimeConfig config)
+    private void LoadDirectory(bool isCommand, string directory, CommandType handlerType, RuntimeConfig config)
     {
         if (handlerType == 0)
         {
@@ -168,15 +148,15 @@ public class FileScriptsLoader : IScriptsLoader
             config.FileSystemHelper.CreateDirectory(directory);
         }
 
-        if (plugin is null)
+        if (isCommand)
         {
-            PrintLog($"Initializing commands directory for {handlerType}...");
+            Logger.Info($"Initializing commands directory for {handlerType}...");
             _registeredDirectories.Add(new CommandsDirectory(new FileSystemWatcherHelper(directory, null, true), handlerType, config));
         }
         else
         {
-            PrintLog("Initializing events directory...");
-            _eventsDirectory = new EventsDirectory(plugin, new FileSystemWatcherHelper(directory, EventsDirectory.ScriptFilesFilter, false), config);
+            Logger.Info("Initializing events directory...");
+            _eventsDirectory = new EventsDirectory(new FileSystemWatcherHelper(directory, EventsDirectory.ScriptFilesFilter, false), config);
         }
     }
 }

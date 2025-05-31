@@ -15,7 +15,6 @@ public class RangesTests
         [5, -2, new[] { 5, 4, 3, 2, 1, 0, -1, -2 }]
     ];
 
-    #region GetRange Tests
     [TestCaseSource(nameof(_testRanges))]
     public void LoadNext_ShouldReturnFalse(int start, int end, int[] expected)
     {
@@ -25,5 +24,4 @@ public class RangesTests
         // Assert
         result.Should().Equal(expected);
     }
-    #endregion
 }

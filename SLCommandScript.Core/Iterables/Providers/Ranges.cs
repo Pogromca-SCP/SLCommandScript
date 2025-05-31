@@ -22,8 +22,8 @@ public static class RangesProvider
     /// </summary>
     /// <param name="targetVars">Dictionary to insert value into.</param>
     /// <param name="number">Number value to load.</param>
-    /// <exception cref="NullReferenceException">When provided object is <see langword="null"/>.</exception>
-    public static void LoadVariables(IDictionary<string, string> targetVars, int number) => targetVars["i"] = number.ToString();
+    /// <exception cref="NullReferenceException">When <paramref name="targetVars" /> is <see langword="null"/>.</exception>
+    public static void LoadVariables(IDictionary<string, string?> targetVars, int number) => targetVars["i"] = number.ToString();
 
     /// <summary>
     /// Creates numbers range.

@@ -1,4 +1,4 @@
-using PluginAPI.Events;
+using LabApi.Events.CustomHandlers;
 using System;
 using System.IO;
 
@@ -42,16 +42,16 @@ public interface IFileSystemWatcherHelper : IDisposable
     /// <summary>
     /// Registers an event handler.
     /// </summary>
-    /// <param name="plugin">Plugin object responsible for event handler.</param>
+    /// <typeparam name="T">Event handler type.</typeparam>
     /// <param name="eventHandler">Event handler to register.</param>
-    void RegisterEvents(object plugin, object eventHandler);
+    void RegisterEvents<T>(T eventHandler) where T : CustomEventsHandler;
 
     /// <summary>
     /// Unregisters an event handler.
     /// </summary>
-    /// <param name="plugin">Plugin object responsible for event handler.</param>
+    /// <typeparam name="T">Event handler type.</typeparam>
     /// <param name="eventHandler">Event handler to unregister.</param>
-    void UnregisterEvents(object plugin, object eventHandler);
+    void UnregisterEvents<T>(T eventHandler) where T : CustomEventsHandler;
 }
 
 /// <summary>
@@ -88,14 +88,14 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
     /// <param name="path">Path to watch.</param>
     /// <param name="filter">Files filter to use.</param>
     /// <param name="includeSubdirectories">Whether or not subdirectories should be monitored.</param>
-    public FileSystemWatcherHelper(string path, string filter, bool includeSubdirectories)
+    public FileSystemWatcherHelper(string path, string? filter, bool includeSubdirectories)
     {
         _watcher = new(path)
         {
             NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName,
             Filter = filter,
             IncludeSubdirectories = includeSubdirectories,
-            EnableRaisingEvents = true
+            EnableRaisingEvents = true,
         };
     }
 
@@ -107,10 +107,10 @@ public class FileSystemWatcherHelper : IFileSystemWatcherHelper
     }
 
     /// <inheritdoc />
-    public void RegisterEvents(object plugin, object eventHandler) => EventManager.RegisterEvents(plugin, eventHandler);
+    public void RegisterEvents<T>(T eventHandler) where T : CustomEventsHandler => CustomHandlersManager.RegisterEventsHandler(eventHandler);
 
     /// <inheritdoc />
-    public void UnregisterEvents(object plugin, object eventHandler) => EventManager.UnregisterEvents(plugin, eventHandler);
+    public void UnregisterEvents<T>(T eventHandler) where T : CustomEventsHandler => CustomHandlersManager.UnregisterEventsHandler(eventHandler);
 
     /// <summary>
     /// Disposes wrapped watcher.

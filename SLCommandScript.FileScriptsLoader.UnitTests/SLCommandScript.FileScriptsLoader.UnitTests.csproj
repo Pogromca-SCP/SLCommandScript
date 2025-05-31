@@ -7,6 +7,7 @@
 		<AssemblyName>SLCommandScript.FileScriptsLoader.UnitTests</AssemblyName>
 		<RootNamespace>SLCommandScript.FileScriptsLoader.UnitTests</RootNamespace>
 		<LangVersion>12</LangVersion>
+		<Nullable>enable</Nullable>
 		<Configurations>Release</Configurations>
 		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>
@@ -28,7 +29,6 @@
 		<Reference Include="Mirror" HintPath="$(SL_REFERENCES)/Mirror.dll" />
 		<Reference Include="netstandard" HintPath="$(SL_REFERENCES)/netstandard.dll" />
 		<Reference Include="NorthwoodLib" HintPath="$(SL_REFERENCES)/NorthwoodLib.dll" />
-		<Reference Include="PluginAPI" HintPath="$(SL_REFERENCES)/PluginAPI.dll" />
 		<Reference Include="UnityEngine.CoreModule" HintPath="$(SL_REFERENCES)/UnityEngine.CoreModule.dll" />
 	</ItemGroup>
 </Project>

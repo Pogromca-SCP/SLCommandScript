@@ -8,7 +8,6 @@ namespace SLCommandScript.Core.UnitTests.Reflection;
 [TestFixture]
 public class CustomTypesUtilsTests
 {
-    #region MakeCustomTypeInstance Tests
     [Test]
     public void MakeCustomTypeInstance_ShouldReturnDefault_WhenCustomTypeWasNotFound()
     {
@@ -61,5 +60,4 @@ public class CustomTypesUtilsTests
         result.Should().Be(0);
         message.Should().BeNull();
     }
-    #endregion
 }

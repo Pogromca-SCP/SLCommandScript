@@ -12,7 +12,6 @@ public class FileScriptDirectoryCommandTests
 {
     private const string TestName = "test";
 
-    #region Constructor Tests
     [Test]
     public void FileScriptDirectoryCommand_ShouldProperlyInitialize_WhenNullsProvided()
     {
@@ -42,9 +41,7 @@ public class FileScriptDirectoryCommandTests
         result.Parent.Should().Be(parentMock.Object);
         parentMock.VerifyAll();
     }
-    #endregion
 
-    #region GetLocation Tests
     [Test]
     public void GetLocation_ShouldReturnProperPath_WhenNoParentPresent([Values] bool includeRoot)
     {
@@ -71,12 +68,10 @@ public class FileScriptDirectoryCommandTests
         var result = cmd.GetLocation(includeRoot);
 
         // Assert
-        result.Should().Be($"{parentLocation}{Path.DirectorySeparatorChar}{cmd.Command}");
+        result.Should().Be($"{parentLocation}{cmd.Command}{Path.DirectorySeparatorChar}");
         parentMock.VerifyAll();
     }
-    #endregion
 
-    #region Execute Tests
     [Test]
     public void ExecuteParent_ShouldProperlyInvokeSubcommand([Values] bool isSuccess)
     {
@@ -85,7 +80,7 @@ public class FileScriptDirectoryCommandTests
         var cmd = new FileScriptDirectoryCommand(null, null);
         var cmdMock = new Mock<ICommand>(MockBehavior.Strict);
         cmdMock.Setup(x => x.Command).Returns("test");
-        cmdMock.Setup(x => x.Aliases).Returns<string[]>(null);
+        cmdMock.Setup(x => x.Aliases).Returns<string[]>(null!);
         cmdMock.Setup(x => x.Execute(new(new[] { "test" }, 0, 0), null, out response)).Returns(isSuccess);
         cmd.RegisterCommand(cmdMock.Object);
 
@@ -111,5 +106,4 @@ public class FileScriptDirectoryCommandTests
         result.Should().BeFalse();
         message.Should().Be("Cannot execute this parent command");
     }
-    #endregion
 }
