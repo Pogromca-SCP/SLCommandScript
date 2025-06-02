@@ -7,12 +7,12 @@ namespace SLCommandScript.Core.Language.Expressions;
 /// Represents a sequence expression.
 /// </summary>
 /// <param name="body">Expressions to execute in a sequence.</param>
-public class SequenceExpr(IEnumerable<Expr> body) : Expr
+public class SequenceExpr(IEnumerable<Expr?>? body) : Expr
 {
     /// <summary>
     /// Expressions to execute in a sequence.
     /// </summary>
-    public IEnumerable<Expr> Body { get; } = body;
+    public IEnumerable<Expr?>? Body { get; } = body;
 
     /// <summary>
     /// Accepts a visit from an expression visitor.

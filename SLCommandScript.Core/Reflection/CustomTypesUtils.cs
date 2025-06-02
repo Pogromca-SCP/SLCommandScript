@@ -13,8 +13,8 @@ public static class CustomTypesUtils
     /// <typeparam name="TResult">Type to cast new instance into.</typeparam>
     /// <param name="typeName">Name of custom type to find.</param>
     /// <param name="message">Message to return on error.</param>
-    /// <returns>New custom type instance or <see langword="default" /> value of an error has occured.</returns>
-    public static TResult MakeCustomTypeInstance<TResult>(string typeName, out string message)
+    /// <returns>New custom type instance or <see langword="default" /> value if an error has occurred.</returns>
+    public static TResult? MakeCustomTypeInstance<TResult>(string? typeName, out string? message)
     {
         var customType = GetCustomType(typeName, out message);
 
@@ -38,8 +38,8 @@ public static class CustomTypesUtils
     /// <typeparam name="TResult">Type to cast new instance into.</typeparam>
     /// <param name="customType">Custom type to instantiate.</param>
     /// <param name="message">Message to return on error.</param>
-    /// <returns>New custom type instance or <see langword="default" /> value of an error has occured.</returns>
-    private static TResult ActivateCustomInstance<TResult>(Type customType, out string message)
+    /// <returns>New custom type instance or <see langword="default" /> value if an error has occurred.</returns>
+    private static TResult? ActivateCustomInstance<TResult>(Type customType, out string? message)
     {
         try
         {
@@ -59,7 +59,7 @@ public static class CustomTypesUtils
     /// <param name="typeName">Name of the type to retrieve.</param>
     /// <param name="message">Message to return on error.</param>
     /// <returns>Found type or <see langword="null"/> if nothing was found.</returns>
-    private static Type GetCustomType(string typeName, out string message)
+    private static Type? GetCustomType(string? typeName, out string? message)
     {
         try
         {

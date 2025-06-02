@@ -9,7 +9,6 @@ namespace SLCommandScript.UnitTests.Commands;
 [TestFixture]
 public class HelperCommandsTests
 {
-    #region Constructor Tests
     [Test]
     public void HelperCommands_ShouldProperlyInitialize()
     {
@@ -19,9 +18,7 @@ public class HelperCommandsTests
         // Assert
         command.AllCommands.Should().HaveCount(2);
     }
-    #endregion
 
-    #region ExecuteParent Tests
     [Test]
     public void ExecuteParent_ShouldSucceed_WhenLoaderIsNull()
     {
@@ -35,8 +32,9 @@ public class HelperCommandsTests
         // Assert
         result.Should().BeTrue();
 
-        response.Should().Be($"Current SLCommandScript environment state:\n{Plugin.PluginName} v{Plugin.PluginVersion} @{Plugin.PluginAuthor}\r\n" +
-            $"{Constants.Name} v{Constants.Version} @{Constants.Author}\r\nNo Scripts Loader currently in use");
+        response.Should().Be("Current SLCommandScript environment state:\n" +
+            $"'{SLCommandScriptPlugin.PluginName}', Version: {SLCommandScriptPlugin.PluginVersion}, Author: '{SLCommandScriptPlugin.PluginAuthor}'\n" +
+            $"'{Constants.Name}', Version: {Constants.Version}, Author: '{Constants.Author}'\nNo scripts loader currently in use");
 
         senderMock.VerifyAll();
     }
@@ -58,11 +56,11 @@ public class HelperCommandsTests
         // Assert
         result.Should().BeTrue();
 
-        response.Should().Be($"Current SLCommandScript environment state:\n{Plugin.PluginName} v{Plugin.PluginVersion} @{Plugin.PluginAuthor}\r\n" +
-            $"{Constants.Name} v{Constants.Version} @{Constants.Author}\r\ntest v1.0.0 @unknown");
+        response.Should().Be("Current SLCommandScript environment state:\n" +
+            $"'{SLCommandScriptPlugin.PluginName}', Version: {SLCommandScriptPlugin.PluginVersion}, Author: '{SLCommandScriptPlugin.PluginAuthor}'\n" +
+            $"'{Constants.Name}', Version: {Constants.Version}, Author: '{Constants.Author}'\n'test', Version: 1.0.0, Author: 'unknown'");
 
         senderMock.VerifyAll();
         loaderMock.VerifyAll();
     }
-    #endregion
 }

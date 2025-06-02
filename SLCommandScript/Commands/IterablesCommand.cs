@@ -47,7 +47,7 @@ public class IterablesCommand : ICommand
             return false;
         }
 
-        var vars = new Dictionary<string, string>();
+        var vars = new Dictionary<string, string?>();
         iterable.LoadNext(vars);
 
         if (vars.Count < 1)
@@ -73,7 +73,7 @@ public class IterablesCommand : ICommand
 
         foreach (var key in dictionary.Keys)
         {
-            sb.AppendLine(key);
+            sb.Append(key).Append('\n');
         }
 
         return StringBuilderPool.Shared.ToStringReturn(sb);
@@ -106,11 +106,11 @@ public class IterablesCommand : ICommand
     /// <param name="sender">Command sender.</param>
     /// <param name="response">Response to display in sender's console.</param>
     /// <returns><see langword="true"/> if command executed successfully, <see langword="false"/> otherwise.</returns>
-    public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+    public bool Execute(ArraySegment<string?> arguments, ICommandSender? sender, out string response)
     {
         if (arguments.Count > 0)
         {
-            return GetVariables(arguments.At(0), out response);
+            return GetVariables(arguments.At(0)!, out response);
         }
 
         response = GetDictionaryKeys(IterablesUtils.Providers, "Currently available iterables:\n");

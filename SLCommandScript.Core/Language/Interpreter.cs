@@ -1,10 +1,10 @@
 using CommandSystem;
-using PluginAPI.Core;
+using LabApi.Features.Console;
+using MEC;
 using SLCommandScript.Core.Language.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SLCommandScript.Core.Language;
 
@@ -13,23 +13,22 @@ namespace SLCommandScript.Core.Language;
 /// </summary>
 public class Interpreter : IExprVisitor<bool>
 {
-    #region Scope
     /// <summary>
     /// Represents variables scope.
     /// </summary>
-    private class Scope : Dictionary<string, string>
+    private class Scope : Dictionary<string, string?>
     {
         /// <summary>
         /// Contains reference to higher variable scope.
         /// </summary>
-        public Scope Next;
+        public Scope? Next;
 
         /// <summary>
         /// Creates new variables scope.
         /// </summary>
         /// <param name="next">Higher variables scope to copy values from.</param>
         /// <param name="saveParent">Whether or not the scope should remember its parent.</param>
-        public Scope(Scope next, bool saveParent) : base(StringComparer.OrdinalIgnoreCase)
+        public Scope(Scope? next, bool saveParent) : base(StringComparer.OrdinalIgnoreCase)
         {
             Next = saveParent ? next : null;
 
@@ -42,55 +41,32 @@ public class Interpreter : IExprVisitor<bool>
             }
         }
     }
-    #endregion
 
-    #region Static Elements
     /// <summary>
     /// Contains regular expression for variables.
     /// </summary>
     private static readonly Regex _variablePattern = new("\\$\\(([^)\\s]+)\\)");
 
     /// <summary>
-    /// Executes delay expression.
-    /// </summary>
-    /// <param name="interp">Interpreter instance to use.</param>
-    /// <param name="expr">Expression to execute.</param>
-    /// <returns>Task representing async operation.</returns>
-    private static async Task ExecuteDelayExprAsync(Interpreter interp, DelayExpr expr)
-    {
-        await Task.Delay(expr.Duration);
-        var result = expr.Body.Accept(interp);
-
-        if (!result)
-        {
-            Log.Error(interp.ErrorMessage, expr.Name is null ? "Async script: " : $"Async script ('{expr.Name}'): ");
-        }
-    }
-    #endregion
-
-    #region Fields and Properties
-    /// <summary>
     /// Contains used command sender.
     /// </summary>
-    public ICommandSender Sender { get; private set; }
+    public ICommandSender? Sender { get; private set; }
 
     /// <summary>
     /// Contains current error message.
     /// </summary>
-    public string ErrorMessage { get; private set; }
+    public string? ErrorMessage { get; private set; }
 
     /// <summary>
     /// Contains current variable values.
     /// </summary>
-    private Scope _variables;
-    #endregion
+    private Scope? _variables;
 
-    #region State Management
     /// <summary>
     /// Creates new interpreter instance.
     /// </summary>
     /// <param name="sender">Command sender to use for commands.</param>
-    public Interpreter(ICommandSender sender)
+    public Interpreter(ICommandSender? sender)
     {
         Reset(sender);
         _variables = null;
@@ -110,16 +86,14 @@ public class Interpreter : IExprVisitor<bool>
     /// Resets the interpretation process.
     /// </summary>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(ICommandSender sender)
+    public void Reset(ICommandSender? sender)
     {
         Sender = sender;
         ErrorMessage = null;
     }
-    #endregion
 
-    #region Expressions Processing
     /// <inheritdoc />
-    public bool VisitCommandExpr(CommandExpr expr)
+    public bool VisitCommandExpr(CommandExpr? expr)
     {
         if (expr is null)
         {
@@ -157,7 +131,7 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <inheritdoc />
-    public bool VisitDelayExpr(DelayExpr expr)
+    public bool VisitDelayExpr(DelayExpr? expr)
     {
         if (expr is null)
         {
@@ -176,12 +150,23 @@ public class Interpreter : IExprVisitor<bool>
             return expr.Body.Accept(this);
         }
 
-        _ = ExecuteDelayExprAsync(new(this), expr);
+        var innerInterp = new Interpreter(this);
+
+        Timing.CallDelayed(expr.Duration / 1000, () =>
+        {
+            var result = expr.Body.Accept(innerInterp);
+
+            if (!result)
+            {
+                Logger.Error(expr.Name is null ? innerInterp.ErrorMessage! : $"[{expr.Name}] {innerInterp.ErrorMessage}");
+            }
+        });
+
         return true;
     }
 
     /// <inheritdoc />
-    public bool VisitForeachExpr(ForeachExpr expr)
+    public bool VisitForeachExpr(ForeachExpr? expr)
     {
         if (expr is null)
         {
@@ -219,7 +204,7 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <inheritdoc />
-    public bool VisitForElseExpr(ForElseExpr expr)
+    public bool VisitForElseExpr(ForElseExpr? expr)
     {
         if (expr is null)
         {
@@ -267,7 +252,7 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <inheritdoc />
-    public bool VisitIfExpr(IfExpr expr)
+    public bool VisitIfExpr(IfExpr? expr)
     {
         if (expr is null)
         {
@@ -301,7 +286,7 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <inheritdoc />
-    public bool VisitSequenceExpr(SequenceExpr expr)
+    public bool VisitSequenceExpr(SequenceExpr? expr)
     {
         if (expr is null)
         {
@@ -331,9 +316,9 @@ public class Interpreter : IExprVisitor<bool>
     /// </summary>
     /// <param name="args">Original arguments values.</param>
     /// <returns>Arguments with injected variables values.</returns>
-    private string[] InjectArguments(string[] args)
+    private string?[] InjectArguments(string?[] args)
     {
-        var results = new string[args.Length];
+        var results = new string?[args.Length];
         results[0] = args[0];
 
         for (var index = 1; index < args.Length; ++index)
@@ -342,7 +327,7 @@ public class Interpreter : IExprVisitor<bool>
 
             if (arg is not null)
             {
-                arg = _variablePattern.Replace(arg, m => _variables.ContainsKey(m.Groups[1].Value) ? _variables[m.Groups[1].Value] : m.Value);
+                arg = _variablePattern.Replace(arg, m => _variables!.ContainsKey(m.Groups[1].Value) ? _variables[m.Groups[1].Value] : m.Value);
             }
 
             results[index] = arg;
@@ -350,5 +335,4 @@ public class Interpreter : IExprVisitor<bool>
 
         return results;
     }
-    #endregion
 }

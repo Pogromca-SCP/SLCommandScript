@@ -12,7 +12,6 @@ public class SyntaxCommandTests
     [SetUp]
     public void SetUp() => _command.Rules.Clear();
 
-    #region Execute Tests
     [Test]
     public void Execute_ShouldSucceed_WhenNoArgumentsArePassed()
     {
@@ -25,7 +24,7 @@ public class SyntaxCommandTests
 
         // Assert
         result.Should().BeTrue();
-        response.Should().Be($"Available expression/guard types:\ntest\r\nxd\r\n");
+        response.Should().Be($"Available expression/guard types:\ntest\nxd\n");
     }
 
     [Test]
@@ -52,5 +51,4 @@ public class SyntaxCommandTests
         result.Should().BeTrue();
         response.Should().Be(_command.Rules["test"]);
     }
-    #endregion
 }

@@ -6,7 +6,7 @@ namespace SLCommandScript.Core.Language;
 /// <param name="type">Token type to set.</param>
 /// <param name="value">Value related to this token.</param>
 /// <param name="numeric">Numeric value related to this token.</param>
-public readonly struct Token(TokenType type, string value, int numeric = 0)
+public readonly struct Token(TokenType type, string? value, int numeric = 0)
 {
     /// <summary>
     /// Contains type of the token.

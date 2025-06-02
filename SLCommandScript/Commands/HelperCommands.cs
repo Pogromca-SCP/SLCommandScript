@@ -17,7 +17,7 @@ public class HelperCommands : ParentCommand, IUsageProvider
     /// <param name="version">Item version.</param>
     /// <param name="author">Item author.</param>
     /// <returns>Created info line.</returns>
-    private static string MakeInfoLine(string name, string version, string author) => $"{name} v{version} @{author}";
+    private static string MakeInfoLine(string name, string version, string author) => $"'{name}', Version: {version}, Author: '{author}'";
 
     /// <summary>
     /// Contains command name.
@@ -27,7 +27,7 @@ public class HelperCommands : ParentCommand, IUsageProvider
     /// <summary>
     /// Defines command aliases.
     /// </summary>
-    public override string[] Aliases => null;
+    public override string[]? Aliases => null;
 
     /// <summary>
     /// Contains command description.
@@ -42,13 +42,13 @@ public class HelperCommands : ParentCommand, IUsageProvider
     /// <summary>
     /// Stores a reference to currently used loader.
     /// </summary>
-    private readonly IScriptsLoader _loader;
+    private readonly IScriptsLoader? _loader;
 
     /// <summary>
     /// Initializes the command.
     /// </summary>
     /// <param name="loader">Currently used loader.</param>
-    public HelperCommands(IScriptsLoader loader)
+    public HelperCommands(IScriptsLoader? loader)
     {
         _loader = loader;
         LoadGeneratedCommands();
@@ -70,12 +70,12 @@ public class HelperCommands : ParentCommand, IUsageProvider
     /// <param name="sender">Command sender.</param>
     /// <param name="response">Response to display in sender's console.</param>
     /// <returns><see langword="true"/> if command executed successfully, <see langword="false"/> otherwise.</returns>
-    protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
+    protected override bool ExecuteParent(ArraySegment<string?> arguments, ICommandSender? sender, out string response)
     {
         var sb = StringBuilderPool.Shared.Rent("Current SLCommandScript environment state:\n");
-        sb.AppendLine(MakeInfoLine(Plugin.PluginName, Plugin.PluginVersion, Plugin.PluginAuthor));
-        sb.AppendLine(MakeInfoLine(Constants.Name, Constants.Version, Constants.Author));
-        sb.Append(_loader is null ? "No Scripts Loader currently in use" : MakeInfoLine(_loader.LoaderName, _loader.LoaderVersion, _loader.LoaderAuthor));
+        sb.Append(MakeInfoLine(SLCommandScriptPlugin.PluginName, SLCommandScriptPlugin.PluginVersion, SLCommandScriptPlugin.PluginAuthor)).Append('\n');
+        sb.Append(MakeInfoLine(Constants.Name, Constants.Version, Constants.Author)).Append('\n');
+        sb.Append(_loader is null ? "No scripts loader currently in use" : MakeInfoLine(_loader.LoaderName, _loader.LoaderVersion, _loader.LoaderAuthor));
         response = StringBuilderPool.Shared.ToStringReturn(sb);
         return true;
     }

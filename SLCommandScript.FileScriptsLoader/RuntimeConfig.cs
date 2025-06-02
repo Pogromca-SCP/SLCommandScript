@@ -9,7 +9,7 @@ namespace SLCommandScript.FileScriptsLoader;
 /// <param name="fileSystemHelper">File system helper to use.</param>
 /// <param name="permissionsResolver">Permissions resolver to use.</param>
 /// <param name="scriptExecutionsLimit">Concurrent executions limit to apply.</param>
-public class RuntimeConfig(IFileSystemHelper fileSystemHelper, IPermissionsResolver permissionsResolver, int scriptExecutionsLimit)
+public class RuntimeConfig(IFileSystemHelper? fileSystemHelper, IPermissionsResolver? permissionsResolver, int scriptExecutionsLimit)
 {
     /// <summary>
     /// Contains file system helper to use.

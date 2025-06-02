@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SLCommandScript.Core.Iterables;
@@ -11,6 +12,7 @@ namespace SLCommandScript.Core.Iterables;
 public class ListIterable<TItem> : IIterable
 {
     /// <inheritdoc />
+    [MemberNotNullWhen(false, nameof(_enumerator))]
     public bool IsAtEnd
     {
         get
@@ -36,7 +38,7 @@ public class ListIterable<TItem> : IIterable
                     }
                 }
 
-                _enumerator = _objects.GetEnumerator();
+                _enumerator = _objects!.GetEnumerator();
                 Count = _objects.Count();
                 _current = 0;
             }
@@ -51,27 +53,27 @@ public class ListIterable<TItem> : IIterable
     /// <summary>
     /// Source of iterated objects.
     /// </summary>
-    private readonly Func<IEnumerable<TItem>> _source;
+    private readonly Func<IEnumerable<TItem>?>? _source;
 
     /// <summary>
     /// Original iterated objects collection.
     /// </summary>
-    private readonly IEnumerable<TItem> _items;
+    private readonly IEnumerable<TItem>? _items;
 
     /// <summary>
     /// Variable mapper used for loading variables.
     /// </summary>
-    private readonly Action<IDictionary<string, string>, TItem> _mapper;
+    private readonly Action<IDictionary<string, string?>, TItem>? _mapper;
 
     /// <summary>
     /// Contains wrapped list of objects.
     /// </summary>
-    private IEnumerable<TItem> _objects;
+    private IEnumerable<TItem>? _objects;
 
     /// <summary>
     /// Contains currently used iterator.
     /// </summary>
-    private IEnumerator<TItem> _enumerator;
+    private IEnumerator<TItem>? _enumerator;
 
     /// <summary>
     /// Random settings used for randomization.
@@ -88,7 +90,7 @@ public class ListIterable<TItem> : IIterable
     /// </summary>
     /// <param name="source">Source of objects to insert into wrapped list.</param>
     /// <param name="mapper">Variable mapper to use to load variables.</param>
-    public ListIterable(Func<IEnumerable<TItem>> source, Action<IDictionary<string, string>, TItem> mapper)
+    public ListIterable(Func<IEnumerable<TItem>?>? source, Action<IDictionary<string, string?>, TItem>? mapper)
     {
         Count = 0;
         _source = source;
@@ -105,7 +107,7 @@ public class ListIterable<TItem> : IIterable
     /// </summary>
     /// <param name="items">Objects to insert into wrapped list.</param>
     /// <param name="mapper">Variable mapper to use to load variables.</param>
-    public ListIterable(IEnumerable<TItem> items, Action<IDictionary<string, string>, TItem> mapper)
+    public ListIterable(IEnumerable<TItem>? items, Action<IDictionary<string, string?>, TItem>? mapper)
     {
         Count = 0;
         _source = null;
@@ -118,7 +120,7 @@ public class ListIterable<TItem> : IIterable
     }
 
     /// <inheritdoc />
-    public bool LoadNext(IDictionary<string, string> targetVars)
+    public bool LoadNext(IDictionary<string, string?>? targetVars)
     {
         if (IsAtEnd)
         {

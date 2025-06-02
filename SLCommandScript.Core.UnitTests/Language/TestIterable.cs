@@ -13,15 +13,19 @@ public class TestIterable : IIterable
 
     public int Count => MaxIterations;
 
-    public bool LoadNext(IDictionary<string, string> targetVars)
+    public bool LoadNext(IDictionary<string, string?>? targetVars)
     {
         if (IsAtEnd)
         {
             return false;
         }
 
-        targetVars["i"] = _index.ToString();
-        targetVars["wut?"] = "hello";
+        if (targetVars is not null)
+        {
+            targetVars["i"] = _index.ToString();
+            targetVars["wut?"] = "hello";
+        }
+
         ++_index;
         return true;
     }

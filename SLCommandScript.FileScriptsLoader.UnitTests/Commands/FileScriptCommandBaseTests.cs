@@ -4,7 +4,6 @@ using NUnit.Framework;
 using SLCommandScript.FileScriptsLoader.Commands;
 using SLCommandScript.FileScriptsLoader.Helpers;
 using System;
-using System.IO;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 
@@ -15,7 +14,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
 
     private const string TestPath = "test.slcs";
 
-    private static readonly string[][] _errorPaths = [
+    private static readonly string?[][] _errorPaths = [
         ["xd", "Command 'xd' was not found\nat test.slcs:1"],
         [null, "Cannot read script from file 'test.slcs'"],
         ["[", "Directive structure is invalid\nat test.slcs:1"]
@@ -27,14 +26,13 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         "#This is a comment"
     ];
 
-    #region Description Tests
     [Test]
     public void Description_ShouldBeSetToDefault_WhenProvidedValueIsNull()
     {
         // Act
         var result = new FileScriptCommandBase(null, null, RuntimeConfig)
         {
-            Description = null
+            Description = null!,
         };
 
         // Assert
@@ -69,9 +67,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         // Assert
         result.Description.Should().Be(newDesc);
     }
-    #endregion
 
-    #region Constructor Tests
     [Test]
     public void FileScriptCommandBase_ShouldProperlyInitialize_WhenProvidedNullValues()
     {
@@ -105,9 +101,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         result.Config.Should().Be(RuntimeConfig);
         fileScriptParentMock.VerifyAll();
     }
-    #endregion
 
-    #region Execute Tests
     [Test]
     public void Execute_ShouldFail_WhenConcurrentExecutionsLimitIsExceeded()
     {
@@ -144,9 +138,9 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
     {
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.ReadFile($"parent{Path.DirectorySeparatorChar}test.slcs")).Throws<Exception>();
+        fileSystemMock.Setup(x => x.ReadFile("parent-test.slcs")).Throws<Exception>();
         var scriptParentMock = new Mock<IFileScriptCommandParent>(MockBehavior.Strict);
-        scriptParentMock.Setup(x => x.GetLocation(true)).Returns("parent");
+        scriptParentMock.Setup(x => x.GetLocation(true)).Returns("parent-");
         var cmd = new FileScriptCommandBase(TestCommand, scriptParentMock.Object, FromFilesMock(fileSystemMock));
 
         // Act
@@ -154,17 +148,17 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
 
         // Assert
         result.Should().BeFalse();
-        message.Should().Be($"Cannot read script from file 'parent{Path.DirectorySeparatorChar}test.slcs'");
+        message.Should().Be("Cannot read script from file 'parent-test.slcs'");
         fileSystemMock.VerifyAll();
         scriptParentMock.VerifyAll();
     }
 
     [TestCaseSource(nameof(_errorPaths))]
-    public void Execute_ShouldFail_WhenScriptFails(string src, string expectedError)
+    public void Execute_ShouldFail_WhenScriptFails(string? src, string expectedError)
     {
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.ReadFile(TestPath)).Returns(src);
+        fileSystemMock.Setup(x => x.ReadFile(TestPath)).Returns(src!);
         var cmd = new FileScriptCommandBase(TestCommand, null, FromFilesMock(fileSystemMock));
 
         // Act
@@ -192,5 +186,4 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         message.Should().Be("Script executed successfully.");
         fileSystemMock.VerifyAll();
     }
-    #endregion
 }

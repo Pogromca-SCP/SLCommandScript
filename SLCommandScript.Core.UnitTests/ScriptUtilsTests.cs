@@ -19,7 +19,6 @@ public class ScriptUtilsTests
         "#This is a comment"
     ];
 
-    #region Execute Tests
     [TestCaseSource(nameof(_errorPaths))]
     public void Execute_ShouldFail_WhenScriptFails(string src, string expectedError)
     {
@@ -41,5 +40,4 @@ public class ScriptUtilsTests
         Message.Should().BeNull();
         Line.Should().Be(src.Length < 1 ? 0 : 1);
     }
-    #endregion
 }
