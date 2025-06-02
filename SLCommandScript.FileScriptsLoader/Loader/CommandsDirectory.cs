@@ -158,7 +158,7 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
             processedPath = processedPath.Substring(0, processedPath.Length - 5);
         }
 
-        var names = processedPath.Split(Path.DirectorySeparatorChar);
+        var names = processedPath.Split('/', '\\');
         var length = names.Length;
         var index = 0;
         var found = Commands.TryGetValue(names[index++], out var foundCommand);

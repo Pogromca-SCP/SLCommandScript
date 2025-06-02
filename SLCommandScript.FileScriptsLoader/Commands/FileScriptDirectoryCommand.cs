@@ -1,6 +1,5 @@
 using CommandSystem;
 using System;
-using System.IO;
 
 namespace SLCommandScript.FileScriptsLoader.Commands;
 
@@ -37,7 +36,7 @@ public class FileScriptDirectoryCommand(string? name, IFileScriptCommandParent? 
     public override void LoadGeneratedCommands() {}
 
     /// <inheritdoc />
-    public string GetLocation(bool includeRoot = false) => Parent is null ? Command : $"{Parent.GetLocation(includeRoot)}{Command}{Path.DirectorySeparatorChar}";
+    public string GetLocation(bool includeRoot = false) => Parent is null ? Command : $"{Parent.GetLocation(includeRoot)}{Command}/";
 
     /// <summary>
     /// Executes the parent command.

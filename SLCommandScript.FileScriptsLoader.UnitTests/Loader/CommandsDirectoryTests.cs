@@ -271,7 +271,7 @@ public partial class CommandsDirectoryTests : TestWithConfigBase
         var folder1 = $"{_testDirectory}folder1";
         var folder2 = $"{_testDirectory}folder2";
         var globalFile = $"{_testDirectory}global";
-        var innerFile = $"{folder1}{Path.DirectorySeparatorChar}inner";
+        var innerFile = $"{folder1}/inner";
         var fileSystemMock = MakeFilesHelper([folder1, folder2], [globalFile, innerFile], [globalFile, innerFile]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(globalFile)).Returns("global");
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(innerFile)).Returns("inner");
@@ -345,7 +345,7 @@ public partial class CommandsDirectoryTests : TestWithConfigBase
         var folder1 = $"{_testDirectory}folder1";
         var folder2 = $"{_testDirectory}folder2";
         var globalFile = $"{_testDirectory}global";
-        var innerFile = $"{folder1}{Path.DirectorySeparatorChar}inner";
+        var innerFile = $"{folder1}/inner";
         var fileSystemMock = MakeFilesHelper([folder1, folder2], [globalFile, innerFile], [globalFile, innerFile]);
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(globalFile)).Returns("global");
         fileSystemMock.Setup(x => x.GetFileNameWithoutExtension(innerFile)).Returns("inner");

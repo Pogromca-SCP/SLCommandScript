@@ -3,7 +3,6 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using SLCommandScript.FileScriptsLoader.Commands;
-using System.IO;
 
 namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 
@@ -68,7 +67,7 @@ public class FileScriptDirectoryCommandTests
         var result = cmd.GetLocation(includeRoot);
 
         // Assert
-        result.Should().Be($"{parentLocation}{cmd.Command}{Path.DirectorySeparatorChar}");
+        result.Should().Be($"{parentLocation}{cmd.Command}/");
         parentMock.VerifyAll();
     }
 

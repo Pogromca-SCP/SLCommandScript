@@ -112,8 +112,8 @@ public class EventsDirectoryTests : TestWithConfigBase
     public void EventsDirectory_ShouldProperlyInitialize_WhenFilesExist()
     {
         // Arrange
-        var path1 = $"{TestDirectory}{Path.DirectorySeparatorChar}panabe";
-        var path2 = $"{TestDirectory}{Path.DirectorySeparatorChar}xd";
+        var path1 = $"{TestDirectory}/panabe";
+        var path2 = $"{TestDirectory}/xd";
         var path3 = "bad";
         var watcherMock = MakeWatcherMock();
         var fileSystemMock = MakeFilesHelper([path1, path2, path3]);
@@ -167,8 +167,8 @@ public class EventsDirectoryTests : TestWithConfigBase
     public void Dispose_ShouldCleanupResources_WhenGoldFlow()
     {
         // Arrange
-        var path1 = $"{TestDirectory}{Path.DirectorySeparatorChar}panabe";
-        var path2 = $"{TestDirectory}{Path.DirectorySeparatorChar}xd";
+        var path1 = $"{TestDirectory}/panabe";
+        var path2 = $"{TestDirectory}/xd";
         var path3 = "bad";
         var watcherMock = MakeWatcherMock();
         watcherMock.Setup(x => x.UnregisterEvents(It.IsAny<FileScriptsEventHandler>()));
