@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-06-09
+
 ## Added
 
 - Added arguments guards to the language, they can be used to prevent script execution when there are not enough arguments provided.
@@ -19,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File scripts loader was updated to no longer rely on static properties and files/directories location tracking.
 - Upgraded project to [LabAPI v1.0.2](https://github.com/northwood-studios/LabAPI/releases/tag/1.0.2).
 
-## [1.0.2]- 2024-11-21
+## [1.0.2] - 2024-11-21
 
 ### Fixed
 
