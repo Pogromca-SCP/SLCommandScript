@@ -10,7 +10,6 @@ namespace SLCommandScript.FileScriptsLoader.UnitTests.Commands;
 [TestFixture]
 public class FileScriptCommandTests : TestWithConfigBase
 {
-    #region Usage Tests
     [Test]
     public void Usage_ShouldBeSetToNull_WhenProvidedValueIsNull()
     {
@@ -43,7 +42,7 @@ public class FileScriptCommandTests : TestWithConfigBase
         // Act
         var result = new FileScriptCommand(null, null, RuntimeConfig)
         {
-            Usage = ["", "       ", null, "\t\t"]
+            Usage = ["", "       ", null!, "\t\t"],
         };
 
         // Assert
@@ -64,9 +63,7 @@ public class FileScriptCommandTests : TestWithConfigBase
         // Assert
         result.Usage.Should().BeEquivalentTo(usage);
     }
-    #endregion
 
-    #region Execute Tests
     [Test]
     public void Execute_ShouldFail_WhenPermissionCheckFails()
     {
@@ -92,7 +89,7 @@ public class FileScriptCommandTests : TestWithConfigBase
     public void Execute_ShouldFail_WhenSenderIsMissingRequiredPermission()
     {
         var resolverMock = new Mock<IPermissionsResolver>(MockBehavior.Strict);
-        string message = null;
+        string? message = null;
         resolverMock.Setup(x => x.CheckPermission(null, "Noclip", out message)).Returns(false);
 
         var cmd = new FileScriptCommand(null, null, new(RuntimeConfig.FileSystemHelper, resolverMock.Object, 10))
@@ -141,5 +138,4 @@ public class FileScriptCommandTests : TestWithConfigBase
         message.Should().Be("Script executed successfully.");
         fileSystemMock.VerifyAll();
     }
-    #endregion
 }

@@ -2,7 +2,6 @@ using CommandSystem;
 using SLCommandScript.Core;
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Threading;
 
 namespace SLCommandScript.FileScriptsLoader.Commands;
@@ -13,7 +12,7 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// <param name="name">Name of the command.</param>
 /// <param name="parent">Parent which stores this command.</param>
 /// <param name="config">Configuration to use.</param>
-public class FileScriptCommandBase(string name, IFileScriptCommandParent parent, RuntimeConfig config) : ICommand
+public class FileScriptCommandBase(string? name, IFileScriptCommandParent? parent, RuntimeConfig? config) : ICommand
 {
     /// <summary>
     /// Default command description to use.
@@ -33,7 +32,7 @@ public class FileScriptCommandBase(string name, IFileScriptCommandParent parent,
     /// <summary>
     /// Defines command aliases.
     /// </summary>
-    public string[] Aliases => null;
+    public string[]? Aliases => null;
 
     /// <summary>
     /// Contains command description.
@@ -48,7 +47,7 @@ public class FileScriptCommandBase(string name, IFileScriptCommandParent parent,
     /// <summary>
     /// Contains parent object which stores this command.
     /// </summary>
-    public IFileScriptCommandParent Parent { get; } = parent;
+    public IFileScriptCommandParent? Parent { get; } = parent;
 
     /// <summary>
     /// Stores used configuration.
@@ -72,7 +71,7 @@ public class FileScriptCommandBase(string name, IFileScriptCommandParent parent,
     /// <param name="sender">Command sender.</param>
     /// <param name="response">Response to display in sender's console.</param>
     /// <returns><see langword="true" /> if command executed successfully, <see langword="false" /> otherwise.</returns>
-    public virtual bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+    public virtual bool Execute(ArraySegment<string?> arguments, ICommandSender? sender, out string response)
     {
         if (Interlocked.Increment(ref _calls) > Config.ScriptExecutionsLimit)
         {
@@ -82,7 +81,7 @@ public class FileScriptCommandBase(string name, IFileScriptCommandParent parent,
         }
 
         var file = $"{Command}.slcs";
-        var path = Parent is null ? file : $"{Parent.GetLocation(true)}{Path.DirectorySeparatorChar}{file}";
+        var path = Parent is null ? file : $"{Parent.GetLocation(true)}{file}";
         var src = LoadSource(path);
 
         if (src is null)
@@ -92,15 +91,15 @@ public class FileScriptCommandBase(string name, IFileScriptCommandParent parent,
             return false;
         }
 
-        (response, var line) = ScriptUtils.Execute(src, arguments, sender, Config.PermissionsResolver);
+        (var error, var line) = ScriptUtils.Execute(src, arguments, sender, Config.PermissionsResolver);
 
         if (Interlocked.Decrement(ref _calls) < 1)
         {
             _loadedScripts.TryRemove(this, out _);
         }
 
-        var result = response is null;
-        response = result ? "Script executed successfully." : $"{response}\nat {Command}.slcs:{line}";
+        var result = error is null;
+        response = result ? "Script executed successfully." : $"{error}\nat {Command}.slcs:{line}";
         return result;
     }
 
@@ -109,7 +108,7 @@ public class FileScriptCommandBase(string name, IFileScriptCommandParent parent,
     /// </summary>
     /// <param name="path">Path to read script from.</param>
     /// <returns>Loaded source code string.</returns>
-    private string LoadSource(string path)
+    private string? LoadSource(string path)
     {
         if (!_loadedScripts.TryGetValue(this, out var src))
         {

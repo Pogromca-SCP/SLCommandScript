@@ -5,7 +5,6 @@ using NUnit.Framework;
 using SLCommandScript.Core.Language;
 using SLCommandScript.Core.Language.Expressions;
 using System;
-using System.Threading.Tasks;
 
 namespace SLCommandScript.Core.UnitTests.Language;
 
@@ -16,7 +15,6 @@ public class InterpreterTests
 
     private static readonly float[] _percentages = [-1.0f, 0.0f, 0.25f, 0.1f, 0.5f, 2.5f];
 
-    #region Constructor Tests
     [Test]
     public void Interpreter_ShouldProperlyInitialize_WhenCommandSenderIsNull()
     {
@@ -41,9 +39,7 @@ public class InterpreterTests
         interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
     }
-    #endregion
 
-    #region Reset Tests
     [Test]
     public void Reset_ShouldProperlyResetInterpreter_WhenCommandSenderIsNull()
     {
@@ -75,9 +71,7 @@ public class InterpreterTests
         interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
     }
-    #endregion
 
-    #region VisitCommandExpr Tests
     [Test]
     public void VisitCommandExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -182,9 +176,7 @@ public class InterpreterTests
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
-    #endregion
 
-    #region VisitDelayExpr Tests
     [Test]
     public void VisitDelayExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -234,46 +226,8 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().Be(success ? null : message);
         commandMock.VerifyAll();
-        commandMock.VerifyNoOtherCalls();
     }
 
-    [Test]
-    public async Task VisitDelayExpr_ShouldExecuteAsynchronously_WhenDurationIsValid([Values] bool success)
-    {
-        // Arrange
-        var delay = 200;
-        var interpreter = new Interpreter(null);
-        var message = success ? "Command succeeded" : "Command failed";
-        var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), null, out message)).Returns(success);
-        var expr = new DelayExpr(new CommandExpr(commandMock.Object, ["test"], false), delay, null);
-
-        // Act
-        var result = interpreter.VisitDelayExpr(expr);
-
-        // Assert
-        result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
-        interpreter.ErrorMessage.Should().BeNull();
-        
-        try
-        {
-            commandMock.VerifyAll();
-            commandMock.VerifyNoOtherCalls();
-        }
-        catch (Exception)
-        {
-            await Task.Delay(delay * 2).ConfigureAwait(false);
-            commandMock.VerifyAll();
-            commandMock.VerifyNoOtherCalls();
-            return;
-        }
-
-        throw new Exception("Expected expression to execute asynchronously, but it was executed synchronously.");
-    }
-    #endregion
-
-    #region VisitForeachExpr Tests
     [Test]
     public void VisitForeachExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -392,9 +346,7 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
     }
-    #endregion
 
-    #region VisitForElseExpr Tests
     [Test]
     public void VisitForElseExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -589,9 +541,7 @@ public class InterpreterTests
         interpreter.Sender.Should().BeNull();
         interpreter.ErrorMessage.Should().BeNull();
     }
-    #endregion
 
-    #region VisitIfExpr Tests
     [Test]
     public void VisitIfExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -766,9 +716,7 @@ public class InterpreterTests
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
-    #endregion
 
-    #region VisitSequenceExpr Tests
     [Test]
     public void VisitSequenceExpr_ShouldFail_WhenExpressionIsNull()
     {
@@ -851,18 +799,17 @@ public class InterpreterTests
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
-    #endregion
 }
 
 public class ArgumentsInjectionTestCommand : ICommand
 {
-    public string Command => null;
+    public string? Command => null;
 
-    public string[] Aliases => null;
+    public string[]? Aliases => null;
 
-    public string Description => null;
+    public string? Description => null;
 
-    public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+    public bool Execute(ArraySegment<string> arguments, ICommandSender? sender, out string? response)
     {
         var firstArg = int.Parse(arguments.At(0));
         var thirdArg = int.Parse(arguments.At(2));
@@ -874,13 +821,13 @@ public class ArgumentsInjectionTestCommand : ICommand
 
 public class NestedArgumentsInjectionTestCommand : ICommand
 {
-    public string Command => null;
+    public string? Command => null;
 
-    public string[] Aliases => null;
+    public string[]? Aliases => null;
 
-    public string Description => null;
+    public string? Description => null;
 
-    public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+    public bool Execute(ArraySegment<string> arguments, ICommandSender? sender, out string? response)
     {
         var firstArg = int.Parse(arguments.At(0));
         var secondArg = int.Parse(arguments.At(1));

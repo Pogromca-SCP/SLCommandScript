@@ -1,4 +1,4 @@
-using PluginAPI.Enums;
+using LabApi.Features.Console;
 using SLCommandScript.FileScriptsLoader.Commands;
 using SLCommandScript.FileScriptsLoader.Events;
 using SLCommandScript.FileScriptsLoader.Helpers;
@@ -23,11 +23,6 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
     public const string EventHandlerPrefix = "on";
 
     /// <summary>
-    /// Contains plugin object.
-    /// </summary>
-    public object PluginObject { get; }
-
-    /// <summary>
     /// Contains used event handler.
     /// </summary>
     public FileScriptsEventHandler Handler { get; }
@@ -35,7 +30,7 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
     /// <summary>
     /// File system watcher used to detect script files changes.
     /// </summary>
-    public IFileSystemWatcherHelper Watcher { get; }
+    public IFileSystemWatcherHelper? Watcher { get; }
 
     /// <summary>
     /// Contains commands configuration to apply.
@@ -45,12 +40,10 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
     /// <summary>
     /// Creates new directory monitor and initializes the watcher.
     /// </summary>
-    /// <param name="plugin">Plugin object.</param>
     /// <param name="watcher">File system watcher to use.</param>
     /// <param name="config">Runtime configuration to use by event scripts.</param>
-    public EventsDirectory(object plugin, IFileSystemWatcherHelper watcher, RuntimeConfig config)
+    public EventsDirectory(IFileSystemWatcherHelper? watcher, RuntimeConfig? config)
     {
-        PluginObject = plugin;
         Handler = new();
         Watcher = watcher;
         Config = config ?? new(null, null, 10);
@@ -68,14 +61,8 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
         Watcher.Created += (obj, args) => RegisterEvent(args.FullPath);
         Watcher.Deleted += (obj, args) => UnregisterEvent(args.FullPath);
         Watcher.Renamed += (obj, args) => RefreshEvent(args.OldFullPath, args.FullPath);
-        Watcher.Error += (obj, args) => FileScriptsLoader.PrintError($"An events watcher error has occured: {args.GetException().Message}");
-
-        if (PluginObject is null)
-        {
-            return;
-        }
-
-        Watcher.RegisterEvents(PluginObject, Handler);
+        Watcher.Error += (obj, args) => Logger.Error($"An events watcher error has occured: {args.GetException().Message}");
+        Watcher.RegisterEvents(Handler);
     }
 
     /// <inheritdoc />
@@ -94,17 +81,13 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
     /// <param name="disposing">Whether or not this method is invoked from <see cref="Dispose()" />.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposing)
+        if (!disposing || Watcher is null)
         {
             return;
         }
 
-        if (PluginObject is not null)
-        {
-            Watcher?.UnregisterEvents(PluginObject, Handler);
-        }
-
-        Watcher?.Dispose();
+        Watcher.UnregisterEvents(Handler);
+        Watcher.Dispose();
     }
 
     /// <summary>
@@ -121,16 +104,16 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
             name = name.Substring(EventHandlerPrefix.Length);
         }
 
-        var parsed = Enum.TryParse<ServerEventType>(name, true, out var result);
+        var parsed = Enum.TryParse<EventType>(name, true, out var result);
 
         if (parsed)
         {
             Handler.EventScripts[result] = cmd;
-            FileScriptsLoader.PrintLog($"Registered event handler for '{result}' event.");
+            Logger.Info($"Registered event handler for '{result}' event.");
         }
         else
         {
-            FileScriptsLoader.PrintError($"Could not register event handler for '{name}' event.");
+            Logger.Warn($"Could not register event handler for '{name}' event.");
         }
     }
 
@@ -142,21 +125,26 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
     {
         var name = Config.FileSystemHelper.GetFileNameWithoutExtension(scriptFile);
 
+        if (name is null)
+        {
+            return;
+        }
+
         if (name.Length > EventHandlerPrefix.Length && name.StartsWith(EventHandlerPrefix, StringComparison.OrdinalIgnoreCase))
         {
             name = name.Substring(EventHandlerPrefix.Length);
         }
 
-        var parsed = Enum.TryParse<ServerEventType>(name, true, out var result);
+        var parsed = Enum.TryParse<EventType>(name, true, out var result);
 
         if (parsed)
         {
             Handler.EventScripts.Remove(result);
-            FileScriptsLoader.PrintLog($"Unregistered event handler for '{result}' event.");
+            Logger.Info($"Unregistered event handler for '{result}' event.");
         }
         else
         {
-            FileScriptsLoader.PrintError($"Could not unregister event handler for '{name}' event.");
+            Logger.Warn($"Could not unregister event handler for '{name}' event.");
         }
     }
 

@@ -2,6 +2,7 @@ using CommandSystem;
 using SLCommandScript.Core.Permissions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SLCommandScript.Core.Language;
@@ -11,7 +12,21 @@ namespace SLCommandScript.Core.Language;
 /// </summary>
 public class Lexer
 {
-    #region Static Elements
+    /// <summary>
+    /// Tokens can be processed.
+    /// </summary>
+    private const sbyte None = 0;
+
+    /// <summary>
+    /// Command sender has missing permissions.
+    /// </summary>
+    private const sbyte MissingPerms = 1;
+
+    /// <summary>
+    /// Command arguments are missing.
+    /// </summary>
+    private const sbyte MissingArgs = 2;
+
     /// <summary>
     /// Contains language keywords associated with appropriate token types.
     /// </summary>
@@ -51,7 +66,7 @@ public class Lexer
     /// </summary>
     /// <param name="str">String to check.</param>
     /// <returns><see langword="true" /> if string is a keyword, <see langword="false" /> otherwise.</returns>
-    public static bool IsKeyword(string str) => str is not null && _keywords.ContainsKey(str);
+    public static bool IsKeyword([NotNullWhen(true)] string? str) => str is not null && _keywords.ContainsKey(str);
 
     /// <summary>
     /// Checks if provided token type is atomic.
@@ -86,9 +101,7 @@ public class Lexer
         TokenType.Variable => TokenType.Variable,
         _ => nextToken.Type == TokenType.Variable ? TokenType.Variable : TokenType.Text
     };
-    #endregion
 
-    #region Fields and Properties
     /// <summary>
     /// Contains tokenized source code.
     /// </summary>
@@ -97,12 +110,12 @@ public class Lexer
     /// <summary>
     /// Contains script arguments.
     /// </summary>
-    public ArraySegment<string> Arguments
+    public ArraySegment<string?> Arguments
     {
         get => _arguments;
         set
         {
-            _argResults.Clear();
+            _argResults!.Clear();
             _arguments = value;
         }
     }
@@ -110,7 +123,7 @@ public class Lexer
     /// <summary>
     /// Contains command sender for permissions guards evaluation.
     /// </summary>
-    public ICommandSender Sender { get; private set; }
+    public ICommandSender? Sender { get; private set; }
 
     /// <summary>
     /// Contains permissions resolved used for permissions guards evaluation.
@@ -125,7 +138,7 @@ public class Lexer
     /// <summary>
     /// Contains current error message.
     /// </summary>
-    public string ErrorMessage { get; private set; }
+    public string? ErrorMessage { get; private set; }
 
     /// <summary>
     /// <see langword="true" /> if end of source code was reached, <see langword="false" /> otherwise.
@@ -153,14 +166,19 @@ public class Lexer
     private bool IsTopLevel => _argResults is not null;
 
     /// <summary>
-    /// Contains script arguments.
+    /// Tells whether or not the tokens can be processed.
     /// </summary>
-    private ArraySegment<string> _arguments;
+    private bool CanProcessTokens => _flags == None;
 
     /// <summary>
-    /// Tells whether or not the command sender has missing permission.
+    /// Contains script arguments.
     /// </summary>
-    private bool _hasMissingPerms;
+    private ArraySegment<string?> _arguments;
+
+    /// <summary>
+    /// Tells whether or not the tokens can be added.
+    /// </summary>
+    private sbyte _flags;
 
     /// <summary>
     /// Contains a list to output found tokens into.
@@ -170,12 +188,12 @@ public class Lexer
     /// <summary>
     /// Caches provided arguments processing results.
     /// </summary>
-    private readonly Dictionary<int, ArgResult> _argResults;
+    private readonly Dictionary<int, ArgResult>? _argResults;
 
     /// <summary>
     /// Contains lexer instance used for arguments processing.
     /// </summary>
-    private Lexer _argLexer;
+    private Lexer? _argLexer;
 
     /// <summary>
     /// Contains current token start index.
@@ -201,9 +219,7 @@ public class Lexer
     /// Contains current numeric value.
     /// </summary>
     private int _numericValue;
-    #endregion
 
-    #region State Management
     /// <summary>
     /// Creates new lexer instance.
     /// </summary>
@@ -211,7 +227,7 @@ public class Lexer
     /// <param name="arguments">Script arguments to inject.</param>
     /// <param name="sender">Command sender to use.</param>
     /// <param name="resolver">Permissions resolver to use.</param>
-    public Lexer(string source, ArraySegment<string> arguments, ICommandSender sender, IPermissionsResolver resolver = null)
+    public Lexer(string? source, ArraySegment<string?> arguments, ICommandSender? sender, IPermissionsResolver? resolver = null)
     {
         _tokens = [];
         _argResults = [];
@@ -227,7 +243,7 @@ public class Lexer
         Source = string.Empty;
         _arguments = new();
         Sender = null;
-        PermissionsResolver = null;
+        PermissionsResolver = null!;
         _tokens = [];
         _argResults = null;
         _argLexer = null;
@@ -263,10 +279,11 @@ public class Lexer
     /// <summary>
     /// Resets the tokenization process.
     /// </summary>
+    [MemberNotNull(nameof(_prefix))]
     public void Reset()
     {
         Line = 0;
-        _hasMissingPerms = false;
+        _flags = None;
         _start = 0;
         _current = 0;
         _depth = 0;
@@ -279,7 +296,7 @@ public class Lexer
     /// Resets the tokenization process.
     /// </summary>
     /// <param name="source">New source code to tokenize.</param>
-    public void Reset(string source)
+    public void Reset(string? source)
     {
         Source = source ?? string.Empty;
         Reset();
@@ -289,7 +306,7 @@ public class Lexer
     /// Resets the tokenization process.
     /// </summary>
     /// <param name="arguments">New script arguments to inject.</param>
-    public void Reset(ArraySegment<string> arguments)
+    public void Reset(ArraySegment<string?> arguments)
     {
         Arguments = arguments;
         Reset();
@@ -299,7 +316,7 @@ public class Lexer
     /// Resets the tokenization process.
     /// </summary>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(ICommandSender sender)
+    public void Reset(ICommandSender? sender)
     {
         Sender = sender;
         Reset();
@@ -309,7 +326,7 @@ public class Lexer
     /// Resets the tokenization process.
     /// </summary>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(IPermissionsResolver resolver)
+    public void Reset(IPermissionsResolver? resolver)
     {
         PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
         Reset();
@@ -320,7 +337,7 @@ public class Lexer
     /// </summary>
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="arguments">New script arguments to inject.</param>
-    public void Reset(string source, ArraySegment<string> arguments)
+    public void Reset(string? source, ArraySegment<string?> arguments)
     {
         Source = source ?? string.Empty;
         Arguments = arguments;
@@ -332,7 +349,7 @@ public class Lexer
     /// </summary>
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(string source, ICommandSender sender)
+    public void Reset(string? source, ICommandSender? sender)
     {
         Source = source ?? string.Empty;
         Sender = sender;
@@ -344,7 +361,7 @@ public class Lexer
     /// </summary>
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(string source, IPermissionsResolver resolver)
+    public void Reset(string? source, IPermissionsResolver? resolver)
     {
         Source = source ?? string.Empty;
         PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
@@ -356,7 +373,7 @@ public class Lexer
     /// </summary>
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(ArraySegment<string> arguments, ICommandSender sender)
+    public void Reset(ArraySegment<string?> arguments, ICommandSender? sender)
     {
         Arguments = arguments;
         Sender = sender;
@@ -368,7 +385,7 @@ public class Lexer
     /// </summary>
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(ArraySegment<string> arguments, IPermissionsResolver resolver)
+    public void Reset(ArraySegment<string?> arguments, IPermissionsResolver? resolver)
     {
         Arguments = arguments;
         PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
@@ -380,7 +397,7 @@ public class Lexer
     /// </summary>
     /// <param name="sender">New command sender to use.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(ICommandSender sender, IPermissionsResolver resolver)
+    public void Reset(ICommandSender? sender, IPermissionsResolver? resolver)
     {
         Sender = sender;
         PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
@@ -393,7 +410,7 @@ public class Lexer
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="sender">New command sender to use.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(ArraySegment<string> arguments, ICommandSender sender, IPermissionsResolver resolver)
+    public void Reset(ArraySegment<string?> arguments, ICommandSender? sender, IPermissionsResolver? resolver)
     {
         Arguments = arguments;
         Sender = sender;
@@ -407,7 +424,7 @@ public class Lexer
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="sender">New command sender to use.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(string source, ICommandSender sender, IPermissionsResolver resolver)
+    public void Reset(string? source, ICommandSender? sender, IPermissionsResolver? resolver)
     {
         Source = source ?? string.Empty;
         Sender = sender;
@@ -421,7 +438,7 @@ public class Lexer
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(string source, ArraySegment<string> arguments, IPermissionsResolver resolver)
+    public void Reset(string? source, ArraySegment<string?> arguments, IPermissionsResolver? resolver)
     {
         Source = source ?? string.Empty;
         Arguments = arguments;
@@ -435,7 +452,7 @@ public class Lexer
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(string source, ArraySegment<string> arguments, ICommandSender sender)
+    public void Reset(string? source, ArraySegment<string?> arguments, ICommandSender? sender)
     {
         Source = source ?? string.Empty;
         Arguments = arguments;
@@ -450,7 +467,8 @@ public class Lexer
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="sender">New command sender to use.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(string source, ArraySegment<string> arguments, ICommandSender sender, IPermissionsResolver resolver)
+    [MemberNotNull(nameof(Source), nameof(PermissionsResolver), nameof(_prefix))]
+    public void Reset(string? source, ArraySegment<string?> arguments, ICommandSender? sender, IPermissionsResolver? resolver)
     {
         Source = source ?? string.Empty;
         Arguments = arguments;
@@ -577,16 +595,14 @@ public class Lexer
 
         return false;
     }
-    #endregion
 
-    #region Tokens Processing
     /// <summary>
     /// Processes directive start or end.
     /// </summary>
     /// <param name="type">Type of token to use.</param>
     private void Directive(TokenType type)
     {
-        if (_hasMissingPerms)
+        if (!CanProcessTokens)
         {
             SkipUntilGuard();
         }
@@ -613,13 +629,18 @@ public class Lexer
 
         if (Match('!'))
         {
-            _hasMissingPerms = false;
+            _flags &= ~MissingPerms;
             action = Permission;
         }
         else if (Match('?'))
         {
             AddToken(TokenType.ScopeGuard);
             action = Identifier;
+        }
+        else if (Match('$'))
+        {
+            _flags &= ~MissingArgs;
+            action = ArgCount;
         }
 
         while (!IsAtEnd && CanRead)
@@ -679,7 +700,7 @@ public class Lexer
     /// <param name="enableKeywords">Whether or not the keywords are enabled.</param>
     private void Text(bool enableKeywords)
     {
-        if (_hasMissingPerms)
+        if (!CanProcessTokens)
         {
             SkipUntilGuard();
             return;
@@ -742,10 +763,50 @@ public class Lexer
         _start = _current;
         Skip();
 
-        if (!_hasMissingPerms)
+        if ((_flags & MissingPerms) == None && !PermissionsResolver.CheckPermission(Sender, Source.Substring(_start, _current - _start), out var message))
         {
-            _hasMissingPerms = !PermissionsResolver.CheckPermission(Sender, Source.Substring(_start, _current - _start), out var message);
+            _flags |= MissingPerms;
             ErrorMessage = message;
+        }
+    }
+
+    /// <summary>
+    /// Processes current token as arguments count.
+    /// </summary>
+    private void ArgCount()
+    {
+        if ((_flags & MissingArgs) != None)
+        {
+            ErrorMessage = "Encountered an unexpected additional value in arguments guard";
+            return;
+        }
+
+        if (!IsDigit(Source[_current]))
+        {
+            ErrorMessage = "Arguments guard value is not a number";
+            return;
+        }
+
+        _start = _current;
+        var value = 0;
+
+        do
+        {
+            value *= 10;
+            value += Source[_current] - '0';
+            ++_current;
+        }
+        while (IsDigit(Current));
+
+        if (!IsWhiteSpace(Current) && IsNotLineExtend)
+        {
+            ErrorMessage = "Arguments guard value has an unexpected suffix";
+            return;
+        }
+
+        if (_arguments.Count < value)
+        {
+            _flags |= MissingArgs;
         }
     }
 
@@ -847,9 +908,7 @@ public class Lexer
                 return type;
         }
     }
-    #endregion
 
-    #region Arguments Processing
     /// <summary>
     /// Processes a potential variable.
     /// </summary>
@@ -904,7 +963,7 @@ public class Lexer
             return TokenType.None;
         }
 
-        if (_argResults.ContainsKey(argNum))
+        if (_argResults!.ContainsKey(argNum))
         {
             var argResult = _argResults[argNum];
             _depth += argResult.Depth;
@@ -958,16 +1017,14 @@ public class Lexer
     /// <param name="startedAt">Start index of processed variable.</param>
     /// <param name="type">Current token type.</param>
     /// <returns>Type of token to use in remaining token processing.</returns>
-    private TokenType InjectArg(ArgResult result, int startedAt, TokenType type) => result.Tokens.Count switch
+    private TokenType InjectArg(ArgResult result, int startedAt, TokenType type) => result.Tokens!.Count switch
     {
-        0 => InjectNoTokensArg(result.Source.Length < 1, startedAt, type),
+        0 => InjectNoTokensArg(result.Source!.Length < 1, startedAt, type),
         1 => Inject1TokenArg(result, startedAt, type),
         2 => Inject2TokensArg(result, startedAt, type),
         _ => InjectNTokensArg(result, startedAt, type)
     };
-    #endregion
 
-    #region Arguments Injection
     /// <summary>
     /// Injects empty argument in place of currect variable.
     /// </summary>
@@ -1002,13 +1059,13 @@ public class Lexer
     /// <returns>Type of token to use in remaining token processing.</returns>
     private TokenType Inject1TokenArg(ArgResult result, int startedAt, TokenType type)
     {
-        var token = result.Tokens[0];
+        var token = result.Tokens![0];
         var isAtomic = IsAtomic(token.Type);
-        var isEnd = IsWhiteSpace(Current) || isAtomic || IsWhiteSpace(result.Source[result.Source.Length - 1]);
+        var isEnd = IsWhiteSpace(Current) || isAtomic || IsWhiteSpace(result.Source![result.Source.Length - 1]);
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(result.Source[0]) || isAtomic)
+            if (IsWhiteSpace(result.Source![0]) || isAtomic)
             {
                 AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
             }
@@ -1049,11 +1106,11 @@ public class Lexer
     /// <returns>Type of token to use in remaining token processing.</returns>
     private TokenType Inject2TokensArg(ArgResult result, int startedAt, TokenType type)
     {
-        var token = result.Tokens[0];
+        var token = result.Tokens![0];
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(result.Source[0]) || IsAtomic(token.Type))
+            if (IsWhiteSpace(result.Source![0]) || IsAtomic(token.Type))
             {
                 AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
                 AddToken(token.Type, token.Value, token.NumericValue);
@@ -1071,7 +1128,7 @@ public class Lexer
 
         var lastToken = result.Tokens[1];
 
-        if (IsWhiteSpace(Current) || IsAtomic(lastToken.Type) || IsWhiteSpace(result.Source[result.Source.Length - 1]))
+        if (IsWhiteSpace(Current) || IsAtomic(lastToken.Type) || IsWhiteSpace(result.Source![result.Source.Length - 1]))
         {
             AddToken(lastToken.Type, lastToken.Value, lastToken.NumericValue);
             return TokenType.None;
@@ -1092,17 +1149,17 @@ public class Lexer
     /// <returns>Type of token to use in remaining token processing.</returns>
     private TokenType InjectNTokensArg(ArgResult result, int startedAt, TokenType type)
     {
-        IEnumerable<Token> tokens = result.Tokens;
-        var isEnd = IsWhiteSpace(Current) || IsAtomic(result.Tokens[result.Tokens.Count - 1].Type) || IsWhiteSpace(result.Source[result.Source.Length - 1]);
+        IEnumerable<Token> tokens = result.Tokens!;
+        var isEnd = IsWhiteSpace(Current) || IsAtomic(result.Tokens![result.Tokens.Count - 1].Type) || IsWhiteSpace(result.Source![result.Source.Length - 1]);
 
         if (!isEnd)
         {
-            tokens = tokens.Take(result.Tokens.Count - 1);
+            tokens = tokens.Take(result.Tokens!.Count - 1);
         }
 
         if (_start != startedAt)
         {
-            if (IsWhiteSpace(result.Source[0]) || IsAtomic(result.Tokens[0].Type))
+            if (IsWhiteSpace(result.Source![0]) || IsAtomic(result.Tokens![0].Type))
             {
                 AddToken(type, GetTextWithPrefix(startedAt), _numericValue);
             }
@@ -1125,11 +1182,10 @@ public class Lexer
             return TokenType.None;
         }
 
-        var lastToken = result.Tokens[result.Tokens.Count - 1];
+        var lastToken = result.Tokens![result.Tokens.Count - 1];
         _prefix = lastToken.Value;
         _numericValue = lastToken.NumericValue;
         _start = _current;
         return lastToken.Type;
     }
-    #endregion
 }

@@ -22,7 +22,7 @@ public interface IIterable
     /// </summary>
     /// <param name="targetVars">Dictionary to insert properties into.</param>
     /// <returns><see langword="true" /> if the iteration can continue, <see langword="false" /> otherwise.</returns>
-    bool LoadNext(IDictionary<string, string> targetVars);
+    bool LoadNext(IDictionary<string, string?>? targetVars);
 
     /// <summary>
     /// Randomizes contained elements.

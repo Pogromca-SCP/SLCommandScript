@@ -1,4 +1,3 @@
-using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
 using System.ComponentModel;
 
@@ -13,7 +12,7 @@ public class ScriptsLoaderConfig
     /// Custom permissions resolver implementation to use, leave empty if not needed.
     /// </summary>
     [Description("Custom permissions resolver implementation to use, leave empty if not needed")]
-    public string CustomPermissionsResolver { get; set; } = null;
+    public string? CustomPermissionsResolver { get; set; } = null;
 
     /// <summary>
     /// Set to <see langword="false" /> in order to disable event handling with scripts.
@@ -22,9 +21,9 @@ public class ScriptsLoaderConfig
     public bool EnableScriptEventHandlers { get; set; } = true;
 
     /// <summary>
-    /// Defines allowed script command types (Console, GameConsole or RemoteAdmin), set to 0 to disable all script commands.
+    /// Defines allowed script command types (Console, Client or RemoteAdmin), set to 0 to disable all script commands.
     /// </summary>
-    [Description("Defines allowed script command types (Console, GameConsole or RemoteAdmin), set to 0 to disable all script commands")]
+    [Description("Defines allowed script command types (Console, Client or RemoteAdmin), set to 0 to disable all script commands")]
     public CommandType AllowedScriptCommandTypes { get; set; } = CommandsUtils.AllScopes;
 
     /// <summary>

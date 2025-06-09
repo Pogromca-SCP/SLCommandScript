@@ -9,7 +9,7 @@ namespace SLCommandScript.Core.Permissions;
 public class VanillaPermissionsResolver : IPermissionsResolver
 {
     /// <inheritdoc />
-    public bool CheckPermission(ICommandSender sender, string permission, out string message)
+    public bool CheckPermission(ICommandSender? sender, string? permission, out string? message)
     {
         if (sender is null)
         {

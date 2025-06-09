@@ -2,7 +2,6 @@ using CommandSystem.Commands.RemoteAdmin;
 using CommandSystem.Commands.RemoteAdmin.Broadcasts;
 using FluentAssertions;
 using NUnit.Framework;
-using PluginAPI.Enums;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.Core.Iterables;
 using SLCommandScript.Core.Iterables.Providers;
@@ -17,7 +16,6 @@ namespace SLCommandScript.Core.UnitTests.Language;
 [TestFixture]
 public class ParserTests
 {
-    #region Error Flow Test Case Sources
     private static readonly object[][] _errorPaths = [
         // #? $(bc)
         [new Core.Language.Token[] { new(TokenType.ScopeGuard, null), new(TokenType.Variable, "$(bc)") },
@@ -163,9 +161,7 @@ public class ParserTests
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Sequence, "|"),
             new(TokenType.RightSquare, "]") }, "Command ']' was not found\nin sequence expression 2"]
     ];
-    #endregion
 
-    #region Gold Flow Test Case Sources
     private static readonly object[][] _goldPaths = [
         // bc 5
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5) },
@@ -184,10 +180,10 @@ public class ParserTests
             new(TokenType.Text, "test"), new(TokenType.RightSquare, "]") }, new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false),
             CommandsUtils.AllScopes],
 
-        // bc 5 Test #? console gameCONsole
+        // bc 5 Test #? console cLIeNt
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.Variable, "Test"),
-            new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "console"), new(TokenType.Text, "gameCONsole") },
-            new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false), CommandType.Console | CommandType.GameConsole],
+            new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "console"), new(TokenType.Text, "cLIeNt") },
+            new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false), CommandType.Console | CommandType.Client],
 
         // [ bc 5 Test if bc 5 Test ] #? console remoTEADmin
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
@@ -197,12 +193,12 @@ public class ParserTests
             new IfExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false),
                 new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], true), null), CommandType.Console | CommandType.RemoteAdmin],
 
-        // [ bc 5 Test if bc 5 $(Test) else bc 5 Test ] #? console remoTEADmin gameConsole
+        // [ bc 5 Test if bc 5 $(Test) else bc 5 Test ] #? console remoTEADmin cliEnt
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
             new(TokenType.Text, "Test"), new(TokenType.If, "if"), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
             new(TokenType.Variable, "$(Test)"), new(TokenType.Else, "else"), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
             new(TokenType.Text, "Test"), new(TokenType.RightSquare, "]"), new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "console"),
-            new(TokenType.Text, "remoTEADmin"), new(TokenType.Text, "gameConsole") }, new IfExpr(new CommandExpr(
+            new(TokenType.Text, "remoTEADmin"), new(TokenType.Text, "cliEnt") }, new IfExpr(new CommandExpr(
                 new BroadcastCommand(), ["bc", "5", "Test"], false),
                 new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true),
                 new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false)), CommandsUtils.AllScopes],
@@ -322,28 +318,26 @@ public class ParserTests
                 new CommandExpr(new BroadcastCommand(), ["bc"], false), new CommandExpr(new BroadcastCommand(), ["bc"], false)]),
                 new CommandExpr(new BroadcastCommand(), ["bc"], false)]), CommandsUtils.AllScopes]
     ];
-    #endregion
 
-    private IEnumerable<KeyValuePair<string, Func<IIterable>>> _originalProviders;
+    private IEnumerable<KeyValuePair<string, Func<IIterable>>> _originalProviders = null!;
 
-    private Parser _parser;
+    private Parser _parser = null!;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        _originalProviders = TestDictionaries.ClearDictionary(IterablesUtils.Providers);
+        _originalProviders = TestDictionaries.ClearDictionary<string, Func<IIterable>>(IterablesUtils.Providers!);
         IterablesUtils.Providers["Null"] = null;
         IterablesUtils.Providers["Bad"] = () => null;
         IterablesUtils.Providers["Test"] = () => new TestIterable();
     }
 
     [OneTimeTearDown]
-    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers, _originalProviders);
+    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers!, _originalProviders!);
 
     [SetUp]
     public void SetUp() => _parser = new();
 
-    #region Constructor Tests
     [Test]
     public void Parser_ShouldProperlyInitialize()
     {
@@ -351,9 +345,7 @@ public class ParserTests
         _parser.ErrorMessage.Should().BeNull();
         _parser.Scope.Should().Be(CommandsUtils.AllScopes);
     }
-    #endregion
 
-    #region Parse Tests
     [Test]
     public void Parse_ShouldReturnProperErrorMessage_WhenTokensListIsNull()
     {
@@ -389,5 +381,4 @@ public class ParserTests
         _parser.ErrorMessage.Should().BeNull();
         _parser.Scope.Should().Be(expectedScope);
     }
-    #endregion
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SLCommandScript.Core.Iterables;
@@ -24,6 +25,7 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     public static EnumIterable<TEnum> GetWithNone() => new(true);
 
     /// <inheritdoc />
+    [MemberNotNullWhen(false, nameof(_values))]
     public bool IsAtEnd
     {
         get
@@ -52,7 +54,7 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
                 _current = 0;
             }
 
-            return _current >= _values.Length;
+            return _current >= _values!.Length;
         }
     }
 
@@ -67,7 +69,7 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     /// <summary>
     /// Contains wrapped array of enum values.
     /// </summary>
-    private TEnum[] _values = null;
+    private TEnum[]? _values = null;
 
     /// <summary>
     /// Random settings used for randomization.
@@ -80,7 +82,7 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     private int _current = 0;
 
     /// <inheritdoc />
-    public bool LoadNext(IDictionary<string, string> targetVars)
+    public bool LoadNext(IDictionary<string, string?>? targetVars)
     {
         if (IsAtEnd)
         {

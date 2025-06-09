@@ -9,7 +9,7 @@ Full documentation for developers can be found in [project wiki](https://github.
 ```csharp
 public class MyCustomPermissionsResolver : SLCommandScript.Core.Permissions.IPermissionsResolver
 {
-    public bool CheckPermission(ICommandSender sender, string permission, out string message)
+    public bool CheckPermission(ICommandSender? sender, string? permission, out string? message)
     {
         // Execute your logic here
     }
@@ -25,7 +25,7 @@ public class MyCustomScriptLoader : SLCommandScript.Core.IScriptsLoader
 
     public string LoaderAuthor { get; } = "ProjectAuthors";
 
-    public void InitScriptsLoader(object plugin, PluginHandler handler, ScriptsLoaderConfig loaderConfig)
+    public void InitScriptsLoader(Plugin? plugin, ScriptsLoaderConfig? loaderConfig)
     {
         // Initialize loader here
     }

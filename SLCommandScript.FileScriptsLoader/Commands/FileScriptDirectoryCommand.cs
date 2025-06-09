@@ -1,6 +1,5 @@
 using CommandSystem;
 using System;
-using System.IO;
 
 namespace SLCommandScript.FileScriptsLoader.Commands;
 
@@ -9,7 +8,7 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// </summary>
 /// <param name="name">Name of the command.</param>
 /// <param name="parent">Parent which stores this command.</param>
-public class FileScriptDirectoryCommand(string name, IFileScriptCommandParent parent) : ParentCommand, IFileScriptCommandParent
+public class FileScriptDirectoryCommand(string? name, IFileScriptCommandParent? parent) : ParentCommand, IFileScriptCommandParent
 {
     /// <summary>
     /// Contains command name.
@@ -19,7 +18,7 @@ public class FileScriptDirectoryCommand(string name, IFileScriptCommandParent pa
     /// <summary>
     /// Defines command aliases.
     /// </summary>
-    public override string[] Aliases => null;
+    public override string[]? Aliases => null;
 
     /// <summary>
     /// Contains command description.
@@ -29,7 +28,7 @@ public class FileScriptDirectoryCommand(string name, IFileScriptCommandParent pa
     /// <summary>
     /// Contains parent object which stores this command.
     /// </summary>
-    public IFileScriptCommandParent Parent { get; } = parent;
+    public IFileScriptCommandParent? Parent { get; } = parent;
 
     /// <summary>
     /// Loads subcommands.
@@ -37,7 +36,7 @@ public class FileScriptDirectoryCommand(string name, IFileScriptCommandParent pa
     public override void LoadGeneratedCommands() {}
 
     /// <inheritdoc />
-    public string GetLocation(bool includeRoot = false) => Parent is null ? Command : $"{Parent.GetLocation(includeRoot)}{Path.DirectorySeparatorChar}{Command}";
+    public string GetLocation(bool includeRoot = false) => Parent is null ? Command : $"{Parent.GetLocation(includeRoot)}{Command}/";
 
     /// <summary>
     /// Executes the parent command.
@@ -46,7 +45,7 @@ public class FileScriptDirectoryCommand(string name, IFileScriptCommandParent pa
     /// <param name="sender">Command sender.</param>
     /// <param name="response">Response to display in sender's console.</param>
     /// <returns><see langword="true" /> if command executed successfully, <see langword="false" /> otherwise.</returns>
-    protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
+    protected override bool ExecuteParent(ArraySegment<string?> arguments, ICommandSender? sender, out string response)
     {
         response = "Cannot execute this parent command";
         return false;

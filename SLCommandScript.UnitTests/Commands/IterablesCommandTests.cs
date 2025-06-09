@@ -15,15 +15,14 @@ public class IterablesCommandTests
 
     private readonly IterablesCommand _command = new();
 
-    private IEnumerable<KeyValuePair<string, Func<IIterable>>> _originalIterables;
+    private IEnumerable<KeyValuePair<string, Func<IIterable>>>? _originalIterables;
 
     [OneTimeSetUp]
-    public void OneTimeSetUp() => _originalIterables = TestDictionaries.ClearDictionary(IterablesUtils.Providers);
+    public void OneTimeSetUp() => _originalIterables = TestDictionaries.ClearDictionary<string, Func<IIterable>>(IterablesUtils.Providers!);
 
     [OneTimeTearDown]
-    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers, _originalIterables);
+    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers!, _originalIterables!);
 
-    #region Execute Tests
     [Test]
     public void Execute_ShouldSucceed_WhenNoArgumentsArePassed()
     {
@@ -35,7 +34,7 @@ public class IterablesCommandTests
 
         // Assert
         result.Should().BeTrue();
-        response.Should().Be($"Currently available iterables:\n{TestIterable}\r\n");
+        response.Should().Be($"Currently available iterables:\n{TestIterable}\n");
     }
 
     [Test]
@@ -119,9 +118,8 @@ public class IterablesCommandTests
 
         // Assert
         result.Should().BeTrue();
-        response.Should().Be($"Variables available in '{TestIterable}':\ntest\r\n");
+        response.Should().Be($"Variables available in '{TestIterable}':\ntest\n");
     }
-    #endregion
 }
 
 public class TestIterable(bool isAtEnd, bool addVars) : IIterable
@@ -132,9 +130,9 @@ public class TestIterable(bool isAtEnd, bool addVars) : IIterable
 
     public bool AddVars { get; } = addVars;
 
-    public bool LoadNext(IDictionary<string, string> targetVars)
+    public bool LoadNext(IDictionary<string, string?>? targetVars)
     {
-        if (!IsAtEnd && AddVars)
+        if (targetVars is not null && !IsAtEnd && AddVars)
         {
             targetVars["test"] = "test";
         }

@@ -1,10 +1,10 @@
 using SLCommandScript;
 using System.Reflection;
 
-[assembly: AssemblyTitle(Plugin.PluginName)]
-[assembly: AssemblyDescription(Plugin.PluginDescription)]
-[assembly: AssemblyProduct(Plugin.PluginName)]
-[assembly: AssemblyCopyright("Copyright © 2023-present " + Plugin.PluginAuthor)]
-[assembly: AssemblyVersion(Plugin.PluginVersion)]
-[assembly: AssemblyFileVersion(Plugin.PluginVersion)]
-[assembly: AssemblyInformationalVersion(Plugin.PluginVersion)]
+[assembly: AssemblyTitle(SLCommandScriptPlugin.PluginName)]
+[assembly: AssemblyDescription(SLCommandScriptPlugin.PluginDescription)]
+[assembly: AssemblyProduct(SLCommandScriptPlugin.PluginName)]
+[assembly: AssemblyCopyright("Copyright © 2023-present " + SLCommandScriptPlugin.PluginAuthor)]
+[assembly: AssemblyVersion(SLCommandScriptPlugin.PluginVersion)]
+[assembly: AssemblyFileVersion(SLCommandScriptPlugin.PluginVersion)]
+[assembly: AssemblyInformationalVersion(SLCommandScriptPlugin.PluginVersion)]

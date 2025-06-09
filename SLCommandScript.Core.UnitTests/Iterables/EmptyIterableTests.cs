@@ -9,7 +9,6 @@ public class EmptyIterableTests
 {
     private readonly EmptyIterable _iterable = EmptyIterable.Instance;
 
-    #region Constructor Tests
     [Test]
     public void EmptyIterable_ShouldProperlyInitialize()
     {
@@ -17,9 +16,7 @@ public class EmptyIterableTests
         _iterable.IsAtEnd.Should().BeTrue();
         _iterable.Count.Should().Be(0);
     }
-    #endregion
 
-    #region LoadNext Tests
     [Test]
     public void LoadNext_ShouldReturnFalse()
     {
@@ -31,5 +28,4 @@ public class EmptyIterableTests
         _iterable.IsAtEnd.Should().BeTrue();
         _iterable.Count.Should().Be(0);
     }
-    #endregion
 }
