@@ -114,9 +114,21 @@ public class FileScriptsEventHandler : CustomEventsHandler
         }
     }
 
-    public override void OnPlayerChangedSpectator(PlayerChangedSpectatorEventArgs args) => HandleEvent(EventType.PlayerChangeSpectator,
-        nameof(EventType.PlayerChangeSpectator), args.Player.PlayerId.ToString(), args.Player.DisplayName, args.OldTarget.PlayerId.ToString(), args.OldTarget.DisplayName,
-        args.NewTarget.PlayerId.ToString(), args.NewTarget.DisplayName);
+    public override void OnPlayerChangedSpectator(PlayerChangedSpectatorEventArgs args)
+    {
+        const EventType eventType = EventType.PlayerChangeSpectator;
+        const string eventName = nameof(EventType.PlayerChangeSpectator);
+
+        if (args.OldTarget is null)
+        {
+            HandleEvent(eventType, eventName, args.Player.PlayerId.ToString(), args.Player.DisplayName, args.NewTarget.PlayerId.ToString(), args.NewTarget.DisplayName);
+}
+        else
+        {
+            HandleEvent(eventType, eventName, args.Player.PlayerId.ToString(), args.Player.DisplayName, args.NewTarget.PlayerId.ToString(), args.NewTarget.DisplayName,
+                args.OldTarget.PlayerId.ToString(), args.OldTarget.DisplayName);
+        }
+    }
 
     public override void OnPlayerEscaped(PlayerEscapedEventArgs args) => HandleEvent(EventType.PlayerEscape, nameof(EventType.PlayerEscape),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.NewRole.ToString(), args.EscapeScenarioType.ToString());
@@ -165,7 +177,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
         }
 
         HandleEvent(EventType.PlayerUseIntercom, nameof(EventType.PlayerUseIntercom), args.Player.PlayerId.ToString(), args.Player.DisplayName,
-            args.State.ToString(), args.State.ToString());
+            args.State.ToString());
     }
 
     public override void OnPlayerClosedGenerator(PlayerClosedGeneratorEventArgs args) => HandleEvent(EventType.PlayerCloseGenerator,
@@ -448,7 +460,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
     public override void OnScp106ChangedVigor(Scp106ChangedVigorEventArgs args) => HandleEvent(EventType.Scp106VigorChange, nameof(EventType.Scp106VigorChange),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.OldValue.ToString(), args.Value.ToString());
 
-    public override void OnScp106TeleportedPlayer(Scp106TeleportedPlayerEvent args) => HandleEvent(EventType.Scp106VigorChange, nameof(EventType.Scp106VigorChange),
+    public override void OnScp106TeleportedPlayer(Scp106TeleportedPlayerEvent args) => HandleEvent(EventType.Scp106TeleportPlayer, nameof(EventType.Scp106TeleportPlayer),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);
 
     public override void OnScp106UsedHunterAtlas(Scp106UsedHunterAtlasEventArgs args) => HandleEvent(EventType.Scp106UseHunterAtlas,
