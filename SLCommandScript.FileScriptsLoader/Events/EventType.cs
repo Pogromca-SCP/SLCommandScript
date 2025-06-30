@@ -190,4 +190,8 @@ public enum EventType : byte
     BanIssued,
     BanRevoked,
     BanUpdated,
+
+
+    RoundEndingConditionsCheck,
+    Scp079Ping,
 }

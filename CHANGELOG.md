@@ -7,13 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2025-07-01
+
+### Added
+
+- File scripts loader can now handle new events: `Scp079Ping`, `RoundEndingConditionsCheck`.
+
+### Changed
+
+- `PlayerDropAmmo` event now provides additional boolean argument telling whether or not the item is thrown.
+- `PlaceBlood` event now provides additional arguments with attacker's details.
+- Upgraded project to [LabAPI v1.1.0](https://github.com/northwood-studios/LabAPI/releases/tag/1.1.0).
+
 ## [2.0.0] - 2025-06-09
 
-## Added
+### Added
 
 - Added arguments guards to the language, they can be used to prevent script execution when there are not enough arguments provided.
 
-## Changed
+### Changed
 
 - File scripts loader events handler now provides more usefull arguments.
 - Changed the consoles scope name from `GameConsole` to `Client`.

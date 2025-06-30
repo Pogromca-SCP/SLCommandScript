@@ -252,7 +252,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.AmmoPickup.Type.ToString(), args.Amount.ToString());
 
     public override void OnPlayerDroppedItem(PlayerDroppedItemEventArgs args) => HandleEvent(EventType.PlayerDropItem, nameof(EventType.PlayerDropItem),
-        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Pickup.Type.ToString());
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Pickup.Type.ToString(), args.Throw.ToString());
 
     public override void OnPlayerPickedUpItem(PlayerPickedUpItemEventArgs args) => HandleEvent(EventType.PlayerPickupItem, nameof(EventType.PlayerPickupItem),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Item.Type.ToString());
@@ -332,7 +332,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
     public override void OnServerGeneratorActivated(GeneratorActivatedEventArgs args) => HandleEvent(EventType.GeneratorActivate, nameof(EventType.GeneratorActivate));
 
     public override void OnPlayerPlacedBlood(PlayerPlacedBloodEventArgs args) => HandleEvent(EventType.PlaceBlood, nameof(EventType.PlaceBlood),
-        args.Player.PlayerId.ToString(), args.Player.DisplayName);
+        args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Attacker.PlayerId.ToString(), args.Attacker.DisplayName);
 
     public override void OnPlayerPlacedBulletHole(PlayerPlacedBulletHoleEventArgs args) => HandleEvent(EventType.PlaceBulletHole, nameof(EventType.PlaceBulletHole),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.DecalType.ToString());
@@ -401,6 +401,9 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnServerWaveRespawned(WaveRespawnedEventArgs args) => HandleEvent(EventType.TeamRespawn, nameof(EventType.TeamRespawn),
         args.Wave.Faction.ToString(), args.Players.Count.ToString());
+
+    public override void OnServerRoundEndingConditionsCheck(RoundEndingConditionsCheckEventArgs args) => HandleEvent(EventType.RoundEndingConditionsCheck,
+        nameof(EventType.RoundEndingConditionsCheck), args.CanEnd.ToString());
 
     public override void OnWarheadStarted(WarheadStartedEventArgs args) => HandleEvent(EventType.WarheadStart, nameof(EventType.WarheadStart),
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
@@ -522,6 +525,9 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnScp079Recontained(Scp079RecontainedEventArgs args) => HandleEvent(EventType.Scp079Recontainment, nameof(EventType.Scp079Recontainment),
         args.Player.PlayerId.ToString(), args.Player.DisplayName);
+
+    public override void OnScp079Pinged(Scp079PingedEventArgs args) => HandleEvent(EventType.Scp079Ping, nameof(EventType.Scp079Ping), args.Player.PlayerId.ToString(),
+        args.Player.DisplayName, args.PingType.ToString());
 
     public override void OnScp049ResurrectedBody(Scp049ResurrectedBodyEventArgs args) => HandleEvent(EventType.Scp049ResurrectBody, nameof(EventType.Scp049ResurrectBody),
         args.Player.PlayerId.ToString(), args.Player.DisplayName, args.Target.PlayerId.ToString(), args.Target.DisplayName);

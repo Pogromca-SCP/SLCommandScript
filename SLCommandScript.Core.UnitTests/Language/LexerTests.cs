@@ -717,7 +717,7 @@ public class LexerTestResolver(PlayerPermissions permissions) : IPermissionsReso
 
     public bool CheckPermission(ICommandSender? sender, string? permission, out string? message)
     {
-        Console.WriteLine($"Lexer test permission resolving: {permission}");
+        TestContext.WriteLine($"Lexer test permission resolving: {permission}");
         var parsed = Enum.TryParse<PlayerPermissions>(permission, true, out var result);
         message = null;
         return parsed && (result & Permissions) != 0;
