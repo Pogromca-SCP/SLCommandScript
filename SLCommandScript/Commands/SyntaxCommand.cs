@@ -26,11 +26,6 @@ public class SyntaxCommand : ICommand
     public string Description { get; } = "Helper command with syntax rules. Provide expression/guard name to view its syntax rules.";
 
     /// <summary>
-    /// Tells whether or not command response should be sanitized.
-    /// </summary>
-    public bool SanitizeResponse => true;
-
-    /// <summary>
     /// Contains syntax rules.
     /// </summary>
     public Dictionary<string, string?> Rules { get; } = new(StringComparer.OrdinalIgnoreCase)

@@ -40,11 +40,6 @@ public class FileScriptCommandBase(string? name, IFileScriptCommandParent? paren
     public string Description { get => _desc; set => _desc = string.IsNullOrWhiteSpace(value) ? DefaultDescription : value; }
 
     /// <summary>
-    /// Tells whether or not command response should be sanitized.
-    /// </summary>
-    public bool SanitizeResponse => true;
-
-    /// <summary>
     /// Contains parent object which stores this command.
     /// </summary>
     public IFileScriptCommandParent? Parent { get; } = parent;

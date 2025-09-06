@@ -25,7 +25,9 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     public static EnumIterable<TEnum> GetWithNone() => new(true);
 
     /// <inheritdoc />
+#pragma warning disable CS0436
     [MemberNotNullWhen(false, nameof(_values))]
+#pragma warning restore CS0436
     public bool IsAtEnd
     {
         get
