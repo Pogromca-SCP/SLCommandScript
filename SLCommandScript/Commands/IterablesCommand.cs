@@ -95,11 +95,6 @@ public class IterablesCommand : ICommand
     public string Description { get; } = "Helper command for iterables discovery. Provide iterable name to check available variables.";
 
     /// <summary>
-    /// Tells whether or not command response should be sanitized.
-    /// </summary>
-    public bool SanitizeResponse => true;
-
-    /// <summary>
     /// Executes the command.
     /// </summary>
     /// <param name="arguments">Command arguments provided by sender.</param>

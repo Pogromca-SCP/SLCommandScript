@@ -13,6 +13,9 @@
 		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="Northwood.LabAPI" Version="1.1.1" />
+	</ItemGroup>
+	<ItemGroup>
 		<ProjectReference Include="../SLCommandScript.Core/SLCommandScript.Core.csproj" />
 	</ItemGroup>
 	<ItemGroup>

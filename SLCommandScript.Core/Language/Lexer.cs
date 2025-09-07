@@ -279,7 +279,9 @@ public class Lexer
     /// <summary>
     /// Resets the tokenization process.
     /// </summary>
+#pragma warning disable CS0436
     [MemberNotNull(nameof(_prefix))]
+#pragma warning restore CS0436
     public void Reset()
     {
         Line = 0;
@@ -467,7 +469,9 @@ public class Lexer
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="sender">New command sender to use.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
+#pragma warning disable CS0436
     [MemberNotNull(nameof(Source), nameof(PermissionsResolver), nameof(_prefix))]
+#pragma warning restore CS0436
     public void Reset(string? source, ArraySegment<string?> arguments, ICommandSender? sender, IPermissionsResolver? resolver)
     {
         Source = source ?? string.Empty;

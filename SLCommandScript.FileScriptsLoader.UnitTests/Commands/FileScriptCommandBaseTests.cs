@@ -78,7 +78,6 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         result.Command.Should().BeEmpty();
         result.Aliases.Should().BeNull();
         result.Description.Should().Be(FileScriptCommandBase.DefaultDescription);
-        result.SanitizeResponse.Should().BeTrue();
         result.Parent.Should().BeNull();
         result.Config.Should().NotBeNull();
     }
@@ -96,7 +95,6 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         result.Command.Should().Be(TestCommand);
         result.Aliases.Should().BeNull();
         result.Description.Should().Be(FileScriptCommandBase.DefaultDescription);
-        result.SanitizeResponse.Should().BeTrue();
         result.Parent.Should().Be(fileScriptParentMock.Object);
         result.Config.Should().Be(RuntimeConfig);
         fileScriptParentMock.VerifyAll();

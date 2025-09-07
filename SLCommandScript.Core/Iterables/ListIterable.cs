@@ -12,7 +12,9 @@ namespace SLCommandScript.Core.Iterables;
 public class ListIterable<TItem> : IIterable
 {
     /// <inheritdoc />
+#pragma warning disable CS0436
     [MemberNotNullWhen(false, nameof(_enumerator))]
+#pragma warning restore CS0436
     public bool IsAtEnd
     {
         get

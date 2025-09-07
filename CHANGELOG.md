@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2025-09-07
+
+### Added
+
+- File scripts loader now has support for new events introduced in recent updates.
+
+### Changed
+
+- `PlayerEscape` event now provides additional argument with old player role.
+- Upgraded project to [LabAPI v1.1.1](https://github.com/northwood-studios/LabAPI/releases/tag/1.1.1).
+
 ## [2.1.0] - 2025-07-01
 
 ### Added
