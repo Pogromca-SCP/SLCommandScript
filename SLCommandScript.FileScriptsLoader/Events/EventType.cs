@@ -230,4 +230,7 @@ public enum EventType : byte
     Scp3114StrangleAbort,
     Scp3114StrangleStart,
     ServerElevatorSequenceChange,
+
+
+    Scp173Teleport,
 }

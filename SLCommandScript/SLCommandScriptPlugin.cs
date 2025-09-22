@@ -24,7 +24,7 @@ public class SLCommandScriptPlugin : Plugin
     /// <summary>
     /// Contains current plugin version.
     /// </summary>
-    public const string PluginVersion = "2.2.0";
+    public const string PluginVersion = "2.3.0";
 
     /// <summary>
     /// Contains plugin description.

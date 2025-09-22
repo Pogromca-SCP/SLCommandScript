@@ -688,4 +688,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnServerElevatorSequenceChanged(ElevatorSequenceChangedEventArgs ev) => HandleEvent(EventType.ServerElevatorSequenceChange,
         nameof(EventType.ServerElevatorSequenceChange));
+
+    public override void OnScp173Teleported(Scp173TeleportedEventArgs ev) => HandleEvent(EventType.Scp173Teleport, nameof(EventType.Scp173Teleport),
+        ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.IsAllowed.ToString());
 }
