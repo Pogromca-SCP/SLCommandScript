@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2025-09-22
+
+### Added
+
+- File scripts loader now has support for new SCP-173 teleported event.
+
+### Changed
+
+- Upgraded project to [LabAPI v1.1.2](https://github.com/northwood-studios/LabAPI/releases/tag/1.1.2).
+
 ## [2.2.0] - 2025-09-07
 
 ### Added
