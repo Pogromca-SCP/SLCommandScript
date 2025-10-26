@@ -1,6 +1,5 @@
 using CommandSystem;
-using GameCore;
-using RemoteAdmin;
+using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -215,9 +214,9 @@ public static class CommandsUtils
     /// <returns>Command handler of provided type or <see langword="null" /> if no such handler exists.</returns>
     private static ICommandHandler? GetCommandHandler(CommandType commandType) => commandType switch
     {
-        CommandType.RemoteAdmin => CommandProcessor.RemoteAdminCommandHandler,
-        CommandType.Console => Console.singleton?.ConsoleCommandHandler,
-        CommandType.Client => QueryProcessor.DotCommandHandler,
+        CommandType.RemoteAdmin => Server.RemoteAdminCommandHandler,
+        CommandType.Console => Server.GameConsoleCommandHandler,
+        CommandType.Client => Server.ClientCommandHandler,
         _ => null,
     };
 

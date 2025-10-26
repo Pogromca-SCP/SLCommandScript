@@ -3,9 +3,9 @@ using CommandSystem;
 using CommandSystem.Commands.RemoteAdmin;
 using CommandSystem.Commands.RemoteAdmin.Broadcasts;
 using CommandSystem.Commands.Shared;
+using LabApi.Features.Wrappers;
 using Moq;
 using NUnit.Framework;
-using RemoteAdmin;
 using SLCommandScript.Core.Commands;
 using SLCommandScript.TestUtils;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ public class CommandsUtilsTests
 {
     private const string MockCommandName = "test";
 
-    private const CommandType InvalidCommandType = CommandType.Console;
+    private const CommandType InvalidCommandType = 0;
 
     private static readonly CommandType[] _allHandlerTypes = [CommandType.RemoteAdmin, CommandType.Console,
         CommandType.Client, CommandType.RemoteAdmin | CommandType.Console, CommandType.RemoteAdmin | CommandType.Client,
@@ -32,8 +32,6 @@ public class CommandsUtilsTests
 
     private static readonly string[]?[] _validAliases = [null, ["string", "example"], []];
 
-    private static readonly CommandType[] _validHandlerTypes = [CommandType.RemoteAdmin, CommandType.Client, CommandType.RemoteAdmin | CommandType.Client];
-
     private static readonly string[] _existingCommandNames = ["help", "HelP", "bc", "cassie", "BC"];
 
     private static readonly string[] _commandsToRegister = ["wtf", "dotheflip", "weeee"];
@@ -44,26 +42,29 @@ public class CommandsUtilsTests
 
     private static IEnumerable<object?[]> AllHandlersXInvalidAliases => TestArrays.CartesianJoin(_allHandlerTypes, _invalidAliases);
 
-    private static IEnumerable<object[]> ValidHandlersXExistingCommandNames => TestArrays.CartesianJoin(_validHandlerTypes, _existingCommandNames);
+    private static IEnumerable<object[]> ValidHandlersXExistingCommandNames => TestArrays.CartesianJoin(_allHandlerTypes, _existingCommandNames);
 
-    private static IEnumerable<object[]> ValidHandlersXCommandsToRegister => TestArrays.CartesianJoin(_validHandlerTypes, _commandsToRegister);
+    private static IEnumerable<object[]> ValidHandlersXCommandsToRegister => TestArrays.CartesianJoin(_allHandlerTypes, _commandsToRegister);
 
-    private static IEnumerable<object[]> ValidHandlersXExampleCommands => TestArrays.CartesianJoin(_validHandlerTypes, _exampleCommands);
+    private static IEnumerable<object[]> ValidHandlersXExampleCommands => TestArrays.CartesianJoin(_allHandlerTypes, _exampleCommands);
 
     private static IEnumerable<ICommandHandler> GetExpectedCommandHandlers(CommandType handlerType) => handlerType switch
     {
-        CommandType.RemoteAdmin => [CommandProcessor.RemoteAdminCommandHandler],
-        CommandType.RemoteAdmin | CommandType.Console => [CommandProcessor.RemoteAdminCommandHandler],
-        CommandType.Client => [QueryProcessor.DotCommandHandler],
-        CommandType.Client | CommandType.Console => [QueryProcessor.DotCommandHandler],
-        CommandType.RemoteAdmin | CommandType.Client => [CommandProcessor.RemoteAdminCommandHandler, QueryProcessor.DotCommandHandler],
-        CommandType.RemoteAdmin | CommandType.Client | CommandType.Console => [CommandProcessor.RemoteAdminCommandHandler, QueryProcessor.DotCommandHandler],
+        CommandType.RemoteAdmin => [Server.RemoteAdminCommandHandler],
+        CommandType.Console => [Server.GameConsoleCommandHandler],
+        CommandType.RemoteAdmin | CommandType.Console => [Server.RemoteAdminCommandHandler, Server.GameConsoleCommandHandler],
+        CommandType.Client => [Server.ClientCommandHandler],
+        CommandType.Client | CommandType.Console => [Server.GameConsoleCommandHandler, Server.ClientCommandHandler],
+        CommandType.RemoteAdmin | CommandType.Client => [Server.RemoteAdminCommandHandler, Server.ClientCommandHandler],
+        CommandType.RemoteAdmin | CommandType.Client | CommandType.Console => [Server.RemoteAdminCommandHandler, Server.GameConsoleCommandHandler,
+            Server.ClientCommandHandler],
         _ => [],
     };
 
     private static CommandType GetCommandHandlerType(ICommandHandler handler) => handler switch
     {
         RemoteAdminCommandHandler => CommandType.RemoteAdmin,
+        GameConsoleCommandHandler => CommandType.Console,
         ClientCommandHandler => CommandType.Client,
         _ => 0,
     };
@@ -100,20 +101,24 @@ public class CommandsUtilsTests
 
     private IEnumerable<ICommand> _originalRemoteAdmin = null!;
 
+    private IEnumerable<ICommand> _originalConsole = null!;
+
     private IEnumerable<ICommand> _originalClient = null!;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        _originalRemoteAdmin = TestCommandHandlers.CopyCommands(CommandProcessor.RemoteAdminCommandHandler);
-        _originalClient = TestCommandHandlers.CopyCommands(QueryProcessor.DotCommandHandler);
+        _originalRemoteAdmin = TestCommandHandlers.CopyCommands(Server.RemoteAdminCommandHandler);
+        _originalConsole = TestCommandHandlers.CopyCommands(Server.GameConsoleCommandHandler);
+        _originalClient = TestCommandHandlers.CopyCommands(Server.ClientCommandHandler);
     }
 
     [OneTimeTearDown]
     public void OneTimeTearDown()
     {
-        TestCommandHandlers.SetCommands(CommandProcessor.RemoteAdminCommandHandler, _originalRemoteAdmin);
-        TestCommandHandlers.SetCommands(QueryProcessor.DotCommandHandler, _originalClient);
+        TestCommandHandlers.SetCommands(Server.RemoteAdminCommandHandler, _originalRemoteAdmin);
+        TestCommandHandlers.SetCommands(Server.GameConsoleCommandHandler, _originalConsole);
+        TestCommandHandlers.SetCommands(Server.ClientCommandHandler, _originalClient);
     }
 
     [TestCaseSource(nameof(_allHandlerTypes))]

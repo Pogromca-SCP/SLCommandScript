@@ -233,4 +233,26 @@ public enum EventType : byte
 
 
     Scp173Teleport,
+
+
+    BlastDoorChange,
+    RoomLightChange,
+    RoomColorChange,
+    DoorLockChange,
+    CheckpointDoorSequenceChange,
+    DoorDamage,
+    DoorRepair,
+    Scp939Focus,
+    Scp939MimickEnvironment,
+    Scp049Attack,
+    Scp049SenseLooseTarget,
+    Scp049SenseKillTarget,
+    Scp173Snap,
+    PlayerCheckHitmarker,
+    PlayerSendHitmarker,
+    HumeShieldBreak,
+    FactionInfluenceChange,
+    MilestoneAchievement,
+    DeadmanSequenceActivation,
+    ServerShutdown,
 }
