@@ -25,7 +25,7 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Contains current project version.
     /// </summary>
-    public const string ProjectVersion = "2.3.0";
+    public const string ProjectVersion = "2.4.0";
 
     /// <summary>
     /// Contains project author.

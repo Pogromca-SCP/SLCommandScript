@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2025-10-26 (nuget 2.0.2)
+
+### Added
+
+- File scripts loader now has support for new events introduced in recent update.
+
+### Changed
+
+- Upgraded project to [LabAPI v1.1.4](https://github.com/northwood-studios/LabAPI/releases/tag/1.1.4).
+
+### Fixed
+
+- Plugin now uses LabAPI wrappers to register commands, so it properly loads on new game version.
+
 ## [2.3.0] - 2025-09-22
 
 ### Added
@@ -28,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PlayerEscape` event now provides additional argument with old player role.
 - Upgraded project to [LabAPI v1.1.1](https://github.com/northwood-studios/LabAPI/releases/tag/1.1.1).
 
-## [2.1.0] - 2025-07-01
+## [2.1.0] - 2025-07-01 (nuget 2.0.1)
 
 ### Added
 
@@ -40,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PlaceBlood` event now provides additional arguments with attacker's details.
 - Upgraded project to [LabAPI v1.1.0](https://github.com/northwood-studios/LabAPI/releases/tag/1.1.0).
 
-## [2.0.0] - 2025-06-09
+## [2.0.0] - 2025-06-09 (nuget 2.0.0)
 
 ### Added
 
@@ -54,19 +68,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File scripts loader was updated to no longer rely on static properties and files/directories location tracking.
 - Upgraded project to [LabAPI v1.0.2](https://github.com/northwood-studios/LabAPI/releases/tag/1.0.2).
 
-## [1.0.2] - 2024-11-21
+## [1.0.2] - 2024-11-21 (nuget 1.0.2)
 
 ### Fixed
 
 - Fixed invalid or missing in-code documentation.
 
-## [1.0.1] - 2024-10-18
+## [1.0.1] - 2024-10-18 (nuget 1.0.1)
 
 ### Fixed
 
 - Fixed in-directive comments messing up line extensions.
 
-## [1.0.0] - 2024-10-17
+## [1.0.0] - 2024-10-17 (nuget 1.0.0)
 
 ### Added
 

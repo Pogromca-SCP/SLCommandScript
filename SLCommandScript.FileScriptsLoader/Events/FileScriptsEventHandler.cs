@@ -11,6 +11,7 @@ using LabApi.Events.Arguments.Scp173Events;
 using LabApi.Events.Arguments.Scp3114Events;
 using LabApi.Events.Arguments.Scp914Events;
 using LabApi.Events.Arguments.Scp939Events;
+using LabApi.Events.Arguments.ScpEvents;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.Arguments.WarheadEvents;
 using LabApi.Events.CustomHandlers;
@@ -691,4 +692,74 @@ public class FileScriptsEventHandler : CustomEventsHandler
 
     public override void OnScp173Teleported(Scp173TeleportedEventArgs ev) => HandleEvent(EventType.Scp173Teleport, nameof(EventType.Scp173Teleport),
         ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.IsAllowed.ToString());
+
+    public override void OnServerBlastDoorChanged(BlastDoorChangedEventArgs ev) => HandleEvent(EventType.BlastDoorChange, nameof(EventType.BlastDoorChange),
+        ev.NewState.ToString());
+
+    public override void OnServerRoomLightChanged(RoomLightChangedEventArgs ev) => HandleEvent(EventType.RoomLightChange, nameof(EventType.RoomLightChange),
+        ev.Room.Name.ToString(), ev.NewState.ToString());
+
+    public override void OnServerRoomColorChanged(RoomColorChangedEventArgs ev) => HandleEvent(EventType.RoomColorChange, nameof(EventType.RoomColorChange),
+        ev.Room.Name.ToString(), ev.NewState.ToHex());
+
+    public override void OnServerDoorLockChanged(DoorLockChangedEventArgs ev) => HandleEvent(EventType.DoorLockChange, nameof(EventType.DoorLockChange),
+        ev.Door.DoorName.ToString(), ev.LockReason.ToString());
+
+    public override void OnServerCheckpointDoorSequenceChanged(CheckpointDoorSequenceChangedEventArgs ev) => HandleEvent(EventType.CheckpointDoorSequenceChange,
+        nameof(EventType.CheckpointDoorSequenceChange), ev.CheckpointDoor.DoorName.ToString(), ev.CurrentSequence.ToString());
+
+    public override void OnServerDoorDamaged(DoorDamagedEventArgs ev) => HandleEvent(EventType.DoorDamage, nameof(EventType.DoorDamage),
+        ev.Door.DoorName.ToString(), ev.DamageType.ToString(), ev.Damage.ToString());
+
+    public override void OnServerDoorRepaired(DoorRepairedEventArgs ev) => HandleEvent(EventType.DoorRepair, nameof(EventType.DoorRepair),
+        ev.Door.DoorName.ToString(), ev.RemainingHealth.ToString());
+
+    public override void OnScp939Focused(Scp939FocusedEventArgs ev) => HandleEvent(EventType.Scp939Focus, nameof(EventType.Scp939Focus),
+        ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.FocusState.ToString());
+
+    public override void OnScp939MimickedEnvironment(Scp939MimickedEnvironmentEventArgs ev) => HandleEvent(EventType.Scp939MimickEnvironment,
+        nameof(EventType.Scp939MimickEnvironment), ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.PlayedSequence.ToString());
+
+    public override void OnScp049Attacked(Scp049AttackedEventArgs ev) => HandleEvent(EventType.Scp049Attack, nameof(EventType.Scp049Attack),
+        ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.Target.PlayerId.ToString(), ev.Target.DisplayName);
+
+    public override void OnScp049SenseLostTarget(Scp049SenseLostTargetEventArgs ev)
+    {
+        const EventType eventType = EventType.Scp049SenseLooseTarget;
+        const string eventName = nameof(EventType.Scp049SenseLooseTarget);
+
+        if (ev.Target is null)
+        {
+            HandleEvent(eventType, eventName, ev.Player.PlayerId.ToString(), ev.Player.DisplayName);
+        }
+        else
+        {
+            HandleEvent(eventType, eventName, ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.Target.PlayerId.ToString(), ev.Target.DisplayName);
+        }
+    }
+
+    public override void OnScp049SenseKilledTarget(Scp049SenseKilledTargetEventArgs ev) => HandleEvent(EventType.Scp049SenseKillTarget,
+        nameof(EventType.Scp049SenseKillTarget), ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.Target.PlayerId.ToString(), ev.Target.DisplayName);
+
+    public override void OnScp173Snapped(Scp173SnappedEventArgs ev) => HandleEvent(EventType.Scp173Snap, nameof(EventType.Scp173Snap),
+        ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.Target.PlayerId.ToString(), ev.Target.DisplayName);
+
+    public override void OnPlayerCheckedHitmarker(PlayerCheckedHitmarkerEventArgs ev) => HandleEvent(EventType.PlayerCheckHitmarker,
+        nameof(EventType.PlayerCheckHitmarker), ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.Victim.PlayerId.ToString(), ev.Victim.DisplayName);
+
+    public override void OnPlayerSentHitmarker(PlayerSentHitmarkerEventArgs ev) => HandleEvent(EventType.PlayerSendHitmarker,
+        nameof(EventType.PlayerSendHitmarker), ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.Size.ToString());
+
+    public override void OnScpHumeShieldBroken(ScpHumeShieldBrokenEventArgs ev) => HandleEvent(EventType.HumeShieldBreak, nameof(EventType.HumeShieldBreak),
+        ev.Player.PlayerId.ToString(), ev.Player.DisplayName);
+
+    public override void OnServerModifiedFactionInfluence(ModifiedFactionInfluenceEventArgs ev) => HandleEvent(EventType.FactionInfluenceChange,
+        nameof(EventType.FactionInfluenceChange), ev.Faction.ToString(), ev.Influence.ToString());
+
+    public override void OnServerAchievedMilestone(AchievedMilestoneEventArgs ev) => HandleEvent(EventType.MilestoneAchievement,
+        nameof(EventType.MilestoneAchievement), ev.Faction.ToString(), ev.MilestoneIndex.ToString(), ev.Threshold.ToString());
+
+    public override void OnServerDeadmanSequenceActivated() => HandleEvent(EventType.DeadmanSequenceActivation, nameof(EventType.DeadmanSequenceActivation));
+
+    public override void OnServerShutdown() => HandleEvent(EventType.ServerShutdown, nameof(EventType.ServerShutdown));
 }
