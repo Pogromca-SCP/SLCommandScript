@@ -25,5 +25,5 @@ jobs:
       with:
         plugin-name: SLCommandScript
         refs-variable: SL_REFERENCES
-        initial-test-runs: 0
+        initial-test-runs: 3
         dependencies: SLCommandScript.Core,SLCommandScript.FileScriptsLoader
