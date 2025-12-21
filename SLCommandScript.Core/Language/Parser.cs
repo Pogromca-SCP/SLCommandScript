@@ -35,11 +35,11 @@ public class Parser
             ++index;
         }
 
-        while (index < str.Length)
+        var length = str.Length;
+
+        while (index < length)
         {
-            result *= 10;
-            result += str[index] - '0';
-            ++index;
+            result = result * 10 + (str[index++] - '0');
         }
 
         return isNegative ? -result : result;
