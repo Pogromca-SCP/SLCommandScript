@@ -13,7 +13,15 @@ This plugin was created using [official Northwood Lab API](https://github.com/no
 This project was developed as part of the educational process at [PJAIT](https://pja.edu.pl/en/).
 
 ## Installation
-[Plugins installation guide](https://github.com/northwood-studios/LabAPI/wiki/Installing-Plugins)
+### Automatic
+1. Run `p install Pogromca-SCP/SLCommandScript` in the server console.
+2. Restart the server.
+
+### Manual
+1. Download `SLCommandScript.dll` and `dependencies.zip` files from [latest release](https://github.com/Pogromca-SCP/SLCommandScript/releases/latest).
+2. Place downloaded `*.dll` file in your server's plugins folder (default`{ServerDirectory}/LabAPI/plugins/{port|global}`).
+3. Unzip the contents of the downloaded `*.zip` file into your server's plugin dependencies folder (default `{ServerDirectory}/LabAPI/dependencies/{port|global}`).
+4. Restart the server.
 
 ## Documentation
 Documentation for users and developers can be found in [project wiki](https://github.com/Pogromca-SCP/SLCommandScript/wiki).

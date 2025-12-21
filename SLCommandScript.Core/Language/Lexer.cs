@@ -796,9 +796,7 @@ public class Lexer
 
         do
         {
-            value *= 10;
-            value += Source[_current] - '0';
-            ++_current;
+            value = value * 10 + (Source[_current++] - '0');
         }
         while (IsDigit(Current));
 
@@ -834,9 +832,7 @@ public class Lexer
     {
         if (isPureNumber && IsDigit(Source[_current]))
         {
-            _numericValue *= 10;
-            _numericValue += Source[_current] - '0';
-            ++_current;
+            _numericValue = _numericValue * 10 + (Source[_current++] - '0');
             return TokenType.Number;
         }
 
@@ -927,9 +923,7 @@ public class Lexer
 
             while (IsDigit(Current))
             {
-                argNum *= 10;
-                argNum += Source[_current] - '0';
-                ++_current;
+                argNum = argNum * 10 + (Source[_current++] - '0');
             }
 
             if (Match(')'))
