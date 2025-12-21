@@ -19,6 +19,11 @@ jobs:
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 10.0.x
+    
+    - name: Setup Mono
+      shell: bash
+      run: |
+        apt install mono-complete
         
     - name: Build, test and upload artifacts
       uses: Pogromca-SCP/build-nwapi-plugin@linux-support
