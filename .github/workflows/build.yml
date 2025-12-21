@@ -23,7 +23,7 @@ jobs:
     - name: Setup Mono
       shell: bash
       run: |
-        apt install mono-complete
+        sudo apt install mono-complete
         
     - name: Build, test and upload artifacts
       uses: Pogromca-SCP/build-nwapi-plugin@linux-support
