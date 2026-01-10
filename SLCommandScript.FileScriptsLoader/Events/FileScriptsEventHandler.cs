@@ -123,10 +123,15 @@ public class FileScriptsEventHandler : CustomEventsHandler
         const EventType eventType = EventType.PlayerChangeSpectator;
         const string eventName = nameof(EventType.PlayerChangeSpectator);
 
+        if (ev.Player is null)
+        {
+            return;
+        }
+
         if (ev.OldTarget is null)
         {
             HandleEvent(eventType, eventName, ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.NewTarget.PlayerId.ToString(), ev.NewTarget.DisplayName);
-}
+        }
         else
         {
             HandleEvent(eventType, eventName, ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.NewTarget.PlayerId.ToString(), ev.NewTarget.DisplayName,
@@ -314,8 +319,15 @@ public class FileScriptsEventHandler : CustomEventsHandler
     public override void OnPlayerToggledRadio(PlayerToggledRadioEventArgs ev) => HandleEvent(EventType.PlayerToggleRadio, nameof(EventType.PlayerToggleRadio),
         ev.NewState.ToString(), ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.NewState.ToString());
 
-    public override void OnPlayerUsedRadio(PlayerUsedRadioEventArgs ev) => HandleEvent(EventType.PlayerUseRadio, nameof(EventType.PlayerUseRadio),
-        ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.Drain.ToString());
+    public override void OnPlayerUsedRadio(PlayerUsedRadioEventArgs ev)
+    {
+        if (ev.Player is null)
+        {
+            return;
+        }
+
+        HandleEvent(EventType.PlayerUseRadio, nameof(EventType.PlayerUseRadio), ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.Drain.ToString());
+    }
 
     public override void OnServerLczDecontaminationStarted() => HandleEvent(EventType.LczDecontaminationStart, nameof(EventType.LczDecontaminationStart));
 
