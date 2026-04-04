@@ -185,6 +185,36 @@ public class EnumIterableTests
     }
 
     [Test]
+    public void Reload_ShouldProperlyResetIterable_BeforeRunning([Values] bool enableNone)
+    {
+        // Arrange
+        var iterable = new EnumIterable<FullEnum>(enableNone);
+
+        // Act
+        iterable.Reload();
+
+        // Assert
+        iterable.IsAtEnd.Should().BeFalse();
+        iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
+    }
+
+    [Test]
+    public void Reload_ShouldProperlyResetIterable_AfterRunning([Values] bool enableNone)
+    {
+        // Arrange
+        var iterable = new EnumIterable<FullEnum>(enableNone);
+        var variables = new TestVariablesCollector();
+
+        // Act
+        while (iterable.LoadNext(variables)) {}
+        iterable.Reload();
+
+        // Assert
+        iterable.IsAtEnd.Should().BeFalse();
+        iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
+    }
+
+    [Test]
     public void Reset_ShouldProperlyResetIterable_BeforeRunning([Values] bool enableNone)
     {
         // Arrange

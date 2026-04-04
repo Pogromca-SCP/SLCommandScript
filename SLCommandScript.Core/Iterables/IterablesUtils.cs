@@ -134,7 +134,7 @@ public static class IterablesUtils
     /// <param name="array">Array to shuffle. This array is modified.</param>
     /// <param name="amount">Percent amount of elements to retrieve.</param>
     /// <returns>New shuffled array or original array if less than 2 elements were found.</returns>
-    public static TItem[] Shuffle<TItem>(TItem[] array, float amount) => Shuffle(array, array.Length * amount);
+    public static TItem[] Shuffle<TItem>(TItem[] array, float amount) => Shuffle(array, (int) (array.Length * amount));
 
     /// <summary>
     /// Shuffles elements in provided array.

@@ -476,7 +476,9 @@ public class Parser
 
             if (expr is null)
             {
-                ErrorMessage = ErrorMessage is null ? $"Sequence expression {body.Count} is missing" : $"{ErrorMessage}\nin sequence expression {body.Count}";
+                ErrorMessage = ErrorMessage is null ? $"Sequence expression {body.Count + 1} is missing" :
+                    $"{ErrorMessage}\nin sequence expression {body.Count + 1}";
+
                 return null;
             }
 

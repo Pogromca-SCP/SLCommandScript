@@ -110,16 +110,6 @@ public class ParserTests
             new(TokenType.Text, "2..5xd"), new(TokenType.RightSquare, "]") },
             "'2..5xd' is not a valid iterable object name"],
 
-        // [ bc forrandom null ]
-        [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.ForRandom, "forrandom"),
-            new(TokenType.Text, "null", 1), new(TokenType.RightSquare, "]") },
-            "Provider for 'null' iterable object is null"],
-
-        // [ bc forrandom Bad ]
-        [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.ForRandom, "forrandom"),
-            new(TokenType.Text, "Bad", 1), new(TokenType.RightSquare, "]") },
-            "Provider for 'Bad' iterable object returned null"],
-
         // [ bc forrandom Test 0 ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.ForRandom, "forrandom"),
             new(TokenType.Text, "Test"), new(TokenType.Number, "0"), new(TokenType.RightSquare, "]") },

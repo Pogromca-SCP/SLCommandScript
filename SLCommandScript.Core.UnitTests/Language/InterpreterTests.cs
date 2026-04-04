@@ -59,7 +59,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeFalse();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().Be("Provided command arguments array is empty");
     }
 
@@ -71,7 +71,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "example", "args" }, 1, 1), null, out message)).Returns(false);
+        commandMock.Setup(x => x.Execute(new(new[] { "example", "args" }, 1, 1), senderMock.Object, out message)).Returns(false);
         var expr = new CommandExpr(commandMock.Object, ["example", "args"], false);
 
         // Act
@@ -79,7 +79,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeFalse();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().Be(message);
         commandMock.VerifyAll();
     }
@@ -92,7 +92,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), null, out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), senderMock.Object, out message)).Returns(true);
         var expr = new CommandExpr(commandMock.Object, ["test"], false);
 
         // Act
@@ -100,7 +100,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
@@ -113,7 +113,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = success ? "Command succeeded" : "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), null, out message)).Returns(success);
+        commandMock.Setup(x => x.Execute(new(new[] { "test" }, 1, 0), senderMock.Object, out message)).Returns(success);
         var expr = new DelayExpr(new CommandExpr(commandMock.Object, ["test"], false), 0, null);
 
         // Act
@@ -121,7 +121,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().Be(success);
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().Be(success ? null : message);
         commandMock.VerifyAll();
     }
@@ -132,14 +132,14 @@ public class InterpreterTests
         // Arrange
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
         var interpreter = new Interpreter(senderMock.Object);
-        var expr = new ForeachExpr(new CommandExpr(new AlwaysFailCommand(), [], false), new TestIterable());
+        var expr = new ForeachExpr(new CommandExpr(new AlwaysFailCommand(), ["al"], false), new TestIterable());
 
         // Act
         var result = interpreter.VisitForeachExpr(expr);
 
         // Assert
         result.Should().BeFalse();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().Be(nameof(AlwaysFailCommand));
     }
 
@@ -151,7 +151,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "test", "args", "$(arg)" }, 1, 2), null, out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "test", "args", "$(arg)" }, 1, 2), senderMock.Object, out message)).Returns(true);
         var expr = new ForeachExpr(new CommandExpr(commandMock.Object, ["test", "args", "$(arg)"], false), new TestIterable());
 
         // Act
@@ -159,7 +159,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
@@ -179,7 +179,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
     }
 
@@ -198,7 +198,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
     }
 
@@ -209,15 +209,15 @@ public class InterpreterTests
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
         var interpreter = new Interpreter(senderMock.Object);
 
-        var expr = new ForElseExpr(new CommandExpr(new AlwaysFailCommand(), [], false), new TestIterable(),
-            new CommandExpr(new AlwaysFailCommand(), [], false), new(testPrimary ? TestIterable.MaxIterations : 0));
+        var expr = new ForElseExpr(new CommandExpr(new AlwaysFailCommand(), ["al"], false), new TestIterable(),
+            new CommandExpr(new AlwaysFailCommand(), ["al"], false), new(testPrimary ? TestIterable.MaxIterations : 0));
 
         // Act
         var result = interpreter.VisitForElseExpr(expr);
 
         // Assert
         result.Should().BeFalse();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().Be(nameof(AlwaysFailCommand));
     }
 
@@ -229,7 +229,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "test", "args", "$(arg)" }, 1, 2), null, out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "test", "args", "$(arg)" }, 1, 2), senderMock.Object, out message)).Returns(true);
         var cmd = new CommandExpr(commandMock.Object, ["test", "args", "$(arg)"], false);
         var expr = new ForElseExpr(cmd, new TestIterable(), cmd, new(limit));
 
@@ -238,7 +238,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
@@ -251,7 +251,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "test", "args", "$(arg)" }, 1, 2), null, out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "test", "args", "$(arg)" }, 1, 2), senderMock.Object, out message)).Returns(true);
         var cmd = new CommandExpr(commandMock.Object, ["test", "args", "$(arg)"], false);
         var expr = new ForElseExpr(cmd, new TestIterable(), cmd, new(limit));
 
@@ -260,7 +260,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
@@ -279,7 +279,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
     }
 
@@ -297,7 +297,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
     }
 
@@ -318,7 +318,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
     }
 
@@ -339,7 +339,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
     }
 
@@ -357,7 +357,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeFalse();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().Be("If expression branches are null");
     }
 
@@ -369,16 +369,16 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), senderMock.Object, out message)).Returns(true);
 
-        var expr = new IfExpr(new CommandExpr(new AlwaysFailCommand(), [], false), new CommandExpr(commandMock.Object, ["condition"], false), null);
+        var expr = new IfExpr(new CommandExpr(new AlwaysFailCommand(), ["al"], false), new CommandExpr(commandMock.Object, ["condition"], false), null);
 
         // Act
         var result = interpreter.VisitIfExpr(expr);
 
         // Assert
         result.Should().BeFalse();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().Be(nameof(AlwaysFailCommand));
         commandMock.VerifyAll();
     }
@@ -391,7 +391,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(false);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), senderMock.Object, out message)).Returns(false);
 
         var expr = new IfExpr(new ForeachExpr(null!, null!), new CommandExpr(commandMock.Object, ["condition"], false),
             new CommandExpr(commandMock.Object, ["else"], false));
@@ -401,7 +401,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeFalse();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().Be(message);
         commandMock.VerifyAll();
     }
@@ -414,7 +414,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), senderMock.Object, out message)).Returns(true);
 
         var expr = new IfExpr(null, new CommandExpr(commandMock.Object, ["condition"], false), new ForeachExpr(null!, null!));
 
@@ -423,7 +423,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
@@ -436,7 +436,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), senderMock.Object, out message)).Returns(true);
 
         var expr = new IfExpr(new CommandExpr(commandMock.Object, ["then"], false), new CommandExpr(commandMock.Object, ["condition"], false), null);
 
@@ -445,7 +445,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
@@ -458,7 +458,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command failed";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(false);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), senderMock.Object, out message)).Returns(false);
 
         var expr = new IfExpr(new ForeachExpr(null!, null!), new CommandExpr(commandMock.Object, ["condition"], false), null);
 
@@ -467,7 +467,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
@@ -480,9 +480,9 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), null, out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] { "condition" }, 1, 0), senderMock.Object, out message)).Returns(true);
 
-        var expr = new IfExpr(new ForeachExpr(null!, null!), new CommandExpr(new AlwaysSuccessCommand(), [], false),
+        var expr = new IfExpr(new ForeachExpr(null!, null!), new CommandExpr(new AlwaysFailCommand(), ["al"], false),
             new CommandExpr(commandMock.Object, ["else"], false));
 
         // Act
@@ -490,7 +490,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }
@@ -501,15 +501,15 @@ public class InterpreterTests
         // Arrange
         var senderMock = new Mock<CommandSender>(MockBehavior.Strict);
         var interpreter = new Interpreter(senderMock.Object);
-        var expr = new SequenceExpr([new CommandExpr(new AlwaysSuccessCommand(), [], false), new IfExpr(null, null!, null)]);
+        var expr = new SequenceExpr([new CommandExpr(new AlwaysSuccessCommand(), ["al"], false), new IfExpr(null, null!, null)]);
 
         // Act
         var result = interpreter.VisitSequenceExpr(expr);
 
         // Assert
         result.Should().BeFalse();
-        interpreter.Sender.Should().BeNull();
-        interpreter.ErrorMessage.Should().Be("If expression condition is null");
+        interpreter.Sender.Should().Be(senderMock.Object);
+        interpreter.ErrorMessage.Should().Be("If expression branches are null");
     }
 
     [Test]
@@ -525,7 +525,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
     }
 
@@ -537,7 +537,7 @@ public class InterpreterTests
         var interpreter = new Interpreter(senderMock.Object);
         var message = "Command succeeded";
         var commandMock = new Mock<ICommand>(MockBehavior.Strict);
-        commandMock.Setup(x => x.Execute(new(new[] {"condition" }, 1, 0), null, out message)).Returns(true);
+        commandMock.Setup(x => x.Execute(new(new[] {"condition" }, 1, 0), senderMock.Object, out message)).Returns(true);
         var expr = new SequenceExpr([new CommandExpr(commandMock.Object, ["condition"], false), new SequenceExpr([])]);
 
         // Act
@@ -545,7 +545,7 @@ public class InterpreterTests
 
         // Assert
         result.Should().BeTrue();
-        interpreter.Sender.Should().BeNull();
+        interpreter.Sender.Should().Be(senderMock.Object);
         interpreter.ErrorMessage.Should().BeNull();
         commandMock.VerifyAll();
     }

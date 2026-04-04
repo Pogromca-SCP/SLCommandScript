@@ -12,7 +12,7 @@ public class CustomTypesUtilsTests
     public void MakeCustomTypeInstance_ShouldReturnDefault_WhenCustomTypeWasNotFound()
     {
         // Act
-        var result = CustomTypesUtils.MakeCustomTypeInstance<object>(string.Empty, out var message);
+        var result = CustomTypesUtils.MakeCustomTypeInstance<object>(null!, out var message);
 
         // Assert
         result.Should().BeNull();
