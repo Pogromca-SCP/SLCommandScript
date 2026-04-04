@@ -86,12 +86,13 @@ public class ListIterableTests
         // Arrange
         var items = strings.ToArray();
         var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var variables = new TestVariablesCollector();
         var count = 0;
 
         // Act
         iterable.Randomize(randAmount);
 
-        while (iterable.LoadNext(new Dictionary<string, string>()))
+        while (iterable.LoadNext(variables))
         {
             ++count;
         }
@@ -113,11 +114,12 @@ public class ListIterableTests
         var count = 0;
         var len = strings.Length;
         var randAmount = (int)(len * percentage);
+        var variables = new TestVariablesCollector();
 
         // Act
         iterable.Randomize(percentage);
 
-        while (iterable.LoadNext(new Dictionary<string, string>()))
+        while (iterable.LoadNext(variables))
         {
             ++count;
         }
@@ -149,9 +151,10 @@ public class ListIterableTests
     {
         // Arrange
         var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var variables = new TestVariablesCollector();
 
         // Act
-        while (iterable.LoadNext(new Dictionary<string, string>())) {}
+        while (iterable.LoadNext(variables)) {}
         iterable.Reload();
 
         // Assert
@@ -180,9 +183,10 @@ public class ListIterableTests
     {
         // Arrange
         var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var variables = new TestVariablesCollector();
 
         // Act
-        while (iterable.LoadNext(new Dictionary<string, string>())) {}
+        while (iterable.LoadNext(variables)) {}
         iterable.Reset();
 
         // Assert

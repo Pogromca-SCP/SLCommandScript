@@ -83,11 +83,12 @@ public class LazyListIterableTests
         // Arrange
         var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
         var count = 0;
+        var variables = new TestVariablesCollector();
 
         // Act
         iterable.Randomize(randAmount);
 
-        while (iterable.LoadNext(new Dictionary<string, string>()))
+        while (iterable.LoadNext(variables))
         {
             ++count;
         }
@@ -107,11 +108,12 @@ public class LazyListIterableTests
         var count = 0;
         var len = strings.Length;
         var randAmount = (int) (len * percentage);
+        var variables = new TestVariablesCollector();
 
         // Act
         iterable.Randomize(percentage);
 
-        while (iterable.LoadNext(new Dictionary<string, string>()))
+        while (iterable.LoadNext(variables))
         {
             ++count;
         }
@@ -142,9 +144,10 @@ public class LazyListIterableTests
     {
         // Arrange
         var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
+        var variables = new TestVariablesCollector();
 
         // Act
-        while (iterable.LoadNext(new Dictionary<string, string>())) {}
+        while (iterable.LoadNext(variables)) {}
         iterable.Reload();
 
         // Assert
@@ -173,9 +176,10 @@ public class LazyListIterableTests
     {
         // Arrange
         var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
+        var variables = new TestVariablesCollector();
 
         // Act
-        while (iterable.LoadNext(new Dictionary<string, string>())) {}
+        while (iterable.LoadNext(variables)) {}
         iterable.Reset();
 
         // Assert

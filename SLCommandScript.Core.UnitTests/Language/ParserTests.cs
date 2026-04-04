@@ -160,6 +160,14 @@ public class ParserTests
         // bc 5 #?
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.ScopeGuard, "#?") },
             new CommandExpr(new BroadcastCommand(), ["bc", "5"], false), CommandType.Any],
+        
+        // bc 5 #? none
+        [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "none") },
+            new CommandExpr(new BroadcastCommand(), ["bc", "5"], false), CommandType.Any],
+        
+        // bc 5 #? any
+        [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "any") },
+            new CommandExpr(new BroadcastCommand(), ["bc", "5"], false), CommandType.Any],
 
         // bc 5 #? Console
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.ScopeGuard, "#?"),
@@ -174,6 +182,16 @@ public class ParserTests
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.Variable, "Test"),
             new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "console"), new(TokenType.Text, "cLIeNt") },
             new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false), CommandType.Console | CommandType.Client],
+        
+        // bc 5 Test #? None RemoteAdmin
+        [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.Variable, "Test"),
+            new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "None"), new(TokenType.Text, "RemoteAdmin") },
+            new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false), CommandType.RemoteAdmin],
+        
+        // bc 5 Test #? any remoteadmin
+        [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.Variable, "Test"),
+            new(TokenType.ScopeGuard, "#?"), new(TokenType.Text, "any"), new(TokenType.Text, "remoteadmin") },
+            new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false), CommandType.Any],
 
         // [ bc 5 Test if bc 5 Test ] #? console remoTEADmin
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),

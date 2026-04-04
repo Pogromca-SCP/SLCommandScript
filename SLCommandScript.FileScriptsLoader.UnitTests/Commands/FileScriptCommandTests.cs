@@ -153,7 +153,7 @@ public class FileScriptCommandTests : TestWithConfigBase
     {
         // Arrange
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
-        fileSystemMock.Setup(x => x.ReadFile(".slcs")).Returns(string.Empty);
+        fileSystemMock.Setup(x => x.ReadFile($"{TestCommand}.slcs")).Returns(string.Empty);
         var senderMock = new Mock<ICommandSender>(MockBehavior.Strict);
         var cmd = new FileScriptCommand(TestCommand, null, FromFilesMock(fileSystemMock));
 

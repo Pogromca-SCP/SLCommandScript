@@ -64,9 +64,10 @@ public class EnumIterableTests
     {
         // Arrange
         var iterable = new EnumIterable<EmptyEnum>(enableNone);
+        var variables = new TestVariablesCollector();
 
         // Act
-        var result = iterable.LoadNext(new Dictionary<string, string>());
+        var result = iterable.LoadNext(variables);
 
         // Assert
         result.Should().BeFalse();
@@ -79,10 +80,11 @@ public class EnumIterableTests
     {
         // Arrange
         var iterable = new EnumIterable<FullEnum>(enableNone);
+        var variables = new TestVariablesCollector();
         var count = 0;
 
         // Act
-        while (iterable.LoadNext(new Dictionary<string, string>()))
+        while (iterable.LoadNext(variables))
         {
             ++count;
         }
@@ -142,12 +144,13 @@ public class EnumIterableTests
     {
         // Arrange
         var iterable = new EnumIterable<FullEnum>(true);
+        var variables = new TestVariablesCollector();
         var count = 0;
 
         // Act
         iterable.Randomize(randAmount);
 
-        while (iterable.LoadNext(new Dictionary<string, string>()))
+        while (iterable.LoadNext(variables))
         {
             ++count;
         }
@@ -164,12 +167,13 @@ public class EnumIterableTests
         // Arrange
         var randAmount = (int) (_values.Length * percentage);
         var iterable = new EnumIterable<FullEnum>(true);
+        var variables = new TestVariablesCollector();
         var count = 0;
 
         // Act
         iterable.Randomize(percentage);
 
-        while (iterable.LoadNext(new Dictionary<string, string>()))
+        while (iterable.LoadNext(variables))
         {
             ++count;
         }
@@ -199,9 +203,10 @@ public class EnumIterableTests
     {
         // Arrange
         var iterable = new EnumIterable<FullEnum>(enableNone);
+        var variables = new TestVariablesCollector();
 
         // Act
-        while (iterable.LoadNext(new Dictionary<string, string>())) {}
+        while (iterable.LoadNext(variables)) {}
         iterable.Reset();
 
         // Assert

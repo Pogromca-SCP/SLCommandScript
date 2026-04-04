@@ -76,7 +76,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         var result = new FileScriptCommandBase(TestCommand, null, RuntimeConfig);
 
         // Assert
-        result.Command.Should().BeEmpty();
+        result.Command.Should().Be(TestCommand);
         result.Aliases.Should().BeNull();
         result.Description.Should().Be(FileScriptCommandBase.DefaultDescription);
         result.Parent.Should().BeNull();
