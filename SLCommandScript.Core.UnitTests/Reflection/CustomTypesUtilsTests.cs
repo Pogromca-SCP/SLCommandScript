@@ -12,7 +12,7 @@ public class CustomTypesUtilsTests
     public void MakeCustomTypeInstance_ShouldReturnDefault_WhenCustomTypeWasNotFound()
     {
         // Act
-        var result = CustomTypesUtils.MakeCustomTypeInstance<object>(null, out var message);
+        var result = CustomTypesUtils.MakeCustomTypeInstance<object>(string.Empty, out var message);
 
         // Assert
         result.Should().BeNull();
@@ -26,7 +26,7 @@ public class CustomTypesUtilsTests
         var type = typeof(object);
 
         // Act
-        var result = CustomTypesUtils.MakeCustomTypeInstance<IDisposable>(type.FullName, out var message);
+        var result = CustomTypesUtils.MakeCustomTypeInstance<IDisposable>(type.FullName!, out var message);
 
         // Assert
         result.Should().BeNull();
@@ -40,7 +40,7 @@ public class CustomTypesUtilsTests
         var type = typeof(Type);
 
         // Act
-        var result = CustomTypesUtils.MakeCustomTypeInstance<object>(type.FullName, out var message);
+        var result = CustomTypesUtils.MakeCustomTypeInstance<object>(type.FullName!, out var message);
 
         // Assert
         result.Should().BeNull();
@@ -54,7 +54,7 @@ public class CustomTypesUtilsTests
         var type = typeof(int);
 
         // Act
-        var result = CustomTypesUtils.MakeCustomTypeInstance<object>(type.FullName, out var message);
+        var result = CustomTypesUtils.MakeCustomTypeInstance<object>(type.FullName!, out var message);
 
         // Assert
         result.Should().Be(0);

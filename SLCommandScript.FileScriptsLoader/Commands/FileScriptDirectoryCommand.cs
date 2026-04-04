@@ -8,12 +8,12 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// </summary>
 /// <param name="name">Name of the command.</param>
 /// <param name="parent">Parent which stores this command.</param>
-public class FileScriptDirectoryCommand(string? name, IFileScriptCommandParent? parent) : ParentCommand, IFileScriptCommandParent
+public class FileScriptDirectoryCommand(string name, IFileScriptCommandParent? parent) : ParentCommand, IFileScriptCommandParent
 {
     /// <summary>
     /// Contains command name.
     /// </summary>
-    public override string Command { get; } = name ?? string.Empty;
+    public override string Command { get; } = name;
 
     /// <summary>
     /// Defines command aliases.

@@ -38,7 +38,7 @@ Documentation for users and developers can be found in [project wiki](https://gi
 | ---------------------------- | ----------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | custom_permissions_resolver  | string                                    |                              | Custom permissions resolver implementation to use, leave empty if not needed.                                   |
 | enable_script_event_handlers | bool                                      | true                         | Set to false in order to disable event handling with scripts.                                                   |
-| allowed_script_command_types | SLCommandScript.Core.Commands.CommandType | Console, Client, RemoteAdmin | Defines allowed script command types (Console, Client or RemoteAdmin), set to 0 to disable all script commands. |
+| allowed_script_command_types | SLCommandScript.Core.Commands.CommandType | Any                          | Defines allowed script command types (Console, Client or RemoteAdmin), set to None to disable all script commands. |
 | script_executions_limit      | int                                       | 10                           | Defines a maximum amount of concurrent executions a single script can have, use it to set max recursion depth.  |
 
 ## Commands

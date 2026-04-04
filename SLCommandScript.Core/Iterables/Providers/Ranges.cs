@@ -23,7 +23,7 @@ public static class RangesProvider
     /// <param name="targetVars">Dictionary to insert value into.</param>
     /// <param name="number">Number value to load.</param>
     /// <exception cref="NullReferenceException">When <paramref name="targetVars" /> is <see langword="null"/>.</exception>
-    public static void LoadVariables(IDictionary<string, string?> targetVars, int number) => targetVars["i"] = number.ToString();
+    public static void LoadVariables(IDictionary<string, string> targetVars, int number) => targetVars["i"] = number.ToString();
 
     /// <summary>
     /// Creates numbers range.
@@ -35,9 +35,10 @@ public static class RangesProvider
     {
         var desc = end < start;
         var range = new int[(desc ? start - end : end - start) + 1];
+        var length = range.Length;
         var value = start;
 
-        for (var i = 0; i < range.Length; ++i)
+        for (var i = 0; i < length; ++i)
         {
             range[i] = value;
             value = desc ? value - 1 : value + 1;

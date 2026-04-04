@@ -65,7 +65,7 @@ public partial class CommandsDirectoryTests : TestWithConfigBase
         _ => null!,
     };
 
-    private static CommandsDirectory MakeSupressed(IFileSystemWatcherHelper? watcher, CommandType handlerType, RuntimeConfig? config)
+    private static CommandsDirectory MakeSupressed(IFileSystemWatcherHelper watcher, CommandType handlerType, RuntimeConfig config)
     {
         var dir = new CommandsDirectory(watcher, handlerType, config);
         GC.SuppressFinalize(dir);
@@ -231,19 +231,6 @@ public partial class CommandsDirectoryTests : TestWithConfigBase
         watcherMock.Raise(x => x.Renamed += null, new RenamedEventArgs(WatcherChangeTypes.Renamed, withParent ? _testParentPath : TestDirectory, name, oldName));
 
     [TestCaseSource(nameof(_handlerTypes))]
-    public void CommandsDirectory_ShouldNotInitialize_WhenProvidedWatcherIsNull(CommandType type)
-    {
-        // Act
-        var result = CommandsDirectoryTests.MakeSupressed(null, type, null);
-
-        // Assert
-        result.Commands.Should().BeEmpty();
-        result.HandlerType.Should().Be(type);
-        result.Watcher.Should().BeNull();
-        result.Config.Should().NotBeNull();
-    }
-
-    [TestCaseSource(nameof(_handlerTypes))]
     public void CommandsDirectory_ShouldProperlyInitialize_WhenNoFilesExist(CommandType type)
     {
         // Arrange
@@ -305,38 +292,6 @@ public partial class CommandsDirectoryTests : TestWithConfigBase
     }
 
     [TestCaseSource(nameof(_validTypes))]
-    public void Dispose_ShouldUnregisterCommands_WhenWatcherIsNull(CommandType type)
-    {
-        // Arrange
-        var dir = MakeSupressed(null, type, RuntimeConfig);
-        var handler = GetCommandHandler(type);
-        var f1 = new FileScriptDirectoryCommand("folder1", dir);
-        f1.RegisterCommand(new FileScriptCommand("inner", f1, RuntimeConfig));
-        handler.RegisterCommand(f1);
-        dir.Commands.Add(f1.Command, f1);
-        var f2 = new FileScriptDirectoryCommand("folder2", dir);
-        handler.RegisterCommand(f2);
-        dir.Commands.Add(f2.Command, f2);
-        var cmd = new FileScriptCommand("global", dir, RuntimeConfig);
-        handler.RegisterCommand(cmd);
-        dir.Commands.Add(cmd.Command, cmd);
-
-        // Act
-        dir.Dispose();
-
-        // Assert
-        dir.Commands.Should().HaveCount(3);
-        dir.HandlerType.Should().Be(type);
-        dir.Watcher.Should().BeNull();
-        dir.Config.Should().Be(RuntimeConfig);
-        var commands = handler.AllCommands;
-        commands.Should().NotContain(c => c.Command.Equals("folder1"));
-        commands.Should().NotContain(c => c.Command.Equals("folder2"));
-        commands.Should().NotContain(c => c.Command.Equals("global"));
-        commands.Should().NotContain(c => c.Command.Equals("inner"));
-    }
-
-    [TestCaseSource(nameof(_validTypes))]
     public void Dispose_ShouldCleanupResources_WhenGoldFlow(CommandType type)
     {
         // Arrange
@@ -370,19 +325,6 @@ public partial class CommandsDirectoryTests : TestWithConfigBase
         commands.Should().NotContain(c => c.Command.Equals("inner"));
         watcherMock.VerifyAll();
         fileSystemMock.VerifyAll();
-    }
-
-    [Test]
-    public void GetLocation_ShouldReturnEmptyString_WhenWatcherIsNull([Values] bool includeRoot)
-    {
-        // Arrange
-        var dir = MakeSupressed(null, TestType, RuntimeConfig);
-
-        // Act
-        var result = dir.GetLocation(includeRoot);
-
-        // Assert
-        result.Should().BeEmpty();
     }
 
     [Test]

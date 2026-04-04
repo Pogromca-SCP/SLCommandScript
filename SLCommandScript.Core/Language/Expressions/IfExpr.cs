@@ -1,5 +1,3 @@
-using System;
-
 namespace SLCommandScript.Core.Language.Expressions;
 
 /// <summary>
@@ -8,7 +6,7 @@ namespace SLCommandScript.Core.Language.Expressions;
 /// <param name="then">Expression to evaluate when condition is met.</param>
 /// <param name="condition">Condition to check.</param>
 /// <param name="els">Expression to evaluate when condition is not met.</param>
-public class IfExpr(Expr? then, Expr? condition, Expr? els) : Expr
+public class IfExpr(Expr? then, Expr condition, Expr? els) : Expr
 {
     /// <summary>
     /// Expression to evaluate when condition is met.
@@ -18,19 +16,13 @@ public class IfExpr(Expr? then, Expr? condition, Expr? els) : Expr
     /// <summary>
     /// Condition to check.
     /// </summary>
-    public Expr? Condition { get; } = condition;
+    public Expr Condition { get; } = condition;
 
     /// <summary>
     /// Expression to evaluate when condition is not met.
     /// </summary>
     public Expr? Else { get; } = els;
 
-    /// <summary>
-    /// Accepts a visit from an expression visitor.
-    /// </summary>
-    /// <typeparam name="TResult">Type used for visit result.</typeparam>
-    /// <param name="visitor">Visitor to accept.</param>
-    /// <exception cref="NullReferenceException">When provided visitor is <see langword="null" />.</exception>
-    /// <returns>Result of accepted visit.</returns>
+    /// <inheritdoc />
     public override TResult Accept<TResult>(IExprVisitor<TResult> visitor) => visitor.VisitIfExpr(this);
 }

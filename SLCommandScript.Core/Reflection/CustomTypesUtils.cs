@@ -12,11 +12,11 @@ public static class CustomTypesUtils
     /// </summary>
     /// <typeparam name="TResult">Type to cast new instance into.</typeparam>
     /// <param name="typeName">Name of custom type to find.</param>
-    /// <param name="message">Message to return on error.</param>
+    /// <param name="errorMessage">Message to return on error.</param>
     /// <returns>New custom type instance or <see langword="default" /> value if an error has occurred.</returns>
-    public static TResult? MakeCustomTypeInstance<TResult>(string? typeName, out string? message)
+    public static TResult? MakeCustomTypeInstance<TResult>(string typeName, out string? errorMessage)
     {
-        var customType = GetCustomType(typeName, out message);
+        var customType = GetCustomType(typeName, out errorMessage);
 
         if (customType is null)
         {
@@ -25,11 +25,11 @@ public static class CustomTypesUtils
 
         if (!typeof(TResult).IsAssignableFrom(customType))
         {
-            message = $"Custom type '{customType.Name}' is not derived from desired type";
+            errorMessage = $"Custom type '{customType.Name}' is not derived from desired type";
             return default;
         }
 
-        return ActivateCustomInstance<TResult>(customType, out message);
+        return ActivateCustomInstance<TResult>(customType, out errorMessage);
     }
 
     /// <summary>
@@ -37,18 +37,18 @@ public static class CustomTypesUtils
     /// </summary>
     /// <typeparam name="TResult">Type to cast new instance into.</typeparam>
     /// <param name="customType">Custom type to instantiate.</param>
-    /// <param name="message">Message to return on error.</param>
+    /// <param name="errorMessage">Message to return on error.</param>
     /// <returns>New custom type instance or <see langword="default" /> value if an error has occurred.</returns>
-    private static TResult? ActivateCustomInstance<TResult>(Type customType, out string? message)
+    private static TResult? ActivateCustomInstance<TResult>(Type customType, out string? errorMessage)
     {
         try
         {
-            message = null;
+            errorMessage = null;
             return (TResult) Activator.CreateInstance(customType);
         }
         catch (Exception ex)
         {
-            message = $"An error has occured during custom type instance creation: {ex.Message}";
+            errorMessage = $"An error has occured during custom type instance creation: {ex.Message}";
             return default;
         }
     }
@@ -57,18 +57,18 @@ public static class CustomTypesUtils
     /// Retrieves custom type.
     /// </summary>
     /// <param name="typeName">Name of the type to retrieve.</param>
-    /// <param name="message">Message to return on error.</param>
+    /// <param name="errorMessage">Message to return on error.</param>
     /// <returns>Found type or <see langword="null"/> if nothing was found.</returns>
-    private static Type? GetCustomType(string? typeName, out string? message)
+    private static Type? GetCustomType(string typeName, out string? errorMessage)
     {
         try
         {
-            message = null;
+            errorMessage = null;
             return Type.GetType(typeName);
         }
         catch (Exception ex)
         {
-            message = $"An error has occured during custom type search: {ex.Message}";
+            errorMessage = $"An error has occured during custom type search: {ex.Message}";
             return null;
         }
     }

@@ -30,7 +30,7 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
     /// <summary>
     /// File system watcher used to detect script files changes.
     /// </summary>
-    public IFileSystemWatcherHelper? Watcher { get; }
+    public IFileSystemWatcherHelper Watcher { get; }
 
     /// <summary>
     /// Contains commands configuration to apply.
@@ -42,16 +42,11 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
     /// </summary>
     /// <param name="watcher">File system watcher to use.</param>
     /// <param name="config">Runtime configuration to use by event scripts.</param>
-    public EventsDirectory(IFileSystemWatcherHelper? watcher, RuntimeConfig? config)
+    public EventsDirectory(IFileSystemWatcherHelper watcher, RuntimeConfig config)
     {
         Handler = new();
         Watcher = watcher;
-        Config = config ?? new(null, null, 10);
-
-        if (Watcher is null)
-        {
-            return;
-        }
+        Config = config;
 
         foreach (var file in Config.FileSystemHelper.EnumerateFiles(Watcher.Directory, ScriptFilesFilter, SearchOption.TopDirectoryOnly))
         {
@@ -73,7 +68,7 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
     }
 
     /// <inheritdoc />
-    public string GetLocation(bool includeRoot = false) => Watcher is not null && includeRoot ? Watcher.Directory : string.Empty;
+    public string GetLocation(bool includeRoot = false) => includeRoot ? Watcher.Directory : string.Empty;
 
     /// <summary>
     /// Disposes the watcher and unregisters events.
@@ -81,7 +76,7 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
     /// <param name="disposing">Whether or not this method is invoked from <see cref="Dispose()" />.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposing || Watcher is null)
+        if (!disposing)
         {
             return;
         }
@@ -96,8 +91,14 @@ public class EventsDirectory : IDisposable, IFileScriptCommandParent
     /// <param name="scriptFile">Event script file to register.</param>
     private void RegisterEvent(string scriptFile)
     {
-        var cmd = new FileScriptCommandBase(Config.FileSystemHelper.GetFileNameWithoutExtension(scriptFile), this, Config);
-        var name = cmd.Command;
+        var name = Config.FileSystemHelper.GetFileNameWithoutExtension(scriptFile);
+
+        if (name is null)
+        {
+            return;
+        }
+
+        var cmd = new FileScriptCommandBase(name, this, Config);
 
         if (name.Length > EventHandlerPrefix.Length && name.StartsWith(EventHandlerPrefix, StringComparison.OrdinalIgnoreCase))
         {

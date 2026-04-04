@@ -8,7 +8,7 @@ namespace SLCommandScript.Core.UnitTests.Permissions;
 [TestFixture]
 public class VanillaPermissionsResolverTests
 {
-    private static readonly string?[] _invalidPermissionNames = [null, "", " ", " \t ", "  \t  \t\t"];
+    private static readonly string[] _invalidPermissionNames = ["", " ", " \t ", "  \t  \t\t"];
 
     private static readonly string[] _validPermissionNames = ["Cooking", "Baking Bread", "Ligma"];
 
@@ -27,19 +27,8 @@ public class VanillaPermissionsResolverTests
 
     private readonly VanillaPermissionsResolver _resolver = new();
 
-    [TestCaseSource(nameof(_existingPermissions))]
-    public void CheckPermission_ShouldFail_WhenCommandSenderIsNull(PlayerPermissions perm)
-    {
-        // Act
-        var result = _resolver.CheckPermission(null, perm.ToString(), out var message);
-
-        // Assert
-        result.Should().BeFalse();
-        message.Should().Be($"Cannot verify permission '{perm}', command sender is null");
-    }
-
     [TestCaseSource(nameof(_invalidPermissionNames))]
-    public void CheckPermission_ShouldFail_WhenPermissionNameIsInvalid(string? perm)
+    public void CheckPermission_ShouldFail_WhenPermissionNameIsInvalid(string perm)
     {
         // Arrange
         var senderMock = GetSenderMock();
@@ -49,7 +38,7 @@ public class VanillaPermissionsResolverTests
 
         // Assert
         result.Should().BeFalse();
-        message.Should().Be($"Permission name '{perm}' is invalid");
+        message.Should().Be("Permission name is invalid");
         senderMock.VerifyAll();
     }
 

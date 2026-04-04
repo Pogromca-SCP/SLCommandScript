@@ -10,24 +10,24 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// <param name="name">Name of the command.</param>
 /// <param name="parent">Parent which stores this command.</param>
 /// <param name="config">Configuration to use.</param>
-public class FileScriptCommand(string? name, IFileScriptCommandParent? parent, RuntimeConfig? config) : FileScriptCommandBase(name, parent, config), IUsageProvider
+public class FileScriptCommand(string name, IFileScriptCommandParent? parent, RuntimeConfig config) : FileScriptCommandBase(name, parent, config), IUsageProvider
 {
     /// <summary>
     /// Describes command arguments usage.
     /// </summary>
     public string[]? Usage
     {
-        get => _usage;
+        get => field;
         set
         {
             if (value is null || value.Length < 1)
             {
-                _usage = null;
+                field = null;
                 return;
             }
 
-            var usage = value.Where(i => !string.IsNullOrWhiteSpace(i));
-            _usage = usage.Count() > 0 ? [..usage] : null;
+            var usage = value.Where(static i => !string.IsNullOrWhiteSpace(i));
+            field = usage.Count() > 0 ? [.. usage] : null;
         }
     }
 
@@ -41,20 +41,20 @@ public class FileScriptCommand(string? name, IFileScriptCommandParent? parent, R
     /// </summary>
     public string?[]? RequiredPermissions { get; set; } = null;
 
-    /// <summary>
-    /// Describes command arguments usage.
-    /// </summary>
-    private string[]? _usage = null;
-
     /// <inheritdoc />
     public override bool Execute(ArraySegment<string?> arguments, ICommandSender? sender, out string response)
     {
-        if (RequiredPermissions is not null && RequiredPermissions.Length > 0)
+        if (RequiredPermissions is not null && RequiredPermissions.Length > 0 && sender is not null)
         {
             var resolver = Config.PermissionsResolver;
 
             foreach (var perm in RequiredPermissions)
             {
+                if (perm is null)
+                {
+                    continue;
+                }
+
                 var hasPerm = resolver.CheckPermission(sender, perm, out var error);
 
                 if (error is not null)

@@ -48,12 +48,12 @@ public class Parser
     /// <summary>
     /// Contains current error message.
     /// </summary>
-    public string? ErrorMessage { get; private set; }
+    public string? ErrorMessage { get; private set; } = null;
 
     /// <summary>
     /// Contains current commands scope.
     /// </summary>
-    public CommandType Scope { get; set; } = CommandsUtils.AllScopes;
+    public CommandType Scope { get; set; } = CommandType.Any;
 
     /// <summary>
     /// <see langword="true" /> if tokens end was reached, <see langword="false" /> otherwise.
@@ -68,26 +68,20 @@ public class Parser
     /// <summary>
     /// Contains current token index.
     /// </summary>
-    private int _current;
+    private int _current = 0;
 
     /// <summary>
     /// Contains current scope depth level.
     /// </summary>
-    private int _depth;
+    private int _depth = 0;
 
     /// <summary>
     /// Parses an expression from provided tokens list.
     /// </summary>
     /// <param name="tokens">List with tokens to process.</param>
     /// <returns>Parsed expression or <see langword="null" /> if something went wrong.</returns>
-    public Expr? Parse(IList<Token>? tokens)
+    public Expr? Parse(IList<Token> tokens)
     {
-        if (tokens is null)
-        {
-            ErrorMessage = "Provided tokens list to parse was null";
-            return null;
-        }
-
         ErrorMessage = null;
         _tokens = tokens;
         _current = 0;
@@ -268,7 +262,7 @@ public class Parser
     /// </summary>
     private void ScopeGuard()
     {
-        CommandType scope = 0;
+        var scope = CommandType.None;
 
         while (Check(TokenType.Text))
         {
@@ -284,7 +278,7 @@ public class Parser
             ++_current;
         }
 
-        Scope = scope == 0 ? CommandsUtils.AllScopes : scope;
+        Scope = scope == CommandType.None ? CommandType.Any : scope;
     }
 
     /// <summary>
@@ -471,7 +465,7 @@ public class Parser
             return null;
         }
 
-        var body = new List<Expr?>()
+        var body = new List<Expr>()
         {
             initial
         };
@@ -479,13 +473,14 @@ public class Parser
         do
         {
             var expr = ParseExpr();
-            body.Add(expr);
 
             if (expr is null)
             {
                 ErrorMessage = ErrorMessage is null ? $"Sequence expression {body.Count} is missing" : $"{ErrorMessage}\nin sequence expression {body.Count}";
                 return null;
             }
+
+            body.Add(expr);
         }
         while (Match(TokenType.Sequence));
 
@@ -506,28 +501,12 @@ public class Parser
 
         var token = _tokens[_current].Value;
 
-        if (!IterablesUtils.Providers.ContainsKey(token))
+        if (!IterablesUtils.Providers.TryGetValue(token, out var provider))
         {
             return GetRange();
         }
 
-        var provider = IterablesUtils.Providers[token];
-
-        if (provider is null)
-        {
-            ErrorMessage = $"Provider for '{token}' iterable object is null";
-            return null;
-        }
-
-        var iter = provider();
-
-        if (iter is null)
-        {
-            ErrorMessage = $"Provider for '{token}' iterable object returned null";
-            return null;
-        }
-
-        return iter;
+        return provider();
     }
 
     /// <summary>

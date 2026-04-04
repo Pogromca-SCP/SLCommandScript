@@ -24,7 +24,7 @@ comment				-> [^\s] "#" comment_body
 comment_body		-> permissions_guard | scope_guard | arguments_guard | [^!?] .*
 permissions_guard	-> "!" TEXT*
 scope_guard			-> "?" scope_name*
-scope_name			-> "RemoteAdmin" | "Console" | "Client"
+scope_name			-> "None" | "RemoteAdmin" | "Console" | "Client" | "Any"
 arguments_guard		-> "$" NUMBER?
 
 TEXT				-> \S+

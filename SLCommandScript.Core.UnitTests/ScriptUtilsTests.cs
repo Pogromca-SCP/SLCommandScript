@@ -23,7 +23,7 @@ public class ScriptUtilsTests
     public void Execute_ShouldFail_WhenScriptFails(string src, string expectedError)
     {
         // Act
-        var (Message, Line) = ScriptUtils.Execute(src, new(), null);
+        var (Message, Line) = ScriptUtils.Execute(src, new(), ServerConsole.Scs);
 
         // Assert
         Message.Should().Be(expectedError);
@@ -34,7 +34,7 @@ public class ScriptUtilsTests
     public void Execute_ShouldSucceed_WhenGoldFlow(string src)
     {
         // Act
-        var (Message, Line) = ScriptUtils.Execute(src, new(), null);
+        var (Message, Line) = ScriptUtils.Execute(src, new(), ServerConsole.Scs);
 
         // Assert
         Message.Should().BeNull();

@@ -15,37 +15,41 @@ public static class RoomIterablesProvider
     /// <summary>
     /// Retrieves all named rooms.
     /// </summary>
-    private static IEnumerable<Room> NamedRooms => Room.List.Where(r => r.Name != RoomName.Unnamed);
+    private static IEnumerable<Room> NamedRooms => Room.List.Where(static r => r.Name != RoomName.Unnamed);
 
     /// <summary>
     /// Retrieves iterable object for all rooms.
     /// </summary>
     /// <returns>Iterable object for all rooms.</returns>
-    public static IIterable AllRooms() => new ListIterable<Room>(() => NamedRooms, LoadVariables);
+    public static IIterable AllRooms() => new LazyListIterable<Room>(static () => NamedRooms, LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all LCZ rooms.
     /// </summary>
     /// <returns>Iterable object for all LCZ rooms.</returns>
-    public static IIterable AllLightRooms() => new ListIterable<Room>(() => NamedRooms.Where(r => r.Zone == FacilityZone.LightContainment), LoadVariables);
+    public static IIterable AllLightRooms() =>
+        new LazyListIterable<Room>(static () => NamedRooms.Where(static r => r.Zone == FacilityZone.LightContainment), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all HCZ rooms.
     /// </summary>
     /// <returns>Iterable object for all HCZ rooms.</returns>
-    public static IIterable AllHeavyRooms() => new ListIterable<Room>(() => NamedRooms.Where(r => r.Zone == FacilityZone.HeavyContainment), LoadVariables);
+    public static IIterable AllHeavyRooms() =>
+        new LazyListIterable<Room>(static () => NamedRooms.Where(static r => r.Zone == FacilityZone.HeavyContainment), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all EZ rooms.
     /// </summary>
     /// <returns>Iterable object for all EZ rooms.</returns>
-    public static IIterable AllEntranceRooms() => new ListIterable<Room>(() => NamedRooms.Where(r => r.Zone == FacilityZone.Entrance), LoadVariables);
+    public static IIterable AllEntranceRooms() =>
+        new LazyListIterable<Room>(static () => NamedRooms.Where(static r => r.Zone == FacilityZone.Entrance), LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all surface rooms.
     /// </summary>
     /// <returns>Iterable object for all surface rooms.</returns>
-    public static IIterable AllSurfaceRooms() => new ListIterable<Room>(() => NamedRooms.Where(r => r.Zone == FacilityZone.Surface), LoadVariables);
+    public static IIterable AllSurfaceRooms() =>
+        new LazyListIterable<Room>(static () => NamedRooms.Where(static r => r.Zone == FacilityZone.Surface), LoadVariables);
 
     /// <summary>
     /// Loads properties from room object and inserts them into a dictionary.
@@ -53,7 +57,7 @@ public static class RoomIterablesProvider
     /// <param name="targetVars">Dictionary to insert properties into.</param>
     /// <param name="room">Room to load properties from.</param>
     /// <exception cref="NullReferenceException">When <paramref name="targetVars" /> or provided object is <see langword="null"/>.</exception>
-    public static void LoadVariables(IDictionary<string, string?> targetVars, Room room)
+    public static void LoadVariables(IDictionary<string, string> targetVars, Room room)
     {
         targetVars["name"] = room.Name.ToString();
         targetVars["zone"] = room.Zone.ToString();

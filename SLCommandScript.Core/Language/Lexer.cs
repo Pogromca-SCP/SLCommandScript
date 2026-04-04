@@ -123,7 +123,7 @@ public class Lexer
     /// <summary>
     /// Contains command sender for permissions guards evaluation.
     /// </summary>
-    public ICommandSender? Sender { get; private set; }
+    public ICommandSender Sender { get; private set; }
 
     /// <summary>
     /// Contains permissions resolved used for permissions guards evaluation.
@@ -227,12 +227,12 @@ public class Lexer
     /// <param name="arguments">Script arguments to inject.</param>
     /// <param name="sender">Command sender to use.</param>
     /// <param name="resolver">Permissions resolver to use.</param>
-    public Lexer(string? source, ArraySegment<string?> arguments, ICommandSender? sender, IPermissionsResolver? resolver = null)
+    public Lexer(string source, ArraySegment<string?> arguments, ICommandSender sender, IPermissionsResolver? resolver = null)
     {
         _tokens = [];
         _argResults = [];
         _argLexer = null;
-        Reset(source, arguments, sender, resolver);
+        Reset(source, arguments, sender, resolver ?? new VanillaPermissionsResolver());
     }
 
     /// <summary>
@@ -242,7 +242,7 @@ public class Lexer
     {
         Source = string.Empty;
         _arguments = new();
-        Sender = null;
+        Sender = null!;
         PermissionsResolver = null!;
         _tokens = [];
         _argResults = null;
@@ -298,9 +298,9 @@ public class Lexer
     /// Resets the tokenization process.
     /// </summary>
     /// <param name="source">New source code to tokenize.</param>
-    public void Reset(string? source)
+    public void Reset(string source)
     {
-        Source = source ?? string.Empty;
+        Source = source;
         Reset();
     }
 
@@ -318,7 +318,7 @@ public class Lexer
     /// Resets the tokenization process.
     /// </summary>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(ICommandSender? sender)
+    public void Reset(ICommandSender sender)
     {
         Sender = sender;
         Reset();
@@ -328,9 +328,9 @@ public class Lexer
     /// Resets the tokenization process.
     /// </summary>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(IPermissionsResolver? resolver)
+    public void Reset(IPermissionsResolver resolver)
     {
-        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        PermissionsResolver = resolver;
         Reset();
     }
 
@@ -339,9 +339,9 @@ public class Lexer
     /// </summary>
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="arguments">New script arguments to inject.</param>
-    public void Reset(string? source, ArraySegment<string?> arguments)
+    public void Reset(string source, ArraySegment<string?> arguments)
     {
-        Source = source ?? string.Empty;
+        Source = source;
         Arguments = arguments;
         Reset();
     }
@@ -351,9 +351,9 @@ public class Lexer
     /// </summary>
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(string? source, ICommandSender? sender)
+    public void Reset(string source, ICommandSender sender)
     {
-        Source = source ?? string.Empty;
+        Source = source;
         Sender = sender;
         Reset();
     }
@@ -363,10 +363,10 @@ public class Lexer
     /// </summary>
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(string? source, IPermissionsResolver? resolver)
+    public void Reset(string source, IPermissionsResolver resolver)
     {
-        Source = source ?? string.Empty;
-        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        Source = source;
+        PermissionsResolver = resolver;
         Reset();
     }
 
@@ -375,7 +375,7 @@ public class Lexer
     /// </summary>
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(ArraySegment<string?> arguments, ICommandSender? sender)
+    public void Reset(ArraySegment<string?> arguments, ICommandSender sender)
     {
         Arguments = arguments;
         Sender = sender;
@@ -387,10 +387,10 @@ public class Lexer
     /// </summary>
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(ArraySegment<string?> arguments, IPermissionsResolver? resolver)
+    public void Reset(ArraySegment<string?> arguments, IPermissionsResolver resolver)
     {
         Arguments = arguments;
-        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        PermissionsResolver = resolver;
         Reset();
     }
 
@@ -399,10 +399,10 @@ public class Lexer
     /// </summary>
     /// <param name="sender">New command sender to use.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(ICommandSender? sender, IPermissionsResolver? resolver)
+    public void Reset(ICommandSender sender, IPermissionsResolver resolver)
     {
         Sender = sender;
-        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        PermissionsResolver = resolver;
         Reset();
     }
 
@@ -412,11 +412,11 @@ public class Lexer
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="sender">New command sender to use.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(ArraySegment<string?> arguments, ICommandSender? sender, IPermissionsResolver? resolver)
+    public void Reset(ArraySegment<string?> arguments, ICommandSender sender, IPermissionsResolver resolver)
     {
         Arguments = arguments;
         Sender = sender;
-        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        PermissionsResolver = resolver;
         Reset();
     }
 
@@ -426,11 +426,11 @@ public class Lexer
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="sender">New command sender to use.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(string? source, ICommandSender? sender, IPermissionsResolver? resolver)
+    public void Reset(string source, ICommandSender sender, IPermissionsResolver resolver)
     {
-        Source = source ?? string.Empty;
+        Source = source;
         Sender = sender;
-        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        PermissionsResolver = resolver;
         Reset();
     }
 
@@ -440,11 +440,11 @@ public class Lexer
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
-    public void Reset(string? source, ArraySegment<string?> arguments, IPermissionsResolver? resolver)
+    public void Reset(string source, ArraySegment<string?> arguments, IPermissionsResolver resolver)
     {
-        Source = source ?? string.Empty;
+        Source = source;
         Arguments = arguments;
-        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        PermissionsResolver = resolver;
         Reset();
     }
 
@@ -454,9 +454,9 @@ public class Lexer
     /// <param name="source">New source code to tokenize.</param>
     /// <param name="arguments">New script arguments to inject.</param>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(string? source, ArraySegment<string?> arguments, ICommandSender? sender)
+    public void Reset(string source, ArraySegment<string?> arguments, ICommandSender sender)
     {
-        Source = source ?? string.Empty;
+        Source = source;
         Arguments = arguments;
         Sender = sender;
         Reset();
@@ -470,14 +470,14 @@ public class Lexer
     /// <param name="sender">New command sender to use.</param>
     /// <param name="resolver">New permissions resolver to use.</param>
 #pragma warning disable CS0436
-    [MemberNotNull(nameof(Source), nameof(PermissionsResolver), nameof(_prefix))]
+    [MemberNotNull(nameof(Source), nameof(Sender), nameof(PermissionsResolver), nameof(_prefix))]
 #pragma warning restore CS0436
-    public void Reset(string? source, ArraySegment<string?> arguments, ICommandSender? sender, IPermissionsResolver? resolver)
+    public void Reset(string source, ArraySegment<string?> arguments, ICommandSender sender, IPermissionsResolver resolver)
     {
-        Source = source ?? string.Empty;
+        Source = source;
         Arguments = arguments;
         Sender = sender;
-        PermissionsResolver = resolver ?? new VanillaPermissionsResolver();
+        PermissionsResolver = resolver;
         Reset();
     }
 
@@ -961,15 +961,14 @@ public class Lexer
             return TokenType.None;
         }
 
-        if (_argResults!.ContainsKey(argNum))
+        if (_argResults!.TryGetValue(argNum, out var argResult))
         {
-            var argResult = _argResults[argNum];
             _depth += argResult.Depth;
             return InjectArg(argResult, startedAt, type);
         }
 
         _argLexer ??= new();
-        _argLexer.Reset(_arguments.Array[_arguments.Offset + argNum - 1]);
+        _argLexer.Reset(_arguments.Array[_arguments.Offset + argNum - 1] ?? string.Empty);
         _argLexer.ScanNextLine();
         var result = new ArgResult(_argLexer.Source, [.._argLexer._tokens], _argLexer._depth);
         _argResults[argNum] = result;

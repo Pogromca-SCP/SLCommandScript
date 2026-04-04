@@ -16,8 +16,8 @@ public class SyntaxCommandTests
     public void Execute_ShouldSucceed_WhenNoArgumentsArePassed()
     {
         // Arrange
-        _command.Rules["test"] = null;
-        _command.Rules["xd"] = null;
+        _command.Rules["test"] = "Heello";
+        _command.Rules["xd"] = "Sample";
 
         // Act
         var result = _command.Execute(new(), null, out var response);

@@ -38,7 +38,7 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
 
                 if (!_enableNone)
                 {
-                    _values = _values.Where(v => !v.ToString().Equals("None")).ToArray();
+                    _values = [.. _values.Where(static v => !v.ToString().Equals("None"))];
                 }
 
                 if (!_randomSettings.IsEmpty)
@@ -56,12 +56,12 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
                 _current = 0;
             }
 
-            return _current >= _values!.Length;
+            return _current >= _values.Length;
         }
     }
 
     /// <inheritdoc />
-    public int Count => _values is null ? 0 : _values.Length;
+    public int Count => _values is null ? -1 : _values.Length;
 
     /// <summary>
     /// Tells whether or not the None values should be included in iteration.
@@ -84,21 +84,20 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     private int _current = 0;
 
     /// <inheritdoc />
-    public bool LoadNext(IDictionary<string, string?>? targetVars)
+    public bool LoadNext(IDictionary<string, string> targetVars)
     {
         if (IsAtEnd)
         {
             return false;
         }
 
-        if (targetVars is not null)
-        {
-            targetVars["id"] = _values[_current].ToString("D");
-        }
-
+        targetVars["id"] = _values[_current].ToString("D");
         ++_current;
         return true;
     }
+
+    /// <inheritdoc />
+    public void Reload() => _values = null;
 
     /// <inheritdoc />
     public void Randomize() => Randomize(new IterableSettings(-1));
@@ -117,11 +116,5 @@ public class EnumIterable<TEnum>(bool enableNone) : IIterable where TEnum : Enum
     }
 
     /// <inheritdoc />
-    public void Reset()
-    {
-        if (_values is not null)
-        {
-            _current = 0;
-        }
-    }
+    public void Reset() => _current = 0;
 }

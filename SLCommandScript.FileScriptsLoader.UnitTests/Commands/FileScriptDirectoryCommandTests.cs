@@ -12,19 +12,6 @@ public class FileScriptDirectoryCommandTests
     private const string TestName = "test";
 
     [Test]
-    public void FileScriptDirectoryCommand_ShouldProperlyInitialize_WhenNullsProvided()
-    {
-        // Act
-        var result = new FileScriptDirectoryCommand(null, null);
-
-        // Assert
-        result.Command.Should().BeEmpty();
-        result.Aliases.Should().BeNull();
-        result.Description.Should().Be("Parent command containing all scripts in a directory.");
-        result.Parent.Should().BeNull();
-    }
-
-    [Test]
     public void FileScriptDirectoryCommand_ShouldProperlyInitialize_WhenDataProvided()
     {
         // Arrange
@@ -76,7 +63,7 @@ public class FileScriptDirectoryCommandTests
     {
         // Arrange
         var response = "hello";
-        var cmd = new FileScriptDirectoryCommand(null, null);
+        var cmd = new FileScriptDirectoryCommand(TestName, null);
         var cmdMock = new Mock<ICommand>(MockBehavior.Strict);
         cmdMock.Setup(x => x.Command).Returns("test");
         cmdMock.Setup(x => x.Aliases).Returns<string[]>(null!);
@@ -96,7 +83,7 @@ public class FileScriptDirectoryCommandTests
     public void ExecuteParent_ShouldFail()
     {
         // Arrange
-        var cmd = new FileScriptDirectoryCommand(null, null);
+        var cmd = new FileScriptDirectoryCommand(TestName, null);
 
         // Act
         var result = cmd.Execute(new(), null, out var message);

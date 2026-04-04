@@ -13,7 +13,7 @@ public interface IIterable
     bool IsAtEnd { get; }
 
     /// <summary>
-    /// Current amount of elements.
+    /// Current amount of elements. Returns -1 if can't be determined.
     /// </summary>
     int Count { get; }
 
@@ -21,8 +21,13 @@ public interface IIterable
     /// Performs next iteration step and loads new property values into provided dictionary.
     /// </summary>
     /// <param name="targetVars">Dictionary to insert properties into.</param>
-    /// <returns><see langword="true" /> if the iteration can continue, <see langword="false" /> otherwise.</returns>
-    bool LoadNext(IDictionary<string, string?>? targetVars);
+    /// <returns><see langword="true" /> if the iteration was successful, <see langword="false" /> otherwise.</returns>
+    bool LoadNext(IDictionary<string, string> targetVars);
+
+    /// <summary>
+    /// Reloads contained elements preserving current randomization configuration.
+    /// </summary>
+    void Reload();
 
     /// <summary>
     /// Randomizes contained elements.
@@ -48,7 +53,7 @@ public interface IIterable
     void Randomize(IterableSettings settings);
 
     /// <summary>
-    /// Resets iteration process.
+    /// Resets the iteration process.
     /// </summary>
     void Reset();
 }

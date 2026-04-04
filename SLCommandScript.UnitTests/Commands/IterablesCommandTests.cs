@@ -15,19 +15,19 @@ public class IterablesCommandTests
 
     private readonly IterablesCommand _command = new();
 
-    private IEnumerable<KeyValuePair<string, Func<IIterable>>>? _originalIterables;
+    private IEnumerable<KeyValuePair<string, Func<IIterable>>> _originalIterables = null!;
 
     [OneTimeSetUp]
-    public void OneTimeSetUp() => _originalIterables = TestDictionaries.ClearDictionary<string, Func<IIterable>>(IterablesUtils.Providers!);
+    public void OneTimeSetUp() => _originalIterables = TestDictionaries.ClearDictionary(IterablesUtils.Providers);
 
     [OneTimeTearDown]
-    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers!, _originalIterables!);
+    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers, _originalIterables);
 
     [Test]
     public void Execute_ShouldSucceed_WhenNoArgumentsArePassed()
     {
         // Arrange
-        IterablesUtils.Providers[TestIterable] = null;
+        IterablesUtils.Providers[TestIterable] = () => new TestIterable(false, false);;
 
         // Act
         var result = _command.Execute(new(), null, out var response);
@@ -49,34 +49,6 @@ public class IterablesCommandTests
         // Assert
         result.Should().BeFalse();
         response.Should().Be($"'{TestIterable}' was not found in available iterables");
-    }
-
-    [Test]
-    public void Execute_ShouldFail_WhenIterableIsNull()
-    {
-        // Arrange
-        IterablesUtils.Providers[TestIterable] = null;
-
-        // Act
-        var result = _command.Execute(new([TestIterable], 0, 1), null, out var response);
-
-        // Assert
-        result.Should().BeFalse();
-        response.Should().Be($"'{TestIterable}' is null");
-    }
-
-    [Test]
-    public void Execute_ShouldFail_WhenIterableReturnsNull()
-    {
-        // Arrange
-        IterablesUtils.Providers[TestIterable] = () => null;
-
-        // Act
-        var result = _command.Execute(new([TestIterable], 0, 1), null, out var response);
-
-        // Assert
-        result.Should().BeFalse();
-        response.Should().Be($"'{TestIterable}' returned null");
     }
 
     [Test]
@@ -130,15 +102,17 @@ public class TestIterable(bool isAtEnd, bool addVars) : IIterable
 
     public bool AddVars { get; } = addVars;
 
-    public bool LoadNext(IDictionary<string, string?>? targetVars)
+    public bool LoadNext(IDictionary<string, string> targetVars)
     {
-        if (targetVars is not null && !IsAtEnd && AddVars)
+        if (!IsAtEnd && AddVars)
         {
             targetVars["test"] = "test";
         }
 
         return IsAtEnd;
     }
+
+    public void Reload() {}
 
     public void Randomize() {}
 

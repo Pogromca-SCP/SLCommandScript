@@ -12,7 +12,7 @@ namespace SLCommandScript.FileScriptsLoader.Commands;
 /// <param name="name">Name of the command.</param>
 /// <param name="parent">Parent which stores this command.</param>
 /// <param name="config">Configuration to use.</param>
-public class FileScriptCommandBase(string? name, IFileScriptCommandParent? parent, RuntimeConfig? config) : ICommand
+public class FileScriptCommandBase(string name, IFileScriptCommandParent? parent, RuntimeConfig config) : ICommand
 {
     /// <summary>
     /// Default command description to use.
@@ -27,7 +27,7 @@ public class FileScriptCommandBase(string? name, IFileScriptCommandParent? paren
     /// <summary>
     /// Contains command name.
     /// </summary>
-    public string Command { get; } = name ?? string.Empty;
+    public string Command { get; } = name;
 
     /// <summary>
     /// Defines command aliases.
@@ -37,7 +37,7 @@ public class FileScriptCommandBase(string? name, IFileScriptCommandParent? paren
     /// <summary>
     /// Contains command description.
     /// </summary>
-    public string Description { get => _desc; set => _desc = string.IsNullOrWhiteSpace(value) ? DefaultDescription : value; }
+    public string Description { get => field; set => field = string.IsNullOrWhiteSpace(value) ? DefaultDescription : value; } = DefaultDescription;
 
     /// <summary>
     /// Contains parent object which stores this command.
@@ -47,12 +47,7 @@ public class FileScriptCommandBase(string? name, IFileScriptCommandParent? paren
     /// <summary>
     /// Stores used configuration.
     /// </summary>
-    public RuntimeConfig Config { get; } = config ?? new(null, null, 10);
-
-    /// <summary>
-    /// Contains command description.
-    /// </summary>
-    private string _desc = DefaultDescription;
+    public RuntimeConfig Config { get; } = config;
 
     /// <summary>
     /// Contains script calls counter.
@@ -68,6 +63,12 @@ public class FileScriptCommandBase(string? name, IFileScriptCommandParent? paren
     /// <returns><see langword="true" /> if command executed successfully, <see langword="false" /> otherwise.</returns>
     public virtual bool Execute(ArraySegment<string?> arguments, ICommandSender? sender, out string response)
     {
+        if (sender is null)
+        {
+            response = "Cannot execute script without a command sender";
+            return false;
+        }
+
         if (Interlocked.Increment(ref _calls) > Config.ScriptExecutionsLimit)
         {
             Interlocked.Decrement(ref _calls);

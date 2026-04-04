@@ -25,7 +25,7 @@ public class FileScriptsLoader : IScriptsLoader
     /// <summary>
     /// Contains current project version.
     /// </summary>
-    public const string ProjectVersion = "2.4.0";
+    public const string ProjectVersion = "3.0.0";
 
     /// <summary>
     /// Contains project author.
@@ -52,19 +52,13 @@ public class FileScriptsLoader : IScriptsLoader
     private EventsDirectory? _eventsDirectory = null;
 
     /// <inheritdoc />
-    public void InitScriptsLoader(Plugin? plugin, ScriptsLoaderConfig? loaderConfig)
+    public void InitScriptsLoader(Plugin plugin, ScriptsLoaderConfig? loaderConfig)
     {
-        if (plugin is null)
-        {
-            Logger.Error("Provided plugin object is null.");
-            return;
-        }
-
         Logger.Info("Initializing scripts loader...");
         loaderConfig ??= new();
         var runtimeConfig = new RuntimeConfig(new FileSystemHelper(), LoadPermissionsResolver(loaderConfig.CustomPermissionsResolver), loaderConfig.ScriptExecutionsLimit);
         var directory = plugin.GetConfigDirectory();
-        LoadDirectory(false, $"{directory.FullName}/scripts/events/", loaderConfig.EnableScriptEventHandlers ? CommandType.Console : 0, runtimeConfig);
+        LoadDirectory(false, $"{directory.FullName}/scripts/events/", loaderConfig.EnableScriptEventHandlers ? CommandType.Console : CommandType.None, runtimeConfig);
         LoadDirectory(true, $"{directory.FullName}/scripts/ra/", loaderConfig.AllowedScriptCommandTypes & CommandType.RemoteAdmin, runtimeConfig);
         LoadDirectory(true, $"{directory.FullName}/scripts/server/", loaderConfig.AllowedScriptCommandTypes & CommandType.Console, runtimeConfig);
         LoadDirectory(true, $"{directory.FullName}/scripts/client/", loaderConfig.AllowedScriptCommandTypes & CommandType.Client, runtimeConfig);
@@ -115,7 +109,7 @@ public class FileScriptsLoader : IScriptsLoader
             return new VanillaPermissionsResolver();
         }
 
-        var permissionsResolver = CustomTypesUtils.MakeCustomTypeInstance<IPermissionsResolver>(resolverToUse, out var message);
+        var permissionsResolver = CustomTypesUtils.MakeCustomTypeInstance<IPermissionsResolver>(resolverToUse!, out var message);
 
         if (permissionsResolver is null)
         {
@@ -138,7 +132,7 @@ public class FileScriptsLoader : IScriptsLoader
     /// <param name="config">Configuration to apply.</param>
     private void LoadDirectory(bool isCommand, string directory, CommandType handlerType, RuntimeConfig config)
     {
-        if (handlerType == 0)
+        if (handlerType == CommandType.None)
         {
             return;
         }

@@ -73,5 +73,5 @@ public enum TokenType : byte
     /// <summary>
     /// |
     /// </summary>
-    Sequence
+    Sequence,
 }

@@ -3,12 +3,11 @@ using NUnit.Framework;
 using SLCommandScript.Core.Iterables;
 using SLCommandScript.TestUtils;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SLCommandScript.Core.UnitTests.Iterables;
 
 [TestFixture]
-public class ListIterableTests
+public class LazyListIterableTests
 {
     private static readonly string[][] _strings = [[], ["example", "", "test"], ["  \t ", "Test", "test", "TEST"]];
 
@@ -21,22 +20,22 @@ public class ListIterableTests
     private static IEnumerable<object[]> StringsXPercentages => TestArrays.CartesianJoin(_strings, _percentages);
 
     [TestCaseSource(nameof(_strings))]
-    public void ListIterable_ShouldProperlyInitialize_WhenProvidedItemsAreNotNull(string[] strings)
+    public void ListIterable_ShouldProperlyInitialize_WhenProvidedDataSourceIsNotNull(string[] strings)
     {
         // Act
-        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
 
         // Assert
         var len = strings.Length;
         iterable.IsAtEnd.Should().Be(len < 1);
         iterable.Count.Should().Be(len);
-    }
+    }  
 
     [TestCaseSource(nameof(_strings))]
-    public void LoadNext_ShouldProperlySetVariables_WhenPredefinedAndProvidedDictionaryIsNotNull(string[] strings)
+    public void LoadNext_ShouldProperlySetVariables_WhenProvidedDictionaryIsNotNull(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
         var variables = new TestVariablesCollector();
         var count = 0;
 
@@ -55,11 +54,10 @@ public class ListIterableTests
     }
 
     [TestCaseSource(nameof(_strings))]
-    public void Randomize_ShouldProperlyRandomizePredefinedElements(string[] strings)
+    public void Randomize_ShouldProperlyRandomizeElements(string[] strings)
     {
         // Arrange
-        var items = strings.ToArray();
-        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
         var count = 0;
         var variables = new TestVariablesCollector();
 
@@ -73,7 +71,6 @@ public class ListIterableTests
 
         // Assert
         var len = strings.Length;
-        items.Should().Equal(strings);
         iterable.IsAtEnd.Should().BeTrue();
         iterable.Count.Should().Be(len);
         count.Should().Be(len);
@@ -81,11 +78,10 @@ public class ListIterableTests
     }
 
     [TestCaseSource(nameof(StringsXSizes))]
-    public void Randomize_ShouldProperlyRandomizePredefinedElements(string[] strings, int randAmount)
+    public void Randomize_ShouldProperlyRandomizeElements(string[] strings, int randAmount)
     {
         // Arrange
-        var items = strings.ToArray();
-        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
         var count = 0;
 
         // Act
@@ -98,21 +94,19 @@ public class ListIterableTests
 
         // Assert
         var len = strings.Length;
-        items.Should().Equal(strings);
         iterable.IsAtEnd.Should().BeTrue();
         iterable.Count.Should().Be(len > randAmount && randAmount > 0 ? randAmount : len);
         count.Should().Be(len > randAmount && randAmount > 0 ? randAmount : len);
     }
 
     [TestCaseSource(nameof(StringsXPercentages))]
-    public void Randomize_ShouldProperlyRandomizePredefinedElementsByPercentage(string[] strings, float percentage)
+    public void Randomize_ShouldProperlyRandomizeElementsByPercentage(string[] strings, float percentage)
     {
         // Arrange
-        var items = strings.ToArray();
-        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
         var count = 0;
         var len = strings.Length;
-        var randAmount = (int)(len * percentage);
+        var randAmount = (int) (len * percentage);
 
         // Act
         iterable.Randomize(percentage);
@@ -123,17 +117,16 @@ public class ListIterableTests
         }
 
         // Assert
-        items.Should().Equal(strings);
         iterable.IsAtEnd.Should().BeTrue();
         iterable.Count.Should().Be(len > randAmount && percentage > 0.0f ? randAmount : len);
         count.Should().Be(len > randAmount && percentage > 0.0f ? randAmount : len);
     }
 
     [TestCaseSource(nameof(_strings))]
-    public void Reload_ShouldProperlyResetPredefinedIterable_BeforeRunning(string[] strings)
+    public void Reload_ShouldProperlyResetIterable_BeforeRunning(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
 
         // Act
         iterable.Reload();
@@ -145,10 +138,10 @@ public class ListIterableTests
     }
 
     [TestCaseSource(nameof(_strings))]
-    public void Reload_ShouldProperlyResetPredefinedIterable_AfterRunning(string[] strings)
+    public void Reload_ShouldProperlyResetIterable_AfterRunning(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
 
         // Act
         while (iterable.LoadNext(new Dictionary<string, string>())) {}
@@ -161,10 +154,10 @@ public class ListIterableTests
     }
 
     [TestCaseSource(nameof(_strings))]
-    public void Reset_ShouldProperlyResetPredefinedIterable_BeforeRunning(string[] strings)
+    public void Reset_ShouldProperlyResetIterable_BeforeRunning(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
 
         // Act
         iterable.Reset();
@@ -176,10 +169,10 @@ public class ListIterableTests
     }
 
     [TestCaseSource(nameof(_strings))]
-    public void Reset_ShouldProperlyResetPredefinedIterable_AfterRunning(string[] strings)
+    public void Reset_ShouldProperlyResetIterable_AfterRunning(string[] strings)
     {
         // Arrange
-        var iterable = new ListIterable<string>(strings, TestVariablesCollector.Inject);
+        var iterable = new LazyListIterable<string>(() => strings, TestVariablesCollector.Inject);
 
         // Act
         while (iterable.LoadNext(new Dictionary<string, string>())) {}

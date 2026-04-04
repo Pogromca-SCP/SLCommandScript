@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using CommandSystem;
 using Moq;
 using NUnit.Framework;
 using SLCommandScript.FileScriptsLoader.Commands;
@@ -30,7 +31,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
     public void Description_ShouldBeSetToDefault_WhenProvidedValueIsNull()
     {
         // Act
-        var result = new FileScriptCommandBase(null, null, RuntimeConfig)
+        var result = new FileScriptCommandBase(TestCommand, null, RuntimeConfig)
         {
             Description = null!,
         };
@@ -43,7 +44,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
     public void Description_ShouldBeSetToDefault_WhenProvidedValueIsBlank()
     {
         // Act
-        var result = new FileScriptCommandBase(null, null, RuntimeConfig)
+        var result = new FileScriptCommandBase(TestCommand, null, RuntimeConfig)
         {
             Description = "     "
         };
@@ -59,7 +60,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         const string newDesc = "HelloThere!";
 
         // Act
-        var result = new FileScriptCommandBase(null, null, RuntimeConfig)
+        var result = new FileScriptCommandBase(TestCommand, null, RuntimeConfig)
         {
             Description = newDesc
         };
@@ -72,7 +73,7 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
     public void FileScriptCommandBase_ShouldProperlyInitialize_WhenProvidedNullValues()
     {
         // Act
-        var result = new FileScriptCommandBase(null, null, null);
+        var result = new FileScriptCommandBase(TestCommand, null, RuntimeConfig);
 
         // Assert
         result.Command.Should().BeEmpty();
@@ -101,13 +102,28 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
     }
 
     [Test]
-    public void Execute_ShouldFail_WhenConcurrentExecutionsLimitIsExceeded()
+    public void Execute_ShouldFail_WhenCommandSenderIsNull()
     {
         // Arrange
-        var cmd = new FileScriptCommandBase(null, null, new(RuntimeConfig.FileSystemHelper, RuntimeConfig.PermissionsResolver, 0));
+        var cmd = new FileScriptCommandBase(TestCommand, null, new(RuntimeConfig.FileSystemHelper, RuntimeConfig.PermissionsResolver, 0));
 
         // Act
         var result = cmd.Execute(new(), null, out var message);
+
+        // Assert
+        result.Should().BeFalse();
+        message.Should().Be("Cannot execute script without a command sender");
+    }
+
+    [Test]
+    public void Execute_ShouldFail_WhenConcurrentExecutionsLimitIsExceeded()
+    {
+        // Arrange
+        var cmd = new FileScriptCommandBase(TestCommand, null, new(RuntimeConfig.FileSystemHelper, RuntimeConfig.PermissionsResolver, 0));
+        var senderMock = new Mock<ICommandSender>(MockBehavior.Strict);
+
+        // Act
+        var result = cmd.Execute(new(), senderMock.Object, out var message);
 
         // Assert
         result.Should().BeFalse();
@@ -121,9 +137,10 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.ReadFile(TestPath)).Throws<Exception>();
         var cmd = new FileScriptCommandBase(TestCommand, null, FromFilesMock(fileSystemMock));
+        var senderMock = new Mock<ICommandSender>(MockBehavior.Strict);
 
         // Act
-        var result = cmd.Execute(new(), null, out var message);
+        var result = cmd.Execute(new(), senderMock.Object, out var message);
 
         // Assert
         result.Should().BeFalse();
@@ -140,9 +157,10 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         var scriptParentMock = new Mock<IFileScriptCommandParent>(MockBehavior.Strict);
         scriptParentMock.Setup(x => x.GetLocation(true)).Returns("parent-");
         var cmd = new FileScriptCommandBase(TestCommand, scriptParentMock.Object, FromFilesMock(fileSystemMock));
+        var senderMock = new Mock<ICommandSender>(MockBehavior.Strict);
 
         // Act
-        var result = cmd.Execute(new(), null, out var message);
+        var result = cmd.Execute(new(), senderMock.Object, out var message);
 
         // Assert
         result.Should().BeFalse();
@@ -158,9 +176,10 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.ReadFile(TestPath)).Returns(src!);
         var cmd = new FileScriptCommandBase(TestCommand, null, FromFilesMock(fileSystemMock));
+        var senderMock = new Mock<ICommandSender>(MockBehavior.Strict);
 
         // Act
-        var result = cmd.Execute(new(), null, out var message);
+        var result = cmd.Execute(new(), senderMock.Object, out var message);
 
         // Assert
         result.Should().BeFalse();
@@ -175,9 +194,10 @@ public class FileScriptCommandBaseTests : TestWithConfigBase
         var fileSystemMock = new Mock<IFileSystemHelper>(MockBehavior.Strict);
         fileSystemMock.Setup(x => x.ReadFile(TestPath)).Returns(src);
         var cmd = new FileScriptCommandBase(TestCommand, null, FromFilesMock(fileSystemMock));
+        var senderMock = new Mock<ICommandSender>(MockBehavior.Strict);
 
         // Act
-        var result = cmd.Execute(new(), null, out var message);
+        var result = cmd.Execute(new(), senderMock.Object, out var message);
 
         // Assert
         result.Should().BeTrue();

@@ -13,7 +13,7 @@ public class TestIterable : IIterable
 
     public int Count => MaxIterations;
 
-    public bool LoadNext(IDictionary<string, string?>? targetVars)
+    public bool LoadNext(IDictionary<string, string> targetVars)
     {
         if (IsAtEnd)
         {
@@ -29,6 +29,8 @@ public class TestIterable : IIterable
         ++_index;
         return true;
     }
+
+    public void Reload() {}
 
     public void Randomize() {}
 

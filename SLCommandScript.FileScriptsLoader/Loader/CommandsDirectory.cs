@@ -45,7 +45,7 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
     /// <summary>
     /// Contains all registered scripts commands from monitored directory.
     /// </summary>
-    public Dictionary<string, ICommand?> Commands { get; }
+    public Dictionary<string, ICommand> Commands { get; }
 
     /// <summary>
     /// Contains handler type used for root commands.
@@ -55,7 +55,7 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
     /// <summary>
     /// File system watcher used to detect script files changes.
     /// </summary>
-    public IFileSystemWatcherHelper? Watcher { get; }
+    public IFileSystemWatcherHelper Watcher { get; }
 
     /// <summary>
     /// Contains commands configuration to apply.
@@ -68,17 +68,12 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
     /// <param name="watcher">File system watcher to use.</param>
     /// <param name="handlerType">Type of handler to use.</param>
     /// <param name="config">Runtime configuration to use by event scripts.</param>
-    public CommandsDirectory(IFileSystemWatcherHelper? watcher, CommandType handlerType, RuntimeConfig? config)
+    public CommandsDirectory(IFileSystemWatcherHelper watcher, CommandType handlerType, RuntimeConfig config)
     {
         Commands = new(StringComparer.OrdinalIgnoreCase);
         HandlerType = handlerType;
         Watcher = watcher;
-        Config = config ?? new(null, null, 10);
-
-        if (Watcher is null)
-        {
-            return;
-        }
+        Config = config;
 
         LoadInitialFiles();
         Watcher.Created += (obj, args) => RegisterFile(args.FullPath);
@@ -96,7 +91,7 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
     }
 
     /// <inheritdoc />
-    public string GetLocation(bool includeRoot = false) => Watcher is not null && includeRoot ? Watcher.Directory : string.Empty;
+    public string GetLocation(bool includeRoot = false) => includeRoot ? Watcher.Directory : string.Empty;
 
     /// <summary>
     /// Disposes the watcher and performs command cleanup.
@@ -109,7 +104,7 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
             return;
         }
 
-        Watcher?.Dispose();
+        Watcher.Dispose();
 
         foreach (var command in Commands.Values)
         {
@@ -124,12 +119,12 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
     {
         foreach (var path in Config.FileSystemHelper.EnumerateDirectories(Watcher!.Directory))
         {
-            RegisterCommand(new FileScriptDirectoryCommand(Config.FileSystemHelper.GetDirectory(path), GetCommand<IFileScriptCommandParent>(path) ?? this));
+            RegisterCommand(new FileScriptDirectoryCommand(Config.FileSystemHelper.GetDirectory(path)!, GetCommand<IFileScriptCommandParent>(path) ?? this));
         }
 
         foreach (var path in Config.FileSystemHelper.EnumerateFiles(Watcher.Directory, EventsDirectory.ScriptFilesFilter, SearchOption.AllDirectories))
         {
-            RegisterCommand(new FileScriptCommand(Config.FileSystemHelper.GetFileNameWithoutExtension(path), GetCommand<IFileScriptCommandParent>(path) ?? this, Config));
+            RegisterCommand(new FileScriptCommand(Config.FileSystemHelper.GetFileNameWithoutExtension(path)!, GetCommand<IFileScriptCommandParent>(path) ?? this, Config));
         }
 
         foreach (var path in Config.FileSystemHelper.EnumerateFiles(Watcher.Directory, DescriptionFilesFilter, SearchOption.AllDirectories))
@@ -146,7 +141,7 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
     /// <returns>Reference to command or <see langword="null" /> if nothing was found.</returns>
     private T? GetCommand<T>(string path) where T : class
     {
-        var processedPath = path.Substring(Watcher!.Directory.Length);
+        var processedPath = path.Substring(Watcher.Directory.Length);
 
         if (processedPath.Length < 1)
         {
@@ -189,7 +184,7 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
     {
         if (Config.FileSystemHelper.DirectoryExists(path))
         {
-            RegisterCommand(new FileScriptDirectoryCommand(Config.FileSystemHelper.GetDirectory(path), GetCommand<IFileScriptCommandParent>(path) ?? this));
+            RegisterCommand(new FileScriptDirectoryCommand(Config.FileSystemHelper.GetDirectory(path)!, GetCommand<IFileScriptCommandParent>(path) ?? this));
             return;
         }
 
@@ -202,7 +197,13 @@ public class CommandsDirectory : IDisposable, IFileScriptCommandParent
 
         if (ext.Equals(ScriptFileExtension, StringComparison.OrdinalIgnoreCase))
         {
-            RegisterCommand(new FileScriptCommand(Config.FileSystemHelper.GetFileNameWithoutExtension(path), GetCommand<IFileScriptCommandParent>(path) ?? this, Config));
+            var name = Config.FileSystemHelper.GetFileNameWithoutExtension(path);
+
+            if (name is not null)
+            {
+                RegisterCommand(new FileScriptCommand(name, GetCommand<IFileScriptCommandParent>(path) ?? this, Config));
+            }
+
             return;
         }
 

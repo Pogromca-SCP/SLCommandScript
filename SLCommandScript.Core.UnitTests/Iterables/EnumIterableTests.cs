@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using NUnit.Framework;
 using SLCommandScript.Core.Iterables;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SLCommandScript.Core.UnitTests.Iterables;
@@ -41,7 +42,7 @@ public class EnumIterableTests
         var iterable = new EnumIterable<EmptyEnum>(enableNone);
 
         // Assert
-        iterable.Count.Should().Be(0);
+        iterable.Count.Should().Be(-1);
         iterable.IsAtEnd.Should().BeTrue();
         iterable.Count.Should().Be(0);
     }
@@ -53,7 +54,7 @@ public class EnumIterableTests
         var iterable = new EnumIterable<FullEnum>(enableNone);
 
         // Assert
-        iterable.Count.Should().Be(0);
+        iterable.Count.Should().Be(-1);
         iterable.IsAtEnd.Should().BeFalse();
         iterable.Count.Should().Be(enableNone ? _values.Length : _values.Length - 1);
     }
@@ -65,7 +66,7 @@ public class EnumIterableTests
         var iterable = new EnumIterable<EmptyEnum>(enableNone);
 
         // Act
-        var result = iterable.LoadNext(null);
+        var result = iterable.LoadNext(new Dictionary<string, string>());
 
         // Assert
         result.Should().BeFalse();
@@ -81,7 +82,7 @@ public class EnumIterableTests
         var count = 0;
 
         // Act
-        while (iterable.LoadNext(null))
+        while (iterable.LoadNext(new Dictionary<string, string>()))
         {
             ++count;
         }
@@ -146,7 +147,7 @@ public class EnumIterableTests
         // Act
         iterable.Randomize(randAmount);
 
-        while (iterable.LoadNext(null))
+        while (iterable.LoadNext(new Dictionary<string, string>()))
         {
             ++count;
         }
@@ -168,7 +169,7 @@ public class EnumIterableTests
         // Act
         iterable.Randomize(percentage);
 
-        while (iterable.LoadNext(null))
+        while (iterable.LoadNext(new Dictionary<string, string>()))
         {
             ++count;
         }
@@ -200,7 +201,7 @@ public class EnumIterableTests
         var iterable = new EnumIterable<FullEnum>(enableNone);
 
         // Act
-        while (iterable.LoadNext(null)) {}
+        while (iterable.LoadNext(new Dictionary<string, string>())) {}
         iterable.Reset();
 
         // Assert

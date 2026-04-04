@@ -9,20 +9,8 @@ namespace SLCommandScript.Core.Permissions;
 public class PluginPermissionsResolver : IPermissionsResolver
 {
     /// <inheritdoc />
-    public bool CheckPermission(ICommandSender? sender, string? permission, out string? message)
+    public bool CheckPermission(ICommandSender sender, string permission, out string? message)
     {
-        if (sender is null)
-        {
-            message = $"Cannot verify permission '{permission}', command sender is null";
-            return false;
-        }
-
-        if (permission is null)
-        {
-            message = "Cannot verify a null permission";
-            return false;
-        }
-
         message = null;
         return sender.HasPermissions(permission);
     }

@@ -28,7 +28,7 @@ public class SyntaxCommand : ICommand
     /// <summary>
     /// Contains syntax rules.
     /// </summary>
-    public Dictionary<string, string?> Rules { get; } = new(StringComparer.OrdinalIgnoreCase)
+    public Dictionary<string, string> Rules { get; } = new(StringComparer.OrdinalIgnoreCase)
     {
         { "perm", "Permissions guard:\n#! <permission_names...>\n(guards cannot be placed inside expressions)" },
         { "scope", "Scope guard:\n#? <scope_names...>\n(guards cannot be placed inside expressions)" },
@@ -55,15 +55,14 @@ public class SyntaxCommand : ICommand
     {
         if (arguments.Count > 0)
         {
-            var key = arguments.At(0);
+            var key = arguments.At(0) ?? string.Empty;
 
-            if (!Rules.ContainsKey(key!))
+            if (!Rules.TryGetValue(key, out response))
             {
                 response = $"No syntax rules found for '{key}'";
                 return false;
             }
 
-            response = Rules[key!];
             return true;
         }
 

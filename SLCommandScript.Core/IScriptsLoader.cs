@@ -28,5 +28,5 @@ public interface IScriptsLoader : IDisposable
     /// </summary>
     /// <param name="plugin">Plugin object.</param>
     /// <param name="loaderConfig">Scripts loader configuration to use.</param>
-    void InitScriptsLoader(Plugin? plugin, ScriptsLoaderConfig? loaderConfig);
+    void InitScriptsLoader(Plugin plugin, ScriptsLoaderConfig? loaderConfig);
 }

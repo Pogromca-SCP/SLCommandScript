@@ -19,27 +19,13 @@ public class IterablesCommand : ICommand
     /// <returns><see langword="true"/> if attempt finished successfully, <see langword="false"/> otherwise.</returns>
     private static bool GetVariables(string iterableName, out string response)
     {
-        if (!IterablesUtils.Providers.ContainsKey(iterableName))
+        if (!IterablesUtils.Providers.TryGetValue(iterableName, out var source))
         {
             response = $"'{iterableName}' was not found in available iterables";
             return false;
         }
 
-        var source = IterablesUtils.Providers[iterableName];
-
-        if (source is null)
-        {
-            response = $"'{iterableName}' is null";
-            return false;
-        }
-
         var iterable = source();
-
-        if (iterable is null)
-        {
-            response = $"'{iterableName}' returned null";
-            return false;
-        }
 
         if (iterable.IsAtEnd)
         {
@@ -47,7 +33,7 @@ public class IterablesCommand : ICommand
             return false;
         }
 
-        var vars = new Dictionary<string, string?>();
+        var vars = new Dictionary<string, string>();
         iterable.LoadNext(vars);
 
         if (vars.Count < 1)
@@ -105,7 +91,7 @@ public class IterablesCommand : ICommand
     {
         if (arguments.Count > 0)
         {
-            return GetVariables(arguments.At(0)!, out response);
+            return GetVariables(arguments.At(0) ?? string.Empty, out response);
         }
 
         response = GetDictionaryKeys(IterablesUtils.Providers, "Currently available iterables:\n");

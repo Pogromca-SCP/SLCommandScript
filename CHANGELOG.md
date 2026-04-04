@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-04-04 (nuget 3.0.0)
+
+### Added
+
+- Added `None` and `Any` command types.
+- Iterables can now be reloaded without randomization settings change.
+
+### Changed
+
+- Iterables without predefined length now return -1 count if data wasn't retrieved or randomized yet.
+- Lazy iterables functionality was moved to separate classes.
+- Upgraded project to [LabAPI v1.1.6](https://github.com/northwood-studios/LabAPI/releases/tag/1.1.6).
+- Required LabAPI version check now uses a predefined constant.
+- File script commands no longer accept null senders.
+
+### Removed
+
+- Removed manu null-checks in favor of nullability contracts. 
+- Removed `AllScopes` constant from `CommandsUtils`.
+
 ## [2.4.0] - 2025-10-26 (nuget 2.0.2)
 
 ### Added

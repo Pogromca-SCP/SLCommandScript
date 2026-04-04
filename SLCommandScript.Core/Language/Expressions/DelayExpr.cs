@@ -1,5 +1,3 @@
-using System;
-
 namespace SLCommandScript.Core.Language.Expressions;
 
 /// <summary>
@@ -8,12 +6,12 @@ namespace SLCommandScript.Core.Language.Expressions;
 /// <param name="body">Expression to execute after the delay.</param>
 /// <param name="duration">Duration of the delay in milliseconds.</param>
 /// <param name="name">Optional name of the delayed operation.</param>
-public class DelayExpr(Expr? body, int duration, string? name) : Expr
+public class DelayExpr(Expr body, int duration, string? name) : Expr
 {
     /// <summary>
     /// Expression to execute after the delay.
     /// </summary>
-    public Expr? Body { get; } = body;
+    public Expr Body { get; } = body;
 
     /// <summary>
     /// Duration of the delay in milliseconds.
@@ -25,12 +23,6 @@ public class DelayExpr(Expr? body, int duration, string? name) : Expr
     /// </summary>
     public string? Name { get; } = name;
 
-    /// <summary>
-    /// Accepts a visit from an expression visitor.
-    /// </summary>
-    /// <typeparam name="TResult">Type used for visit result.</typeparam>
-    /// <param name="visitor">Visitor to accept.</param>
-    /// <exception cref="NullReferenceException">When provided visitor is <see langword="null" />.</exception>
-    /// <returns>Result of accepted visit.</returns>
+    /// <inheritdoc />
     public override TResult Accept<TResult>(IExprVisitor<TResult> visitor) => visitor.VisitDelayExpr(this);
 }

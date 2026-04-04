@@ -3,23 +3,33 @@ using System;
 namespace SLCommandScript.Core.Commands;
 
 /// <summary>
-/// Represents command types.
+/// Represents a command type.
 /// </summary>
 [Flags]
 public enum CommandType : byte
 {
     /// <summary>
-    /// A command that is executed from the server console.
+    /// Command can't be executed from any console.
+    /// </summary>
+    None = 0,
+
+    /// <summary>
+    /// Command can be executed from server console.
     /// </summary>
     Console = 1,
 
     /// <summary>
-    /// A command that is executed from the players console.
+    /// Command can be executed from player console.
     /// </summary>
     Client = 2,
 
     /// <summary>
-    /// A command that is executed from the remote admin.
+    /// Command can be executed from remote admin.
     /// </summary>
     RemoteAdmin = 4,
+
+    /// <summary>
+    /// Command can be executed from any console.
+    /// </summary>
+    Any = Console | Client | RemoteAdmin,
 }

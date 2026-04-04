@@ -16,7 +16,7 @@ public readonly struct Token(TokenType type, string? value, int numeric = 0)
     /// <summary>
     /// Contains a value assigned to this token.
     /// </summary>
-    public string Value { get; } = value ?? string.Empty;
+    public string Value { get => field ?? string.Empty; } = value;
 
     /// <summary>
     /// Contains a numeric value assigned to this token.

@@ -4,6 +4,7 @@ using MEC;
 using SLCommandScript.Core.Language.Expressions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace SLCommandScript.Core.Language;
@@ -16,7 +17,7 @@ public class Interpreter : IExprVisitor<bool>
     /// <summary>
     /// Represents variables scope.
     /// </summary>
-    private class Scope : Dictionary<string, string?>
+    private class Scope : Dictionary<string, string>
     {
         /// <summary>
         /// Contains reference to higher variable scope.
@@ -50,7 +51,7 @@ public class Interpreter : IExprVisitor<bool>
     /// <summary>
     /// Contains used command sender.
     /// </summary>
-    public ICommandSender? Sender { get; private set; }
+    public ICommandSender Sender { get; private set; }
 
     /// <summary>
     /// Contains current error message.
@@ -66,7 +67,7 @@ public class Interpreter : IExprVisitor<bool>
     /// Creates new interpreter instance.
     /// </summary>
     /// <param name="sender">Command sender to use for commands.</param>
-    public Interpreter(ICommandSender? sender)
+    public Interpreter(ICommandSender sender)
     {
         Reset(sender);
         _variables = null;
@@ -86,33 +87,18 @@ public class Interpreter : IExprVisitor<bool>
     /// Resets the interpretation process.
     /// </summary>
     /// <param name="sender">New command sender to use.</param>
-    public void Reset(ICommandSender? sender)
+#pragma warning disable CS0436
+    [MemberNotNull(nameof(Sender))]
+#pragma warning restore CS0436
+    public void Reset(ICommandSender sender)
     {
         Sender = sender;
         ErrorMessage = null;
     }
 
     /// <inheritdoc />
-    public bool VisitCommandExpr(CommandExpr? expr)
+    public bool VisitCommandExpr(CommandExpr expr)
     {
-        if (expr is null)
-        {
-            ErrorMessage = "Provided command expression is null";
-            return false;
-        }
-
-        if (expr.Cmd is null)
-        {
-            ErrorMessage = "Cannot execute a null command";
-            return false;
-        }
-
-        if (expr.Arguments is null)
-        {
-            ErrorMessage = "Provided command arguments array is null";
-            return false;
-        }
-
         if (expr.Arguments.Length < 1)
         {
             ErrorMessage = "Provided command arguments array is empty";
@@ -131,20 +117,8 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <inheritdoc />
-    public bool VisitDelayExpr(DelayExpr? expr)
+    public bool VisitDelayExpr(DelayExpr expr)
     {
-        if (expr is null)
-        {
-            ErrorMessage = "Provided delay expression is null";
-            return false;
-        }
-
-        if (expr.Body is null)
-        {
-            ErrorMessage = "Delay expression body is null";
-            return false;
-        }
-
         if (expr.Duration < 1)
         {
             return expr.Body.Accept(this);
@@ -166,26 +140,8 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <inheritdoc />
-    public bool VisitForeachExpr(ForeachExpr? expr)
+    public bool VisitForeachExpr(ForeachExpr expr)
     {
-        if (expr is null)
-        {
-            ErrorMessage = "Provided foreach expression is null";
-            return false;
-        }
-
-        if (expr.Body is null)
-        {
-            ErrorMessage = "Foreach expression body is null";
-            return false;
-        }
-
-        if (expr.Iterable is null)
-        {
-            ErrorMessage = "Foreach expression iterable object is null";
-            return false;
-        }
-
         _variables = new(_variables, true);
 
         while (expr.Iterable.LoadNext(_variables))
@@ -204,32 +160,8 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <inheritdoc />
-    public bool VisitForElseExpr(ForElseExpr? expr)
+    public bool VisitForElseExpr(ForElseExpr expr)
     {
-        if (expr is null)
-        {
-            ErrorMessage = "Provided forelse expression is null";
-            return false;
-        }
-
-        if (expr.Then is null)
-        {
-            ErrorMessage = "Forelse primary expression body is null";
-            return false;
-        }
-
-        if (expr.Iterable is null)
-        {
-            ErrorMessage = "Forelse expression iterable object is null";
-            return false;
-        }
-
-        if (expr.Else is null)
-        {
-            ErrorMessage = "Forelse secondary expression body is null";
-            return false;
-        }
-
         _variables = new(_variables, true);
         var count = 0;
         int? limit = null;
@@ -252,20 +184,8 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <inheritdoc />
-    public bool VisitIfExpr(IfExpr? expr)
+    public bool VisitIfExpr(IfExpr expr)
     {
-        if (expr is null)
-        {
-            ErrorMessage = "Provided if expression is null";
-            return false;
-        }
-
-        if (expr.Condition is null)
-        {
-            ErrorMessage = "If expression condition is null";
-            return false;
-        }
-
         if (expr.Then is null && expr.Else is null)
         {
             ErrorMessage = "If expression branches are null";
@@ -286,23 +206,11 @@ public class Interpreter : IExprVisitor<bool>
     }
 
     /// <inheritdoc />
-    public bool VisitSequenceExpr(SequenceExpr? expr)
+    public bool VisitSequenceExpr(SequenceExpr expr)
     {
-        if (expr is null)
-        {
-            ErrorMessage = "Provided sequence expression is null";
-            return false;
-        }
-
-        if (expr.Body is null)
-        {
-            ErrorMessage = "Sequence expression body is null";
-            return false;
-        }
-
         foreach (var exp in expr.Body)
         {
-            if (exp is not null && !exp.Accept(this))
+            if (!exp.Accept(this))
             {
                 return false;
             }
@@ -319,9 +227,10 @@ public class Interpreter : IExprVisitor<bool>
     private string?[] InjectArguments(string?[] args)
     {
         var results = new string?[args.Length];
+        var length = args.Length;
         results[0] = args[0];
 
-        for (var index = 1; index < args.Length; ++index)
+        for (var index = 1; index < length; ++index)
         {
             var arg = args[index];
 

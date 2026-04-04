@@ -1,4 +1,3 @@
-using LabApi.Features;
 using LabApi.Features.Console;
 using LabApi.Loader;
 using LabApi.Loader.Features.Plugins;
@@ -24,7 +23,7 @@ public class SLCommandScriptPlugin : Plugin
     /// <summary>
     /// Contains current plugin version.
     /// </summary>
-    public const string PluginVersion = "2.4.0";
+    public const string PluginVersion = "3.0.0";
 
     /// <summary>
     /// Contains plugin description.
@@ -35,6 +34,11 @@ public class SLCommandScriptPlugin : Plugin
     /// Contains plugin author.
     /// </summary>
     public const string PluginAuthor = "Adam Szerszenowicz";
+
+    /// <summary>
+    /// Contains minimal LabAPI version required by this plugin.
+    /// </summary>
+    public const string RequiredVersion = "1.1.6";
 
     /// <inheritdoc />
     public override string Name { get; } = PluginName;
@@ -49,7 +53,7 @@ public class SLCommandScriptPlugin : Plugin
     public override Version Version { get; } = new(PluginVersion);
 
     /// <inheritdoc />
-    public override Version RequiredApiVersion { get; } = new(LabApiProperties.CompiledVersion);
+    public override Version RequiredApiVersion { get; } = new(RequiredVersion);
 
     /// <inheritdoc />
     public override LoadPriority Priority => LoadPriority.Lowest;
@@ -67,12 +71,12 @@ public class SLCommandScriptPlugin : Plugin
     /// <summary>
     /// Stores a reference to scripts loader.
     /// </summary>
-    private IScriptsLoader? _scriptsLoader;
+    private IScriptsLoader? _scriptsLoader = null;
 
     /// <summary>
     /// Stores a reference to helper commands.
     /// </summary>
-    private HelperCommands? _helperCommands;
+    private HelperCommands? _helperCommands = null;
 
     /// <inheritdoc />
     public override void Enable()
@@ -150,7 +154,7 @@ public class SLCommandScriptPlugin : Plugin
             return null;
         }
 
-        var loader = CustomTypesUtils.MakeCustomTypeInstance<IScriptsLoader>(implementation, out var message);
+        var loader = CustomTypesUtils.MakeCustomTypeInstance<IScriptsLoader>(implementation!, out var message);
 
         if (loader is null)
         {
@@ -167,18 +171,19 @@ public class SLCommandScriptPlugin : Plugin
     /// </summary>
     private void RegisterHelperCommands()
     {
-        if (!_pluginConfig.EnableHelperCommands || _scriptsLoaderConfig.AllowedScriptCommandTypes == 0)
+        var targetTypes = _scriptsLoaderConfig.AllowedScriptCommandTypes;
+
+        if (!_pluginConfig.EnableHelperCommands || targetTypes == CommandType.None)
         {
             return;
         }
         
         _helperCommands ??= new(_scriptsLoader);
-        var targetTypes = _scriptsLoaderConfig.AllowedScriptCommandTypes;
         var registered = CommandsUtils.RegisterCommand(targetTypes, _helperCommands);
 
         if (registered != targetTypes)
         {
-            Logger.Warn($"Could not register helper commands for {targetTypes ^ (registered ?? 0)}");
+            Logger.Warn($"Could not register helper commands for {targetTypes ^ (registered ?? CommandType.None)}");
         }
     }
 
@@ -197,7 +202,7 @@ public class SLCommandScriptPlugin : Plugin
 
         if (unregistered != targetTypes)
         {
-            Logger.Warn($"Could not unregister helper commands from {targetTypes ^ (unregistered ?? 0)}");
+            Logger.Warn($"Could not unregister helper commands from {targetTypes ^ (unregistered ?? CommandType.None)}");
         }
         else
         {

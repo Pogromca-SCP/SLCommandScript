@@ -255,4 +255,9 @@ public enum EventType : byte
     MilestoneAchievement,
     DeadmanSequenceActivation,
     ServerShutdown,
+
+
+    PlayerInspectItem,
+    Scp1507ProcessMessage,
+    Scp1507Resurrect,
 }

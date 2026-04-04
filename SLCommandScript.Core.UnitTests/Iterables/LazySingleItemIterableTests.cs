@@ -5,15 +5,15 @@ using SLCommandScript.Core.Iterables;
 namespace SLCommandScript.Core.UnitTests.Iterables;
 
 [TestFixture]
-public class SingleItemIterableTests
+public class LazySingleItemIterableTests
 {
     private const string TestString = "test";
 
     [Test]
-    public void SingleItemIterable_ShouldProperlyInitialize_WhenProvidedItemDirectly()
+    public void SingleItemIterable_ShouldProperlyInitialize_WhenProvidedDataSource()
     {
         // Act
-        var iterable = new SingleItemIterable<string>(TestString, TestVariablesCollector.Inject);
+        var iterable = new LazySingleItemIterable<string>(() => TestString, TestVariablesCollector.Inject);
 
         // Assert
         iterable.IsAtEnd.Should().BeFalse();
@@ -21,10 +21,10 @@ public class SingleItemIterableTests
     }
 
     [Test]
-    public void LoadNext_ShouldProperlySetVariables_WhenProvidedItemAndDictionary()
+    public void LoadNext_ShouldProperlySetVariables_WhenProvidedDictionary()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>(TestString, TestVariablesCollector.Inject);
+        var iterable = new LazySingleItemIterable<string>(() => TestString, TestVariablesCollector.Inject);
         var variables = new TestVariablesCollector();
         var count = 0;
 
@@ -43,10 +43,10 @@ public class SingleItemIterableTests
     }
 
     [Test]
-    public void Reload_ShouldProperlyResetIterable_BeforeRunningOnItem()
+    public void Reload_ShouldProperlyResetIterable_BeforeRunning()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>(TestString, TestVariablesCollector.Inject);
+        var iterable = new LazySingleItemIterable<string>(() => TestString, TestVariablesCollector.Inject);
 
         // Act
         iterable.Reload();
@@ -57,10 +57,10 @@ public class SingleItemIterableTests
     }
 
     [Test]
-    public void Reload_ShouldProperlyResetIterable_AfterRunningOnItem()
+    public void Reload_ShouldProperlyResetIterable_AfterRunning()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>(TestString, TestVariablesCollector.Inject);
+        var iterable = new LazySingleItemIterable<string>(() => TestString, TestVariablesCollector.Inject);
         var variables = new TestVariablesCollector();
 
         // Act
@@ -73,10 +73,10 @@ public class SingleItemIterableTests
     }
 
     [Test]
-    public void Reset_ShouldProperlyResetIterable_BeforeRunningOnItem()
+    public void Reset_ShouldProperlyResetIterable_BeforeRunning()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>(TestString, TestVariablesCollector.Inject);
+        var iterable = new LazySingleItemIterable<string>(() => TestString, TestVariablesCollector.Inject);
 
         // Act
         iterable.Reset();
@@ -87,10 +87,10 @@ public class SingleItemIterableTests
     }
 
     [Test]
-    public void Reset_ShouldProperlyResetIterable_AfterRunningOnItem()
+    public void Reset_ShouldProperlyResetIterable_AfterRunning()
     {
         // Arrange
-        var iterable = new SingleItemIterable<string>(TestString, TestVariablesCollector.Inject);
+        var iterable = new LazySingleItemIterable<string>(() => TestString, TestVariablesCollector.Inject);
         var variables = new TestVariablesCollector();
 
         // Act

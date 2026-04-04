@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using NUnit.Framework;
 using SLCommandScript.Core.Iterables;
+using System.Collections.Generic;
 
 namespace SLCommandScript.Core.UnitTests.Iterables;
 
@@ -21,7 +22,7 @@ public class EmptyIterableTests
     public void LoadNext_ShouldReturnFalse()
     {
         // Act
-        var result = _iterable.LoadNext(null);
+        var result = _iterable.LoadNext(new Dictionary<string, string>());
 
         // Assert
         result.Should().BeFalse();

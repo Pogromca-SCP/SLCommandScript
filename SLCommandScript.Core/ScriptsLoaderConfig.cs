@@ -21,10 +21,10 @@ public class ScriptsLoaderConfig
     public bool EnableScriptEventHandlers { get; set; } = true;
 
     /// <summary>
-    /// Defines allowed script command types (Console, Client or RemoteAdmin), set to 0 to disable all script commands.
+    /// Defines allowed script command types (Console, Client or RemoteAdmin), set to None to disable all script commands.
     /// </summary>
-    [Description("Defines allowed script command types (Console, Client or RemoteAdmin), set to 0 to disable all script commands")]
-    public CommandType AllowedScriptCommandTypes { get; set; } = CommandsUtils.AllScopes;
+    [Description("Defines allowed script command types (Console, Client or RemoteAdmin), set to None to disable all script commands")]
+    public CommandType AllowedScriptCommandTypes { get; set; } = CommandType.Any;
 
     /// <summary>
     /// Defines a maximum amount of concurrent executions a single script can have, use it to set max recursion depth.

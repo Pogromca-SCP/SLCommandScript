@@ -18,13 +18,13 @@ public class CommandsUtilsTests
 {
     private const string MockCommandName = "test";
 
-    private const CommandType InvalidCommandType = 0;
+    private const CommandType InvalidCommandType = CommandType.None;
 
     private static readonly CommandType[] _allHandlerTypes = [CommandType.RemoteAdmin, CommandType.Console,
         CommandType.Client, CommandType.RemoteAdmin | CommandType.Console, CommandType.RemoteAdmin | CommandType.Client,
         CommandType.Client | CommandType.Console, CommandType.RemoteAdmin | CommandType.Client | CommandType.Console];
 
-    private static readonly string?[] _invalidCommandNames = [null, "", " ", " \t ", "  \t  \t\t"];
+    private static readonly string[] _invalidCommandNames = ["", " ", " \t ", "  \t  \t\t"];
 
     private static readonly string[] _validCommandNames = ["hello", "item list", "?.cassie"];
 
@@ -38,9 +38,9 @@ public class CommandsUtilsTests
 
     private static readonly ICommand[] _exampleCommands = [new BroadcastCommand(), new CassieCommand(), new HelpCommand(ClientCommandHandler.Create())];
 
-    private static IEnumerable<object?[]> AllHandlersXInvalidCommands => TestArrays.CartesianJoin(_allHandlerTypes, _invalidCommandNames);
+    private static IEnumerable<object[]> AllHandlersXInvalidCommands => TestArrays.CartesianJoin(_allHandlerTypes, _invalidCommandNames);
 
-    private static IEnumerable<object?[]> AllHandlersXInvalidAliases => TestArrays.CartesianJoin(_allHandlerTypes, _invalidAliases);
+    private static IEnumerable<object[]> AllHandlersXInvalidAliases => TestArrays.CartesianJoin(_allHandlerTypes, _invalidAliases);
 
     private static IEnumerable<object[]> ValidHandlersXExistingCommandNames => TestArrays.CartesianJoin(_allHandlerTypes, _existingCommandNames);
 
@@ -66,12 +66,12 @@ public class CommandsUtilsTests
         RemoteAdminCommandHandler => CommandType.RemoteAdmin,
         GameConsoleCommandHandler => CommandType.Console,
         ClientCommandHandler => CommandType.Client,
-        _ => 0,
+        _ => CommandType.None,
     };
 
     private static CommandType JoinCommandTypes(IEnumerable<CommandType> handlerTypes)
     {
-        CommandType result = 0;
+        var result = CommandType.None;
 
         foreach (var handlerType in handlerTypes)
         {
@@ -83,14 +83,14 @@ public class CommandsUtilsTests
 
     private static Mock<ICommand> MockCommand() => new(MockBehavior.Strict);
 
-    private static Mock<ICommand> MockCommand(string? name)
+    private static Mock<ICommand> MockCommand(string name)
     {
         var mock = MockCommand();
-        mock.Setup(x => x.Command).Returns(name!);
+        mock.Setup(x => x.Command).Returns(name);
         return mock;
     }
 
-    private static Mock<ICommand> MockCommand(string? name, string?[]? aliases)
+    private static Mock<ICommand> MockCommand(string name, string?[]? aliases)
     {
         var mock = MockCommand(name);
         mock.Setup(x => x.Aliases).Returns(aliases!);
@@ -134,18 +134,8 @@ public class CommandsUtilsTests
         result.Should().BeEquivalentTo(expectedHandlers);
     }
 
-    [Test]
-    public void IsCommandInvalid_ShouldReturnTrue_WhenCommandIsNull()
-    {
-        // Act
-        var result = CommandsUtils.IsCommandInvalid(null);
-
-        // Assert
-        result.Should().BeTrue();
-    }
-
     [TestCaseSource(nameof(_invalidCommandNames))]
-    public void IsCommandInvalid_ShouldReturnTrue_WhenCommandHasInvalidName(string? commandName)
+    public void IsCommandInvalid_ShouldReturnTrue_WhenCommandHasInvalidName(string commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);
@@ -187,7 +177,7 @@ public class CommandsUtilsTests
     }
 
     [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
-    public void GetCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string? commandName)
+    public void GetCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Act
         var result = CommandsUtils.GetCommand(handlerType, commandName);
@@ -228,18 +218,8 @@ public class CommandsUtilsTests
         }
     }
 
-    [TestCaseSource(nameof(_allHandlerTypes))]
-    public void IsCommandRegistered_ShouldReturnNull_WhenCommandIsNull(CommandType handlerType)
-    {
-        // Act
-        var result = CommandsUtils.IsCommandRegistered(handlerType, null);
-
-        // Assert
-        result.Should().BeNull();
-    }
-
     [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
-    public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string? commandName)
+    public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);
@@ -294,31 +274,8 @@ public class CommandsUtilsTests
         result.Should().Be(expectedResult);
     }
 
-    [Test]
-    public void IsCommandRegistered_ShouldReturnNull_WhenCommandHandlerIsNull()
-    {
-        // Arrange
-        var commandMock = MockCommand();
-
-        // Act
-        var result = CommandsUtils.IsCommandRegistered(null, commandMock.Object);
-
-        // Assert
-        result.Should().BeNull();
-    }
-
-    [Test]
-    public void IsCommandRegistered_ShouldReturnNull_WhenCommandIsNull()
-    {
-        // Act
-        var result = CommandsUtils.IsCommandRegistered(MakeHandler(), null);
-
-        // Assert
-        result.Should().BeNull();
-    }
-
     [TestCaseSource(nameof(_invalidCommandNames))]
-    public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(string? commandName)
+    public void IsCommandRegistered_ShouldReturnNull_WhenCommandNameIsInvalid(string commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);
@@ -359,18 +316,8 @@ public class CommandsUtilsTests
         result.Should().Be(expectedResult);
     }
 
-    [TestCaseSource(nameof(_allHandlerTypes))]
-    public void RegisterCommand_ShouldReturnNull_WhenCommandIsNull(CommandType handlerType)
-    {
-        // Act
-        var result = CommandsUtils.RegisterCommand(handlerType, null);
-
-        // Assert
-        result.Should().BeNull();
-    }
-
     [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
-    public void RegisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string? commandName)
+    public void RegisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);
@@ -428,29 +375,6 @@ public class CommandsUtilsTests
         handlers.Select(h => h.TryGetCommand(commandName, out _)).Should().NotContain(false);
     }
 
-    [Test]
-    public void RegisterCommand_ShouldReturnNull_WhenCommandHandlerIsNull()
-    {
-        // Arrange
-        var commandMock = MockCommand();
-
-        // Act
-        var result = CommandsUtils.RegisterCommand(null, commandMock.Object);
-
-        // Assert
-        result.Should().BeNull();
-    }
-
-    [Test]
-    public void RegisterCommand_ShouldReturnNull_WhenCommandIsNull()
-    {
-        // Act
-        var result = CommandsUtils.RegisterCommand(MakeHandler(), null);
-
-        // Assert
-        result.Should().BeNull();
-    }
-
     [TestCaseSource(nameof(_invalidCommandNames))]
     public void RegisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(string commandName)
     {
@@ -494,18 +418,8 @@ public class CommandsUtilsTests
         handler.TryGetCommand(command.Command, out _).Should().BeTrue();
     }
 
-    [TestCaseSource(nameof(_allHandlerTypes))]
-    public void UnegisterCommand_ShouldReturnNull_WhenCommandIsNull(CommandType handlerType)
-    {
-        // Act
-        var result = CommandsUtils.UnregisterCommand(handlerType, null);
-
-        // Assert
-        result.Should().BeNull();
-    }
-
     [TestCaseSource(nameof(AllHandlersXInvalidCommands))]
-    public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string? commandName)
+    public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(CommandType handlerType, string commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);
@@ -563,31 +477,8 @@ public class CommandsUtilsTests
         handlers.Select(h => h.TryGetCommand(commandName, out _)).Should().NotContain(true);
     }
 
-    [Test]
-    public void UnegisterCommand_ShouldReturnNull_WhenCommandHandlerIsNull()
-    {
-        // Arrange
-        var commandMock = MockCommand();
-
-        // Act
-        var result = CommandsUtils.UnregisterCommand(null, commandMock.Object);
-
-        // Assert
-        result.Should().BeNull();
-    }
-
-    [Test]
-    public void UnegisterCommand_ShouldReturnNull_WhenCommandIsNull()
-    {
-        // Act
-        var result = CommandsUtils.UnregisterCommand(MakeHandler(), null);
-
-        // Assert
-        result.Should().BeNull();
-    }
-
     [TestCaseSource(nameof(_invalidCommandNames))]
-    public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(string? commandName)
+    public void UnregisterCommand_ShouldReturnNull_WhenCommandNameIsInvalid(string commandName)
     {
         // Arrange
         var commandMock = MockCommand(commandName);

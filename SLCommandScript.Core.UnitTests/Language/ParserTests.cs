@@ -88,16 +88,6 @@ public class ParserTests
             new(TokenType.Text, "Human"), new(TokenType.RightSquare, "]") },
             "'Human' is not a valid iterable object name"],
 
-        // [ bc foreach null ]
-        [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Foreach, "foreach"),
-            new(TokenType.Text, "null"), new(TokenType.RightSquare, "]") },
-            "Provider for 'null' iterable object is null"],
-
-        // [ bc foreach Bad ]
-        [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Foreach, "foreach"),
-            new(TokenType.Text, "Bad"), new(TokenType.RightSquare, "]") },
-            "Provider for 'Bad' iterable object returned null"],
-
         // [ delayby ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.DelayBy, "delayby"),
             new(TokenType.RightSquare, "]") }, "Command 'delayby' was not found\nin delay body expression" ],
@@ -165,11 +155,11 @@ public class ParserTests
     private static readonly object[][] _goldPaths = [
         // bc 5
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5) },
-            new CommandExpr(new BroadcastCommand(), ["bc", "5"], false), CommandsUtils.AllScopes],
+            new CommandExpr(new BroadcastCommand(), ["bc", "5"], false), CommandType.Any],
 
         // bc 5 #?
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.ScopeGuard, "#?") },
-            new CommandExpr(new BroadcastCommand(), ["bc", "5"], false), CommandsUtils.AllScopes],
+            new CommandExpr(new BroadcastCommand(), ["bc", "5"], false), CommandType.Any],
 
         // bc 5 #? Console
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.ScopeGuard, "#?"),
@@ -178,7 +168,7 @@ public class ParserTests
         // [ bc 5 test ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
             new(TokenType.Text, "test"), new(TokenType.RightSquare, "]") }, new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false),
-            CommandsUtils.AllScopes],
+            CommandType.Any],
 
         // bc 5 Test #? console cLIeNt
         [new Core.Language.Token[] { new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5), new(TokenType.Variable, "Test"),
@@ -201,7 +191,7 @@ public class ParserTests
             new(TokenType.Text, "remoTEADmin"), new(TokenType.Text, "cliEnt") }, new IfExpr(new CommandExpr(
                 new BroadcastCommand(), ["bc", "5", "Test"], false),
                 new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true),
-                new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false)), CommandsUtils.AllScopes],
+                new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false)), CommandType.Any],
 
         // [ bc 5 $(Test) else bc 5 Test ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
@@ -209,24 +199,24 @@ public class ParserTests
             new(TokenType.Text, "Test"), new(TokenType.RightSquare, "]") },
             new IfExpr(null, new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true),
                 new CommandExpr(new BroadcastCommand(), ["bc", "5", "Test"], false)),
-            CommandsUtils.AllScopes],
+            CommandType.Any],
 
         // [ bc 5 $(Test) foreach test ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
             new(TokenType.Variable, "$(Test)"), new(TokenType.Foreach, "foreach"), new(TokenType.Text, "test"), new(TokenType.RightSquare, "]") },
-            new ForeachExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true), new TestIterable()), CommandsUtils.AllScopes],
+            new ForeachExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true), new TestIterable()), CommandType.Any],
 
         // [ bc 5 $(Test) foreach 15..-12 ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
             new(TokenType.Variable, "$(Test)"), new(TokenType.Foreach, "foreach"), new(TokenType.Text, "15..-12"), new(TokenType.RightSquare, "]") },
-            new ForeachExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true), RangesProvider.StandardRange(15, -12)), CommandsUtils.AllScopes],
+            new ForeachExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true), RangesProvider.StandardRange(15, -12)), CommandType.Any],
 
         // [ [ bc 5 $(Test) foreach test ] foreach test ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"),
             new(TokenType.Number, "5", 5), new(TokenType.Variable, "$(Test)"), new(TokenType.Foreach, "foreach"), new(TokenType.Text, "test"),
             new(TokenType.RightSquare, "]"), new(TokenType.Foreach, "foreach"), new(TokenType.Text, "test"), new(TokenType.RightSquare, "]") },
             new ForeachExpr(new ForeachExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true), new TestIterable()),
-                new TestIterable()), CommandsUtils.AllScopes],
+                new TestIterable()), CommandType.Any],
 
         // [ [ bc 5 $(name) foreach test ] if bc 5 test else [ bc 5 test if cassie hello ] ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"),
@@ -238,13 +228,13 @@ public class ParserTests
             new IfExpr(new ForeachExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(name)"], true), new TestIterable()),
                 new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false), new IfExpr(new CommandExpr(
                     new BroadcastCommand(), ["bc", "5", "test"], false),
-                    new CommandExpr(new CassieCommand(), ["cassie", "hello"], false), null)), CommandsUtils.AllScopes],
+                    new CommandExpr(new CassieCommand(), ["cassie", "hello"], false), null)), CommandType.Any],
 
         // [ bc 5 $(na5me) delayby 3 ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"),
             new(TokenType.Number, "5", 5), new(TokenType.Variable, "$(na5me)"), new(TokenType.DelayBy, "delayby"), new(TokenType.Number, "3", 3),
             new(TokenType.RightSquare, "]") }, new DelayExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(na5me)"], true), 3, null),
-            CommandsUtils.AllScopes],
+            CommandType.Any],
 
         // [ [ bc 5 Test foreach test ] delayby 034 NamedOperation ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"),
@@ -252,13 +242,13 @@ public class ParserTests
             new(TokenType.RightSquare, "]"), new(TokenType.DelayBy, "delayby"), new(TokenType.Number, "034", 34), new(TokenType.Text, "NamedOperation"),
             new(TokenType.RightSquare, "]") }, new DelayExpr(new ForeachExpr(new CommandExpr(
                 new BroadcastCommand(), ["bc", "5", "Test"], false), new TestIterable()), 34, "NamedOperation"),
-            CommandsUtils.AllScopes],
+            CommandType.Any],
 
         // [ bc 5 $(Test) forrandom test ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
             new(TokenType.Variable, "$(Test)"), new(TokenType.ForRandom, "forrandom"), new(TokenType.Text, "test"), new(TokenType.RightSquare, "]") },
             new ForeachExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true), new TestIterable()),
-            CommandsUtils.AllScopes],
+            CommandType.Any],
 
         // [ [ bc 5 test if cassie hello ] forrandom test 6 ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"),
@@ -266,7 +256,7 @@ public class ParserTests
             new(TokenType.Text, "hello"), new(TokenType.RightSquare, "]"), new(TokenType.ForRandom, "forrandom"), new(TokenType.Text, "test"),
             new(TokenType.Number, "6", 6), new(TokenType.RightSquare, "]") },
             new ForeachExpr(new IfExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false), new CommandExpr(new CassieCommand(), ["cassie", "hello"], false),
-                null), new TestIterable()), CommandsUtils.AllScopes],
+                null), new TestIterable()), CommandType.Any],
 
         // [ [ bc 5 test if cassie hello ] forrandom test 60% ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"),
@@ -274,14 +264,14 @@ public class ParserTests
             new(TokenType.Text, "hello"), new(TokenType.RightSquare, "]"), new(TokenType.ForRandom, "forrandom"), new(TokenType.Text, "test"),
             new(TokenType.Percentage, "60%", 60), new(TokenType.RightSquare, "]") },
             new ForeachExpr(new IfExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false), new CommandExpr(new CassieCommand(), ["cassie", "hello"], false),
-                null), new TestIterable()), CommandsUtils.AllScopes],
+                null), new TestIterable()), CommandType.Any],
 
         // [ bc 5 $(Test) forrandom test else bc 3 hello ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"), new(TokenType.Number, "5", 5),
             new(TokenType.Variable, "$(Test)"), new(TokenType.ForRandom, "forrandom"), new(TokenType.Text, "test"), new(TokenType.Else, "else"),
             new(TokenType.Text, "bc"), new(TokenType.Number, "3", 3), new(TokenType.Text, "hello"), new(TokenType.RightSquare, "]") },
             new ForElseExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "$(Test)"], true), new TestIterable(), new CommandExpr(new BroadcastCommand(),
-                ["bc", "3", "hello"], false), new(1)), CommandsUtils.AllScopes],
+                ["bc", "3", "hello"], false), new(1)), CommandType.Any],
 
         // [ [ bc 5 test if cassie hello ] forrandom test 6 else bc 3 hello ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"),
@@ -290,7 +280,7 @@ public class ParserTests
             new(TokenType.Number, "6", 6), new(TokenType.Else, "else"), new(TokenType.Text, "bc"), new(TokenType.Number, "3", 3), new(TokenType.Text, "hello"),
             new(TokenType.RightSquare, "]") }, new ForElseExpr(new IfExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false),
                 new CommandExpr(new CassieCommand(), ["cassie", "hello"], false), null), new TestIterable(), new CommandExpr(new BroadcastCommand(), ["bc", "3", "hello"],
-                    false), new(6)), CommandsUtils.AllScopes],
+                    false), new(6)), CommandType.Any],
 
         // [ [ bc 5 test if cassie hello ] forrandom test 60% else bc 3 hello ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"),
@@ -300,14 +290,14 @@ public class ParserTests
             new(TokenType.RightSquare, "]") },
             new ForElseExpr(new IfExpr(new CommandExpr(new BroadcastCommand(), ["bc", "5", "test"], false),
                 new CommandExpr(new CassieCommand(), ["cassie", "hello"], false), null), new TestIterable(), new CommandExpr(new BroadcastCommand(), ["bc", "3", "hello"],
-                    false), new(0.6f)), CommandsUtils.AllScopes],
+                    false), new(0.6f)), CommandType.Any],
 
         // [ [ bc | bc ] foreach test ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"),
             new(TokenType.Sequence, "|"), new(TokenType.Text, "bc"), new(TokenType.RightSquare, "]"), new(TokenType.Foreach, "foreach"),
             new(TokenType.Text, "test"), new(TokenType.RightSquare, "]") },
             new ForeachExpr(new SequenceExpr([new CommandExpr(new BroadcastCommand(), ["bc"], false), new CommandExpr(new BroadcastCommand(), ["bc"], false)]),
-                new TestIterable()), CommandsUtils.AllScopes],
+                new TestIterable()), CommandType.Any],
 
         // [ [ bc | bc | bc | bc ] | bc ]
         [new Core.Language.Token[] { new(TokenType.LeftSquare, "["), new(TokenType.LeftSquare, "["), new(TokenType.Text, "bc"),
@@ -316,7 +306,7 @@ public class ParserTests
             new(TokenType.Text, "bc"), new(TokenType.RightSquare, "]") },
             new SequenceExpr([new SequenceExpr([new CommandExpr(new BroadcastCommand(), ["bc"], false), new CommandExpr(new BroadcastCommand(), ["bc"], false),
                 new CommandExpr(new BroadcastCommand(), ["bc"], false), new CommandExpr(new BroadcastCommand(), ["bc"], false)]),
-                new CommandExpr(new BroadcastCommand(), ["bc"], false)]), CommandsUtils.AllScopes]
+                new CommandExpr(new BroadcastCommand(), ["bc"], false)]), CommandType.Any]
     ];
 
     private IEnumerable<KeyValuePair<string, Func<IIterable>>> _originalProviders = null!;
@@ -326,14 +316,12 @@ public class ParserTests
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        _originalProviders = TestDictionaries.ClearDictionary<string, Func<IIterable>>(IterablesUtils.Providers!);
-        IterablesUtils.Providers["Null"] = null;
-        IterablesUtils.Providers["Bad"] = () => null;
+        _originalProviders = TestDictionaries.ClearDictionary(IterablesUtils.Providers);
         IterablesUtils.Providers["Test"] = () => new TestIterable();
     }
 
     [OneTimeTearDown]
-    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers!, _originalProviders!);
+    public void OneTimeTearDown() => TestDictionaries.SetDictionary(IterablesUtils.Providers, _originalProviders);
 
     [SetUp]
     public void SetUp() => _parser = new();
@@ -343,19 +331,7 @@ public class ParserTests
     {
         // Assert
         _parser.ErrorMessage.Should().BeNull();
-        _parser.Scope.Should().Be(CommandsUtils.AllScopes);
-    }
-
-    [Test]
-    public void Parse_ShouldReturnProperErrorMessage_WhenTokensListIsNull()
-    {
-        // Act
-        var result = _parser.Parse(null);
-
-        // Assert
-        result.Should().BeNull();
-        _parser.ErrorMessage.Should().Be("Provided tokens list to parse was null");
-        _parser.Scope.Should().Be(CommandsUtils.AllScopes);
+        _parser.Scope.Should().Be(CommandType.Any);
     }
 
     [TestCaseSource(nameof(_errorPaths))]
@@ -367,7 +343,7 @@ public class ParserTests
         // Assert
         result.Should().BeNull();
         _parser.ErrorMessage.Should().Be(expectedError);
-        _parser.Scope.Should().Be(CommandsUtils.AllScopes);
+        _parser.Scope.Should().Be(CommandType.Any);
     }
 
     [TestCaseSource(nameof(_goldPaths))]

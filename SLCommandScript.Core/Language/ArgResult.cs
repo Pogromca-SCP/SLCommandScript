@@ -13,12 +13,12 @@ public readonly struct ArgResult(string? source, IList<Token>? tokens, int depth
     /// <summary>
     /// Contains argument source code.
     /// </summary>
-    public string? Source { get; } = source;
+    public string Source { get => field ?? string.Empty; } = source;
 
     /// <summary>
     /// Contains tokens produced from argument.
     /// </summary>
-    public IList<Token>? Tokens { get; } = tokens;
+    public IList<Token> Tokens { get => field ?? []; } = tokens;
 
     /// <summary>
     /// Contains argument final scope depth level.
@@ -28,5 +28,5 @@ public readonly struct ArgResult(string? source, IList<Token>? tokens, int depth
     /// <summary>
     /// Creates new argument processing result.
     /// </summary>
-    public ArgResult() : this(string.Empty, [], 0) {}
+    public ArgResult() : this(null, null, 0) {}
 }

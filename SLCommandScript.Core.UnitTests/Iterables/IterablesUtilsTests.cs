@@ -7,24 +7,19 @@ namespace SLCommandScript.Core.UnitTests.Iterables;
 [TestFixture]
 public class IterablesUtilsTests
 {
-    private static readonly int[]?[] _invalidArrays = [null, [], [0]];
+    private static readonly int[][] _invalidArrays = [[], [0]];
 
     private static readonly int[][] _validArrays = [[1, 2, 3], [5, -9, 2], [0, 0, 5, 1, 7, 8]];
 
-    private static int[]? CopyArray(int[]? src)
+    private static int[] CopyArray(int[] src)
     {
-        if (src is null)
-        {
-            return null;
-        }
-
         var cp = new int[src.Length];
         src.CopyTo(cp, 0);
         return cp;
     }
 
     [TestCaseSource(nameof(_invalidArrays))]
-    public void Shuffle_ShouldDoNothing_WhenNotEnoughElements(int[]? array)
+    public void Shuffle_ShouldDoNothing_WhenNotEnoughElements(int[] array)
     {
         // Arrange
         var copy = CopyArray(array);
@@ -52,7 +47,7 @@ public class IterablesUtilsTests
     }
 
     [TestCaseSource(nameof(_invalidArrays))]
-    public void Shuffle_ShouldDoNothing_WhenWithAmountAndNotEnoughElements(int[]? array)
+    public void Shuffle_ShouldDoNothing_WhenWithAmountAndNotEnoughElements(int[] array)
     {
         // Arrange
         var copy = CopyArray(array);

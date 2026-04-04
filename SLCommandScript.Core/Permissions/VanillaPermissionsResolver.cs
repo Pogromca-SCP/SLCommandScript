@@ -9,17 +9,11 @@ namespace SLCommandScript.Core.Permissions;
 public class VanillaPermissionsResolver : IPermissionsResolver
 {
     /// <inheritdoc />
-    public bool CheckPermission(ICommandSender? sender, string? permission, out string? message)
+    public bool CheckPermission(ICommandSender sender, string permission, out string? errorMessage)
     {
-        if (sender is null)
-        {
-            message = $"Cannot verify permission '{permission}', command sender is null";
-            return false;
-        }
-
         if (string.IsNullOrWhiteSpace(permission))
         {
-            message = $"Permission name '{permission}' is invalid";
+            errorMessage = "Permission name is invalid";
             return false;
         }
 
@@ -27,11 +21,11 @@ public class VanillaPermissionsResolver : IPermissionsResolver
 
         if (!parsed)
         {
-            message = $"Permission '{permission}' does not exist";
+            errorMessage = $"Permission '{permission}' does not exist";
             return false;
         }
 
-        message = null;
+        errorMessage = null;
         return sender.CheckPermission(result);
     }
 }

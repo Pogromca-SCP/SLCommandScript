@@ -15,20 +15,20 @@ public static class PluginIterablesProvider
     /// Retrieves iterable object for all plugins.
     /// </summary>
     /// <returns>Iterable object for all plugins.</returns>
-    public static IIterable AllPlugins() => new ListIterable<Plugin>(() => PluginLoader.Plugins.Keys, LoadVariables);
+    public static IIterable AllPlugins() => new LazyListIterable<Plugin>(static () => PluginLoader.Plugins.Keys, LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all enabled plugins.
     /// </summary>
     /// <returns>Iterable object for all enabled plugins.</returns>
-    public static IIterable AllEnabledPlugins() => new ListIterable<Plugin>(() => PluginLoader.EnabledPlugins, LoadVariables);
+    public static IIterable AllEnabledPlugins() => new LazyListIterable<Plugin>(static () => PluginLoader.EnabledPlugins, LoadVariables);
 
     /// <summary>
     /// Retrieves iterable object for all disabled plugins.
     /// </summary>
     /// <returns>Iterable object for all disabled plugins.</returns>
     public static IIterable AllDisabledPlugins() =>
-        new ListIterable<Plugin>(() => PluginLoader.Plugins.Keys.Where(p => !PluginLoader.EnabledPlugins.Contains(p)), LoadVariables);
+        new LazyListIterable<Plugin>(static () => PluginLoader.Plugins.Keys.Where(static p => !PluginLoader.EnabledPlugins.Contains(p)), LoadVariables);
 
     /// <summary>
     /// Loads properties from plugin object and inserts them into a dictionary.
@@ -36,7 +36,7 @@ public static class PluginIterablesProvider
     /// <param name="targetVars">Dictionary to insert properties into.</param>
     /// <param name="plugin">Plugin to load properties from.</param>
     /// <exception cref="NullReferenceException">When <paramref name="targetVars" /> or provided object is <see langword="null"/>.</exception>
-    public static void LoadVariables(IDictionary<string, string?> targetVars, Plugin plugin)
+    public static void LoadVariables(IDictionary<string, string> targetVars, Plugin plugin)
     {
         targetVars["name"] = plugin.Name;
         targetVars["version"] = plugin.Version.ToString();

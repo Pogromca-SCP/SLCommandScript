@@ -28,7 +28,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
     /// <summary>
     /// Contains registered event handling scripts.
     /// </summary>
-    public Dictionary<EventType, ICommand?> EventScripts { get; } = [];
+    public Dictionary<EventType, ICommand> EventScripts { get; } = [];
 
     /// <summary>
     /// Executes a command handler.
@@ -37,7 +37,7 @@ public class FileScriptsEventHandler : CustomEventsHandler
     /// <param name="args">Event arguments to use.</param>
     private void HandleEvent(EventType eventType, params string[] args)
     {
-        if (!EventScripts.TryGetValue(eventType, out var cmd) || cmd is null)
+        if (!EventScripts.TryGetValue(eventType, out var cmd))
         {
             return;
         }
@@ -774,4 +774,14 @@ public class FileScriptsEventHandler : CustomEventsHandler
     public override void OnServerDeadmanSequenceActivated() => HandleEvent(EventType.DeadmanSequenceActivation, nameof(EventType.DeadmanSequenceActivation));
 
     public override void OnServerShutdown() => HandleEvent(EventType.ServerShutdown, nameof(EventType.ServerShutdown));
+
+    public override void OnPlayerInspectedItem(PlayerInspectedItemEventArgs ev) => HandleEvent(EventType.PlayerInspectItem, nameof(EventType.PlayerInspectItem),
+        ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.Item.Type.ToString());
+
+    public override void OnPlayerProcessedScp1509Message(PlayerProcessedScp1509MessageEventArgs ev) => HandleEvent(EventType.Scp1507ProcessMessage,
+        nameof(EventType.Scp1507ProcessMessage), ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.Message.ToString());
+
+    public override void OnPlayerScp1509Resurrected(PlayerScp1509ResurrectedEventArgs ev) => HandleEvent(EventType.Scp1507Resurrect,
+        nameof(EventType.Scp1507Resurrect), ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.KilledPlayer.PlayerId.ToString(),
+        ev.KilledPlayer.DisplayName, ev.RevivedPlayer.PlayerId.ToString(), ev.RevivedPlayer.DisplayName, ev.RespawnRole.ToString());
 }
