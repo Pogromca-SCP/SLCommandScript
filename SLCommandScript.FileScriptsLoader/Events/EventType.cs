@@ -260,4 +260,7 @@ public enum EventType : byte
     PlayerInspectItem,
     Scp1507ProcessMessage,
     Scp1507Resurrect,
+
+
+    PluginsEnabled,
 }

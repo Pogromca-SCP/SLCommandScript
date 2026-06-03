@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-06-03 (nuget 3.1.0)
+
+### Added
+
+- File scripts loader now supports new `PluginsEnabled` event.
+
+### Changed
+
+- Upgraded project to [LabAPI v1.1.7](https://github.com/northwood-studios/LabAPI/releases/tag/1.1.7).
+- `PluginPermissionsResolver` now uses the new `HasPermission` overload.
+
+
 ## [3.0.0] - 2026-04-04 (nuget 3.0.0)
 
 ### Added

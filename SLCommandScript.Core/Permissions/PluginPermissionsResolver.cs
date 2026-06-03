@@ -12,6 +12,6 @@ public class PluginPermissionsResolver : IPermissionsResolver
     public bool CheckPermission(ICommandSender sender, string permission, out string? message)
     {
         message = null;
-        return sender.HasPermissions(permission);
+        return sender.HasPermission(permission);
     }
 }

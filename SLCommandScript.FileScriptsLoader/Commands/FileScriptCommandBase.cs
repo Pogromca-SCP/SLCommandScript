@@ -37,7 +37,7 @@ public class FileScriptCommandBase(string name, IFileScriptCommandParent? parent
     /// <summary>
     /// Contains command description.
     /// </summary>
-    public string Description { get => field; set => field = string.IsNullOrWhiteSpace(value) ? DefaultDescription : value; } = DefaultDescription;
+    public string Description { get; set => field = string.IsNullOrWhiteSpace(value) ? DefaultDescription : value; } = DefaultDescription;
 
     /// <summary>
     /// Contains parent object which stores this command.

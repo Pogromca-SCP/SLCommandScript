@@ -784,4 +784,6 @@ public class FileScriptsEventHandler : CustomEventsHandler
     public override void OnPlayerScp1509Resurrected(PlayerScp1509ResurrectedEventArgs ev) => HandleEvent(EventType.Scp1507Resurrect,
         nameof(EventType.Scp1507Resurrect), ev.Player.PlayerId.ToString(), ev.Player.DisplayName, ev.KilledPlayer.PlayerId.ToString(),
         ev.KilledPlayer.DisplayName, ev.RevivedPlayer.PlayerId.ToString(), ev.RevivedPlayer.DisplayName, ev.RespawnRole.ToString());
+
+    public override void OnServerPluginsEnabled() => HandleEvent(EventType.PluginsEnabled, nameof(EventType.PluginsEnabled));
 }

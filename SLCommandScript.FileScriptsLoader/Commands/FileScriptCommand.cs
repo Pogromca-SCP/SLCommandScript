@@ -17,7 +17,7 @@ public class FileScriptCommand(string name, IFileScriptCommandParent? parent, Ru
     /// </summary>
     public string[]? Usage
     {
-        get => field;
+        get;
         set
         {
             if (value is null || value.Length < 1)
